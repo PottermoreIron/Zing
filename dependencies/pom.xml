@@ -23,6 +23,10 @@
         <!-- data相关 -->
         <mysql.version>9.2.0</mysql.version>
         <mybatis-plus.version>3.5.10.1</mybatis-plus.version>
+        <!-- apache -->
+        <apache-commons.version>3.17.0</apache-commons.version>
+        <freemaker.version>2.3.34</freemaker.version>
+        <swagger.version>3.0.0</swagger.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -43,8 +47,28 @@
             <!-- mybatis-plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <artifactId>mybatis-plus-bom</artifactId>
                 <version>${mybatis-plus.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- apache -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${apache-commons.version}</version>
+            </dependency>
+            <!-- freemarker -->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemaker.version}</version>
+            </dependency>
+            <!-- swagger -->
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-boot-starter</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
