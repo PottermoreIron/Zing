@@ -3,6 +3,7 @@ package com.pot.user.service.utils;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
+import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.config.rules.DbColumnType;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
@@ -10,6 +11,7 @@ import org.apache.ibatis.type.JdbcType;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author: Pot
@@ -50,6 +52,8 @@ public class CodeGenerator {
                         .serviceImpl(PACKAGE_SERVICE_IMPL)
                         .controller(PACKAGE_CONTROLLER)
                         .xml(PACKAGE_XML)
+                        .pathInfo(Collections.singletonMap(OutputFile.xml, Paths.get(System.getProperty("user.dir")) + "/user/service/src/main/resources/mapper")
+                        )
                 )
                 .dataSourceConfig(builder ->
                         builder.typeConvertHandler((globalConfig, typeRegistry, metaInfo) -> {
