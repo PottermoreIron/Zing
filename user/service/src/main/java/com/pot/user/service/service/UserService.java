@@ -1,7 +1,7 @@
 package com.pot.user.service.service;
 
-import com.pot.user.service.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pot.user.service.entity.User;
 
 /**
  * <p>
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author pot
  * @since 2025-02-25
  */
-public interface IUserService extends IService<User> {
+public interface UserService extends IService<User> {
 
 }
