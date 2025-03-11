@@ -1,8 +1,7 @@
 package com.pot.user.service.strategy;
 
+import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.enums.RegisterType;
-
-import java.util.Map;
 
 /**
  * @author: Pot
@@ -11,48 +10,33 @@ import java.util.Map;
  */
 public interface RegisterStrategy {
     /**
-     * 返回策略类型
+     * 是否支持注册类型
      *
+     * @param type 注册类型
      * @return boolean
      * @author pot
      * @description
-     * @date 23:17 2025/3/10
+     * @date 23:39 2025/3/11
      **/
-    RegisterType getStrategy();
+    boolean supports(RegisterType type);
 
     /**
      * 校验参数
      *
-     * @param params 参数
-     * @return boolean
+     * @param request 请求参数
      * @author pot
      * @description
      * @date 23:18 2025/3/10
      **/
-    boolean validate(Map<String, String> params);
+    void validate(RegisterRequest request);
 
     /**
      * 注册
      *
-     * @param params 参数
+     * @param request 请求参数
      * @author pot
      * @description
      * @date 23:21 2025/3/10
      **/
-    default void register(Map<String, String> params) {
-        if (!validate(params)) {
-            throw new IllegalArgumentException("参数校验失败");
-        }
-        doRegister(params);
-    }
-
-    /**
-     * 核心注册逻辑
-     *
-     * @param params 参数
-     * @author pot
-     * @description
-     * @date 23:21 2025/3/10
-     **/
-    void doRegister(Map<String, String> params);
+    void register(RegisterRequest request);
 }

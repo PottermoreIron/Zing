@@ -1,5 +1,11 @@
 package com.pot.user.service.controller;
 
+import com.pot.user.service.controller.request.RegisterRequest;
+import com.pot.user.service.strategy.RegisterStrategy;
+import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
+@Slf4j
 public class UserController {
+    private final RegisterStrategyFactory strategyFactory;
+
+    @RequestMapping("/test")
+    public String test(@RequestBody RegisterRequest request) {
+        log.info("request={}", request);
+        RegisterStrategy strategy = strategyFactory.getStrategyByCode(request.getType());
+        strategy.register(request);
+        return "success";
+    }
 
 }

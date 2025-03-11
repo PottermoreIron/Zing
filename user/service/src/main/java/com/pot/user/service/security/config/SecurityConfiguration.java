@@ -23,10 +23,8 @@ public class SecurityConfiguration {
                 .with(CustomSecurityConfigurer.customSecurityConfigurer(), Customizer.withDefaults())
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login**").permitAll()
+                        .requestMatchers("/login**", "/user/test").permitAll()
                         .anyRequest().authenticated());
-//                .authenticationProvider(smsCodeAuthenticationProvider)
-//                .addFilterBefore(smsCodeAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
