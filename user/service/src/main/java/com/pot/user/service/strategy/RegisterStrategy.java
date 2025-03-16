@@ -10,6 +10,14 @@ import com.pot.user.service.enums.RegisterType;
  */
 public interface RegisterStrategy {
     /**
+     * @return RegisterType
+     * @author pot
+     * @description
+     * @date 21:29 2025/3/16
+     **/
+    RegisterType getRegisterType();
+
+    /**
      * 是否支持注册类型
      *
      * @param type 注册类型

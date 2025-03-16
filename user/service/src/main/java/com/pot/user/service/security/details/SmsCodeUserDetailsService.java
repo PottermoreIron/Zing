@@ -1,6 +1,8 @@
 package com.pot.user.service.security.details;
 
+import com.pot.common.enums.ResultCode;
 import com.pot.user.service.entity.User;
+import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class SmsCodeUserDetailsService implements UserDetailsService {
         User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
         log.info("loadUserByUsername user={}", user);
         if (user == null) {
-            throw new UsernameNotFoundException("用户不存在");
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
         }
         return LoginUser.builder()
                 .user(user)

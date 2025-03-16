@@ -3,6 +3,7 @@ package com.pot.user.service.security.filter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pot.user.service.security.token.SmsCodeAuthenticationToken;
+import com.pot.user.service.utils.JacksonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -77,8 +78,7 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
 
     private Map<String, String> parseJsonRequest(HttpServletRequest request) throws IOException {
         // 使用 Jackson 解析请求体
-        String jsonString = request.getReader().lines().collect(Collectors.joining());
-        return objectMapper.readValue(jsonString, new TypeReference<>() {
+        return JacksonUtils.toObject(request.getReader().lines().collect(Collectors.joining()), new TypeReference<>() {
         });
     }
 }

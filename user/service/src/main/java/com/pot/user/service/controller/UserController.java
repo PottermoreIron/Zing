@@ -3,6 +3,7 @@ package com.pot.user.service.controller;
 import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,7 @@ public class UserController {
     private final RegisterStrategyFactory strategyFactory;
 
     @RequestMapping("/test")
-    public String test(@RequestBody RegisterRequest request) {
+    public String test(@Valid @RequestBody RegisterRequest request) {
         log.info("request={}", request);
         RegisterStrategy strategy = strategyFactory.getStrategyByCode(request.getType());
         strategy.register(request);

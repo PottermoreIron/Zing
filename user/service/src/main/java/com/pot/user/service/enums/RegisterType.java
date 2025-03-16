@@ -2,23 +2,21 @@ package com.pot.user.service.enums;
 
 import lombok.Getter;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Getter
 public enum RegisterType {
-    //    USERNAME_PASSWORD(1, "username_password", "username", "password"),
-//    PHONE_PASSWORD(2, "phone_password", "phone", "password"),
-//    EMAIL_PASSWORD(3, "email_password", "email", "password"),
-    PHONE_CODE(4, "phone_code", "phone", "code");
-//    EMAIL_CODE(5, "email_code", "email", "code"),
-//    THIRD_PARTY(6, "third_party", "provider", "access_token");
+    USERNAME_PASSWORD(1, "username_password"),
+    PHONE_PASSWORD(2, "phone_password"),
+    EMAIL_PASSWORD(3, "email_password"),
+    PHONE_CODE(4, "phone_code"),
+    EMAIL_CODE(5, "email_code"),
+    THIRD_PARTY(6, "third_party");
 
     private final int code;
     private final String type;
-    private final List<String> fields;
 
     private static final Map<Integer, RegisterType> REGISTER_CODE_MAP;
     private static final Map<String, RegisterType> REGISTER_TYPE_MAP;
@@ -28,10 +26,9 @@ public enum RegisterType {
         REGISTER_TYPE_MAP = Stream.of(values()).collect(Collectors.toMap(RegisterType::getType, e -> e));
     }
 
-    RegisterType(int code, String type, String... fields) {
+    RegisterType(int code, String type) {
         this.code = code;
         this.type = type;
-        this.fields = List.of(fields);
     }
 
     public static RegisterType getByCode(int code) {
