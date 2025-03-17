@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final RegisterStrategyFactory strategyFactory;
 
-    @RequestMapping("/test")
+    @RequestMapping("/register")
     public String test(@Valid @RequestBody RegisterRequest request) {
         log.info("request={}", request);
         RegisterStrategy strategy = strategyFactory.getStrategyByCode(request.getType());

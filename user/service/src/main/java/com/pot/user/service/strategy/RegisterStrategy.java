@@ -29,16 +29,6 @@ public interface RegisterStrategy {
     boolean supports(RegisterType type);
 
     /**
-     * 校验参数
-     *
-     * @param request 请求参数
-     * @author pot
-     * @description
-     * @date 23:18 2025/3/10
-     **/
-    void validate(RegisterRequest request);
-
-    /**
      * 注册
      *
      * @param request 请求参数

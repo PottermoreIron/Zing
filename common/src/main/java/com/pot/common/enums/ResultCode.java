@@ -60,6 +60,10 @@ public enum ResultCode {
      * 用户不存在
      */
     USER_NOT_EXIST(1003, "用户不存在", false),
+    /**
+     * 用户已存在
+     */
+    USER_EXIST(1004, "用户已存在", false),
     ;
 
     private final int code;

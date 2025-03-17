@@ -8,7 +8,7 @@ import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 
-import static com.pot.user.service.utils.RandomCodeGenerator.generateRandomCode;
+import static com.pot.user.service.utils.RandomStringGenerator.generateRandomCode;
 
 /**
  * @author: Pot

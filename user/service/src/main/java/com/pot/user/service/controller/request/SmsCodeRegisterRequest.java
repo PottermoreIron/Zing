@@ -13,8 +13,14 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class SmsCodeRegisterRequest extends RegisterRequest {
+    public SmsCodeRegisterRequest() {
+        this.type = 4;
+    }
+
     @IsMobile
     private String phone;
-    @Size(min = 6, max = 6, message = "验证码长度为 5 位")
+    @Size(min = 6, max = 6, message = "Captcha length is 6 digits")
     private String code;
+
+    private Boolean needCheckCode = true;
 }

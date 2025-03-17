@@ -1,13 +1,18 @@
 package com.pot.user.service.strategy.impl;
 
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.controller.request.SmsCodeRegisterRequest;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.RegisterType;
+import com.pot.user.service.exception.BusinessException;
+import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.service.UserService;
+import com.pot.user.service.utils.RandomStringGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,25 +27,34 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     private final UserService userService;
 
+    private final SmsCodeService smsCodeService;
+
     @Override
     protected void checkUniqueness(RegisterRequest request) {
         // todo 校验手机号是否已注册
         String phone = ((SmsCodeRegisterRequest) request).getPhone();
-        String code = ((SmsCodeRegisterRequest) request).getCode();
         LambdaQueryChainWrapper<User> query = userService.lambdaQuery().eq(User::getPhone, phone);
-        if (query.count() > 0) {
-            throw new IllegalArgumentException("手机号已注册");
+        User user = query.one();
+        if (ObjectUtils.isNotEmpty(user)) {
+            throw new BusinessException(ResultCode.USER_EXIST);
         }
     }
 
     @Override
-    protected void sendVerificationIfNeeded(RegisterRequest request) {
-        log.info("sms-code sendVerificationIfNeeded request={}", request);
+    protected void checkCodeIfNeeded(RegisterRequest request) {
+        boolean needCheckCode = ((SmsCodeRegisterRequest) request).getNeedCheckCode();
+        if (needCheckCode) {
+            // todo 校验验证码
+            String phone = ((SmsCodeRegisterRequest) request).getPhone();
+            String code = ((SmsCodeRegisterRequest) request).getCode();
+            smsCodeService.validateSmsCode(phone, code);
+        }
     }
 
     @Override
     protected void doRegister(RegisterRequest request) {
-        log.info("sms-code doRegister request={}", request);
+        User user = createDefaultUser(request);
+        userService.save(user);
     }
 
     @Override
@@ -54,8 +68,19 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
     }
 
     @Override
-    public void validate(RegisterRequest request) {
-        // todo 校验手机号
-        // todo 校验验证码
+    protected void validate(RegisterRequest request) {
+        // 用validation校验了手机号和验证码
+    }
+
+    private User createDefaultUser(RegisterRequest request) {
+        // 帮我用builder创建一个默认用户, 你可以在这里设置一些默认值
+        String phone = ((SmsCodeRegisterRequest) request).getPhone();
+        String name = "User_%s".formatted(RandomStringGenerator.generateRandomString());
+        User user = User.builder()
+                .phone(phone)
+                .nickname(name)
+                .name(name)
+                .build();
+        return User.builder().build();
     }
 }

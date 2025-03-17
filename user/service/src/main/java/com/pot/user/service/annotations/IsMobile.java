@@ -19,7 +19,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IsMobile {
 
-    String message() default "{phone number is invalid}";
+    String message() default "Phone number is invalid";
 
     Class<?>[] groups() default {};
 

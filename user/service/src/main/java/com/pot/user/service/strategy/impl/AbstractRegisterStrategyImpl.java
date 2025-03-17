@@ -15,15 +15,17 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
         validate(request);
         // 校验唯一性
         checkUniqueness(request);
-        // 发送验证码
-        sendVerificationIfNeeded(request);
+        // 校验验证码
+        checkCodeIfNeeded(request);
         // 注册
         doRegister(request);
     }
 
+    protected abstract void validate(RegisterRequest request);
+
     protected abstract void checkUniqueness(RegisterRequest request);
 
-    protected abstract void sendVerificationIfNeeded(RegisterRequest request);
+    protected abstract void checkCodeIfNeeded(RegisterRequest request);
 
     protected abstract void doRegister(RegisterRequest request);
 }

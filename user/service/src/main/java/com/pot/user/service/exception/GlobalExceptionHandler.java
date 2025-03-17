@@ -5,9 +5,11 @@ import com.pot.common.enums.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.Objects;
 
 /**
  * @author: Pot
@@ -16,15 +18,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-//    /**
-//     * 处理校验异常
-//     */
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    public R<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-//        String message = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
-//        return R.fail(ResultCode.PARAM_ERROR, message);
-//    }
+public class GlobalExceptionHandler {
+    /**
+     * 处理校验异常
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public R<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        String message = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+        return R.fail(ResultCode.PARAM_ERROR, message);
+    }
 
     /**
      * 处理业务异常

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
+@Builder
 @ToString
 @TableName("t_user")
 @ApiModel(value = "User对象", description = "用户表")
