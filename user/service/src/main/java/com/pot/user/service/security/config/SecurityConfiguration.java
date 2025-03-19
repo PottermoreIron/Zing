@@ -23,7 +23,7 @@ public class SecurityConfiguration {
                 .with(CustomSecurityConfigurer.customSecurityConfigurer(), Customizer.withDefaults())
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login**", "/user/register").permitAll()
+                        .requestMatchers("/login**", "/user/register", "/user/send/sms/code").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

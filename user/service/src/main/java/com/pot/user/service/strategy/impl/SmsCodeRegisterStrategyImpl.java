@@ -9,11 +9,14 @@ import com.pot.user.service.enums.RegisterType;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.service.UserService;
+import com.pot.user.service.utils.PasswordUtils;
 import com.pot.user.service.utils.RandomStringGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 /**
  * @author: Pot
@@ -31,7 +34,6 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     @Override
     protected void checkUniqueness(RegisterRequest request) {
-        // todo 校验手机号是否已注册
         String phone = ((SmsCodeRegisterRequest) request).getPhone();
         LambdaQueryChainWrapper<User> query = userService.lambdaQuery().eq(User::getPhone, phone);
         User user = query.one();
@@ -44,7 +46,6 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
     protected void checkCodeIfNeeded(RegisterRequest request) {
         boolean needCheckCode = ((SmsCodeRegisterRequest) request).getNeedCheckCode();
         if (needCheckCode) {
-            // todo 校验验证码
             String phone = ((SmsCodeRegisterRequest) request).getPhone();
             String code = ((SmsCodeRegisterRequest) request).getCode();
             smsCodeService.validateSmsCode(phone, code);
@@ -76,11 +77,18 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
         // 帮我用builder创建一个默认用户, 你可以在这里设置一些默认值
         String phone = ((SmsCodeRegisterRequest) request).getPhone();
         String name = "User_%s".formatted(RandomStringGenerator.generateRandomString());
-        User user = User.builder()
+        String uid = RandomStringGenerator.generateUUID();
+        String defaultPassword = PasswordUtils.generateDefaultPassword();
+        LocalDateTime registerTime = LocalDateTime.now();
+        return User.builder()
                 .phone(phone)
                 .nickname(name)
                 .name(name)
+                .uid(uid)
+                .password(defaultPassword)
+                .registerTime(registerTime)
+                .status(0)
+                .deleted(false)
                 .build();
-        return User.builder().build();
     }
 }

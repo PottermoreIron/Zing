@@ -1,7 +1,5 @@
 package com.pot.user.service.service;
 
-import com.pot.common.R;
-
 /**
  * @author: Pot
  * @created: 2025/3/16 22:56
@@ -23,10 +21,9 @@ public interface SmsCodeService {
      *
      * @param phone 手机号
      * @param code  验证码
-     * @return boolean
      * @author yeyu.cy
      * @description 验证验证码
      * @date 11:43 2025/3/10
      **/
-    R<Void> validateSmsCode(String phone, String code);
+    void validateSmsCode(String phone, String code);
 }

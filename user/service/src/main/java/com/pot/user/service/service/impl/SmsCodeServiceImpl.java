@@ -30,7 +30,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
     }
 
     @Override
-    public R<Void> validateSmsCode(String phone, String code) {
+    public void validateSmsCode(String phone, String code) {
         checkPhone(phone);
         String key = SMS_CODE_KEY_PREFIX + phone;
         String smsCode = RedisUtils.get(key);
@@ -41,7 +41,7 @@ public class SmsCodeServiceImpl implements SmsCodeService {
             throw new BusinessException(ResultCode.SMS_CODE_ERROR);
         }
         RedisUtils.delete(key);
-        return R.success("验证码正确");
+        R.success("验证码正确");
     }
 
     private void checkPhone(String phone) {

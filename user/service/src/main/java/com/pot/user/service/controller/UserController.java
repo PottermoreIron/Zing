@@ -1,6 +1,10 @@
 package com.pot.user.service.controller;
 
+import com.pot.common.R;
 import com.pot.user.service.controller.request.RegisterRequest;
+import com.pot.user.service.controller.request.SendCodeRequest;
+import com.pot.user.service.controller.request.SendSmsCodeRequest;
+import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
 import jakarta.validation.Valid;
@@ -23,14 +27,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
+
     private final RegisterStrategyFactory strategyFactory;
+    private final SmsCodeService smsCodeService;
 
     @RequestMapping("/register")
-    public String test(@Valid @RequestBody RegisterRequest request) {
+    public R<Void> register(@Valid @RequestBody RegisterRequest request) {
         log.info("request={}", request);
         RegisterStrategy strategy = strategyFactory.getStrategyByCode(request.getType());
         strategy.register(request);
-        return "success";
+        return R.success("注册成功");
+    }
+
+    @RequestMapping("/send/sms/code")
+    public R<Void> sendSms(@Valid @RequestBody SendCodeRequest request) {
+        String phone = ((SendSmsCodeRequest) request).getPhone();
+        smsCodeService.sendSmsCode(phone);
+        return R.success("发送成功");
     }
 
 }
