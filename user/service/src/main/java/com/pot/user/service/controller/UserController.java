@@ -7,6 +7,7 @@ import com.pot.user.service.controller.request.SendSmsCodeRequest;
 import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
+import com.sankuai.inf.leaf.service.SegmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class UserController {
 
     private final RegisterStrategyFactory strategyFactory;
     private final SmsCodeService smsCodeService;
+    private final SegmentService segmentService;
 
     @RequestMapping("/register")
     public R<Void> register(@Valid @RequestBody RegisterRequest request) {
@@ -44,6 +46,12 @@ public class UserController {
         String phone = ((SendSmsCodeRequest) request).getPhone();
         smsCodeService.sendSmsCode(phone);
         return R.success("发送成功");
+    }
+
+    @RequestMapping("/test")
+    public R<Long> test() {
+        Long id = segmentService.getId("user").getId();
+        return R.success(id, "test");
     }
 
 }

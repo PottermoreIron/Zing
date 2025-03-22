@@ -79,6 +79,6 @@ public class RandomStringGenerator {
     }
 
     public static void main(String[] args) {
-        System.out.println(generateUUID(20));
+        System.out.println(generateRandomString(32));
     }
 }

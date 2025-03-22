@@ -27,6 +27,8 @@
         <apache-commons.version>3.17.0</apache-commons.version>
         <freemaker.version>2.3.34</freemaker.version>
         <swagger.version>3.0.0</swagger.version>
+        <jjwt.version>0.12.6</jjwt.version>
+        <leaf.version>1.0.1-RELEASE</leaf.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -70,6 +72,30 @@
                 <artifactId>springfox-boot-starter</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
+            <!-- jjwt -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <artifactId>leaf-boot-starter</artifactId>
+                <groupId>com.sankuai.inf.leaf</groupId>
+                <version>${leaf.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

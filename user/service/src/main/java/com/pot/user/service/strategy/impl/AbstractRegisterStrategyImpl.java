@@ -2,13 +2,24 @@ package com.pot.user.service.strategy.impl;
 
 import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.strategy.RegisterStrategy;
+import com.sankuai.inf.leaf.common.Result;
+import com.sankuai.inf.leaf.common.Status;
+import com.sankuai.inf.leaf.service.SegmentService;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
 
 /**
  * @author: Pot
  * @created: 2025/3/10 23:22
  * @description: 抽象注册策略类
  */
+@Component
 public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
+    private final String BIZ_TYPE = "user";
+
+    @Resource
+    private SegmentService segmentService;
+
     @Override
     public void register(RegisterRequest request) {
         // 校验参数
@@ -21,6 +32,18 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
         doRegister(request);
     }
 
+    protected Long getNextId() {
+        try {
+            Result result = segmentService.getId(BIZ_TYPE);
+            if (result.getStatus().equals(Status.EXCEPTION)) {
+                throw new RuntimeException("获取分布式ID异常");
+            }
+            return result.getId();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected abstract void validate(RegisterRequest request);
 
     protected abstract void checkUniqueness(RegisterRequest request);
@@ -28,4 +51,6 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
     protected abstract void checkCodeIfNeeded(RegisterRequest request);
 
     protected abstract void doRegister(RegisterRequest request);
+
+
 }

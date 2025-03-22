@@ -65,7 +65,7 @@ public class User implements Serializable {
     @TableField("uid")
     @ApiModelProperty("用户id")
     @NotEmpty
-    private String uid;
+    private Long uid;
 
     /**
      * 设备id

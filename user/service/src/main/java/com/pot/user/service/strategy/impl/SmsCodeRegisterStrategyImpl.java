@@ -77,7 +77,7 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
         // 帮我用builder创建一个默认用户, 你可以在这里设置一些默认值
         String phone = ((SmsCodeRegisterRequest) request).getPhone();
         String name = "User_%s".formatted(RandomStringGenerator.generateRandomString());
-        String uid = RandomStringGenerator.generateUUID();
+        Long uid = getNextId();
         String defaultPassword = PasswordUtils.generateDefaultPassword();
         LocalDateTime registerTime = LocalDateTime.now();
         return User.builder()
