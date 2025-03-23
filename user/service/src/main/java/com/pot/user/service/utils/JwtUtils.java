@@ -1,8 +1,8 @@
 package com.pot.user.service.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
+import com.pot.common.enums.ResultCode;
+import com.pot.user.service.exception.BusinessException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,7 +32,7 @@ public class JwtUtils {
     public static final String TOKEN_TYPE = "JWT";
 
 
-    private static String createToken(Map<String, String> claims, Long expiration) {
+    private static String createToken(Map<String, Object> claims, Long expiration) {
         // todo collectionUtils
         if (claims == null || claims.isEmpty()) {
             throw new IllegalArgumentException("claims must not be null or empty");
@@ -50,27 +51,55 @@ public class JwtUtils {
         return builder.compact();
     }
 
-    private static String createToken(String claim, String value, Long expiration) {
-        Map<String, String> claims = Map.of(claim, value);
+    private static String createToken(String claim, Object value, Long expiration) {
+        Map<String, Object> claims = Map.of(claim, value);
         return createToken(claims, expiration);
     }
 
-    public static String createAccessToken(String claim) {
+    public static String createAccessToken(Object claim) {
         return createToken("uid", claim, ACCESS_TOKEN_EXPIRATION);
     }
 
-    public static String createRefreshToken(String claim) {
+    public static String createRefreshToken(Object claim) {
         return createToken("uid", claim, REFRESH_TOKEN_EXPIRATION);
     }
 
     public static Claims parseToken(String token) {
-        return Jwts.parser()
-                .verifyWith(KEY)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        try {
+            return Jwts.parser()
+                    .verifyWith(KEY)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (MalformedJwtException e) {
+            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "Malformed JWT token");
+        } catch (ExpiredJwtException e) {
+            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "JWT token is expired");
+        } catch (UnsupportedJwtException e) {
+            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "Unsupported JWT token");
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "JWT token is invalid");
+        } catch (Exception e) {
+            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "JWT token error");
+        }
+    }
+
+    public static Long getUid(String token) {
+        try {
+            Claims claims = parseToken(token); // 可能抛出BusinessException
+            return Optional.ofNullable(claims.get("uid"))
+                    .map(Object::toString)
+                    .map(Long::parseLong)
+                    .orElseThrow(() ->
+                            new BusinessException(ResultCode.TOKEN_EXCEPTION, "No Invalid uid in token")
+                    );
+        } catch (NumberFormatException e) {
+            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "Invalid uid format");
+        }
     }
 
     public static void main(String[] args) {
+        String token = createAccessToken("123");
+        System.out.println(getUid(token));
     }
 }

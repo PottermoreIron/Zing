@@ -1,6 +1,7 @@
 package com.pot.user.service.strategy;
 
 import com.pot.user.service.controller.request.RegisterRequest;
+import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.enums.RegisterType;
 
 /**
@@ -32,9 +33,10 @@ public interface RegisterStrategy {
      * 注册
      *
      * @param request 请求参数
+     * @return Tokens 返回两个Token
      * @author pot
      * @description
      * @date 23:21 2025/3/10
      **/
-    void register(RegisterRequest request);
+    Tokens register(RegisterRequest request);
 }

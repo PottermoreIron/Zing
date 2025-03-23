@@ -4,6 +4,7 @@ import com.pot.common.R;
 import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.SendSmsCodeRequest;
+import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
@@ -34,11 +35,11 @@ public class UserController {
     private final SegmentService segmentService;
 
     @RequestMapping("/register")
-    public R<Void> register(@Valid @RequestBody RegisterRequest request) {
+    public R<Tokens> register(@Valid @RequestBody RegisterRequest request) {
         log.info("request={}", request);
         RegisterStrategy strategy = strategyFactory.getStrategyByCode(request.getType());
-        strategy.register(request);
-        return R.success("注册成功");
+        Tokens tokens = strategy.register(request);
+        return R.success(tokens, "注册成功");
     }
 
     @RequestMapping("/send/sms/code")
@@ -52,6 +53,11 @@ public class UserController {
     public R<Long> test() {
         Long id = segmentService.getId("user").getId();
         return R.success(id, "test");
+    }
+
+    @RequestMapping("/test/token")
+    public R<Void> testToken() {
+        return R.success("token");
     }
 
 }

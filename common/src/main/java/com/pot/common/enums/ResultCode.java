@@ -64,6 +64,10 @@ public enum ResultCode {
      * 用户已存在
      */
     USER_EXIST(1004, "用户已存在", false),
+    /**
+     * token异常
+     */
+    TOKEN_EXCEPTION(1005, "token异常", false),
     ;
 
     private final int code;

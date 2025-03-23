@@ -1,6 +1,7 @@
 package com.pot.user.service.strategy.impl;
 
 import com.pot.user.service.controller.request.RegisterRequest;
+import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.sankuai.inf.leaf.common.Result;
 import com.sankuai.inf.leaf.common.Status;
@@ -21,7 +22,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
     private SegmentService segmentService;
 
     @Override
-    public void register(RegisterRequest request) {
+    public Tokens register(RegisterRequest request) {
         // 校验参数
         validate(request);
         // 校验唯一性
@@ -29,7 +30,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
         // 校验验证码
         checkCodeIfNeeded(request);
         // 注册
-        doRegister(request);
+        return doRegister(request);
     }
 
     protected Long getNextId() {
@@ -50,7 +51,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
 
     protected abstract void checkCodeIfNeeded(RegisterRequest request);
 
-    protected abstract void doRegister(RegisterRequest request);
+    protected abstract Tokens doRegister(RegisterRequest request);
 
 
 }

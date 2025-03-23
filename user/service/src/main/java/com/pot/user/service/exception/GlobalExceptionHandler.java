@@ -48,6 +48,6 @@ public class GlobalExceptionHandler {
             throw ex;
         }
         log.error("System error: {}", ex.getMessage(), ex);
-        return R.fail();
+        return R.fail(ResultCode.INTERNAL_ERROR, ex.getMessage());
     }
 }

@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +39,6 @@ public class User implements Serializable {
      */
     @ApiModelProperty("数据库默认Id")
     @TableId(value = "id", type = IdType.AUTO)
-    @NotEmpty
     private Long id;
 
     /**
@@ -48,7 +46,6 @@ public class User implements Serializable {
      */
     @ApiModelProperty("创建时间")
     @TableField(value = "gmt_create", fill = FieldFill.INSERT)
-    @NotEmpty
     private LocalDateTime gmtCreate;
 
     /**
@@ -56,7 +53,6 @@ public class User implements Serializable {
      */
     @ApiModelProperty("修改时间")
     @TableField(value = "gmt_modified", fill = FieldFill.INSERT_UPDATE)
-    @NotEmpty
     private LocalDateTime gmtModified;
 
     /**
@@ -64,7 +60,6 @@ public class User implements Serializable {
      */
     @TableField("uid")
     @ApiModelProperty("用户id")
-    @NotEmpty
     private Long uid;
 
     /**
@@ -79,7 +74,6 @@ public class User implements Serializable {
      */
     @TableField("name")
     @ApiModelProperty("姓名")
-    @Size(min = 1, max = 30)
     private String name;
 
     /**
@@ -87,8 +81,6 @@ public class User implements Serializable {
      */
     @ApiModelProperty("昵称")
     @TableField("nickname")
-    @NotEmpty
-    @Size(min = 1, max = 30)
     private String nickname;
 
     /**
@@ -96,8 +88,6 @@ public class User implements Serializable {
      */
     @TableField("password")
     @ApiModelProperty("加密加盐密码")
-    @NotEmpty
-    @Size(min = 1, max = 100)
     private String password;
 
     /**
@@ -169,7 +159,6 @@ public class User implements Serializable {
      */
     @TableField("status")
     @ApiModelProperty("账户状态 [0代表正常，1代表停用]")
-    @NotEmpty
     private Integer status;
 
     /**
@@ -177,7 +166,6 @@ public class User implements Serializable {
      */
     @ApiModelProperty("账户注册时间")
     @TableField("register_time")
-    @NotEmpty
     private LocalDateTime registerTime;
 
     /**
@@ -185,7 +173,7 @@ public class User implements Serializable {
      */
     @TableField("last_login_ip")
     @ApiModelProperty("最后一次登录ip地址")
-    @NotEmpty
+    @NotBlank(message = "最后一次登录ip地址不能为空")
     private String lastLoginIp;
 
     /**
@@ -193,7 +181,6 @@ public class User implements Serializable {
      */
     @ApiModelProperty("最后一次登录时间")
     @TableField("last_login_date")
-    @NotEmpty
     private LocalDateTime lastLoginDate;
 
     /**
@@ -202,7 +189,6 @@ public class User implements Serializable {
     @TableLogic
     @TableField("is_deleted")
     @ApiModelProperty("删除标识位 [0代表没删除，1代表删除]")
-    @NotEmpty
     private Boolean deleted;
 
     /**
@@ -210,7 +196,6 @@ public class User implements Serializable {
      */
     @TableField("creator")
     @ApiModelProperty("创建者")
-    @NotEmpty
     private String creator;
 
     /**
@@ -218,7 +203,6 @@ public class User implements Serializable {
      */
     @TableField("updater")
     @ApiModelProperty("修改者")
-    @NotEmpty
     private String updater;
 
     /**

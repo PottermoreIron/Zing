@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.controller.request.SmsCodeRegisterRequest;
+import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.RegisterType;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.service.UserService;
+import com.pot.user.service.utils.JwtUtils;
 import com.pot.user.service.utils.PasswordUtils;
 import com.pot.user.service.utils.RandomStringGenerator;
 import lombok.RequiredArgsConstructor;
@@ -53,9 +55,14 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
     }
 
     @Override
-    protected void doRegister(RegisterRequest request) {
+    protected Tokens doRegister(RegisterRequest request) {
         User user = createDefaultUser(request);
         userService.save(user);
+        Long uid = user.getUid();
+        return Tokens.builder()
+                .accessToken(JwtUtils.createAccessToken(uid))
+                .refreshToken(JwtUtils.createRefreshToken(uid))
+                .build();
     }
 
     @Override
