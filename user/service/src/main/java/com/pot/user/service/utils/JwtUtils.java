@@ -1,7 +1,5 @@
 package com.pot.user.service.utils;
 
-import com.pot.common.enums.ResultCode;
-import com.pot.user.service.exception.BusinessException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -72,15 +70,15 @@ public class JwtUtils {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (MalformedJwtException e) {
-            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "Malformed JWT token");
+            throw new JwtException("Invalid JWT token: " + e.getMessage());
         } catch (ExpiredJwtException e) {
-            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "JWT token is expired");
+            throw new JwtException("Expired JWT token: " + e.getMessage());
         } catch (UnsupportedJwtException e) {
-            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "Unsupported JWT token");
+            throw new JwtException("Unsupported JWT token: " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "JWT token is invalid");
+            throw new JwtException("JWT token compact of handler are invalid: " + e.getMessage());
         } catch (Exception e) {
-            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "JWT token error");
+            throw new JwtException("JWT token is invalid: " + e.getMessage());
         }
     }
 
@@ -91,10 +89,10 @@ public class JwtUtils {
                     .map(Object::toString)
                     .map(Long::parseLong)
                     .orElseThrow(() ->
-                            new BusinessException(ResultCode.TOKEN_EXCEPTION, "No Invalid uid in token")
+                            new JwtException("No Invalid uid in token")
                     );
         } catch (NumberFormatException e) {
-            throw new BusinessException(ResultCode.TOKEN_EXCEPTION, "Invalid uid format");
+            throw new JwtException("Invalid uid in token");
         }
     }
 

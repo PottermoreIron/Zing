@@ -65,10 +65,13 @@ public enum ResultCode {
      */
     USER_EXIST(1004, "用户已存在", false),
     /**
-     * token异常
+     * 用户认证失败
      */
-    TOKEN_EXCEPTION(1005, "token异常", false),
-    ;
+    AUTHENTICATION_FAILED(1005, "用户认证失败", false),
+    /**
+     * 用户没有权限
+     */
+    USER_NO_PERMISSION(1006, "用户没有权限", false);
 
     private final int code;
     private final String msg;
