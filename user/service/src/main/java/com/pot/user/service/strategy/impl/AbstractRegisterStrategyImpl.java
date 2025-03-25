@@ -1,6 +1,6 @@
 package com.pot.user.service.strategy.impl;
 
-import com.pot.user.service.controller.request.RegisterRequest;
+import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.sankuai.inf.leaf.common.Result;

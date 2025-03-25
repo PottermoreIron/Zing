@@ -1,4 +1,4 @@
-package com.pot.user.service.controller.request;
+package com.pot.user.service.controller.request.register;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -22,7 +22,8 @@ import lombok.NoArgsConstructor;
         property = "type",
         visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = SmsCodeRegisterRequest.class, name = "4"),
+        @JsonSubTypes.Type(value = PhoneCodeRegisterRequest.class, name = "4"),
+        @JsonSubTypes.Type(value = EmailCodeRegisterRequest.class, name = "5")
 })
 public abstract class RegisterRequest {
     @Min(value = 1, message = "值不能小于1")

@@ -2,8 +2,8 @@ package com.pot.user.service.strategy.impl;
 
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.pot.common.enums.ResultCode;
-import com.pot.user.service.controller.request.RegisterRequest;
-import com.pot.user.service.controller.request.SmsCodeRegisterRequest;
+import com.pot.user.service.controller.request.register.PhoneCodeRegisterRequest;
+import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.RegisterType;
@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
+public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     private final UserService userService;
 
@@ -36,7 +36,7 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     @Override
     protected void checkUniqueness(RegisterRequest request) {
-        String phone = ((SmsCodeRegisterRequest) request).getPhone();
+        String phone = ((PhoneCodeRegisterRequest) request).getPhone();
         LambdaQueryChainWrapper<User> query = userService.lambdaQuery().eq(User::getPhone, phone);
         User user = query.one();
         if (ObjectUtils.isNotEmpty(user)) {
@@ -46,12 +46,9 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     @Override
     protected void checkCodeIfNeeded(RegisterRequest request) {
-        boolean needCheckCode = ((SmsCodeRegisterRequest) request).getNeedCheckCode();
-        if (needCheckCode) {
-            String phone = ((SmsCodeRegisterRequest) request).getPhone();
-            String code = ((SmsCodeRegisterRequest) request).getCode();
-            smsCodeService.validateSmsCode(phone, code);
-        }
+        String phone = ((PhoneCodeRegisterRequest) request).getPhone();
+        String code = ((PhoneCodeRegisterRequest) request).getCode();
+        smsCodeService.validateSmsCode(phone, code);
     }
 
     @Override
@@ -82,7 +79,7 @@ public class SmsCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     private User createDefaultUser(RegisterRequest request) {
         // 帮我用builder创建一个默认用户, 你可以在这里设置一些默认值
-        String phone = ((SmsCodeRegisterRequest) request).getPhone();
+        String phone = ((PhoneCodeRegisterRequest) request).getPhone();
         String name = "User_%s".formatted(RandomStringGenerator.generateRandomString());
         Long uid = getNextId();
         String defaultPassword = PasswordUtils.generateDefaultPassword();

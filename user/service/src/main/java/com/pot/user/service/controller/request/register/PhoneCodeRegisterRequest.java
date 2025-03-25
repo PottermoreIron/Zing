@@ -1,4 +1,4 @@
-package com.pot.user.service.controller.request;
+package com.pot.user.service.controller.request.register;
 
 import com.pot.user.service.annotations.IsMobile;
 import jakarta.validation.constraints.Size;
@@ -12,8 +12,8 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class SmsCodeRegisterRequest extends RegisterRequest {
-    public SmsCodeRegisterRequest() {
+public class PhoneCodeRegisterRequest extends RegisterRequest {
+    public PhoneCodeRegisterRequest() {
         this.type = 4;
     }
 
@@ -21,6 +21,4 @@ public class SmsCodeRegisterRequest extends RegisterRequest {
     private String phone;
     @Size(min = 6, max = 6, message = "Captcha length is 6 digits")
     private String code;
-
-    private Boolean needCheckCode = true;
 }

@@ -1,9 +1,9 @@
 package com.pot.user.service.controller;
 
 import com.pot.common.R;
-import com.pot.user.service.controller.request.RegisterRequest;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.SendSmsCodeRequest;
+import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.strategy.RegisterStrategy;
