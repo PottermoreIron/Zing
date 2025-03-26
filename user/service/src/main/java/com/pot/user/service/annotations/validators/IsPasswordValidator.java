@@ -1,26 +1,25 @@
 package com.pot.user.service.annotations.validators;
 
-
 import com.pot.common.utils.ValidationUtils;
-import com.pot.user.service.annotations.IsMobile;
+import com.pot.user.service.annotations.IsPassword;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * @author: Pot
- * @created: 2025/3/16 23:10
- * @description: 手机号码校验的验证类
+ * @created: 2025/3/26 22:45
+ * @description: 密码校验
  */
-public class IsMobileValidator implements ConstraintValidator<IsMobile, String> {
+public class IsPasswordValidator implements ConstraintValidator<IsPassword, String> {
     private String regex;
 
     @Override
-    public void initialize(IsMobile constraintAnnotation) {
+    public void initialize(IsPassword constraintAnnotation) {
         this.regex = constraintAnnotation.regex();
     }
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return ValidationUtils.isPhone(s, regex);
+        return ValidationUtils.isValidPassword(s, regex);
     }
 }
