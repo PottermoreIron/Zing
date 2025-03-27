@@ -18,19 +18,24 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class SmsCodeUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService;
 
     @Autowired
-    public SmsCodeUserDetailsService(UserService userService) {
+    public CustomUserDetailsService(UserService userService) {
         this.userService = userService;
     }
 
     // find user by phone
     @Override
-    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
-        log.info("loadUserByUsername phone={}", phone);
-        User user = userService.lambdaQuery().eq(User::getPhone, phone).one();
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        log.info("loadUserByUsername identifier={}", identifier);
+        // 这个地方需要保证Nickname不能全是数字, 避免和手机号冲突
+        User user = userService.lambdaQuery()
+                .or().eq(User::getPhone, identifier)
+                .or().eq(User::getNickname, identifier)
+                .or().eq(User::getEmail, identifier)
+                .one();
         log.info("loadUserByUsername user={}", user);
         if (user == null) {
             throw new BusinessException(ResultCode.USER_NOT_EXIST);

@@ -21,7 +21,7 @@ import java.io.IOException;
  */
 @Slf4j
 @Component
-public class SmsCodeAuthenticationFailureHandler implements AuthenticationFailureHandler {
+public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         log.info("exception:{}", exception.getMessage());

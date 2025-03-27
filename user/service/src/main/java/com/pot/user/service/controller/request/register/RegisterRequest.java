@@ -22,6 +22,9 @@ import lombok.NoArgsConstructor;
         property = "type",
         visible = true)
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = EmailPasswordRegisterRequest.class, name = "1"),
+        @JsonSubTypes.Type(value = PhonePasswordRegisterRequest.class, name = "2"),
+        @JsonSubTypes.Type(value = EmailPasswordRegisterRequest.class, name = "3"),
         @JsonSubTypes.Type(value = PhoneCodeRegisterRequest.class, name = "4"),
         @JsonSubTypes.Type(value = EmailCodeRegisterRequest.class, name = "5")
 })

@@ -6,7 +6,7 @@ import com.pot.user.service.controller.request.register.PhoneCodeRegisterRequest
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
-import com.pot.user.service.enums.RegisterType;
+import com.pot.user.service.enums.LoginRegisterType;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.service.UserService;
@@ -63,13 +63,13 @@ public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl 
     }
 
     @Override
-    public RegisterType getRegisterType() {
-        return RegisterType.PHONE_CODE;
+    public LoginRegisterType getRegisterType() {
+        return LoginRegisterType.PHONE_CODE;
     }
 
     @Override
-    public boolean supports(RegisterType type) {
-        return type.equals(RegisterType.PHONE_CODE);
+    public boolean supports(LoginRegisterType type) {
+        return type.equals(LoginRegisterType.PHONE_CODE);
     }
 
     @Override

@@ -51,11 +51,11 @@ public enum ResultCode {
     /**
      * 短信验证码不存在或过期
      */
-    SMS_CODE_NOT_EXIST(1001, "短信验证码不存在或过期", false),
+    VERIFICATION_CODE_NOT_EXIST(1001, "验证码不存在或过期", false),
     /**
      * 短信验证码错误
      */
-    SMS_CODE_ERROR(1002, "短信验证码错误", false),
+    VERIFICATION_CODE_ERROR(1002, "验证码错误", false),
     /**
      * 用户不存在
      */

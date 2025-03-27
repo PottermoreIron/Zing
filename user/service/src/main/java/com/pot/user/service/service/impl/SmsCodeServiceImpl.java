@@ -35,10 +35,10 @@ public class SmsCodeServiceImpl implements SmsCodeService {
         String key = SMS_CODE_KEY_PREFIX + phone;
         String smsCode = RedisUtils.get(key);
         if (smsCode == null) {
-            throw new BusinessException(ResultCode.SMS_CODE_NOT_EXIST);
+            throw new BusinessException(ResultCode.VERIFICATION_CODE_NOT_EXIST);
         }
         if (!smsCode.equals(code)) {
-            throw new BusinessException(ResultCode.SMS_CODE_ERROR);
+            throw new BusinessException(ResultCode.VERIFICATION_CODE_ERROR);
         }
         RedisUtils.delete(key);
         R.success("验证码正确");

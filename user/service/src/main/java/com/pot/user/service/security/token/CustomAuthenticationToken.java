@@ -1,5 +1,7 @@
 package com.pot.user.service.security.token;
 
+import com.pot.user.service.enums.LoginRegisterType;
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -10,37 +12,31 @@ import java.util.Collection;
  * @created: 2025/2/25 23:14
  * @description: 测试spring security
  */
-public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {
-    // 手机号
+public class CustomAuthenticationToken extends AbstractAuthenticationToken {
     private final Object principal;
-    // 存验证码
     private final Object credentials;
+    @Getter
+    private final LoginRegisterType loginType;
 
-    public SmsCodeAuthenticationToken(Object principal, Object credentials) {
+    public CustomAuthenticationToken(Object principal, Object credentials, LoginRegisterType loginType) {
         super(null);
         this.principal = principal;
         this.credentials = credentials;
+        this.loginType = loginType;
         setAuthenticated(false);
     }
 
-    public SmsCodeAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
+    public CustomAuthenticationToken(Object principal, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
         this.credentials = null;
+        this.loginType = null;
         super.setAuthenticated(true);
     }
 
-    public SmsCodeAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
-        super(authorities);
-        this.principal = principal;
-        this.credentials = credentials;
-        super.setAuthenticated(true);
+    public static CustomAuthenticationToken unauthenticated(Object principal, Object credentials, LoginRegisterType loginType) {
+        return new CustomAuthenticationToken(principal, credentials, loginType);
     }
-
-    public static SmsCodeAuthenticationToken unauthenticated(Object principal, Object credentials) {
-        return new SmsCodeAuthenticationToken(principal, credentials);
-    }
-
 
     @Override
     public Object getCredentials() {
@@ -52,3 +48,4 @@ public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {
         return this.principal;
     }
 }
+

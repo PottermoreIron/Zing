@@ -1,7 +1,7 @@
 package com.pot.user.service.security.config;
 
+import com.pot.user.service.security.filter.CustomAuthenticationFilter;
 import com.pot.user.service.security.filter.JwtAuthenticationFilter;
-import com.pot.user.service.security.filter.SmsCodeAuthenticationFilter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,7 +18,7 @@ public class CustomSecurityConfigurer extends AbstractHttpConfigurer<CustomSecur
     @Override
     public void configure(HttpSecurity http) {
         AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        http.addFilterBefore(new SmsCodeAuthenticationFilter(authenticationManager), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new CustomAuthenticationFilter(authenticationManager), BasicAuthenticationFilter.class);
         http.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
