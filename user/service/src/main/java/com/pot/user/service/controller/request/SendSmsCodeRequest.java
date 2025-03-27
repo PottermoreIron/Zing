@@ -1,6 +1,7 @@
 package com.pot.user.service.controller.request;
 
-import com.pot.user.service.annotations.IsMobile;
+import com.pot.common.utils.ValidationUtils;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,6 +13,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class SendSmsCodeRequest extends SendCodeRequest {
-    @IsMobile
+    @Pattern(regexp = ValidationUtils.PHONE_REGEX, message = "Phone number format is incorrect")
     String phone;
 }

@@ -1,7 +1,7 @@
 package com.pot.user.service.controller.request.register;
 
-import com.pot.user.service.annotations.IsNickName;
-import com.pot.user.service.annotations.IsPassword;
+import com.pot.common.utils.ValidationUtils;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
@@ -11,8 +11,8 @@ import lombok.Data;
  */
 @Data
 public class UserNamePasswordRegisterRequest {
-    @IsNickName
+    @Pattern(regexp = ValidationUtils.NICKNAME_REGEX, message = "Nick name can only contain letters, numbers, underscores and chinese characters. The length is 1-30 characters")
     private String username;
-    @IsPassword
+    @Pattern(regexp = ValidationUtils.PASSWORD_REGEX, message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character. The length is 8-16 characters")
     private String password;
 }

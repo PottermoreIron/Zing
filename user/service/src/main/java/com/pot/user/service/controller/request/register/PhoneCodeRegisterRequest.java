@@ -1,6 +1,7 @@
 package com.pot.user.service.controller.request.register;
 
-import com.pot.user.service.annotations.IsMobile;
+import com.pot.common.utils.ValidationUtils;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,7 +18,7 @@ public class PhoneCodeRegisterRequest extends RegisterRequest {
         this.type = 4;
     }
 
-    @IsMobile
+    @Pattern(regexp = ValidationUtils.PHONE_REGEX, message = "Phone number format is incorrect")
     private String phone;
     @Size(min = 6, max = 6, message = "Captcha length is 6 digits")
     private String code;
