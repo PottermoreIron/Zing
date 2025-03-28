@@ -1,10 +1,11 @@
 package com.pot.user.service.security.provider;
 
 import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.security.details.CustomUserDetailsService;
 import com.pot.user.service.security.details.LoginUser;
 import com.pot.user.service.security.token.CustomAuthenticationToken;
-import com.pot.user.service.service.SmsCodeService;
+import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,7 +26,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private final CustomUserDetailsService customUserDetailsService;
 
-    private final SmsCodeService smsCodeService;
+    private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
 
 
     @Override
@@ -37,7 +38,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         LoginUser loginUser = null;
         log.info("identifier={}, credentials={}, type={}", identifier, credentials, loginType);
         switch (loginType) {
-            case PHONE_CODE -> smsCodeService.validateSmsCode(identifier, credentials);
+            case PHONE_CODE ->
+                    verificationCodeStrategyFactory.getStrategy(SendCodeChannelType.PHONE).validateCode(credentials, identifier);
             case USERNAME_PASSWORD -> {
                 loginUser = (LoginUser) customUserDetailsService.loadUserByUsername(identifier);
                 //todo 用户名密码登录

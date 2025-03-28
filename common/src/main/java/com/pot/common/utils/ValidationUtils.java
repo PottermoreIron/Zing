@@ -11,6 +11,7 @@ public class ValidationUtils {
     public final static String PHONE_REGEX = "(?:0|86|\\+86)?1[3-9]\\d{9}$";
     public final static String NICKNAME_REGEX = "^[\\u4e00-\\u9fa5a-zA-Z0-9_-]{1,30}$";
     public final static String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,16}$";
+    public final static String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
 
     public static boolean isPhone(String phone) {
         return isPhone(phone, PHONE_REGEX);
@@ -18,6 +19,14 @@ public class ValidationUtils {
 
     public static boolean isPhone(String phone, String pattern) {
         return isMatch(phone, pattern);
+    }
+
+    public static boolean isEmail(String email) {
+        return isEmail(email, EMAIL_REGEX);
+    }
+
+    public static boolean isEmail(String email, String pattern) {
+        return isMatch(email, pattern);
     }
 
     public static boolean isValidNickname(String nickname) {

@@ -7,9 +7,10 @@ import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
-import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.service.UserService;
+import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
 import com.pot.user.service.utils.JwtUtils;
 import com.pot.user.service.utils.PasswordUtils;
 import com.pot.user.service.utils.RandomStringGenerator;
@@ -31,8 +32,7 @@ import java.time.LocalDateTime;
 public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     private final UserService userService;
-
-    private final SmsCodeService smsCodeService;
+    private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
 
     @Override
     protected void checkUniqueness(RegisterRequest request) {
@@ -48,7 +48,7 @@ public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl 
     protected void checkCodeIfNeeded(RegisterRequest request) {
         String phone = ((PhoneCodeRegisterRequest) request).getPhone();
         String code = ((PhoneCodeRegisterRequest) request).getCode();
-        smsCodeService.validateSmsCode(phone, code);
+        verificationCodeStrategyFactory.getStrategy(SendCodeChannelType.PHONE).validateCode(phone, code);
     }
 
     @Override

@@ -23,7 +23,8 @@ import lombok.NoArgsConstructor;
         property = "type",
         visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = SendSmsCodeRequest.class, name = "1"),
+        @JsonSubTypes.Type(value = SendPhoneCodeRequest.class, name = "1"),
+        @JsonSubTypes.Type(value = SendEmailCodeRequest.class, name = "2")
 })
 public abstract class SendCodeRequest {
     @Min(value = 1, message = "值不能小于1")

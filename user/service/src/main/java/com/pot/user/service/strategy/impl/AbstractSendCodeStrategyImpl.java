@@ -1,9 +1,10 @@
 package com.pot.user.service.strategy.impl;
 
 import com.pot.common.enums.ResultCode;
-import com.pot.user.service.enums.VerificationCodeType;
+import com.pot.user.service.controller.request.SendCodeRequest;
+import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
-import com.pot.user.service.strategy.VerificationCodeStrategy;
+import com.pot.user.service.strategy.SendCodeStrategy;
 import com.pot.user.service.utils.RedisUtils;
 
 import static com.pot.user.service.utils.RandomStringGenerator.generateRandomCode;
@@ -13,13 +14,15 @@ import static com.pot.user.service.utils.RandomStringGenerator.generateRandomCod
  * @created: 2025/3/27 23:47
  * @description: 抽象实现验证码服务类
  */
-public abstract class AbstractVerificationCodeStrategyImpl implements VerificationCodeStrategy {
+public abstract class AbstractSendCodeStrategyImpl implements SendCodeStrategy {
     private static final String CODE_KEY_PREFIX = "verification_code:";
     protected static final int CODE_LENGTH = 6;
     protected static final long CODE_EXPIRE = 300;
+    protected String target;
 
     @Override
-    public void sendCode(String target) {
+    public void sendCode(SendCodeRequest request) {
+        setTarget(request);
         checkTarget(target);
         String code = generateRandomCode(CODE_LENGTH);
         doSend(target, code);
@@ -30,7 +33,6 @@ public abstract class AbstractVerificationCodeStrategyImpl implements Verificati
     public void validateCode(String target, String code) {
         checkTarget(target);
         String storedCode = getStoredCode(target);
-
         if (storedCode == null) {
             throw new BusinessException(ResultCode.VERIFICATION_CODE_NOT_EXIST);
         }
@@ -41,7 +43,7 @@ public abstract class AbstractVerificationCodeStrategyImpl implements Verificati
     }
 
     @Override
-    public VerificationCodeType getVerificationCodeType() {
+    public SendCodeChannelType getVerificationCodeType() {
         return null;
     }
 
@@ -64,4 +66,6 @@ public abstract class AbstractVerificationCodeStrategyImpl implements Verificati
     protected abstract void doSend(String target, String code);
 
     protected abstract void checkTarget(String target);
+
+    protected abstract void setTarget(SendCodeRequest request);
 }

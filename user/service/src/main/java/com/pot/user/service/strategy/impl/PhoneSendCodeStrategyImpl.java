@@ -2,6 +2,9 @@ package com.pot.user.service.strategy.impl;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.common.utils.ValidationUtils;
+import com.pot.user.service.controller.request.SendCodeRequest;
+import com.pot.user.service.controller.request.SendPhoneCodeRequest;
+import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
 
 /**
@@ -9,7 +12,7 @@ import com.pot.user.service.exception.BusinessException;
  * @created: 2025/3/27 23:55
  * @description: 手机验证码策略实现
  */
-public class SmsCodeStrategyImpl extends AbstractVerificationCodeStrategyImpl {
+public class PhoneSendCodeStrategyImpl extends AbstractSendCodeStrategyImpl {
     @Override
     protected void doSend(String target, String code) {
         // todo 发送验证码
@@ -22,5 +25,15 @@ public class SmsCodeStrategyImpl extends AbstractVerificationCodeStrategyImpl {
         if (!ValidationUtils.isPhone(phone)) {
             throw new BusinessException(ResultCode.PHONE_NOT_LEGAL);
         }
+    }
+
+    @Override
+    protected void setTarget(SendCodeRequest request) {
+        this.target = ((SendPhoneCodeRequest) request).getPhone();
+    }
+
+    @Override
+    public SendCodeChannelType getVerificationCodeType() {
+        return SendCodeChannelType.PHONE;
     }
 }

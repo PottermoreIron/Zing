@@ -2,12 +2,12 @@ package com.pot.user.service.controller;
 
 import com.pot.common.R;
 import com.pot.user.service.controller.request.SendCodeRequest;
-import com.pot.user.service.controller.request.SendSmsCodeRequest;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
-import com.pot.user.service.service.SmsCodeService;
 import com.pot.user.service.strategy.RegisterStrategy;
+import com.pot.user.service.strategy.SendCodeStrategy;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
+import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
 import com.sankuai.inf.leaf.service.SegmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,22 +30,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class UserController {
 
-    private final RegisterStrategyFactory strategyFactory;
-    private final SmsCodeService smsCodeService;
+    private final RegisterStrategyFactory registerStrategyFactory;
+    private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
     private final SegmentService segmentService;
 
     @RequestMapping("/register")
     public R<Tokens> register(@Valid @RequestBody RegisterRequest request) {
         log.info("request={}", request);
-        RegisterStrategy strategy = strategyFactory.getStrategyByCode(request.getType());
+        RegisterStrategy strategy = registerStrategyFactory.getStrategyByCode(request.getType());
         Tokens tokens = strategy.register(request);
         return R.success(tokens, "注册成功");
     }
 
-    @RequestMapping("/send/sms/code")
+    @RequestMapping("/send/code")
     public R<Void> sendSms(@Valid @RequestBody SendCodeRequest request) {
-        String phone = ((SendSmsCodeRequest) request).getPhone();
-        smsCodeService.sendSmsCode(phone);
+        SendCodeStrategy strategy = verificationCodeStrategyFactory.getStrategyByCode(request.getType());
+        strategy.sendCode(request);
         return R.success("发送成功");
     }
 

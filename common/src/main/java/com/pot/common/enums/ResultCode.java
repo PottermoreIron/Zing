@@ -49,11 +49,15 @@ public enum ResultCode {
      */
     PHONE_NOT_LEGAL(1000, "手机号不合法", false),
     /**
-     * 短信验证码不存在或过期
+     * 邮箱不合法
+     */
+    EMAIL_NOT_LEGAL(1000, "邮箱不合法", false),
+    /**
+     * 验证码不存在或过期
      */
     VERIFICATION_CODE_NOT_EXIST(1001, "验证码不存在或过期", false),
     /**
-     * 短信验证码错误
+     * 验证码错误
      */
     VERIFICATION_CODE_ERROR(1002, "验证码错误", false),
     /**

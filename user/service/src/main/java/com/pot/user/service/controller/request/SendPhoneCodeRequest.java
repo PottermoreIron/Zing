@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class SendSmsCodeRequest extends SendCodeRequest {
+public class SendPhoneCodeRequest extends SendCodeRequest {
     @Pattern(regexp = ValidationUtils.PHONE_REGEX, message = "Phone number format is incorrect")
     String phone;
 }
