@@ -6,12 +6,16 @@ import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.SendPhoneCodeRequest;
 import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * @author: Pot
  * @created: 2025/3/27 23:55
  * @description: 手机验证码策略实现
  */
+@Service
+@Slf4j
 public class PhoneSendCodeStrategyImpl extends AbstractSendCodeStrategyImpl {
     @Override
     protected void doSend(String target, String code) {

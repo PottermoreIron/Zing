@@ -11,6 +11,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.io.IOException;
@@ -25,6 +27,11 @@ import java.io.IOException;
 public class SecurityConfiguration {
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .with(CustomSecurityConfigurer.customSecurityConfigurer(), Customizer.withDefaults())
@@ -33,12 +40,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/login**", "/user/register", "/user/send/sms/code", "/user/test").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            setResponse(response, ResultCode.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED);
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            setResponse(response, ResultCode.USER_NO_PERMISSION, HttpStatus.FORBIDDEN);
-                        }))
+                        .authenticationEntryPoint((request, response, authException) -> setResponse(response, ResultCode.AUTHENTICATION_FAILED, HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler((request, response, accessDeniedException) -> setResponse(response, ResultCode.USER_NO_PERMISSION, HttpStatus.FORBIDDEN)))
         ;
         return http.build();
     }

@@ -6,6 +6,7 @@ import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.strategy.SendCodeStrategy;
 import com.pot.user.service.utils.RedisUtils;
+import org.springframework.stereotype.Service;
 
 import static com.pot.user.service.utils.RandomStringGenerator.generateRandomCode;
 
@@ -14,6 +15,7 @@ import static com.pot.user.service.utils.RandomStringGenerator.generateRandomCod
  * @created: 2025/3/27 23:47
  * @description: 抽象实现验证码服务类
  */
+@Service
 public abstract class AbstractSendCodeStrategyImpl implements SendCodeStrategy {
     private static final String CODE_KEY_PREFIX = "verification_code:";
     protected static final int CODE_LENGTH = 6;

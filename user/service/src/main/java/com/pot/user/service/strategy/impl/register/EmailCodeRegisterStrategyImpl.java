@@ -1,44 +1,40 @@
-package com.pot.user.service.strategy.impl;
+package com.pot.user.service.strategy.impl.register;
 
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.pot.common.enums.ResultCode;
-import com.pot.user.service.controller.request.register.PhoneCodeRegisterRequest;
+import com.pot.user.service.controller.request.register.EmailCodeRegisterRequest;
 import com.pot.user.service.controller.request.register.RegisterRequest;
-import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.LoginRegisterType;
 import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
-import com.pot.user.service.utils.JwtUtils;
 import com.pot.user.service.utils.PasswordUtils;
 import com.pot.user.service.utils.RandomStringGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 /**
  * @author: Pot
- * @created: 2025/3/11 23:44
- * @description: 手机验证码注册策略实现类
+ * @created: 2025/3/28 23:42
+ * @description: 邮件验证码注册策略实现类
  */
-@Component
+@Service
 @RequiredArgsConstructor
 @Slf4j
-public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
+public class EmailCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl {
 
     private final UserService userService;
     private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
 
     @Override
     protected void checkUniqueness(RegisterRequest request) {
-        String phone = ((PhoneCodeRegisterRequest) request).getPhone();
-        LambdaQueryChainWrapper<User> query = userService.lambdaQuery().eq(User::getPhone, phone);
-        User user = query.one();
+        String email = ((EmailCodeRegisterRequest) request).getEmail();
+        User user = userService.lambdaQuery().eq(User::getEmail, email).one();
         if (ObjectUtils.isNotEmpty(user)) {
             throw new BusinessException(ResultCode.USER_EXIST);
         }
@@ -46,20 +42,16 @@ public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl 
 
     @Override
     protected void checkCodeIfNeeded(RegisterRequest request) {
-        String phone = ((PhoneCodeRegisterRequest) request).getPhone();
-        String code = ((PhoneCodeRegisterRequest) request).getCode();
-        verificationCodeStrategyFactory.getStrategy(SendCodeChannelType.PHONE).validateCode(phone, code);
+        String email = ((EmailCodeRegisterRequest) request).getEmail();
+        String code = ((EmailCodeRegisterRequest) request).getCode();
+        verificationCodeStrategyFactory.getStrategy(SendCodeChannelType.EMAIL).validateCode(email, code);
     }
 
     @Override
-    protected Tokens doRegister(RegisterRequest request) {
+    protected Long doRegister(RegisterRequest request) {
         User user = createDefaultUser(request);
         userService.save(user);
-        Long uid = user.getUid();
-        return Tokens.builder()
-                .accessToken(JwtUtils.createAccessToken(uid))
-                .refreshToken(JwtUtils.createRefreshToken(uid))
-                .build();
+        return user.getUid();
     }
 
     @Override
@@ -78,18 +70,18 @@ public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl 
     }
 
     private User createDefaultUser(RegisterRequest request) {
-        // 帮我用builder创建一个默认用户, 你可以在这里设置一些默认值
-        String phone = ((PhoneCodeRegisterRequest) request).getPhone();
+        // 创建一个默认用户
+        String email = ((EmailCodeRegisterRequest) request).getEmail();
         String name = "User_%s".formatted(RandomStringGenerator.generateRandomString());
         Long uid = getNextId();
         String defaultPassword = PasswordUtils.generateDefaultPassword();
         LocalDateTime registerTime = LocalDateTime.now();
         return User.builder()
-                .phone(phone)
                 .nickname(name)
                 .name(name)
                 .uid(uid)
                 .password(defaultPassword)
+                .email(email)
                 .registerTime(registerTime)
                 .status(0)
                 .deleted(false)

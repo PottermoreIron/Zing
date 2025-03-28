@@ -1,6 +1,5 @@
 package com.pot.user.service.security.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pot.user.service.enums.LoginRegisterType;
 import com.pot.user.service.security.token.CustomAuthenticationToken;
 import com.pot.user.service.utils.HttpUtils;
@@ -25,7 +24,6 @@ import java.util.Map;
 @Slf4j
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public CustomAuthenticationFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);

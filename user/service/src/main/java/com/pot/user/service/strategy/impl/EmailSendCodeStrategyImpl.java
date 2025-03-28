@@ -6,12 +6,16 @@ import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.SendEmailCodeRequest;
 import com.pot.user.service.enums.SendCodeChannelType;
 import com.pot.user.service.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
  * @author: Pot
  * @created: 2025/3/28 22:51
  * @description: 发送邮件验证码策略实现
  */
+@Service
+@Slf4j
 public class EmailSendCodeStrategyImpl extends AbstractSendCodeStrategyImpl {
     @Override
     protected void doSend(String target, String code) {

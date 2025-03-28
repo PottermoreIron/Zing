@@ -39,12 +39,7 @@ public class GlobalExceptionHandler {
      * 处理所有不可知异常
      */
     @ExceptionHandler(Exception.class)
-    public R<?> handleAllException(Exception ex) throws Exception {
-        // 将 Spring Security 异常继续抛出，以便交给自定义处理器处理
-//        if (ex instanceof AccessDeniedException
-//                || ex instanceof AuthenticationException) {
-//            throw ex;
-//        }
+    public R<?> handleAllException(Exception ex) {
         log.error("System error: {}", ex.getMessage(), ex);
         return R.fail(ResultCode.INTERNAL_ERROR, ex.getMessage());
     }
