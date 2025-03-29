@@ -9,7 +9,7 @@ import com.pot.user.service.enums.LoginRegisterType;
  * @created: 2025/3/10 23:12
  * @description: 注册策略类
  */
-public interface RegisterStrategy {
+public interface RegisterStrategy<T extends RegisterRequest> {
     /**
      * @return RegisterType
      * @author pot
@@ -27,7 +27,9 @@ public interface RegisterStrategy {
      * @description
      * @date 23:39 2025/3/11
      **/
-    boolean supports(LoginRegisterType type);
+    default boolean supports(LoginRegisterType type) {
+        return type.equals(getRegisterType());
+    }
 
     /**
      * 注册
@@ -38,5 +40,5 @@ public interface RegisterStrategy {
      * @description
      * @date 23:21 2025/3/10
      **/
-    Tokens register(RegisterRequest request);
+    Tokens register(T request);
 }

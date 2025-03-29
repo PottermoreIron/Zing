@@ -1,14 +1,26 @@
 package com.pot.user.service.strategy.impl.register;
 
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
+import com.pot.user.service.entity.User;
+import com.pot.user.service.exception.BusinessException;
+import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.RegisterStrategy;
+import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
 import com.pot.user.service.utils.JwtUtils;
+import com.pot.user.service.utils.PasswordUtils;
+import com.pot.user.service.utils.RandomStringGenerator;
 import com.sankuai.inf.leaf.common.Result;
 import com.sankuai.inf.leaf.common.Status;
 import com.sankuai.inf.leaf.service.SegmentService;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 /**
  * @author: Pot
@@ -16,14 +28,20 @@ import org.springframework.stereotype.Service;
  * @description: 抽象注册策略类
  */
 @Service
-public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
+public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
     private final String BIZ_TYPE = "user";
 
     @Resource
-    private SegmentService segmentService;
+    protected UserService userService;
+    @Resource
+    protected SegmentService segmentService;
+    @Resource
+    protected VerificationCodeStrategyFactory verificationCodeStrategyFactory;
+    @Resource
+    protected PasswordEncoder passwordEncoder;
 
     @Override
-    public Tokens register(RegisterRequest request) {
+    public Tokens register(T request) {
         // 校验参数
         validate(request);
         // 校验唯一性
@@ -31,22 +49,34 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
         // 校验验证码
         checkCodeIfNeeded(request);
         // 注册
-        Long uid = doRegister(request);
-        return getTokens(uid);
+        doRegister(request);
+        User user = buildUser(request);
+        userService.save(user);
+        return generateTokens(user.getUid());
     }
 
-    protected Tokens getTokens(Long uid) {
-        return Tokens.builder()
-                .accessToken(JwtUtils.createAccessToken(uid))
-                .refreshToken(JwtUtils.createRefreshToken(uid))
-                .build();
+    protected abstract void checkUniqueness(T request);
+
+    protected abstract User buildUser(T request);
+
+    protected void validate(T request) {
+    }
+
+    protected void checkCodeIfNeeded(T request) {
+    }
+
+    protected void doRegister(T request) {
+    }
+
+    protected Tokens generateTokens(Long uid) {
+        return JwtUtils.createAccessTokenAndRefreshToken(uid);
     }
 
     protected Long getNextId() {
         try {
             Result result = segmentService.getId(BIZ_TYPE);
             if (result.getStatus().equals(Status.EXCEPTION)) {
-                throw new RuntimeException("获取分布式ID异常");
+                throw new BusinessException(ResultCode.GET_ID_EXCEPTION);
             }
             return result.getId();
         } catch (Exception e) {
@@ -54,13 +84,29 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
         }
     }
 
-    protected abstract void validate(RegisterRequest request);
+    protected void checkUnique(SFunction<User, ?> column, Object value) {
+        if (!ObjectUtils.isEmpty(userService.lambdaQuery().eq(column, value).one())) {
+            throw new BusinessException(ResultCode.USER_EXIST);
+        }
+    }
 
-    protected abstract void checkUniqueness(RegisterRequest request);
+    protected User.UserBuilder createBaseBuilder() {
+        return User.builder()
+                .uid(getNextId())
+                .registerTime(LocalDateTime.now())
+                .status(0)
+                .deleted(false);
+    }
 
-    protected abstract void checkCodeIfNeeded(RegisterRequest request);
+    protected String generateRandomNickname() {
+        return RandomStringGenerator.generateRandomNickname();
+    }
 
-    protected abstract Long doRegister(RegisterRequest request);
+    protected String generateEncodedPassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
+    }
 
-
+    protected String generateRandomPassword() {
+        return PasswordUtils.generateDefaultPassword();
+    }
 }

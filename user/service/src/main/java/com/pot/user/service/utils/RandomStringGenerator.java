@@ -74,6 +74,12 @@ public class RandomStringGenerator {
         return UUID.randomUUID().toString().replace("-", "").substring(0, length);
     }
 
+    public static String generateRandomNickname() {
+        // 生成一个随机的昵称，长度为20
+        // 可以根据需要修改生成规则
+        return "User_" + generateRandomString();
+    }
+
     public static String generateUUID() {
         return generateUUID(STRING_DEFAULT_LENGTH);
     }

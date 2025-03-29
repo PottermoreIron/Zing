@@ -75,7 +75,11 @@ public enum ResultCode {
     /**
      * 用户没有权限
      */
-    USER_NO_PERMISSION(1006, "用户没有权限", false);
+    USER_NO_PERMISSION(1006, "用户没有权限", false),
+    /**
+     * 获取分布式ID异常
+     */
+    GET_ID_EXCEPTION(1007, "获取分布式ID异常", false);
 
     private final int code;
     private final String msg;
