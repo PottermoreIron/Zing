@@ -1,5 +1,6 @@
 package com.pot.user.service.utils;
 
+import com.pot.user.service.controller.response.Tokens;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -60,6 +61,17 @@ public class JwtUtils {
 
     public static String createRefreshToken(Object claim) {
         return createToken("uid", claim, REFRESH_TOKEN_EXPIRATION);
+    }
+
+    public static Tokens createAccessTokenAndRefreshToken(Object claim) {
+        // 创建访问令牌和刷新令牌
+        String accessToken = createAccessToken(claim);
+        String refreshToken = createRefreshToken(claim);
+        // 返回令牌对象
+        return Tokens.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public static Claims parseToken(String token) {

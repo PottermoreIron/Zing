@@ -1,8 +1,7 @@
 package com.pot.user.service.security.details;
 
-import com.pot.common.enums.ResultCode;
 import com.pot.user.service.entity.User;
-import com.pot.user.service.exception.BusinessException;
+import com.pot.user.service.enums.LoginRegisterType;
 import com.pot.user.service.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +25,29 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userService = userService;
     }
 
-    // find user by phone
+    @Deprecated
     @Override
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
-        log.info("loadUserByUsername identifier={}", identifier);
-        // 这个地方需要保证Nickname不能全是数字, 避免和手机号冲突
-        User user = userService.lambdaQuery()
-                .or().eq(User::getPhone, identifier)
-                .or().eq(User::getNickname, identifier)
-                .or().eq(User::getEmail, identifier)
-                .one();
-        log.info("loadUserByUsername user={}", user);
+        throw new UnsupportedOperationException("Use loadUserByIdentifier instead");
+    }
+
+    public UserDetails loadUserByIdentifier(String identifier, LoginRegisterType loginType) {
+        log.info("Loading user by {}: {}", loginType, identifier);
+        User user;
+        switch (loginType) {
+            case USERNAME_PASSWORD -> user = userService.lambdaQuery()
+                    .eq(User::getNickname, identifier)
+                    .one();
+            case PHONE_PASSWORD, PHONE_CODE -> user = userService.lambdaQuery()
+                    .eq(User::getPhone, identifier)
+                    .one();
+            case EMAIL_PASSWORD, EMAIL_CODE -> user = userService.lambdaQuery()
+                    .eq(User::getEmail, identifier)
+                    .one();
+            default -> throw new IllegalArgumentException("Unsupported login type: " + loginType);
+        }
         if (user == null) {
-            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+            return null;
         }
         return LoginUser.builder()
                 .user(user)
