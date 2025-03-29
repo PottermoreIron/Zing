@@ -4,9 +4,11 @@ import com.pot.user.service.controller.request.register.PhoneCodeRegisterRequest
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.LoginRegisterType;
 import com.pot.user.service.enums.SendCodeChannelType;
+import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
-import lombok.RequiredArgsConstructor;
+import com.sankuai.inf.leaf.service.SegmentService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,10 +17,12 @@ import org.springframework.stereotype.Service;
  * @description: 手机验证码注册策略实现类
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl<PhoneCodeRegisterRequest> {
-    private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
+
+    public PhoneCodeRegisterStrategyImpl(UserService userService, SegmentService segmentService, VerificationCodeStrategyFactory verificationCodeStrategyFactory, PasswordEncoder passwordEncoder) {
+        super(userService, segmentService, verificationCodeStrategyFactory, passwordEncoder);
+    }
 
     @Override
     public LoginRegisterType getRegisterType() {

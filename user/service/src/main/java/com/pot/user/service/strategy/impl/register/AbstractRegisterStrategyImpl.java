@@ -15,7 +15,7 @@ import com.pot.user.service.utils.RandomStringGenerator;
 import com.sankuai.inf.leaf.common.Result;
 import com.sankuai.inf.leaf.common.Status;
 import com.sankuai.inf.leaf.service.SegmentService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,17 +28,14 @@ import java.time.LocalDateTime;
  * @description: 抽象注册策略类
  */
 @Service
+@RequiredArgsConstructor
 public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
+    
     private final String BIZ_TYPE = "user";
-
-    @Resource
-    protected UserService userService;
-    @Resource
-    protected SegmentService segmentService;
-    @Resource
-    protected VerificationCodeStrategyFactory verificationCodeStrategyFactory;
-    @Resource
-    protected PasswordEncoder passwordEncoder;
+    protected final UserService userService;
+    protected final SegmentService segmentService;
+    protected final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
+    protected final PasswordEncoder passwordEncoder;
 
     @Override
     public Tokens register(T request) {
