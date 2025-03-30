@@ -23,3 +23,11 @@ leaf:
     url: jdbc:mysql://localhost:3306/id?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 000802
+# 限流配置
+ratelimit:
+  enabled: false  # 是否启用限流功能
+  key-prefix: "zing:"  # 所有限流key的前缀
+  expire-after-access: 2  # 限流器缓存过期时间（小时）
+  global-rate-factor: 1.0 # 全局速率因子，可以统一调整所有限流的速率
+  ip-based-enabled: true  # 是否启用IP限流
+  user-based-enabled: true  # 是否启用用户限流

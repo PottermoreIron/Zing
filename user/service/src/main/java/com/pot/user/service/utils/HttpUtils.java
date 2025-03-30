@@ -2,6 +2,8 @@ package com.pot.user.service.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,5 +41,14 @@ public class HttpUtils {
         return Optional.ofNullable(requestJson.get(param))
                 .map(clazz::cast)
                 .orElse(null);
+    }
+
+    public static HttpServletRequest getRequest() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            return attributes != null ? attributes.getRequest() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

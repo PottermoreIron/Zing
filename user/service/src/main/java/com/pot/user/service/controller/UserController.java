@@ -1,14 +1,15 @@
 package com.pot.user.service.controller;
 
 import com.pot.common.R;
+import com.pot.user.service.annotations.ratelimit.RateLimit;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
+import com.pot.user.service.enums.ratelimit.RateLimitType;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.SendCodeStrategy;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
-import com.sankuai.inf.leaf.service.SegmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +33,11 @@ public class UserController {
 
     private final RegisterStrategyFactory registerStrategyFactory;
     private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
-    private final SegmentService segmentService;
 
     @RequestMapping("/register")
-    public R<Tokens> register(@Valid @RequestBody RegisterRequest request) {
+    public <T extends RegisterRequest> R<Tokens> register(@Valid @RequestBody T request) {
         log.info("request={}", request);
-        RegisterStrategy strategy = registerStrategyFactory.getStrategyByCode(request.getType());
+        RegisterStrategy<T> strategy = registerStrategyFactory.getStrategyByCode(request.getType());
         Tokens tokens = strategy.register(request);
         return R.success(tokens, "注册成功");
     }
@@ -50,9 +50,10 @@ public class UserController {
     }
 
     @RequestMapping("/test")
-    public R<Long> test() {
-        Long id = segmentService.getId("user").getId();
-        return R.success(id, "test");
+    @RateLimit(type = RateLimitType.IP_BASED, rate = 1)
+    public R<Void> test() {
+        log.info("test");
+        return R.success();
     }
 
     @RequestMapping("/test/token")

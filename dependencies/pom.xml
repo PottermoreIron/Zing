@@ -29,6 +29,7 @@
         <swagger.version>3.0.0</swagger.version>
         <jjwt.version>0.12.6</jjwt.version>
         <leaf.version>1.0.1-RELEASE</leaf.version>
+        <guava.version>33.4.6-jre</guava.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -94,6 +95,18 @@
                 <artifactId>leaf-boot-starter</artifactId>
                 <groupId>com.sankuai.inf.leaf</groupId>
                 <version>${leaf.version}</version>
+                <exclusions>
+                    <!-- 排除不必要的依赖，避免冲突 -->
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
 
         </dependencies>

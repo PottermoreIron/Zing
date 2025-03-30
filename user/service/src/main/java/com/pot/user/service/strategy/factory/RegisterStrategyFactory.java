@@ -1,5 +1,6 @@
 package com.pot.user.service.strategy.factory;
 
+import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.enums.LoginRegisterType;
 import com.pot.user.service.strategy.RegisterStrategy;
 import jakarta.annotation.PostConstruct;
@@ -7,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: Pot
@@ -21,9 +22,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class RegisterStrategyFactory {
-    private final List<RegisterStrategy> strategies;
-    private final Map<LoginRegisterType, RegisterStrategy> strategyMap = new HashMap<>();
-    private final Map<Integer, RegisterStrategy> strategyCodeMap = new HashMap<>();
+    private final List<RegisterStrategy<?>> strategies;
+    private final Map<LoginRegisterType, RegisterStrategy<?>> strategyMap = new ConcurrentHashMap<>();
+    private final Map<Integer, RegisterStrategy<?>> strategyCodeMap = new ConcurrentHashMap<>();
 
     @PostConstruct
     void init() {
@@ -35,13 +36,13 @@ public class RegisterStrategyFactory {
         });
     }
 
-    public RegisterStrategy getStrategy(LoginRegisterType type) {
-        return Optional.ofNullable(strategyMap.get(type))
+    public <T extends RegisterRequest> RegisterStrategy<T> getStrategy(LoginRegisterType type) {
+        return Optional.ofNullable((RegisterStrategy<T>) strategyMap.get(type))
                 .orElseThrow(() -> new UnsupportedOperationException("不支持的注册类型: " + type));
     }
 
-    public RegisterStrategy getStrategyByCode(int code) {
-        return Optional.ofNullable(strategyCodeMap.get(code))
+    public <T extends RegisterRequest> RegisterStrategy<T> getStrategyByCode(int code) {
+        return Optional.ofNullable((RegisterStrategy<T>) strategyCodeMap.get(code))
                 .orElseThrow(() -> new UnsupportedOperationException("不支持的注册类型: " + code));
     }
 }

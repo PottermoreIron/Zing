@@ -79,7 +79,11 @@ public enum ResultCode {
     /**
      * 获取分布式ID异常
      */
-    GET_ID_EXCEPTION(1007, "获取分布式ID异常", false);
+    GET_ID_EXCEPTION(1007, "获取分布式ID异常", false),
+    /**
+     * 限流异常
+     */
+    RATE_LIMIT_EXCEPTION(1008, "请求过于频繁，请稍后再试", false);
 
     private final int code;
     private final String msg;

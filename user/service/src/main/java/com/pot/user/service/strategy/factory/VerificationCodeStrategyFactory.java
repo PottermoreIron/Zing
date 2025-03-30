@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: Pot
@@ -22,8 +22,8 @@ import java.util.Optional;
 @Slf4j
 public class VerificationCodeStrategyFactory {
     private final List<SendCodeStrategy> strategies;
-    private final Map<SendCodeChannelType, SendCodeStrategy> strategyMap = new HashMap<>();
-    private final Map<Integer, SendCodeStrategy> strategyCodeMap = new HashMap<>();
+    private final Map<SendCodeChannelType, SendCodeStrategy> strategyMap = new ConcurrentHashMap<>();
+    private final Map<Integer, SendCodeStrategy> strategyCodeMap = new ConcurrentHashMap<>();
 
     @PostConstruct
     void init() {

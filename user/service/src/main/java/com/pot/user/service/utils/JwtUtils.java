@@ -4,12 +4,12 @@ import com.pot.user.service.controller.response.Tokens;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -75,6 +75,10 @@ public class JwtUtils {
     }
 
     public static Claims parseToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new JwtException("Token不能为空");
+        }
+
         try {
             return Jwts.parser()
                     .verifyWith(KEY)
@@ -82,30 +86,46 @@ public class JwtUtils {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (MalformedJwtException e) {
-            throw new JwtException("Invalid JWT token: " + e.getMessage());
+            throw new JwtException("JWT令牌格式不正确", e);
         } catch (ExpiredJwtException e) {
-            throw new JwtException("Expired JWT token: " + e.getMessage());
+            throw new JwtException("JWT令牌已过期", e);
         } catch (UnsupportedJwtException e) {
-            throw new JwtException("Unsupported JWT token: " + e.getMessage());
+            throw new JwtException("不支持的JWT令牌格式", e);
         } catch (IllegalArgumentException e) {
-            throw new JwtException("JWT token compact of handler are invalid: " + e.getMessage());
+            throw new JwtException("JWT令牌参数无效", e);
         } catch (Exception e) {
-            throw new JwtException("JWT token is invalid: " + e.getMessage());
+            throw new JwtException("JWT令牌解析失败：" + e.getMessage(), e);
         }
     }
 
     public static Long getUid(String token) {
         try {
-            Claims claims = parseToken(token); // 可能抛出BusinessException
-            return Optional.ofNullable(claims.get("uid"))
-                    .map(Object::toString)
-                    .map(Long::parseLong)
-                    .orElseThrow(() ->
-                            new JwtException("No Invalid uid in token")
-                    );
-        } catch (NumberFormatException e) {
-            throw new JwtException("Invalid uid in token");
+            Claims claims = parseToken(token);
+            Object uidObj = claims.get("uid");
+
+            if (uidObj == null) {
+                throw new JwtException("令牌中不包含uid信息");
+            }
+
+            try {
+                return Long.parseLong(uidObj.toString());
+            } catch (NumberFormatException e) {
+                throw new JwtException("令牌中uid格式无效，无法转换为数字", e);
+            }
+        } catch (JwtException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JwtException("获取用户ID时发生错误", e);
         }
+    }
+
+    public static Long getUid(HttpServletRequest request) {
+        String header = request.getHeader(TOKEN_HEADER);
+        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+            throw new JwtException("Authorization header is missing or invalid");
+        }
+        String token = header.substring(TOKEN_PREFIX.length());
+        return getUid(token);
     }
 
     public static void main(String[] args) {
