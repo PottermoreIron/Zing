@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -95,7 +96,11 @@ public class RateLimitAspect {
     private String getFinalKey(RateLimit rateLimit, Method method, ProceedingJoinPoint pjp) {
         String baseKey = Optional.ofNullable(rateLimit.key())
                 .filter(s -> !s.isEmpty())
-                .orElse(method.getDeclaringClass().getName() + "." + method.getName());
+                .orElse(method.getDeclaringClass().getName() + "." + method.getName() + "." +
+                        Arrays.stream(pjp.getArgs())
+                                .map(Object::toString)
+                                .collect(Collectors.joining(",")));
+        log.error("!!!!!pot:{}", baseKey);
 
         // 添加全局前缀，便于统一管理
         baseKey = properties.getKeyPrefix() + baseKey;
