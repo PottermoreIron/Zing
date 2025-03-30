@@ -10,7 +10,7 @@ import com.pot.user.service.ratelimit.RateLimitManager;
 import com.pot.user.service.ratelimit.RateLimitProperties;
 import com.pot.user.service.ratelimit.impl.FixedRateLimitKeyProvider;
 import com.pot.user.service.ratelimit.impl.GuavaRateLimitManager;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,6 +23,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
  * @description: 限流切面类
  */
 @Aspect
+@Slf4j
 @Configuration
 @ConditionalOnProperty(prefix = "ratelimit", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(RateLimitProperties.class)
@@ -91,8 +93,9 @@ public class RateLimitAspect {
      * 获取限流的key
      */
     private String getFinalKey(RateLimit rateLimit, Method method, ProceedingJoinPoint pjp) {
-        String baseKey = StringUtils.defaultIfEmpty(rateLimit.key(),
-                method.getDeclaringClass().getName() + "." + method.getName());
+        String baseKey = Optional.ofNullable(rateLimit.key())
+                .filter(s -> !s.isEmpty())
+                .orElse(method.getDeclaringClass().getName() + "." + method.getName());
 
         // 添加全局前缀，便于统一管理
         baseKey = properties.getKeyPrefix() + baseKey;
@@ -117,6 +120,6 @@ public class RateLimitAspect {
         }
 
         // 使用全局速率因子调整注解速率
-        return rateLimit.rate() * properties.getGlobalRateFactor();
+        return rateLimit.count() * properties.getGlobalRateFactor();
     }
 }

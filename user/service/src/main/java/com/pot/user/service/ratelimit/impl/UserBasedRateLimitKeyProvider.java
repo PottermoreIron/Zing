@@ -8,14 +8,12 @@ import com.pot.user.service.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.springframework.stereotype.Component;
 
 /**
  * @author: Pot
  * @created: 2025/3/30 21:04
  * @description: 基于用户ID的限流key提供者
  */
-@Component
 public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
 
     @Override

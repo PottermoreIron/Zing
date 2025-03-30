@@ -50,7 +50,7 @@ public class UserController {
     }
 
     @RequestMapping("/test")
-    @RateLimit(type = RateLimitType.IP_BASED, rate = 1)
+    @RateLimit(type = RateLimitType.IP_BASED, count = 1)
     public R<Void> test() {
         log.info("test");
         return R.success();

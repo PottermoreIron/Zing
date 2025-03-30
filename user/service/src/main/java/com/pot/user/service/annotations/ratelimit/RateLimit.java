@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: Pot
@@ -23,9 +24,15 @@ public @interface RateLimit {
     String key() default "";
 
     /**
-     * 限流速率（每秒请求数）
+     * 请求数量，表示在指定的时间窗口内允许的最大请求次数
      */
-    double rate();
+    int count();
+
+    /**
+     * 限流时间窗口，单位为timeUnit
+     * 默认1秒
+     */
+    TimeUnit timeUnit() default TimeUnit.SECONDS;
 
     /**
      * 限流策略，默认为固定窗口

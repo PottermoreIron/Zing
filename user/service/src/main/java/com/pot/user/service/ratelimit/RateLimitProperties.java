@@ -35,6 +35,16 @@ public class RateLimitProperties {
      * 例如，设置为0.5将所有限流速率减半
      */
     private double globalRateFactor = 1.0;
+    
+    /**
+     * 是否启用基于IP的限流
+     */
+    private boolean ipBasedEnabled = true;
+
+    /**
+     * 是否启用基于用户的限流
+     */
+    private boolean userBasedEnabled = true;
 
     /**
      * 针对特定key的速率覆盖
