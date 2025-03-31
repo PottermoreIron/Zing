@@ -35,7 +35,12 @@ public class RateLimitProperties {
      * 例如，设置为0.5将所有限流速率减半
      */
     private double globalRateFactor = 1.0;
-    
+
+    /**
+     * 限流器实现提供者
+     */
+    private String provider = "guava";
+
     /**
      * 是否启用基于IP的限流
      */

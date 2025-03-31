@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.RateLimiter;
 import com.pot.user.service.ratelimit.RateLimitManager;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  * @created: 2025/3/30 16:11
  * @description: 基于Guava RateLimiter的限流管理器实现
  */
-@Component
+@Slf4j
 public class GuavaRateLimitManager implements RateLimitManager {
     private final Cache<String, RateLimiter> rateLimiterCache;
 
@@ -39,6 +39,7 @@ public class GuavaRateLimitManager implements RateLimitManager {
 
     @Override
     public boolean tryAcquire(String key, double rate, long timeout, TimeUnit timeUnit) {
+        log.info("Trying to acquire RateLimitManager for key: {} with rate: {}", key, rate);
         try {
             RateLimiter rateLimiter = rateLimiterCache.get(key, () -> RateLimiter.create(rate));
 

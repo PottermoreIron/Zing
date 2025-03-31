@@ -31,3 +31,4 @@ ratelimit:
   global-rate-factor: 1.0 # 全局速率因子，可以统一调整所有限流的速率
   ip-based-enabled: true  # 是否启用IP限流
   user-based-enabled: true  # 是否启用用户限流
+  provider: guava

@@ -1,13 +1,17 @@
 package com.pot.user.service.ratelimit;
 
+import com.pot.user.service.ratelimit.impl.GuavaRateLimitManager;
 import com.pot.user.service.ratelimit.impl.IpBasedRateLimitKeyProvider;
+import com.pot.user.service.ratelimit.impl.RedisRateLimitManager;
 import com.pot.user.service.ratelimit.impl.UserBasedRateLimitKeyProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * @author: Pot
@@ -19,6 +23,34 @@ import org.springframework.context.annotation.Import;
 @Import(RateLimitAutoConfiguration.class)
 @Slf4j
 public class RateLimitConfiguration {
+    /**
+     * 创建默认的限流管理器
+     * 如果需要自定义实现，可以在应用中提供一个RateLimitManager的Bean
+     *
+     * @return RateLimitManager实例
+     */
+    @Bean
+    @ConditionalOnMissingBean(RateLimitManager.class)
+    @ConditionalOnProperty(prefix = "ratelimit", name = "provider", havingValue = "guava", matchIfMissing = true)
+    public RateLimitManager rateLimitManager(RateLimitProperties properties) {
+        log.info("Creating default RateLimitManager with expireAfterAccess: {} hours", properties.getExpireAfterAccess());
+        return new GuavaRateLimitManager(properties.getExpireAfterAccess());
+    }
+
+    /**
+     * 提供Redis的限流管理器
+     *
+     * @return RateLimitManager实例
+     */
+    @Bean
+    @ConditionalOnMissingBean(RateLimitManager.class)
+    @ConditionalOnProperty(prefix = "ratelimit", name = "provider", havingValue = "redis")
+    @ConditionalOnBean(RedisTemplate.class)
+    public RateLimitManager redisRateLimitManager(RedisTemplate<Object, Object> redisTemplate, RateLimitProperties properties) {
+        log.info("Creating Redis RateLimitManager with expireAfterAccess: {} hours", properties.getExpireAfterAccess());
+        return new RedisRateLimitManager(redisTemplate, properties);
+    }
+
     /**
      * IP类型限流key提供者
      */

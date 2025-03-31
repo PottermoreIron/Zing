@@ -30,7 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             CustomAuthenticationToken authenticationToken = new CustomAuthenticationToken(uid, null);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         } catch (Exception e) {
-            log.error("Uid from JWT token error: {}", e.getMessage());
+
         }
         filterChain.doFilter(request, response);
     }

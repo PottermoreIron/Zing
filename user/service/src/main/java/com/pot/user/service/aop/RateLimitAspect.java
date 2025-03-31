@@ -96,10 +96,9 @@ public class RateLimitAspect {
     private String getFinalKey(RateLimit rateLimit, Method method, ProceedingJoinPoint pjp) {
         String baseKey = Optional.ofNullable(rateLimit.key())
                 .filter(s -> !s.isEmpty())
-                .orElse(method.getDeclaringClass().getName() + "." + method.getName() + "." +
-                        Arrays.stream(pjp.getArgs())
-                                .map(Object::toString)
-                                .collect(Collectors.joining(",")));
+                .orElse(STR."\{method.getDeclaringClass().getName()}.\{method.getName()}.\{Arrays.stream(pjp.getArgs())
+                        .map(Object::toString)
+                        .collect(Collectors.joining(","))}");
         log.error("!!!!!pot:{}", baseKey);
 
         // 添加全局前缀，便于统一管理
