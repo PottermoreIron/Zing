@@ -10,6 +10,7 @@ import com.pot.user.service.ratelimit.RateLimitManager;
 import com.pot.user.service.ratelimit.RateLimitProperties;
 import com.pot.user.service.ratelimit.impl.FixedRateLimitKeyProvider;
 import com.pot.user.service.ratelimit.impl.GuavaRateLimitManager;
+import com.pot.user.service.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -102,7 +103,7 @@ public class RateLimitAspect {
         log.error("!!!!!pot:{}", baseKey);
 
         // 添加全局前缀，便于统一管理
-        baseKey = properties.getKeyPrefix() + baseKey;
+        baseKey = SecurityUtils.hashHex(properties.getKeyPrefix() + baseKey);
 
         // 获取对应类型的提供者，如果不存在则使用固定类型提供者
         RateLimitKeyProvider provider = keyProviders.getOrDefault(

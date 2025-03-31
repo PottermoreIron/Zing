@@ -2,17 +2,19 @@ package com.pot.user.service.utils;
 
 import com.pot.common.utils.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author: Pot
  * @created: 2025/3/30 20:47
  * @description: Ip工具类
  */
+@Slf4j
 public class IpUtils {
+    private static final String UNKNOWN = "unknown";
     private static final List<String> IP_HEADER_CANDIDATES = Arrays.asList(
             "X-Forwarded-For",
             "Proxy-Client-IP",
@@ -30,20 +32,26 @@ public class IpUtils {
 
     public static String getClientIp(HttpServletRequest request) {
         if (request == null) {
-            return null;
+            return UNKNOWN;
         }
         return IP_HEADER_CANDIDATES.stream()
                 .map(request::getHeader)
+                .filter(ip -> ip != null && !ip.isBlank())
+                .flatMap(ip -> Arrays.stream(ip.split(",\\s*"))) // 拆分可能的多个IP
+                .map(IpUtils::normalizeIp)
                 .filter(ValidationUtils::isValidIpV4)
                 .findFirst()
-                .flatMap(IpUtils::parseFirstValidIp)
-                .orElseGet(request::getRemoteAddr);
+                .orElseGet(() -> normalizeIp(request.getRemoteAddr()));
     }
 
-    private static Optional<String> parseFirstValidIp(String ipString) {
-        return Arrays.stream(ipString.split(","))
-                .map(String::trim)
-                .filter(ValidationUtils::isValidIpV4)
-                .findFirst();
+    /**
+     * IP地址标准化处理
+     * 1. 转换IPv6环回地址为IPv4
+     * 2. 提取IPv4映射地址
+     */
+    private static String normalizeIp(String ip) {
+        if (ip == null || ip.isBlank()) return "";
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) return "127.0.0.1";
+        return ip.startsWith("::ffff:") ? ip.substring(7) : ip.trim();
     }
 }
