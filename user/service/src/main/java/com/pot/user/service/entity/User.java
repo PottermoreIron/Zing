@@ -155,10 +155,10 @@ public class User implements Serializable {
     private String country;
 
     /**
-     * 账户状态 [0代表正常，1代表停用]
+     * 账户状态 [0代表停用，1代表启用]
      */
     @TableField("status")
-    @ApiModelProperty("账户状态 [0代表正常，1代表停用]")
+    @ApiModelProperty("账户状态 [0代表停用，1代表启用]")
     private Integer status;
 
     /**

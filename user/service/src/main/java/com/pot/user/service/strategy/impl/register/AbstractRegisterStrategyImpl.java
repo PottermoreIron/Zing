@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
-    
+
     private final String BIZ_TYPE = "user";
     protected final UserService userService;
     protected final SegmentService segmentService;
@@ -91,7 +91,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
         return User.builder()
                 .uid(getNextId())
                 .registerTime(LocalDateTime.now())
-                .status(0)
+                .status(1)
                 .deleted(false);
     }
 
