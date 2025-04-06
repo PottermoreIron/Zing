@@ -5,7 +5,7 @@ package com.pot.user.service.enums.ratelimit;
  * @created: 2025/3/30 16:09
  * @description: 限流策略枚举
  */
-public enum LimitPolicy {
+public enum RateLimitPolicyEnum {
     /**
      * 拒绝策略：直接拒绝请求
      */

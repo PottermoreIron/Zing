@@ -1,7 +1,7 @@
 package com.pot.user.service.security.details;
 
 import com.pot.user.service.entity.User;
-import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.LoginRegisterEnum;
 import com.pot.user.service.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         throw new UnsupportedOperationException("Use loadUserByIdentifier instead");
     }
 
-    public UserDetails loadUserByIdentifier(String identifier, LoginRegisterType loginType) {
+    public UserDetails loadUserByIdentifier(String identifier, LoginRegisterEnum loginType) {
         log.info("Loading user by {}: {}", loginType, identifier);
         User user;
         switch (loginType) {

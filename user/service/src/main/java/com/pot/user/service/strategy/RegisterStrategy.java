@@ -2,7 +2,7 @@ package com.pot.user.service.strategy;
 
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
-import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.LoginRegisterEnum;
 
 /**
  * @author: Pot
@@ -16,7 +16,7 @@ public interface RegisterStrategy<T extends RegisterRequest> {
      * @description
      * @date 21:29 2025/3/16
      **/
-    LoginRegisterType getRegisterType();
+    LoginRegisterEnum getRegisterType();
 
     /**
      * 是否支持注册类型
@@ -27,7 +27,7 @@ public interface RegisterStrategy<T extends RegisterRequest> {
      * @description
      * @date 23:39 2025/3/11
      **/
-    default boolean supports(LoginRegisterType type) {
+    default boolean supports(LoginRegisterEnum type) {
         return type.equals(getRegisterType());
     }
 

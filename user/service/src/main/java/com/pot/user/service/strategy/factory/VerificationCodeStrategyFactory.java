@@ -1,6 +1,6 @@
 package com.pot.user.service.strategy.factory;
 
-import com.pot.user.service.enums.SendCodeChannelType;
+import com.pot.user.service.enums.SendCodeChannelEnum;
 import com.pot.user.service.strategy.SendCodeStrategy;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +22,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class VerificationCodeStrategyFactory {
     private final List<SendCodeStrategy> strategies;
-    private final Map<SendCodeChannelType, SendCodeStrategy> strategyMap = new ConcurrentHashMap<>();
+    private final Map<SendCodeChannelEnum, SendCodeStrategy> strategyMap = new ConcurrentHashMap<>();
     private final Map<Integer, SendCodeStrategy> strategyCodeMap = new ConcurrentHashMap<>();
 
     @PostConstruct
     void init() {
         strategies.forEach(strategy -> {
-            SendCodeChannelType type = strategy.getVerificationCodeType();
+            SendCodeChannelEnum type = strategy.getVerificationCodeType();
             Integer code = type.getCode();
             strategyMap.put(type, strategy);
             strategyCodeMap.put(code, strategy);
         });
     }
 
-    public SendCodeStrategy getStrategy(SendCodeChannelType type) {
+    public SendCodeStrategy getStrategy(SendCodeChannelEnum type) {
         return Optional.ofNullable(strategyMap.get(type))
                 .orElseThrow(() -> new UnsupportedOperationException("不支持的发送类型: " + type));
     }

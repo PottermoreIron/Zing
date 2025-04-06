@@ -2,12 +2,12 @@ package com.pot.user.service.strategy.impl.register;
 
 import com.pot.user.service.controller.request.register.EmailPasswordRegisterRequest;
 import com.pot.user.service.entity.User;
-import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.LoginRegisterEnum;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
-import com.sankuai.inf.leaf.service.SegmentService;
+import com.pot.user.service.utils.IdUtils;
+import com.pot.user.service.utils.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,14 +18,13 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class EmailPasswordRegisterStrategyImpl extends AbstractRegisterStrategyImpl<EmailPasswordRegisterRequest> {
-
-    public EmailPasswordRegisterStrategyImpl(UserService userService, SegmentService segmentService, VerificationCodeStrategyFactory verificationCodeStrategyFactory, PasswordEncoder passwordEncoder) {
-        super(userService, segmentService, verificationCodeStrategyFactory, passwordEncoder);
+    public EmailPasswordRegisterStrategyImpl(UserService userService, VerificationCodeStrategyFactory verificationCodeStrategyFactory, PasswordUtils passwordUtils, IdUtils idUtils) {
+        super(userService, verificationCodeStrategyFactory, passwordUtils, idUtils);
     }
 
     @Override
-    public LoginRegisterType getRegisterType() {
-        return LoginRegisterType.EMAIL_PASSWORD;
+    public LoginRegisterEnum getRegisterType() {
+        return LoginRegisterEnum.EMAIL_PASSWORD;
     }
 
     @Override

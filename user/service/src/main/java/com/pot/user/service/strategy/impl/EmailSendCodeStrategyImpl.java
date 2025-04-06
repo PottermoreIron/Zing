@@ -4,7 +4,7 @@ import com.pot.common.enums.ResultCode;
 import com.pot.common.utils.ValidationUtils;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.SendEmailCodeRequest;
-import com.pot.user.service.enums.SendCodeChannelType;
+import com.pot.user.service.enums.SendCodeChannelEnum;
 import com.pot.user.service.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class EmailSendCodeStrategyImpl extends AbstractSendCodeStrategyImpl {
     }
 
     @Override
-    public SendCodeChannelType getVerificationCodeType() {
-        return SendCodeChannelType.EMAIL;
+    public SendCodeChannelEnum getVerificationCodeType() {
+        return SendCodeChannelEnum.EMAIL;
     }
 }

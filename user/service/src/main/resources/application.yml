@@ -9,6 +9,38 @@ spring:
     redis:
       host: localhost
       port: 6379
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: xxxx
+            client-secret: xxxx
+            redirect-uri: http://localhost:10000/user/oauth2/github/callback
+            scope: read:user,user:email
+          google:
+            client-id: xxxx
+            client-secret: xxxx
+            redirect-uri: http://localhost:10000/user/oauth2/google/callback
+            authorization-grant-type: code
+            scope: profile, email, openid
+          facebook:
+            client-id: 123456789012345
+            client-secret: abcdefghijklmnopqrstuvwxyz
+            redirect-uri: http://localhost:10000/user/oauth2/facebook/callback
+            authorization-grant-type: code
+            scope: public_profile, email
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: id
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
 server:
   port: 10000
 mybatis-plus:
@@ -32,3 +64,5 @@ ratelimit:
   ip-based-enabled: true  # 是否启用IP限流
   user-based-enabled: true  # 是否启用用户限流
   provider: guava
+
+# 三方登录配置

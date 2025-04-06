@@ -6,9 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -23,10 +21,8 @@ import java.time.LocalDateTime;
  * @author pot
  * @since 2025-02-25
  */
-@Getter
-@Setter
+@Data
 @Builder
-@ToString
 @TableName("t_user")
 @ApiModel(value = "User对象", description = "用户表")
 public class User implements Serializable {

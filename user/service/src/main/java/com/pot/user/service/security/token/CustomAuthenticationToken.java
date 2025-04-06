@@ -1,6 +1,6 @@
 package com.pot.user.service.security.token;
 
-import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.LoginRegisterEnum;
 import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,9 +16,9 @@ public class CustomAuthenticationToken extends AbstractAuthenticationToken {
     private final Object principal;
     private final Object credentials;
     @Getter
-    private final LoginRegisterType loginType;
+    private final LoginRegisterEnum loginType;
 
-    public CustomAuthenticationToken(Object principal, Object credentials, LoginRegisterType loginType) {
+    public CustomAuthenticationToken(Object principal, Object credentials, LoginRegisterEnum loginType) {
         super(null);
         this.principal = principal;
         this.credentials = credentials;
@@ -34,7 +34,7 @@ public class CustomAuthenticationToken extends AbstractAuthenticationToken {
         super.setAuthenticated(true);
     }
 
-    public static CustomAuthenticationToken unauthenticated(Object principal, Object credentials, LoginRegisterType loginType) {
+    public static CustomAuthenticationToken unauthenticated(Object principal, Object credentials, LoginRegisterEnum loginType) {
         return new CustomAuthenticationToken(principal, credentials, loginType);
     }
 

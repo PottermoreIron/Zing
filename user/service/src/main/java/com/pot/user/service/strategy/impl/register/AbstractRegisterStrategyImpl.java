@@ -5,19 +5,17 @@ import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
+import com.pot.user.service.enums.IdBizEnum;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
+import com.pot.user.service.utils.IdUtils;
 import com.pot.user.service.utils.JwtUtils;
 import com.pot.user.service.utils.PasswordUtils;
 import com.pot.user.service.utils.RandomStringGenerator;
-import com.sankuai.inf.leaf.common.Result;
-import com.sankuai.inf.leaf.common.Status;
-import com.sankuai.inf.leaf.service.SegmentService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,12 +28,10 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
-
-    private final String BIZ_TYPE = "user";
     protected final UserService userService;
-    protected final SegmentService segmentService;
     protected final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
-    protected final PasswordEncoder passwordEncoder;
+    protected final PasswordUtils passwordUtils;
+    protected final IdUtils idUtils;
 
     @Override
     public Tokens register(T request) {
@@ -69,18 +65,6 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
         return JwtUtils.createAccessTokenAndRefreshToken(uid);
     }
 
-    protected Long getNextId() {
-        try {
-            Result result = segmentService.getId(BIZ_TYPE);
-            if (result.getStatus().equals(Status.EXCEPTION)) {
-                throw new BusinessException(ResultCode.GET_ID_EXCEPTION);
-            }
-            return result.getId();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     protected void checkUnique(SFunction<User, ?> column, Object value) {
         if (!ObjectUtils.isEmpty(userService.lambdaQuery().eq(column, value).one())) {
             throw new BusinessException(ResultCode.USER_EXIST);
@@ -89,7 +73,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
 
     protected User.UserBuilder createBaseBuilder() {
         return User.builder()
-                .uid(getNextId())
+                .uid(idUtils.getNextId(IdBizEnum.USER.getBizType()))
                 .registerTime(LocalDateTime.now())
                 .status(1)
                 .deleted(false);
@@ -100,10 +84,10 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     }
 
     protected String generateEncodedPassword(String rawPassword) {
-        return passwordEncoder.encode(rawPassword);
+        return passwordUtils.encodePassword(rawPassword);
     }
 
     protected String generateRandomPassword() {
-        return PasswordUtils.generateDefaultPassword();
+        return passwordUtils.generateDefaultPassword();
     }
 }

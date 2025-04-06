@@ -2,8 +2,8 @@ package com.pot.user.service.aop;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.user.service.annotations.ratelimit.RateLimit;
-import com.pot.user.service.enums.ratelimit.LimitPolicy;
-import com.pot.user.service.enums.ratelimit.RateLimitType;
+import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
+import com.pot.user.service.enums.ratelimit.RateLimitPolicyEnum;
 import com.pot.user.service.exception.RateLimitException;
 import com.pot.user.service.ratelimit.RateLimitKeyProvider;
 import com.pot.user.service.ratelimit.RateLimitManager;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(RateLimitProperties.class)
 public class RateLimitAspect {
     private final RateLimitManager rateLimitManager;
-    private final Map<RateLimitType, RateLimitKeyProvider> keyProviders;
+    private final Map<RateLimitMethodEnum, RateLimitKeyProvider> keyProviders;
     private final RateLimitProperties properties;
 
     public RateLimitAspect(
@@ -80,7 +80,7 @@ public class RateLimitAspect {
         boolean acquired = rateLimitManager.tryAcquire(
                 finalKey,
                 rate,
-                rateLimit.policy() == LimitPolicy.WAIT ? rateLimit.waitTimeout() : 0,
+                rateLimit.policy() == RateLimitPolicyEnum.WAIT ? rateLimit.waitTimeout() : 0,
                 TimeUnit.MILLISECONDS
         );
 
@@ -108,7 +108,7 @@ public class RateLimitAspect {
         // 获取对应类型的提供者，如果不存在则使用固定类型提供者
         RateLimitKeyProvider provider = keyProviders.getOrDefault(
                 rateLimit.type(),
-                keyProviders.getOrDefault(RateLimitType.FIXED,
+                keyProviders.getOrDefault(RateLimitMethodEnum.FIXED,
                         new FixedRateLimitKeyProvider()));
 
         return provider.getKey(baseKey, pjp, rateLimit);

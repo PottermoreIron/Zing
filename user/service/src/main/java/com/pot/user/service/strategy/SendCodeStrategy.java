@@ -1,7 +1,7 @@
 package com.pot.user.service.strategy;
 
 import com.pot.user.service.controller.request.SendCodeRequest;
-import com.pot.user.service.enums.SendCodeChannelType;
+import com.pot.user.service.enums.SendCodeChannelEnum;
 
 /**
  * @author: Pot
@@ -32,5 +32,5 @@ public interface SendCodeStrategy {
      * @description
      * @date 23:45 2025/3/27
      **/
-    SendCodeChannelType getVerificationCodeType();
+    SendCodeChannelEnum getVerificationCodeType();
 }

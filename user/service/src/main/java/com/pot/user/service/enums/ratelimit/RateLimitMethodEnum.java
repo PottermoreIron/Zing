@@ -5,7 +5,7 @@ package com.pot.user.service.enums.ratelimit;
  * @created: 2025/3/30 16:08
  * @description: 限流类型枚举
  */
-public enum RateLimitType {
+public enum RateLimitMethodEnum {
     /**
      * 固定速率限流
      */

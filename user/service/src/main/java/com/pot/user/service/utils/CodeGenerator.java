@@ -34,6 +34,7 @@ public class CodeGenerator {
     private final static String PACKAGE_SERVICE_IMPL = "service.impl";
     private final static String PACKAGE_CONTROLLER = "controller";
     private final static String PACKAGE_XML = "mapper.xml";
+    private final static boolean ENABLE_PACKAGE_OVERRIDE = false;
 
     public static void main(String[] args) {
         System.out.println(OUTPUT_DIR);
@@ -70,7 +71,7 @@ public class CodeGenerator {
                         .enableLombok()
                         .enableTableFieldAnnotation()
                         .enableRemoveIsPrefix()
-                        .logicDeleteColumnName("is_deleted")
+                        .logicDeleteColumnName("deleted")
                         .addTableFills(Arrays.asList(
                                 new Column("gmt_create", FieldFill.INSERT),
                                 new Column("gmt_modified", FieldFill.INSERT_UPDATE)

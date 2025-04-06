@@ -1,21 +1,26 @@
 package com.pot.user.service.controller;
 
 import com.pot.common.R;
+import com.pot.common.enums.ResultCode;
 import com.pot.user.service.annotations.ratelimit.RateLimit;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
-import com.pot.user.service.enums.ratelimit.RateLimitType;
+import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
+import com.pot.user.service.strategy.OAuth2LoginStrategy;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.SendCodeStrategy;
+import com.pot.user.service.strategy.factory.OAuth2LoginStrategyFactory;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -33,10 +38,11 @@ public class UserController {
 
     private final RegisterStrategyFactory registerStrategyFactory;
     private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
+    private final OAuth2ClientProperties oAuth2Properties;
+    private final OAuth2LoginStrategyFactory oAuth2LoginStrategyFactory;
 
     @RequestMapping("/register")
     public <T extends RegisterRequest> R<Tokens> register(@Valid @RequestBody T request) {
-        log.info("request={}", request);
         RegisterStrategy<T> strategy = registerStrategyFactory.getStrategyByCode(request.getType());
         Tokens tokens = strategy.register(request);
         return R.success(tokens, "注册成功");
@@ -50,7 +56,7 @@ public class UserController {
     }
 
     @RequestMapping("/test")
-    @RateLimit(type = RateLimitType.IP_BASED, count = 1)
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, count = 1)
     public R<Void> test() {
         log.info("test");
         return R.success();
@@ -61,4 +67,22 @@ public class UserController {
         return R.success("token");
     }
 
+    @GetMapping("/oauth2/{provider}")
+    public void redirectToOAuth2Login(@PathVariable("provider") String provider, HttpServletResponse response) {
+        OAuth2LoginStrategy strategy = oAuth2LoginStrategyFactory.getStrategy(provider);
+        strategy.redirectToOauth2Login(response);
+    }
+
+    @RequestMapping("/oauth2/{provider}/callback")
+    public R<Tokens> handleOauth2Callback(@RequestParam("code") String code, @PathVariable("provider") String provider) {
+        try {
+            OAuth2LoginStrategy strategy = oAuth2LoginStrategyFactory.getStrategy(provider);
+            Map<String, Object> userInfo = strategy.getOauth2UserInfo(code);
+            Tokens tokens = strategy.loginOauth2User(userInfo);
+            return R.success(tokens, "登录成功");
+        } catch (Exception e) {
+            log.error("OAuth2 login failed", e);
+            return R.fail(ResultCode.OAUTH2_EXCEPTION, "OAuth2 login failed");
+        }
+    }
 }

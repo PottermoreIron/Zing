@@ -83,7 +83,11 @@ public enum ResultCode {
     /**
      * 限流异常
      */
-    RATE_LIMIT_EXCEPTION(1008, "请求过于频繁，请稍后再试", false);
+    RATE_LIMIT_EXCEPTION(1008, "请求过于频繁，请稍后再试", false),
+    /**
+     * OAuth2异常
+     */
+    OAUTH2_EXCEPTION(1009, "OAuth2异常", false);
 
     private final int code;
     private final String msg;

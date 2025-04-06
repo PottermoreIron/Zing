@@ -1,7 +1,7 @@
 package com.pot.user.service.ratelimit.impl;
 
 import com.pot.user.service.annotations.ratelimit.RateLimit;
-import com.pot.user.service.enums.ratelimit.RateLimitType;
+import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
 import com.pot.user.service.ratelimit.RateLimitKeyProvider;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.stereotype.Component;
@@ -19,8 +19,8 @@ public class FixedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     @Override
-    public RateLimitType getType() {
-        return RateLimitType.FIXED;
+    public RateLimitMethodEnum getType() {
+        return RateLimitMethodEnum.FIXED;
     }
 }
 

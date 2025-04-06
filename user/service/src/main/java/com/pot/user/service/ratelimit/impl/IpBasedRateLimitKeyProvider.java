@@ -1,7 +1,7 @@
 package com.pot.user.service.ratelimit.impl;
 
 import com.pot.user.service.annotations.ratelimit.RateLimit;
-import com.pot.user.service.enums.ratelimit.RateLimitType;
+import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
 import com.pot.user.service.ratelimit.RateLimitKeyProvider;
 import com.pot.user.service.utils.HttpUtils;
 import com.pot.user.service.utils.IpUtils;
@@ -26,7 +26,7 @@ public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     @Override
-    public RateLimitType getType() {
-        return RateLimitType.IP_BASED;
+    public RateLimitMethodEnum getType() {
+        return RateLimitMethodEnum.IP_BASED;
     }
 }

@@ -1,7 +1,7 @@
 package com.pot.user.service.ratelimit;
 
 import com.pot.user.service.annotations.ratelimit.RateLimit;
-import com.pot.user.service.enums.ratelimit.RateLimitType;
+import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
@@ -25,5 +25,5 @@ public interface RateLimitKeyProvider {
      *
      * @return 限流类型
      */
-    RateLimitType getType();
+    RateLimitMethodEnum getType();
 }

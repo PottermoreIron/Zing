@@ -12,25 +12,25 @@ import java.util.stream.Stream;
  * @description: 验证码渠道枚举
  */
 @Getter
-public enum SendCodeChannelType {
+public enum SendCodeChannelEnum {
     PHONE(1, "phone"),
     EMAIL(2, "email"),
     WECHAT(3, "wechat");
     private final int code;
     private final String name;
 
-    SendCodeChannelType(int code, String name) {
+    SendCodeChannelEnum(int code, String name) {
         this.code = code;
         this.name = name;
     }
 
-    private static final Map<Integer, SendCodeChannelType> VERIFICATION_CODE_TYPE_MAP;
+    private static final Map<Integer, SendCodeChannelEnum> VERIFICATION_CODE_TYPE_MAP;
 
     static {
-        VERIFICATION_CODE_TYPE_MAP = Stream.of(values()).collect(Collectors.toMap(SendCodeChannelType::getCode, e -> e));
+        VERIFICATION_CODE_TYPE_MAP = Stream.of(values()).collect(Collectors.toMap(SendCodeChannelEnum::getCode, e -> e));
     }
 
-    public static SendCodeChannelType getByCode(int code) {
+    public static SendCodeChannelEnum getByCode(int code) {
         return VERIFICATION_CODE_TYPE_MAP.getOrDefault(code, null);
     }
 

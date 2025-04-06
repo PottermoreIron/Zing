@@ -3,7 +3,7 @@ package com.pot.user.service.security.filter;
 import com.pot.common.R;
 import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.response.Tokens;
-import com.pot.user.service.enums.LoginRegisterType;
+import com.pot.user.service.enums.LoginRegisterEnum;
 import com.pot.user.service.security.details.LoginUser;
 import com.pot.user.service.security.token.CustomAuthenticationToken;
 import com.pot.user.service.utils.HttpUtils;
@@ -48,13 +48,13 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         int type = HttpUtils.obtainParamValue("type", requestJson, Integer.class);
         if (!httpMethod.equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
-        } else if (LoginRegisterType.getByCode(type) == null) {
+        } else if (LoginRegisterEnum.getByCode(type) == null) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         } else {
-            LoginRegisterType loginRegisterType = LoginRegisterType.getByCode(type);
-            String identifier = HttpUtils.obtainParamValue(loginRegisterType.getIdentifier(), requestJson, String.class).trim();
-            String credentials = HttpUtils.obtainParamValue(loginRegisterType.getCredentials(), requestJson, String.class).trim();
-            CustomAuthenticationToken authRequest = CustomAuthenticationToken.unauthenticated(identifier, credentials, loginRegisterType);
+            LoginRegisterEnum loginRegisterEnum = LoginRegisterEnum.getByCode(type);
+            String identifier = HttpUtils.obtainParamValue(loginRegisterEnum.getIdentifier(), requestJson, String.class).trim();
+            String credentials = HttpUtils.obtainParamValue(loginRegisterEnum.getCredentials(), requestJson, String.class).trim();
+            CustomAuthenticationToken authRequest = CustomAuthenticationToken.unauthenticated(identifier, credentials, loginRegisterEnum);
             this.setDetails(request, authRequest);
             return this.getAuthenticationManager().authenticate(authRequest);
         }

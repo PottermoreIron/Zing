@@ -1,7 +1,7 @@
 package com.pot.user.service.security.provider;
 
-import com.pot.user.service.enums.LoginRegisterType;
-import com.pot.user.service.enums.SendCodeChannelType;
+import com.pot.user.service.enums.LoginRegisterEnum;
+import com.pot.user.service.enums.SendCodeChannelEnum;
 import com.pot.user.service.security.details.CustomUserDetailsService;
 import com.pot.user.service.security.details.LoginUser;
 import com.pot.user.service.security.token.CustomAuthenticationToken;
@@ -37,7 +37,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         CustomAuthenticationToken authToken = (CustomAuthenticationToken) authentication;
         String identifier = authToken.getName();
         String credentials = authToken.getCredentials().toString();
-        LoginRegisterType loginType = authToken.getLoginType();
+        LoginRegisterEnum loginType = authToken.getLoginType();
         LoginUser loginUser = null;
         log.info("identifier={}, credentials={}, type={}", identifier, credentials, loginType);
         switch (loginType) {
@@ -56,7 +56,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                 }
             }
             case PHONE_CODE, EMAIL_CODE -> verificationCodeStrategyFactory.getStrategy(
-                    loginType == LoginRegisterType.PHONE_CODE ? SendCodeChannelType.PHONE : SendCodeChannelType.EMAIL
+                    loginType == LoginRegisterEnum.PHONE_CODE ? SendCodeChannelEnum.PHONE : SendCodeChannelEnum.EMAIL
             ).validateCode(credentials, identifier);
 
             default -> throw new AuthenticationServiceException("Unsupported login type: %s".formatted(loginType));

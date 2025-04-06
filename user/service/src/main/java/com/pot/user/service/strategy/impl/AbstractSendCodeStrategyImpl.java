@@ -2,7 +2,7 @@ package com.pot.user.service.strategy.impl;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.request.SendCodeRequest;
-import com.pot.user.service.enums.SendCodeChannelType;
+import com.pot.user.service.enums.SendCodeChannelEnum;
 import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.strategy.SendCodeStrategy;
 import com.pot.user.service.utils.RedisUtils;
@@ -45,7 +45,7 @@ public abstract class AbstractSendCodeStrategyImpl implements SendCodeStrategy {
     }
 
     @Override
-    public SendCodeChannelType getVerificationCodeType() {
+    public SendCodeChannelEnum getVerificationCodeType() {
         return null;
     }
 

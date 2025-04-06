@@ -1,7 +1,7 @@
 package com.pot.user.service.annotations.ratelimit;
 
-import com.pot.user.service.enums.ratelimit.LimitPolicy;
-import com.pot.user.service.enums.ratelimit.RateLimitType;
+import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
+import com.pot.user.service.enums.ratelimit.RateLimitPolicyEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -37,12 +37,12 @@ public @interface RateLimit {
     /**
      * 限流策略，默认为固定窗口
      */
-    RateLimitType type() default RateLimitType.FIXED;
+    RateLimitMethodEnum type() default RateLimitMethodEnum.FIXED;
 
     /**
      * 当限流触发时的处理策略
      */
-    LimitPolicy policy() default LimitPolicy.REJECT;
+    RateLimitPolicyEnum policy() default RateLimitPolicyEnum.REJECT;
 
     /**
      * 等待获取令牌的最大时间（毫秒），仅在LimitPolicy.WAIT策略下有效

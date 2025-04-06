@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Getter
-public enum LoginRegisterType {
+public enum LoginRegisterEnum {
     USERNAME_PASSWORD(1, "username", "password"),
     PHONE_PASSWORD(2, "phone", "password"),
     EMAIL_PASSWORD(3, "email", "password"),
@@ -19,19 +19,19 @@ public enum LoginRegisterType {
     private final String identifier;
     private final String credentials;
 
-    private static final Map<Integer, LoginRegisterType> REGISTER_CODE_MAP;
+    private static final Map<Integer, LoginRegisterEnum> REGISTER_CODE_MAP;
 
     static {
-        REGISTER_CODE_MAP = Stream.of(values()).collect(Collectors.toMap(LoginRegisterType::getCode, e -> e));
+        REGISTER_CODE_MAP = Stream.of(values()).collect(Collectors.toMap(LoginRegisterEnum::getCode, e -> e));
     }
 
-    LoginRegisterType(int code, String identifier, String credentials) {
+    LoginRegisterEnum(int code, String identifier, String credentials) {
         this.code = code;
         this.identifier = identifier;
         this.credentials = credentials;
     }
 
-    public static LoginRegisterType getByCode(int code) {
+    public static LoginRegisterEnum getByCode(int code) {
         return REGISTER_CODE_MAP.getOrDefault(code, null);
     }
 
