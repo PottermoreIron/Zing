@@ -1,4 +1,4 @@
-package com.pot.user.service.strategy.impl;
+package com.pot.user.service.strategy.impl.oAuth2;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.response.Tokens;

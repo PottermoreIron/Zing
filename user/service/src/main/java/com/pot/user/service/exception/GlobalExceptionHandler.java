@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public R<?> handleAllException(Exception ex) {
-        log.error("System error: {}", ex.getMessage(), ex);
+        log.error("System error: {}, stack:{}", ex.getMessage(), ex.getStackTrace());
         return R.fail(ResultCode.INTERNAL_ERROR, ex.getMessage());
     }
 }

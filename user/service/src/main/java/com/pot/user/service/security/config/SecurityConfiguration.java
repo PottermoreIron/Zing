@@ -54,7 +54,7 @@ public class SecurityConfiguration {
                         }
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/user/login", "/user/register", "/user/send/code", "/user/test", "/error", "/user/oauth2/**").permitAll()
+                        .requestMatchers("/user/login", "/user/register", "/user/send/code", "/user/test", "/error", "/user/oauth2/**", "/api/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((request, response, authException) -> setResponse(response, authException, HttpStatus.UNAUTHORIZED))

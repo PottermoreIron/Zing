@@ -4,7 +4,7 @@ import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.OAuth2Enum;
 import com.pot.user.service.service.ThirdPartyConnectionService;
 import com.pot.user.service.service.UserService;
-import com.pot.user.service.strategy.impl.AbstractOAuth2LoginStrategyImpl;
+import com.pot.user.service.strategy.impl.oAuth2.AbstractOAuth2LoginStrategyImpl;
 import com.pot.user.service.utils.IdUtils;
 import com.pot.user.service.utils.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;

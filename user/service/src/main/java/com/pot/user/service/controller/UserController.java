@@ -17,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -38,7 +37,6 @@ public class UserController {
 
     private final RegisterStrategyFactory registerStrategyFactory;
     private final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
-    private final OAuth2ClientProperties oAuth2Properties;
     private final OAuth2LoginStrategyFactory oAuth2LoginStrategyFactory;
 
     @RequestMapping("/register")

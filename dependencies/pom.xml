@@ -30,6 +30,7 @@
         <jjwt.version>0.12.6</jjwt.version>
         <leaf.version>1.0.1-RELEASE</leaf.version>
         <guava.version>33.4.6-jre</guava.version>
+        <weixin-java-mp.version>4.7.4.B</weixin-java-mp.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -107,6 +108,12 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <!-- weixin -->
+            <dependency>
+                <groupId>com.github.binarywang</groupId>
+                <artifactId>weixin-java-mp</artifactId>
+                <version>${weixin-java-mp.version}</version>
             </dependency>
 
         </dependencies>

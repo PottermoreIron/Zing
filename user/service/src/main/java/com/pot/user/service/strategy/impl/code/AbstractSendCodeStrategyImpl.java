@@ -1,4 +1,4 @@
-package com.pot.user.service.strategy.impl;
+package com.pot.user.service.strategy.impl.code;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.user.service.controller.request.SendCodeRequest;

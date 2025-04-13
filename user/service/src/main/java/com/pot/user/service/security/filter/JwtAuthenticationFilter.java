@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             CustomAuthenticationToken authenticationToken = new CustomAuthenticationToken(uid, null);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         } catch (Exception e) {
-
         }
         filterChain.doFilter(request, response);
     }
