@@ -21,8 +21,8 @@
         <java.version>21</java.version>
     </properties>
     <modules>
-        <module>api</module>
-        <module>service</module>
+        <module>user-api</module>
+        <module>user-service</module>
     </modules>
 
 </project>

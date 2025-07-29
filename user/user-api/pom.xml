@@ -7,7 +7,7 @@
         <artifactId>user</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>api</artifactId>
+    <artifactId>user-api</artifactId>
     <name>api</name>
     <description>api</description>
     <developers>
