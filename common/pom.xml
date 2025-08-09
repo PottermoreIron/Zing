@@ -59,6 +59,14 @@
             <artifactId>freemarker</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
             <artifactId>leaf-boot-starter</artifactId>
             <groupId>com.sankuai.inf.leaf</groupId>
         </dependency>

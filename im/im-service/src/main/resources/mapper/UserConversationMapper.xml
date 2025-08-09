@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pot.im.service.mapper.UserConversationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pot.im.service.entity.UserConversation">
+        <id column="id" property="id" />
+        <result column="gmt_create" property="gmtCreate" />
+        <result column="gmt_modified" property="gmtModified" />
+        <result column="user_id" property="userId" />
+        <result column="conversation_id" property="conversationId" />
+        <result column="last_read_message_id" property="lastReadMessageId" />
+        <result column="last_read_time" property="lastReadTime" />
+        <result column="unread_count" property="unreadCount" />
+        <result column="is_muted" property="isMuted" />
+        <result column="is_pinned" property="isPinned" />
+        <result column="is_hidden" property="isHidden" />
+        <result column="pinned_at" property="pinnedAt" />
+        <result column="deleted_at" property="deletedAt" />
+        <result column="extend_json" property="extendJson" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, gmt_create, gmt_modified, user_id, conversation_id, last_read_message_id, last_read_time, unread_count, is_muted, is_pinned, is_hidden, pinned_at, deleted_at, extend_json
+    </sql>
+
+</mapper>

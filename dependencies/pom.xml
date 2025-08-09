@@ -22,11 +22,12 @@
         <spring-boot.version>3.4.2</spring-boot.version>
         <!-- data相关 -->
         <mysql.version>9.2.0</mysql.version>
-        <mybatis-plus.version>3.5.10.1</mybatis-plus.version>
+        <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <!-- apache -->
         <apache-commons.version>3.17.0</apache-commons.version>
         <freemaker.version>2.3.34</freemaker.version>
-        <swagger.version>3.0.0</swagger.version>
+        <velocity.version>2.4.1</velocity.version>
+        <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
         <jjwt.version>0.12.6</jjwt.version>
         <leaf.version>1.0.1-RELEASE</leaf.version>
         <guava.version>33.4.6-jre</guava.version>
@@ -68,11 +69,16 @@
                 <artifactId>freemarker</artifactId>
                 <version>${freemaker.version}</version>
             </dependency>
-            <!-- swagger -->
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-boot-starter</artifactId>
-                <version>${swagger.version}</version>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>${velocity.version}</version>
+            </dependency>
+            <!-- springdoc-openapi -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi.version}</version>
             </dependency>
             <!-- jjwt -->
             <dependency>

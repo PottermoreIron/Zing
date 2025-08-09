@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pot.im.service.mapper.MessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pot.im.service.entity.Message">
+        <id column="id" property="id" />
+        <result column="gmt_create" property="gmtCreate" />
+        <result column="gmt_modified" property="gmtModified" />
+        <result column="message_id" property="messageId" />
+        <result column="conversation_id" property="conversationId" />
+        <result column="sender_id" property="senderId" />
+        <result column="message_type" property="messageType" />
+        <result column="content" property="content" />
+        <result column="extra_data" property="extraData" />
+        <result column="reply_to_message_id" property="replyToMessageId" />
+        <result column="forward_from_message_id" property="forwardFromMessageId" />
+        <result column="at_users" property="atUsers" />
+        <result column="status" property="status" />
+        <result column="read_count" property="readCount" />
+        <result column="extend_json" property="extendJson" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, gmt_create, gmt_modified, message_id, conversation_id, sender_id, message_type, content, extra_data, reply_to_message_id, forward_from_message_id, at_users, status, read_count, extend_json
+    </sql>
+
+</mapper>
