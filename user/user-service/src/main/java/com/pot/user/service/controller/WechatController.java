@@ -3,6 +3,7 @@ package com.pot.user.service.controller;
 import com.pot.common.R;
 import com.pot.user.service.service.wechat.WechatMpService;
 import com.pot.user.service.utils.RandomStringGenerator;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
@@ -25,6 +26,10 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping("/api/wechat/{appid}")
 @RequiredArgsConstructor
+@Tag(
+        name = "微信相关接口",
+        description = "提供微信公众平台的消息处理、二维码生成、OAuth2授权等功能"
+)
 @Slf4j
 public class WechatController {
     private final WxMpService wxService;

@@ -13,6 +13,7 @@ import com.pot.user.service.strategy.SendCodeStrategy;
 import com.pot.user.service.strategy.factory.OAuth2LoginStrategyFactory;
 import com.pot.user.service.strategy.factory.RegisterStrategyFactory;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Tag(
+        name = "用户相关接口",
+        description = "提供用户注册、登录、验证码发送等功能"
+)
 @Slf4j
 public class UserController {
 
