@@ -32,6 +32,7 @@
         <leaf.version>1.0.1-RELEASE</leaf.version>
         <guava.version>33.4.6-jre</guava.version>
         <weixin-java-mp.version>4.7.4.B</weixin-java-mp.version>
+        <netty.version>4.2.3.Final</netty.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -120,6 +121,12 @@
                 <groupId>com.github.binarywang</groupId>
                 <artifactId>weixin-java-mp</artifactId>
                 <version>${weixin-java-mp.version}</version>
+            </dependency>
+            <!-- netty -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
             </dependency>
 
         </dependencies>
