@@ -1,8 +1,8 @@
 package com.pot.user.service.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -27,156 +27,114 @@ public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 数据库默认Id
-     */
     @TableId(value = "id", type = IdType.AUTO)
+    @Schema(description = "主键ID")
     private Long id;
 
-    /**
-     * 创建时间
-     */
     @TableField(value = "gmt_create", fill = FieldFill.INSERT)
+    @Schema(description = "创建时间")
     private LocalDateTime gmtCreate;
 
-    /**
-     * 修改时间
-     */
     @TableField(value = "gmt_modified", fill = FieldFill.INSERT_UPDATE)
+    @Schema(description = "修改时间")
     private LocalDateTime gmtModified;
 
-    /**
-     * 用户id
-     */
     @TableField("uid")
+    @Schema(description = "用户ID")
+    @NotNull(message = "用户ID不能为空")
     private Long uid;
 
-    /**
-     * 设备id
-     */
     @TableField("device_id")
+    @Schema(description = "设备ID")
     private String deviceId;
 
-    /**
-     * 姓名
-     */
     @TableField("name")
+    @Schema(description = "姓名")
+    @NotBlank(message = "姓名不能为空")
     private String name;
 
-    /**
-     * 昵称
-     */
     @TableField("nickname")
+    @Schema(description = "昵称")
     private String nickname;
 
-    /**
-     * 加密加盐密码
-     */
     @TableField("password")
+    @Schema(description = "加密加盐密码")
+    @NotBlank(message = "密码不能为空")
     private String password;
 
-    /**
-     * 邮箱
-     */
     @TableField("email")
-    @Email
+    @Schema(description = "邮箱")
+    @Email(message = "邮箱格式不正确")
     private String email;
 
-    /**
-     * 手机号码
-     */
     @TableField("phone")
+    @Schema(description = "手机号码")
     private String phone;
 
-    /**
-     * 性别 [0代表男, 1代表女]
-     */
     @TableField("sex")
+    @Schema(description = "性别 [0代表男, 1代表女]")
+    @Min(value = 0, message = "性别只能为0或1")
+    @Max(value = 1, message = "性别只能为0或1")
     private Integer sex;
 
-    /**
-     * 头像地址
-     */
     @TableField("avatar")
+    @Schema(description = "头像地址")
     private String avatar;
 
-    /**
-     * 年龄
-     */
     @TableField("age")
+    @Schema(description = "年龄")
+    @Min(value = 0, message = "年龄不能为负数")
     private Integer age;
 
-    /**
-     * 生日
-     */
     @TableField("birthday")
+    @Schema(description = "生日")
     private LocalDate birthday;
 
-    /**
-     * 地址
-     */
     @TableField("address")
+    @Schema(description = "地址")
     private String address;
 
-    /**
-     * 设备语言
-     */
     @TableField("language")
+    @Schema(description = "设备语言")
     private String language;
 
-    /**
-     * 国家
-     */
     @TableField("country")
+    @Schema(description = "国家")
     private String country;
 
-    /**
-     * 账户状态 [0代表停用，1代表启用]
-     */
     @TableField("status")
+    @Schema(description = "账户状态 [0代表停用，1代表启用]")
+    @NotNull(message = "账户状态不能为空")
+    @Min(value = 0, message = "账户状态只能为0或1")
+    @Max(value = 1, message = "账户状态只能为0或1")
     private Integer status;
 
-    /**
-     * 账户注册时间
-     */
     @TableField("register_time")
+    @Schema(description = "账户注册时间")
     private LocalDateTime registerTime;
 
-    /**
-     * 最后一次登录ip地址
-     */
     @TableField("last_login_ip")
-    @NotBlank(message = "最后一次登录ip地址不能为空")
+    @Schema(description = "最后一次登录ip地址")
     private String lastLoginIp;
 
-    /**
-     * 最后一次登录时间
-     */
     @TableField("last_login_date")
+    @Schema(description = "最后一次登录时间")
     private LocalDateTime lastLoginDate;
 
-    /**
-     * 删除标识位 [0代表没删除，1代表删除]
-     */
     @TableLogic
     @TableField("is_deleted")
+    @Schema(description = "删除标识位 [0代表没删除，1代表删除]")
     private Boolean deleted;
 
-    /**
-     * 创建者
-     */
     @TableField("creator")
+    @Schema(description = "创建者")
     private String creator;
 
-    /**
-     * 修改者
-     */
     @TableField("updater")
+    @Schema(description = "修改者")
     private String updater;
 
-    /**
-     * 业务扩展json
-     */
     @TableField("extend_json")
+    @Schema(description = "业务扩展json")
     private String extendJson;
 }
