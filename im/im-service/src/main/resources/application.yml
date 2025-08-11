@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: im-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 000802
+server:
+  port: 20000
+im:
+  server:
+    port: 8888
+  client:
+    server-port: 8888
