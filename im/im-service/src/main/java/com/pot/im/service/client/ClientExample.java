@@ -1,6 +1,5 @@
 package com.pot.im.service.client;
 
-import com.pot.im.service.server.IMClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

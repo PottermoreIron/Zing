@@ -1,4 +1,4 @@
-package com.pot.im.service.server;
+package com.pot.im.service.client;
 
 import com.pot.im.service.protocol.serializer.MessageType;
 import com.pot.im.service.protocol.serializer.ProtocolMessage;

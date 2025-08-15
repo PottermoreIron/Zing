@@ -1,4 +1,4 @@
-package com.pot.im.service.server;
+package com.pot.im.service.message;
 
 import com.pot.im.service.protocol.serializer.MessageType;
 import jakarta.annotation.PostConstruct;
