@@ -28,6 +28,7 @@
         <module>user</module>
         <module>server</module>
         <module>im</module>
+        <module>gateway</module>
     </modules>
 
     <dependencyManagement>
