@@ -1,7 +1,7 @@
 package com.pot.user.service.handler.wechat;
 
+import com.pot.common.utils.JacksonUtils;
 import com.pot.user.service.handler.wechat.builder.TextWechatMpBuilder;
-import com.pot.user.service.utils.JacksonUtils;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;

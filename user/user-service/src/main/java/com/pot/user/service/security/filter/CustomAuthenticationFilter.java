@@ -2,12 +2,12 @@ package com.pot.user.service.security.filter;
 
 import com.pot.common.R;
 import com.pot.common.enums.ResultCode;
+import com.pot.common.utils.JacksonUtils;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.enums.LoginRegisterEnum;
 import com.pot.user.service.security.details.LoginUser;
 import com.pot.user.service.security.token.CustomAuthenticationToken;
 import com.pot.user.service.utils.HttpUtils;
-import com.pot.user.service.utils.JacksonUtils;
 import com.pot.user.service.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;

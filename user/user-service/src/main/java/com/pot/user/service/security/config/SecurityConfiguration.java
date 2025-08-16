@@ -2,7 +2,7 @@ package com.pot.user.service.security.config;
 
 import com.pot.common.R;
 import com.pot.common.enums.ResultCode;
-import com.pot.user.service.utils.JacksonUtils;
+import com.pot.common.utils.JacksonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

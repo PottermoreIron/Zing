@@ -1,6 +1,7 @@
 package com.pot.user.service.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.pot.common.utils.JacksonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

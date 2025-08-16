@@ -1,4 +1,4 @@
-package com.pot.user.service.utils;
+package com.pot.common.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
