@@ -1,5 +1,6 @@
 package com.pot.im.service.server;
 
+import com.pot.im.service.config.ServerConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -96,16 +96,5 @@ public class IMServer implements ApplicationRunner {
             group.shutdownGracefully(0, 5, TimeUnit.SECONDS)
                     .addListener(future -> log.info("{} EventLoopGroup shutdown", name));
         }
-    }
-
-    @ConfigurationProperties(prefix = "im.server")
-    @Component
-    @lombok.Data
-    public static class ServerConfig {
-        private int port = 8888;
-        private int bossThreads = 1;
-        private int workerThreads = Runtime.getRuntime().availableProcessors();
-        private int backlog = 1024;
-        private int readerIdleTime = 60;
     }
 }
