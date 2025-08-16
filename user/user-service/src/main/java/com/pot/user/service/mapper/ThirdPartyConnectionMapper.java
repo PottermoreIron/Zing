@@ -1,7 +1,7 @@
 package com.pot.user.service.mapper;
 
-import com.pot.user.service.entity.ThirdPartyConnection;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.pot.user.service.entity.ThirdPartyConnection;
 
 
 /**

@@ -1,12 +1,12 @@
 package com.pot.user.service.strategy.impl.register;
 
+import com.pot.common.utils.IdUtils;
+import com.pot.common.utils.PasswordUtils;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.OAuth2Enum;
 import com.pot.user.service.service.ThirdPartyConnectionService;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.impl.oAuth2.AbstractOAuth2LoginStrategyImpl;
-import com.pot.user.service.utils.IdUtils;
-import com.pot.user.service.utils.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;

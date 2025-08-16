@@ -2,12 +2,11 @@ package com.pot.user.service.exception;
 
 import com.pot.common.R;
 import com.pot.common.enums.ResultCode;
+import com.pot.common.exception.BusinessException;
+import com.pot.common.handler.BaseGlobalExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Objects;
 
 /**
  * @author: Pot
@@ -16,15 +15,7 @@ import java.util.Objects;
  */
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
-    /**
-     * 处理校验异常
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public R<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        String message = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
-        return R.fail(ResultCode.PARAM_ERROR, message);
-    }
+public class GlobalExceptionHandler extends BaseGlobalExceptionHandler {
 
     /**
      * 处理业务异常
@@ -33,14 +24,5 @@ public class GlobalExceptionHandler {
     public R<?> handleBusinessException(BusinessException ex) {
         ResultCode resultCode = ex.getResultCode();
         return R.fail(resultCode);
-    }
-
-    /**
-     * 处理所有不可知异常
-     */
-    @ExceptionHandler(Exception.class)
-    public R<?> handleAllException(Exception ex) {
-        log.error("System error: {}, stack:{}", ex.getMessage(), ex.getStackTrace());
-        return R.fail(ResultCode.INTERNAL_ERROR, ex.getMessage());
     }
 }

@@ -1,6 +1,9 @@
 package com.pot.user.service.strategy.impl.oAuth2;
 
 import com.pot.common.enums.ResultCode;
+import com.pot.common.utils.IdUtils;
+import com.pot.common.utils.PasswordUtils;
+import com.pot.common.utils.RandomUtils;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.ThirdPartyConnection;
 import com.pot.user.service.entity.User;
@@ -9,10 +12,7 @@ import com.pot.user.service.exception.OAuth2Exception;
 import com.pot.user.service.service.ThirdPartyConnectionService;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.OAuth2LoginStrategy;
-import com.pot.user.service.utils.IdUtils;
-import com.pot.user.service.utils.JwtUtils;
-import com.pot.user.service.utils.PasswordUtils;
-import com.pot.user.service.utils.RandomStringGenerator;
+import com.pot.user.service.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +78,7 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
         }
         Long uid = user.getUid();
         // todo update login time and login ip
-        return JwtUtils.createAccessTokenAndRefreshToken(uid);
+        return CommonUtils.createAccessTokenAndRefreshToken(uid);
     }
 
     protected String buildAuthorizationUrl() {
@@ -227,7 +227,7 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
     }
 
     protected String generateSecureState() {
-        return RandomStringGenerator.generateRandomString(32);
+        return RandomUtils.generateRandomString(32);
     }
 
     protected String getScopes() {

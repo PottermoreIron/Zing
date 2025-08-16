@@ -1,5 +1,7 @@
 package com.pot.user.service.service.wechat.impl;
 
+import com.pot.common.utils.IdUtils;
+import com.pot.common.utils.PasswordUtils;
 import com.pot.user.service.entity.ThirdPartyConnection;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.IdBizEnum;
@@ -8,8 +10,6 @@ import com.pot.user.service.handler.wechat.builder.TextWechatMpBuilder;
 import com.pot.user.service.service.ThirdPartyConnectionService;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.service.wechat.WechatMpService;
-import com.pot.user.service.utils.IdUtils;
-import com.pot.user.service.utils.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;

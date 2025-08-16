@@ -1,12 +1,12 @@
 package com.pot.user.service.controller;
 
 import com.pot.common.R;
+import com.pot.common.annotations.ratelimit.RateLimit;
 import com.pot.common.enums.ResultCode;
-import com.pot.user.service.annotations.ratelimit.RateLimit;
+import com.pot.common.enums.ratelimit.RateLimitMethodEnum;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
-import com.pot.user.service.enums.ratelimit.RateLimitMethodEnum;
 import com.pot.user.service.strategy.OAuth2LoginStrategy;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.SendCodeStrategy;

@@ -1,8 +1,8 @@
 package com.pot.user.service.controller;
 
 import com.pot.common.R;
+import com.pot.common.utils.RandomUtils;
 import com.pot.user.service.service.wechat.WechatMpService;
-import com.pot.user.service.utils.RandomStringGenerator;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class WechatController {
         switchoverAppId(appid);
 
         try {
-            String randomString = RandomStringGenerator.generateRandomString(20);
+            String randomString = RandomUtils.generateRandomString(20);
             String ticket = wxService.getQrcodeService().qrCodeCreateTmpTicket(randomString, 10 * 60).getTicket();
             String qrCodeUrl = wxService.getQrcodeService().qrCodePictureUrl(ticket);
             return R.success(qrCodeUrl);

@@ -1,6 +1,7 @@
 package com.pot.user.service.exception;
 
 import com.pot.common.enums.ResultCode;
+import com.pot.common.exception.BusinessException;
 
 /**
  * @author: Pot

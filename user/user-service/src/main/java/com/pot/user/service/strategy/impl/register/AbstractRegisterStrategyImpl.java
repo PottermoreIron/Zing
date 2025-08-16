@@ -2,18 +2,18 @@ package com.pot.user.service.strategy.impl.register;
 
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.pot.common.enums.ResultCode;
+import com.pot.common.exception.BusinessException;
+import com.pot.common.utils.IdUtils;
+import com.pot.common.utils.PasswordUtils;
+import com.pot.common.utils.RandomUtils;
 import com.pot.user.service.controller.request.register.RegisterRequest;
 import com.pot.user.service.controller.response.Tokens;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.IdBizEnum;
-import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.RegisterStrategy;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
-import com.pot.user.service.utils.IdUtils;
-import com.pot.user.service.utils.JwtUtils;
-import com.pot.user.service.utils.PasswordUtils;
-import com.pot.user.service.utils.RandomStringGenerator;
+import com.pot.user.service.utils.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
@@ -62,7 +62,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     }
 
     protected Tokens generateTokens(Long uid) {
-        return JwtUtils.createAccessTokenAndRefreshToken(uid);
+        return CommonUtils.createAccessTokenAndRefreshToken(uid);
     }
 
     protected void checkUnique(SFunction<User, ?> column, Object value) {
@@ -80,7 +80,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     }
 
     protected String generateRandomNickname() {
-        return RandomStringGenerator.generateRandomNickname();
+        return RandomUtils.generateRandomNickname();
     }
 
     protected String generateEncodedPassword(String rawPassword) {

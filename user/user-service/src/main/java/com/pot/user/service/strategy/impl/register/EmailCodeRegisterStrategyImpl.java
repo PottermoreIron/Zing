@@ -1,13 +1,13 @@
 package com.pot.user.service.strategy.impl.register;
 
+import com.pot.common.utils.IdUtils;
+import com.pot.common.utils.PasswordUtils;
 import com.pot.user.service.controller.request.register.EmailCodeRegisterRequest;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.LoginRegisterEnum;
 import com.pot.user.service.enums.SendCodeChannelEnum;
 import com.pot.user.service.service.UserService;
 import com.pot.user.service.strategy.factory.VerificationCodeStrategyFactory;
-import com.pot.user.service.utils.IdUtils;
-import com.pot.user.service.utils.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

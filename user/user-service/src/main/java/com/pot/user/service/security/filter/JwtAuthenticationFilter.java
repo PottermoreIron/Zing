@@ -1,7 +1,7 @@
 package com.pot.user.service.security.filter;
 
+import com.pot.common.utils.JwtUtils;
 import com.pot.user.service.security.token.CustomAuthenticationToken;
-import com.pot.user.service.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

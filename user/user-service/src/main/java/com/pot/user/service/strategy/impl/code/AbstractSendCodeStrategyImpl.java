@@ -1,14 +1,14 @@
 package com.pot.user.service.strategy.impl.code;
 
 import com.pot.common.enums.ResultCode;
+import com.pot.common.exception.BusinessException;
+import com.pot.common.utils.RedisUtils;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.enums.SendCodeChannelEnum;
-import com.pot.user.service.exception.BusinessException;
 import com.pot.user.service.strategy.SendCodeStrategy;
-import com.pot.user.service.utils.RedisUtils;
 import org.springframework.stereotype.Service;
 
-import static com.pot.user.service.utils.RandomStringGenerator.generateRandomCode;
+import static com.pot.common.utils.RandomUtils.generateRandomCode;
 
 /**
  * @author: Pot
