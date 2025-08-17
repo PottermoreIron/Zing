@@ -7,8 +7,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-import static java.lang.StringTemplate.STR;
-
 /**
  * @author: Pot
  * @created: 2025/3/31 23:46
@@ -27,7 +25,7 @@ public class SecurityUtils {
             byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().withLowerCase().formatHex(digest);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(STR."Unsupported algorithm: \{algorithm}", e);
+            throw new IllegalArgumentException("Unsupported algorithm: " + algorithm, e);
         }
     }
 }

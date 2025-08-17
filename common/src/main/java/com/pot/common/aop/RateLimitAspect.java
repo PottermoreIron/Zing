@@ -30,8 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.lang.StringTemplate.STR;
-
 /**
  * @author: Pot
  * @created: 2025/3/30 22:24
@@ -99,9 +97,10 @@ public class RateLimitAspect {
     private String getFinalKey(RateLimit rateLimit, Method method, ProceedingJoinPoint pjp) {
         String baseKey = Optional.ofNullable(rateLimit.key())
                 .filter(s -> !s.isEmpty())
-                .orElse(STR."\{method.getDeclaringClass().getName()}.\{method.getName()}.\{Arrays.stream(pjp.getArgs())
-                        .map(Object::toString)
-                        .collect(Collectors.joining(","))}");
+                .orElse(method.getDeclaringClass().getName() + "." + method.getName() + "." +
+                        Arrays.stream(pjp.getArgs())
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(",")));
         log.error("!!!!!pot:{}", baseKey);
 
         // 添加全局前缀，便于统一管理

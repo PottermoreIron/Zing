@@ -1,7 +1,6 @@
 package com.pot.user.service.strategy.impl.register;
 
-import com.pot.common.utils.IdUtils;
-import com.pot.common.utils.PasswordUtils;
+import com.pot.common.id.IdService;
 import com.pot.user.service.controller.request.register.EmailCodeRegisterRequest;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.LoginRegisterEnum;
@@ -20,8 +19,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class EmailCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl<EmailCodeRegisterRequest> {
 
-    public EmailCodeRegisterStrategyImpl(UserService userService, VerificationCodeStrategyFactory verificationCodeStrategyFactory, PasswordUtils passwordUtils, IdUtils idUtils) {
-        super(userService, verificationCodeStrategyFactory, passwordUtils, idUtils);
+    public EmailCodeRegisterStrategyImpl(UserService userService, VerificationCodeStrategyFactory verificationCodeStrategyFactory, IdService idService) {
+        super(userService, verificationCodeStrategyFactory, idService);
     }
 
     @Override

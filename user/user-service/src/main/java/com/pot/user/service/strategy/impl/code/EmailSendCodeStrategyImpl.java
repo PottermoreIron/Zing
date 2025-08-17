@@ -2,6 +2,7 @@ package com.pot.user.service.strategy.impl.code;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.common.exception.BusinessException;
+import com.pot.common.redis.RedisService;
 import com.pot.common.utils.ValidationUtils;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.controller.request.SendEmailCodeRequest;
@@ -17,6 +18,10 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class EmailSendCodeStrategyImpl extends AbstractSendCodeStrategyImpl {
+    public EmailSendCodeStrategyImpl(RedisService redisService) {
+        super(redisService);
+    }
+
     @Override
     protected void doSend(String target, String code) {
         // todo 发送验证码

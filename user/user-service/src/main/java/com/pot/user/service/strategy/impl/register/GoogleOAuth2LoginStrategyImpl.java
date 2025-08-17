@@ -1,7 +1,6 @@
 package com.pot.user.service.strategy.impl.register;
 
-import com.pot.common.utils.IdUtils;
-import com.pot.common.utils.PasswordUtils;
+import com.pot.common.id.IdService;
 import com.pot.user.service.entity.User;
 import com.pot.user.service.enums.OAuth2Enum;
 import com.pot.user.service.service.ThirdPartyConnectionService;
@@ -24,8 +23,8 @@ import java.util.Optional;
 @Slf4j
 public class GoogleOAuth2LoginStrategyImpl extends AbstractOAuth2LoginStrategyImpl {
 
-    public GoogleOAuth2LoginStrategyImpl(OAuth2ClientProperties oAuth2ClientProperties, RestTemplateBuilder restTemplateBuilder, UserService userService, ThirdPartyConnectionService thirdPartyConnectionService, PasswordUtils passwordUtils, IdUtils idUtils) {
-        super(oAuth2ClientProperties, restTemplateBuilder, userService, thirdPartyConnectionService, passwordUtils, idUtils);
+    public GoogleOAuth2LoginStrategyImpl(OAuth2ClientProperties oAuth2ClientProperties, RestTemplateBuilder restTemplateBuilder, UserService userService, ThirdPartyConnectionService thirdPartyConnectionService, IdService idService) {
+        super(oAuth2ClientProperties, restTemplateBuilder, userService, thirdPartyConnectionService, idService);
     }
 
     @Override

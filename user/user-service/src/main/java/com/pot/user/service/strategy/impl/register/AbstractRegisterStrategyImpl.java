@@ -3,7 +3,7 @@ package com.pot.user.service.strategy.impl.register;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.pot.common.enums.ResultCode;
 import com.pot.common.exception.BusinessException;
-import com.pot.common.utils.IdUtils;
+import com.pot.common.id.IdService;
 import com.pot.common.utils.PasswordUtils;
 import com.pot.common.utils.RandomUtils;
 import com.pot.user.service.controller.request.register.RegisterRequest;
@@ -30,8 +30,7 @@ import java.time.LocalDateTime;
 public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
     protected final UserService userService;
     protected final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
-    protected final PasswordUtils passwordUtils;
-    protected final IdUtils idUtils;
+    protected final IdService idService;
 
     @Override
     public Tokens register(T request) {
@@ -73,7 +72,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
 
     protected User.UserBuilder createBaseBuilder() {
         return User.builder()
-                .uid(idUtils.getNextId(IdBizEnum.USER.getBizType()))
+                .uid(idService.getNextId(IdBizEnum.USER.getBizType()))
                 .registerTime(LocalDateTime.now())
                 .status(1)
                 .deleted(false);
@@ -84,10 +83,10 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     }
 
     protected String generateEncodedPassword(String rawPassword) {
-        return passwordUtils.encodePassword(rawPassword);
+        return PasswordUtils.encodePassword(rawPassword);
     }
 
     protected String generateRandomPassword() {
-        return passwordUtils.generateDefaultPassword();
+        return PasswordUtils.generateDefaultPassword();
     }
 }

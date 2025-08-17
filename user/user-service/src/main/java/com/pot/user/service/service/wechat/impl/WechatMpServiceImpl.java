@@ -1,6 +1,6 @@
 package com.pot.user.service.service.wechat.impl;
 
-import com.pot.common.utils.IdUtils;
+import com.pot.common.id.IdService;
 import com.pot.common.utils.PasswordUtils;
 import com.pot.user.service.entity.ThirdPartyConnection;
 import com.pot.user.service.entity.User;
@@ -42,8 +42,7 @@ public class WechatMpServiceImpl implements WechatMpService {
 
     private final UserService userService;
     private final ThirdPartyConnectionService thirdPartyConnectionService;
-    private final IdUtils idUtils;
-    private final PasswordUtils passwordUtils;
+    private final IdService idService;
 
     @Override
     public WxMpXmlOutMessage scan(WxMpService wxMpService, WxMpXmlMessage wxMpXmlMessage) {
@@ -131,12 +130,12 @@ public class WechatMpServiceImpl implements WechatMpService {
     }
 
     private User buildUserFromWechatInfo(WxOAuth2UserInfo userInfo) {
-        Long uid = idUtils.getNextId(IdBizEnum.USER.getBizType());
+        Long uid = idService.getNextId(IdBizEnum.USER.getBizType());
 
         return User.builder()
                 .uid(uid)
                 .registerTime(LocalDateTime.now())
-                .password(passwordUtils.generateDefaultPassword())
+                .password(PasswordUtils.generateDefaultPassword())
                 .name(userInfo != null ? userInfo.getNickname() : null)
                 .nickname(userInfo != null ? userInfo.getNickname() : null)
                 .avatar(userInfo != null ? userInfo.getHeadImgUrl() : null)
@@ -146,7 +145,7 @@ public class WechatMpServiceImpl implements WechatMpService {
     }
 
     private void createThirdPartyConnection(Long uid, String openId) {
-        Long connectionId = idUtils.getNextId(IdBizEnum.THIRD_PARTY_CONNECTION.getBizType());
+        Long connectionId = idService.getNextId(IdBizEnum.THIRD_PARTY_CONNECTION.getBizType());
 
         ThirdPartyConnection connection = ThirdPartyConnection.builder()
                 .connectionId(connectionId)

@@ -2,11 +2,14 @@ package com.pot.user.service.strategy.impl.code;
 
 import com.pot.common.enums.ResultCode;
 import com.pot.common.exception.BusinessException;
-import com.pot.common.utils.RedisUtils;
+import com.pot.common.redis.RedisService;
 import com.pot.user.service.controller.request.SendCodeRequest;
 import com.pot.user.service.enums.SendCodeChannelEnum;
 import com.pot.user.service.strategy.SendCodeStrategy;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 
 import static com.pot.common.utils.RandomUtils.generateRandomCode;
 
@@ -16,10 +19,15 @@ import static com.pot.common.utils.RandomUtils.generateRandomCode;
  * @description: 抽象实现验证码服务类
  */
 @Service
+@RequiredArgsConstructor
 public abstract class AbstractSendCodeStrategyImpl implements SendCodeStrategy {
+
+    protected final RedisService redisService;
+
     private static final String CODE_KEY_PREFIX = "verification_code:";
     protected static final int CODE_LENGTH = 6;
     protected static final long CODE_EXPIRE = 300;
+    protected final Duration CODE_EXPIRE_TIME = Duration.ofSeconds(CODE_EXPIRE);
     protected String target;
 
     @Override
@@ -54,15 +62,15 @@ public abstract class AbstractSendCodeStrategyImpl implements SendCodeStrategy {
     }
 
     private void storeCode(String target, String code) {
-        RedisUtils.set(buildRedisKey(target), code, CODE_EXPIRE);
+        redisService.set(buildRedisKey(target), code, CODE_EXPIRE_TIME);
     }
 
     private String getStoredCode(String target) {
-        return RedisUtils.get(buildRedisKey(target));
+        return redisService.get(buildRedisKey(target)).toString();
     }
 
     private void deleteCode(String target) {
-        RedisUtils.delete(buildRedisKey(target));
+        redisService.delete(buildRedisKey(target));
     }
 
     protected abstract void doSend(String target, String code);

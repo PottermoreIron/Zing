@@ -1,7 +1,7 @@
 package com.pot.user.service.strategy.impl.oAuth2;
 
 import com.pot.common.enums.ResultCode;
-import com.pot.common.utils.IdUtils;
+import com.pot.common.id.IdService;
 import com.pot.common.utils.PasswordUtils;
 import com.pot.common.utils.RandomUtils;
 import com.pot.user.service.controller.response.Tokens;
@@ -44,8 +44,7 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
     protected final RestTemplateBuilder restTemplateBuilder;
     protected final UserService userService;
     protected final ThirdPartyConnectionService thirdPartyConnectionService;
-    protected final PasswordUtils passwordUtils;
-    protected final IdUtils idUtils;
+    protected final IdService idService;
 
     @Override
     public void redirectToOauth2Login(HttpServletResponse httpServletResponse) {
@@ -171,9 +170,9 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
 
     protected User.UserBuilder createBaseBuilder() {
         return User.builder()
-                .uid(idUtils.getNextId(IdBizEnum.USER.getBizType()))
+                .uid(idService.getNextId(IdBizEnum.USER.getBizType()))
                 .registerTime(LocalDateTime.now())
-                .password(passwordUtils.generateDefaultPassword())
+                .password(PasswordUtils.generateDefaultPassword())
                 .status(1)
                 .deleted(false);
     }
@@ -188,7 +187,7 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
 
     protected void registerThirdPartyConnection(User user, String thirdPartyUserId) {
         ThirdPartyConnection connection = ThirdPartyConnection.builder()
-                .connectionId(idUtils.getNextId(IdBizEnum.THIRD_PARTY_CONNECTION.getBizType()))
+                .connectionId(idService.getNextId(IdBizEnum.THIRD_PARTY_CONNECTION.getBizType()))
                 .platformType(getType().getName())
                 .thirdPartyUserId(thirdPartyUserId)
                 .uid(user.getUid())
