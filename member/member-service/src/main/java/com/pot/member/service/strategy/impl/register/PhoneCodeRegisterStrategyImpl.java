@@ -1,0 +1,53 @@
+package com.pot.member.service.strategy.impl.register;
+
+import com.pot.common.id.IdService;
+import com.pot.member.service.controller.request.register.PhoneCodeRegisterRequest;
+import com.pot.member.service.entity.User;
+import com.pot.member.service.enums.LoginRegisterEnum;
+import com.pot.member.service.enums.SendCodeChannelEnum;
+import com.pot.member.service.service.UserService;
+import com.pot.member.service.strategy.factory.VerificationCodeStrategyFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/**
+ * @author: Pot
+ * @created: 2025/3/11 23:44
+ * @description: 手机验证码注册策略实现类
+ */
+@Service
+@Slf4j
+public class PhoneCodeRegisterStrategyImpl extends AbstractRegisterStrategyImpl<PhoneCodeRegisterRequest> {
+
+    public PhoneCodeRegisterStrategyImpl(UserService userService, VerificationCodeStrategyFactory verificationCodeStrategyFactory, IdService idService) {
+        super(userService, verificationCodeStrategyFactory, idService);
+    }
+
+    @Override
+    public LoginRegisterEnum getRegisterType() {
+        return LoginRegisterEnum.PHONE_CODE;
+    }
+
+    @Override
+    protected void checkUniqueness(PhoneCodeRegisterRequest request) {
+        checkUnique(User::getPhone, request.getPhone());
+    }
+
+    @Override
+    protected void checkCodeIfNeeded(PhoneCodeRegisterRequest request) {
+        verificationCodeStrategyFactory.getStrategy(SendCodeChannelEnum.PHONE).validateCode(request.getPhone(), request.getCode());
+    }
+
+    @Override
+    protected User buildUser(PhoneCodeRegisterRequest request) {
+        String phone = request.getPhone();
+        String name = generateRandomNickname();
+        String password = generateRandomPassword();
+        return createBaseBuilder()
+                .phone(phone)
+                .name(name)
+                .nickname(name)
+                .password(password)
+                .build();
+    }
+}
