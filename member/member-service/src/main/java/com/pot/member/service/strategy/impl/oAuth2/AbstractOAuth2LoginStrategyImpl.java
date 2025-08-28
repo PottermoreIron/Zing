@@ -45,6 +45,7 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
     protected final UserService userService;
     protected final ThirdPartyConnectionService thirdPartyConnectionService;
     protected final IdService idService;
+    protected final CommonUtils commonUtils;
 
     @Override
     public void redirectToOauth2Login(HttpServletResponse httpServletResponse) {
@@ -77,7 +78,7 @@ public abstract class AbstractOAuth2LoginStrategyImpl implements OAuth2LoginStra
         }
         Long uid = user.getUid();
         // todo update login time and login ip
-        return CommonUtils.createAccessTokenAndRefreshToken(uid);
+        return commonUtils.createAccessTokenAndRefreshToken(uid);
     }
 
     protected String buildAuthorizationUrl() {

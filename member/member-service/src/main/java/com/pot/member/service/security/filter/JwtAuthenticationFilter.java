@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,13 +21,16 @@ import java.io.IOException;
  * @description: JWT验证Filter
  */
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtUtils jwtUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            Long uid = JwtUtils.getUid(request);
+            Long uid = jwtUtils.getUid(request);
             CustomAuthenticationToken authenticationToken = new CustomAuthenticationToken(uid, null);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         } catch (Exception e) {

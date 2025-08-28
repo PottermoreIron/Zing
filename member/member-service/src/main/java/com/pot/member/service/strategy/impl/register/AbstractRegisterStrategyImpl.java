@@ -31,6 +31,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     protected final UserService userService;
     protected final VerificationCodeStrategyFactory verificationCodeStrategyFactory;
     protected final IdService idService;
+    protected final CommonUtils commonUtils;
 
     @Override
     public Tokens register(T request) {
@@ -61,7 +62,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     }
 
     protected Tokens generateTokens(Long uid) {
-        return CommonUtils.createAccessTokenAndRefreshToken(uid);
+        return commonUtils.createAccessTokenAndRefreshToken(uid);
     }
 
     protected void checkUnique(SFunction<User, ?> column, Object value) {

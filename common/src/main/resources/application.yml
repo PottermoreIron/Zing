@@ -1,3 +1,9 @@
 spring:
   application:
     name: common
+jwt:
+  secret: your_jwt_secret_key
+  access-token-expiration: 3600
+  refresh-token-expiration: 604800000
+  issuer: pot
+  subject: zing

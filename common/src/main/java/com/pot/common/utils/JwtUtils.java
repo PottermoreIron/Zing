@@ -4,6 +4,8 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -15,22 +17,29 @@ import java.util.UUID;
  * @created: 2025/8/16 22:07
  * @description: Jwt工具类
  */
+@Component
 public class JwtUtils {
 
-    private static final String SECRET = "POTISTHEBESTPOTISTHEBESTPOTISTHEBESTPOTISTHEBEST";
-    private static final Long ACCESS_TOKEN_EXPIRATION = 1000L * 60 * 60;
-    private static final Long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7;
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private static final String JWT_ISS = "POT";
-    private static final SecretKey KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET));
-    private static final String SUBJECT = "zing";
+    @Value("${jwt.access-token-expiration}")
+    private Long accessTokenExpiration;
 
+    @Value("${jwt.refresh-token-expiration}")
+    private Long refreshTokenExpiration;
+
+    @Value("${jwt.issuer}")
+    private String jwtIssuer;
+
+    @Value("${jwt.subject}")
+    private String subject;
     public static final String TOKEN_HEADER = "Authorization";
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String TOKEN_TYPE = "JWT";
 
 
-    private static String createToken(Map<String, Object> claims, Long expiration) {
+    public String createToken(Map<String, Object> claims, Long expiration) {
         // todo collectionUtils
         if (claims == null || claims.isEmpty()) {
             throw new IllegalArgumentException("claims must not be null or empty");
@@ -38,38 +47,39 @@ public class JwtUtils {
         String id = UUID.randomUUID().toString();
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + expiration);
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         JwtBuilder builder = Jwts.builder()
                 .id(id)
-                .subject(SUBJECT)
-                .signWith(KEY)
-                .issuer(JWT_ISS)
+                .subject(subject)
+                .signWith(key)
+                .issuer(jwtIssuer)
                 .issuedAt(now)
                 .expiration(expireDate);
         claims.forEach(builder::claim);
         return builder.compact();
     }
 
-    private static String createToken(String claim, Object value, Long expiration) {
+    private String createToken(String claim, Object value, Long expiration) {
         Map<String, Object> claims = Map.of(claim, value);
         return createToken(claims, expiration);
     }
 
-    public static String createAccessToken(Object claim) {
-        return createToken("uid", claim, ACCESS_TOKEN_EXPIRATION);
+    public String createAccessToken(Object claim) {
+        return createToken("uid", claim, accessTokenExpiration);
     }
 
-    public static String createRefreshToken(Object claim) {
-        return createToken("uid", claim, REFRESH_TOKEN_EXPIRATION);
+    public String createRefreshToken(Object claim) {
+        return createToken("uid", claim, refreshTokenExpiration);
     }
 
-    public static Claims parseToken(String token) {
+    public Claims parseToken(String token) {
         if (token == null || token.isEmpty()) {
             throw new JwtException("Token不能为空");
         }
-
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         try {
             return Jwts.parser()
-                    .verifyWith(KEY)
+                    .verifyWith(key)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -86,7 +96,7 @@ public class JwtUtils {
         }
     }
 
-    public static Long getUid(String token) {
+    public Long getUid(String token) {
         try {
             Claims claims = parseToken(token);
             Object uidObj = claims.get("uid");
@@ -107,17 +117,12 @@ public class JwtUtils {
         }
     }
 
-    public static Long getUid(HttpServletRequest request) {
+    public Long getUid(HttpServletRequest request) {
         String header = request.getHeader(TOKEN_HEADER);
         if (header == null || !header.startsWith(TOKEN_PREFIX)) {
             throw new JwtException("Authorization header is missing or invalid");
         }
         String token = header.substring(TOKEN_PREFIX.length());
         return getUid(token);
-    }
-
-    public static void main(String[] args) {
-        String token = createAccessToken("123");
-        System.out.println(getUid(token));
     }
 }

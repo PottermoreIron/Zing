@@ -33,12 +33,17 @@ import java.util.Map;
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
 
-    public CustomAuthenticationFilter() {
+    private final CommonUtils commonUtils;
+
+    public CustomAuthenticationFilter(CommonUtils commonUtils) {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
+        this.commonUtils = commonUtils;
     }
 
-    public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
+    public CustomAuthenticationFilter(AuthenticationManager authenticationManager,
+                                      CommonUtils commonUtils) {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
+        this.commonUtils = commonUtils;
     }
 
     @Override
@@ -67,7 +72,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
-        Tokens tokens = CommonUtils.createAccessTokenAndRefreshToken(loginUser.getUser().getUid());
+        Tokens tokens = commonUtils.createAccessTokenAndRefreshToken(loginUser.getUser().getUid());
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(JacksonUtils.toJson(R.success(tokens)));
     }

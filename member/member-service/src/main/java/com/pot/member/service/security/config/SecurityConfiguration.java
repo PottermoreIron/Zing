@@ -3,7 +3,10 @@ package com.pot.member.service.security.config;
 import com.pot.common.R;
 import com.pot.common.enums.ResultCode;
 import com.pot.common.utils.JacksonUtils;
+import com.pot.common.utils.JwtUtils;
+import com.pot.member.service.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +29,12 @@ import java.io.IOException;
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 @Slf4j
 public class SecurityConfiguration {
+
+    private final CommonUtils commonUtils;
+    private final JwtUtils jwtUtils;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -46,7 +53,7 @@ public class SecurityConfiguration {
                 // 使用无状态的Session管理，因为JWT令牌不需要服务器存储会话信息
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .with(CustomSecurityConfigurer.customSecurityConfigurer(), // 添加自定义的Security配置)
+                .with(CustomSecurityConfigurer.customSecurityConfigurer(commonUtils, jwtUtils), // 添加自定义的Security配置)
                         customizer -> {
                             // 这里可以进行其他的自定义配置
                             // 例如添加更多的过滤器或修改现有的配置

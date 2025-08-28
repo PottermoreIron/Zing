@@ -6,15 +6,21 @@ import com.pot.common.ratelimit.RateLimitKeyProvider;
 import com.pot.common.utils.HttpUtils;
 import com.pot.common.utils.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.stereotype.Component;
 
 /**
  * @author: Pot
  * @created: 2025/3/30 21:04
  * @description: 基于用户ID的限流key提供者
  */
+@Component
+@RequiredArgsConstructor
 public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
+
+    private final JwtUtils jwtUtils;
 
     @Override
     public String getKey(String baseKey, ProceedingJoinPoint joinPoint, RateLimit rateLimit) {
@@ -40,6 +46,6 @@ public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
      * 获取用户ID
      */
     private String getUserId(HttpServletRequest request) {
-        return JwtUtils.getUid(request).toString();
+        return jwtUtils.getUid(request).toString();
     }
 }
