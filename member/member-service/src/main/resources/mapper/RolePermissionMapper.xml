@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pot.member.service.mapper.RolePermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pot.member.service.entity.RolePermission">
+        <id column="id" property="id" />
+        <result column="gmt_created_at" property="gmtCreatedAt" />
+        <result column="gmt_updated_at" property="gmtUpdatedAt" />
+        <result column="gmt_deleted_at" property="gmtDeletedAt" />
+        <result column="role_id" property="roleId" />
+        <result column="permission_id" property="permissionId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, role_id, permission_id
+    </sql>
+
+</mapper>

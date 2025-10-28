@@ -1,5 +1,6 @@
 package com.pot.im.service.server;
 
+import com.pot.im.service.config.ServerConfig;
 import com.pot.im.service.protocol.serializer.ProtocolDecoder;
 import com.pot.im.service.protocol.serializer.ProtocolEncoder;
 import io.netty.channel.ChannelPipeline;
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ChannelPipelineConfigurer {
 
-    private final IMServer.ServerConfig config;
+    private final ServerConfig config;
     private final IMServerHandler serverHandler;
 
     public void configure(ChannelPipeline pipeline) {

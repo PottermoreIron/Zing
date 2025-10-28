@@ -8,8 +8,8 @@
         <version>${revision}</version>
     </parent>
     <artifactId>member</artifactId>
-    <name>user</name>
-    <description>user</description>
+    <name>member</name>
+    <description>member</description>
     <packaging>pom</packaging>
     <developers>
         <developer>
@@ -21,7 +21,7 @@
         <java.version>21</java.version>
     </properties>
     <modules>
-        <module>member-api</module>
+        <module>member-facade</module>
         <module>member-service</module>
     </modules>
 

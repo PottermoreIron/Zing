@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pot.member.service.mapper.PermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pot.member.service.entity.Permission">
+        <id column="id" property="id" />
+        <result column="gmt_created_at" property="gmtCreatedAt" />
+        <result column="gmt_updated_at" property="gmtUpdatedAt" />
+        <result column="gmt_deleted_at" property="gmtDeletedAt" />
+        <result column="permission_code" property="permissionCode" />
+        <result column="permission_name" property="permissionName" />
+        <result column="permission_description" property="permissionDescription" />
+        <result column="resource_type" property="resourceType" />
+        <result column="action_type" property="actionType" />
+        <result column="parent_id" property="parentId" />
+        <result column="permission_level" property="permissionLevel" />
+        <result column="is_system_permission" property="isSystemPermission" />
+        <result column="is_active" property="isActive" />
+        <result column="extend_json" property="extendJson" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, permission_code, permission_name, permission_description, resource_type, action_type, parent_id, permission_level, is_system_permission, is_active, extend_json
+    </sql>
+
+</mapper>

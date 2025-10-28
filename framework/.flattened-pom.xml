@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.pot</groupId>
+        <artifactId>zing</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>framework</artifactId>
+    <packaging>pom</packaging>
+    <name>framework</name>
+    <description>framework</description>
+    <developers>
+        <developer>
+            <name>pot</name>
+            <email>yecao.sacu@gmail.com</email>
+        </developer>
+    </developers>
+    <modules>
+        <module>framework-common</module>
+        <module>framework-starter-id</module>
+        <module>framework-starter-redis</module>
+        <module>framework-starter-ratelimit</module>
+        <module>framework-starter-code-generator</module>
+        <module>framework-starter-touch</module>
+        <module>framework-starter-security</module>
+    </modules>
+</project>

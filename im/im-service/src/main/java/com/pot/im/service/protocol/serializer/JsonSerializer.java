@@ -1,6 +1,6 @@
 package com.pot.im.service.protocol.serializer;
 
-import com.pot.common.utils.JacksonUtils;
+import com.pot.zing.framework.common.util.JacksonUtils;
 
 /**
  * @author: Pot

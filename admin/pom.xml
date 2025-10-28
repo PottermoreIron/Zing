@@ -21,7 +21,7 @@
         <java.version>21</java.version>
     </properties>
     <modules>
-        <module>admin-api</module>
+        <module>admin-facade</module>
         <module>admin-service</module>
     </modules>
 

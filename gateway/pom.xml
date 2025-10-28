@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>com.pot</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>framework-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

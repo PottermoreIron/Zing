@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pot.member.service.mapper.DeviceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pot.member.service.entity.Device">
+        <id column="id" property="id" />
+        <result column="gmt_created_at" property="gmtCreatedAt" />
+        <result column="gmt_updated_at" property="gmtUpdatedAt" />
+        <result column="gmt_deleted_at" property="gmtDeletedAt" />
+        <result column="member_id" property="memberId" />
+        <result column="device_id" property="deviceId" />
+        <result column="device_type" property="deviceType" />
+        <result column="platform" property="platform" />
+        <result column="browser" property="browser" />
+        <result column="app_version" property="appVersion" />
+        <result column="push_token" property="pushToken" />
+        <result column="is_active" property="isActive" />
+        <result column="gmt_last_used_at" property="gmtLastUsedAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, device_id, device_type, platform, browser, app_version, push_token, is_active, gmt_last_used_at
+    </sql>
+
+</mapper>
