@@ -80,11 +80,9 @@ public class MemberController {
             member.setAvatarUrl(memberDTO.getAvatarUrl());
         }
         if (memberDTO.getGender() != null) {
-            member.setGender(memberDTO.getGender());
+            member.setGender(Member.Gender.fromCode(member.getGender()));
         }
-        if (memberDTO.getBirthday() != null) {
-            member.setBirthday(memberDTO.getBirthday());
-        }
+        // Birthday field removed from MemberDTO, skip it
 
         memberService.updateById(member);
 
@@ -128,9 +126,8 @@ public class MemberController {
         }
 
         // 软删除
-        member.setStatus(3); // 3-已删除
         memberService.updateById(member);
-
+        member.setStatus(Member.AccountStatus.DELETED.getCode()); // 已删除
         return R.success(null, "删除成功");
     }
 

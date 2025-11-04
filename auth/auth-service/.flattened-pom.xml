@@ -40,6 +40,11 @@
         </dependency>
         <dependency>
             <groupId>com.pot</groupId>
+            <artifactId>framework-starter-security</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pot</groupId>
             <artifactId>member-facade</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -75,6 +80,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- WxJava - 微信开发工具包 -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-open</artifactId>
+            <version>4.6.0</version>
         </dependency>
     </dependencies>
 

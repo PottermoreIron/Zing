@@ -283,7 +283,7 @@ public class SocialConnection implements Serializable {
     /**
      * 业务方法 - 更新令牌信息
      */
-    public void updateTokens(String accessToken, String refreshToken, LocalDateTime expiresAt) {
+    public void updateTokens(String accessToken, String refreshToken, Long expiresAt) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.gmtTokenExpiresAt = expiresAt;
