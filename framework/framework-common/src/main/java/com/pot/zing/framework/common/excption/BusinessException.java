@@ -24,6 +24,6 @@ public class BusinessException extends RuntimeException {
 
     public BusinessException(String message) {
         super(message);
-        this.resultCode = ResultCode.BUSINESS_ERROR;
+        this.resultCode = ResultCode.INTERNAL_ERROR;
     }
 }

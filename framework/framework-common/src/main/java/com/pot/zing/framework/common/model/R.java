@@ -2,6 +2,7 @@ package com.pot.zing.framework.common.model;
 
 
 import com.pot.zing.framework.common.enums.ResultCode;
+import com.pot.zing.framework.common.service.IResultCode;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,41 +19,41 @@ import lombok.Getter;
 public class R<T> {
     T data;
     String msg;
-    Integer code;
+    String code;
     boolean success;
 
-    public R(ResultCode resultCode) {
+    public R(IResultCode resultCode) {
         this(resultCode, null, resultCode.getMsg());
     }
 
-    public R(ResultCode resultCode, T data) {
+    public R(IResultCode resultCode, T data) {
         this(resultCode, data, resultCode.getMsg());
     }
 
-    public R(ResultCode resultCode, String msg) {
+    public R(IResultCode resultCode, String msg) {
         this(resultCode, null, msg);
     }
 
-    public R(ResultCode resultCode, T data, String msg) {
+    public R(IResultCode resultCode, T data, String msg) {
         this(data, msg, resultCode.getCode(), resultCode.isSuccess());
     }
 
     /**
      * 静态工厂方法统一入口
      */
-    public static <T> R<T> of(ResultCode resultCode) {
+    public static <T> R<T> of(IResultCode resultCode) {
         return new R<>(resultCode);
     }
 
-    public static <T> R<T> of(ResultCode resultCode, T data) {
+    public static <T> R<T> of(IResultCode resultCode, T data) {
         return new R<>(resultCode, data);
     }
 
-    public static <T> R<T> of(ResultCode resultCode, String msg) {
+    public static <T> R<T> of(IResultCode resultCode, String msg) {
         return new R<>(resultCode, msg);
     }
 
-    public static <T> R<T> of(ResultCode resultCode, T data, String msg) {
+    public static <T> R<T> of(IResultCode resultCode, T data, String msg) {
         return new R<>(resultCode, data, msg);
     }
 
@@ -79,7 +80,7 @@ public class R<T> {
         return of(ResultCode.INTERNAL_ERROR);
     }
 
-    public static <T> R<T> fail(ResultCode resultCode) {
+    public static <T> R<T> fail(IResultCode resultCode) {
         return of(resultCode);
     }
 
@@ -95,7 +96,7 @@ public class R<T> {
         return of(ResultCode.INTERNAL_ERROR, data, msg);
     }
 
-    public static <T> R<T> fail(ResultCode resultCode, String msg) {
+    public static <T> R<T> fail(IResultCode resultCode, String msg) {
         return of(resultCode, msg);
     }
 }

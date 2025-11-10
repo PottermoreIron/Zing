@@ -8,10 +8,10 @@
 
 ### 1. 职责划分
 
-| 组件 | 职责 | 性能要求 |
-|------|------|----------|
-| **Gateway** | - JWT Token本地验证 (不调用服务)<br>- 权限预检查 (基于缓存)<br>- 限流控制<br>- 路由转发 | <10ms |
-| **Auth-Service** | - 用户认证 (登录)<br>- Token签发<br>- Token刷新<br>- 权限管理<br>- 权限变更通知 | <200ms |
+| 组件               | 职责                                                            | 性能要求   |
+|------------------|---------------------------------------------------------------|--------|
+| **Gateway**      | - JWT Token本地验证 (不调用服务)<br>- 权限预检查 (基于缓存)<br>- 限流控制<br>- 路由转发 | <10ms  |
+| **Auth-Service** | - 用户认证 (登录)<br>- Token签发<br>- Token刷新<br>- 权限管理<br>- 权限变更通知   | <200ms |
 
 ### 2. 核心设计
 
@@ -101,7 +101,10 @@
     "sub": "user-id",
     "userDomain": "MEMBER",
     "username": "john_doe",
-    "authorities": ["user:read", "user:write"],
+    "authorities": [
+      "user:read",
+      "user:write"
+    ],
     "iat": 1699516800,
     "exp": 1699520400
   },
@@ -129,6 +132,7 @@ pot:
 ```
 
 **优势**:
+
 - ✅ Gateway只需公钥，无法签发Token
 - ✅ Auth-Service独占私钥，安全性高
 - ✅ 支持分布式部署
@@ -140,59 +144,60 @@ pot:
 ### 1. JWT验证Filter
 
 ```java
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    
+
     private final JwtTokenValidator jwtTokenValidator;
     private final TokenBlacklistCache blacklistCache;
-    
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                   HttpServletResponse response, 
-                                   FilterChain filterChain) {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) {
         // 1. 提取Token
         String token = extractToken(request);
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-        
+
         try {
             // 2. 本地验证Token (签名、过期时间)
             Claims claims = jwtTokenValidator.validate(token);
-            
+
             // 3. 黑名单检查 (Redis本地缓存，100ms TTL)
             String jti = claims.get("jti", String.class);
             if (blacklistCache.isBlacklisted(jti)) {
                 throw new TokenRevokedException("Token已撤销");
             }
-            
+
             // 4. 构建Spring Security上下文
             Authentication auth = buildAuthentication(claims);
             SecurityContextHolder.getContext().setAuthentication(auth);
-            
+
             // 5. 添加用户上下文Header (传递给下游服务)
             request.setAttribute("X-User-Id", claims.getSubject());
             request.setAttribute("X-User-Domain", claims.get("userDomain"));
             request.setAttribute("X-Authorities", claims.get("authorities"));
-            
+
             filterChain.doFilter(request, response);
-            
+
         } catch (JwtException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.getWriter().write("{\"error\":\"Invalid token\"}");
         }
     }
-    
+
     private Authentication buildAuthentication(Claims claims) {
         String userId = claims.getSubject();
         String userDomain = claims.get("userDomain", String.class);
         List<String> authorities = claims.get("authorities", List.class);
-        
+
         Collection<GrantedAuthority> grantedAuthorities = authorities.stream()
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
-        
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
         UserPrincipal principal = new GatewayUserPrincipal(userId, userDomain);
         return new UsernamePasswordAuthenticationToken(principal, null, grantedAuthorities);
     }
@@ -202,30 +207,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 ### 2. Token黑名单缓存 (Gateway侧)
 
 ```java
+
 @Component
 public class TokenBlacklistCache {
-    
+
     private final StringRedisTemplate redisTemplate;
     private final LoadingCache<String, Boolean> localCache;
-    
+
     public TokenBlacklistCache(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
         // 本地缓存，减少Redis调用
         this.localCache = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofSeconds(10))  // 10秒本地缓存
-            .maximumSize(10000)
-            .build(this::checkRedis);
+                .expireAfterWrite(Duration.ofSeconds(10))  // 10秒本地缓存
+                .maximumSize(10000)
+                .build(this::checkRedis);
     }
-    
+
     public boolean isBlacklisted(String jti) {
         return localCache.get(jti);
     }
-    
+
     private Boolean checkRedis(String jti) {
         String key = "auth:token:blacklist:" + jti;
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
-    
+
     // 监听Auth-Service发送的黑名单变更事件
     @EventListener
     public void onTokenRevoked(TokenRevokedEvent event) {
@@ -237,24 +243,25 @@ public class TokenBlacklistCache {
 ### 3. 限流Filter
 
 ```java
+
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
-    
+
     private final RateLimiter rateLimiter;
-    
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                   HttpServletResponse response, 
-                                   FilterChain filterChain) {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) {
         String userId = (String) request.getAttribute("X-User-Id");
         String limitKey = "rate_limit:user:" + userId;
-        
+
         // 令牌桶算法 (Redis + Lua)
         if (!rateLimiter.tryAcquire(limitKey, 100, 1, TimeUnit.SECONDS)) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             return;
         }
-        
+
         filterChain.doFilter(request, response);
     }
 }
@@ -273,13 +280,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
 @Service
 public class TokenBlacklistService {
     private final StringRedisTemplate redisTemplate;
-    
+
     public void revokeToken(String jti, Long expiresAt) {
         // 1. 写入Redis黑名单
         String key = "auth:token:blacklist:" + jti;
         long ttl = expiresAt - System.currentTimeMillis() / 1000;
         redisTemplate.opsForValue().set(key, "1", ttl, TimeUnit.SECONDS);
-        
+
         // 2. 发布消息通知Gateway
         redisTemplate.convertAndSend("auth:token:revoked", jti);
     }
@@ -289,7 +296,7 @@ public class TokenBlacklistService {
 @Component
 public class TokenRevokedListener implements MessageListener {
     private final TokenBlacklistCache blacklistCache;
-    
+
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String jti = new String(message.getBody());
@@ -325,7 +332,7 @@ public void onRolePermissionChanged(RolePermissionGrantedEvent event) {
 @Component
 public class PermissionCacheInvalidator implements MessageListener {
     private final PermissionCache permissionCache;
-    
+
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String roleId = new String(message.getBody());
@@ -363,12 +370,12 @@ auth:permission:role:{roleId}    TTL = 300s
 
 ### 3. 性能目标
 
-| 场景 | 目标延迟 | 缓存命中率 |
-|------|----------|------------|
-| Gateway JWT验证 | <5ms | N/A (本地计算) |
-| Gateway黑名单检查 | <2ms | >99% (本地缓存) |
-| Gateway权限检查 | <10ms | >95% |
-| Auth-Service登录 | <200ms | N/A |
+| 场景             | 目标延迟   | 缓存命中率       |
+|----------------|--------|-------------|
+| Gateway JWT验证  | <5ms   | N/A (本地计算)  |
+| Gateway黑名单检查   | <2ms   | >99% (本地缓存) |
+| Gateway权限检查    | <10ms  | >95%        |
+| Auth-Service登录 | <200ms | N/A         |
 
 ---
 
@@ -389,7 +396,7 @@ spring:
             - Path=/auth/**
           filters:
             - StripPrefix=0
-        
+
         - id: member-route
           uri: lb://member-service
           predicates:
@@ -401,9 +408,9 @@ spring:
 pot:
   jwt:
     public-key: ${JWT_PUBLIC_KEY:classpath:keys/jwt_public_key.pem}
-  
+
   security:
-    whitelist:  # 白名单，不需要认证
+    whitelist: # 白名单，不需要认证
       - /auth/login
       - /auth/register
       - /auth/oauth2/callback/**
@@ -424,7 +431,7 @@ pot:
     access-token-ttl: 3600          # 1小时
     refresh-token-ttl: 2592000      # 30天
     issuer: pot-auth
-  
+
   security:
     password-policy:
       min-length: 8
@@ -432,7 +439,7 @@ pot:
       require-number: true
       require-special-char: true
       max-history: 5                # 密码历史记录数
-    
+
     login-attempt:
       max-attempts: 5
       lock-duration: 1800           # 锁定30分钟
@@ -447,16 +454,17 @@ pot:
 **场景**: 用户怀疑Token泄露
 
 **解决方案**:
+
 ```java
 // 提供API撤销所有Token
 @PostMapping("/auth/logout-all")
 public void logoutAll(@AuthenticationPrincipal UserPrincipal principal) {
     // 1. 查询该用户所有未过期的RefreshToken
     List<String> refreshTokens = refreshTokenRepository.findByPrincipal(principal);
-    
+
     // 2. 全部加入黑名单
     refreshTokens.forEach(jti -> tokenBlacklistService.revokeToken(jti));
-    
+
     // 3. 发布事件
     eventPublisher.publish(new AllTokensRevokedEvent(principal));
 }
@@ -471,15 +479,15 @@ public void logoutAll(@AuthenticationPrincipal UserPrincipal principal) {
 @PostMapping("/transfer")
 public void transfer(@RequestHeader("Authorization") String token) {
     String jti = jwtParser.parseJti(token);
-    
+
     // 检查jti是否已使用
     String key = "auth:jti:used:" + jti;
     Boolean isUsed = redisTemplate.opsForValue().setIfAbsent(key, "1", 10, TimeUnit.MINUTES);
-    
+
     if (Boolean.FALSE.equals(isUsed)) {
         throw new ReplayAttackException("请求重放");
     }
-    
+
     // 执行业务逻辑
 }
 ```
@@ -501,19 +509,28 @@ server:
 ### Gateway指标
 
 ```java
+
 @Component
 public class GatewayMetrics {
     private final MeterRegistry registry;
-    
+
     // JWT验证成功率
-    Counter.builder("gateway.jwt.validation.success").register(registry);
-    Counter.builder("gateway.jwt.validation.failed").register(registry);
-    
+    Counter.builder("gateway.jwt.validation.success").
+
+    register(registry);
+    Counter.builder("gateway.jwt.validation.failed").
+
+    register(registry);
+
     // 黑名单检查耗时
-    Timer.builder("gateway.blacklist.check.duration").register(registry);
-    
+    Timer.builder("gateway.blacklist.check.duration").
+
+    register(registry);
+
     // 限流拦截数
-    Counter.builder("gateway.ratelimit.rejected").register(registry);
+    Counter.builder("gateway.ratelimit.rejected").
+
+    register(registry);
 }
 ```
 
@@ -521,14 +538,34 @@ public class GatewayMetrics {
 
 ```java
 // 登录成功率
-Counter.builder("auth.login.success").tag("method", loginMethod).register(registry);
-Counter.builder("auth.login.failed").tag("reason", failReason).register(registry);
+Counter.builder("auth.login.success").
+
+tag("method",loginMethod).
+
+register(registry);
+Counter.
+
+builder("auth.login.failed").
+
+tag("reason",failReason).
+
+register(registry);
 
 // Token签发数
-Counter.builder("auth.token.issued").tag("type", tokenType).register(registry);
+Counter.
+
+builder("auth.token.issued").
+
+tag("type",tokenType).
+
+register(registry);
 
 // 黑名单大小
-Gauge.builder("auth.blacklist.size", blacklistRepository::count).register(registry);
+Gauge.
+
+builder("auth.blacklist.size",blacklistRepository::count).
+
+register(registry);
 ```
 
 ---

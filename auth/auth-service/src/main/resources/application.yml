@@ -1,14 +1,23 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: auth-service
+
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: localhost:8848
+        namespace: dev
+        group: DEFAULT_GROUP
+
+  # Redis配置
   data:
     redis:
       host: localhost
       port: 6379
+      password:
       database: 0
       lettuce:
         pool:
@@ -16,59 +25,47 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: -1ms
-server:
-  port: 10000
-pot:
-  touch:
-    enabled: true
-  jwt:
-    secret: pot
-    access-token-expiration: 3600
-    refresh-token-expiration: 604800000
-    issuer: pot
-    subject: auth
-    enable: true
+      timeout: 3000ms
 
-# OAuth2配置
-oauth2:
-  clients:
-    # GitHub OAuth2配置
-    github:
+# Auth服务配置
+auth:
+  # 缓存类型：redis | local | composite
+  cache:
+    type: redis
+
+  # Token配置
+  token:
+    # Token提供者：spring-security | shiro
+    provider: spring-security
+    # JWT配置
+    jwt:
+      # RSA私钥文件路径
+      private-key-location: classpath:keys/jwt_private_key.pem
+      # RSA公钥文件路径
+      public-key-location: classpath:keys/jwt_public_key.pem
+      # AccessToken过期时间（秒）
+      access-token-ttl: 3600
+      # RefreshToken过期时间（秒）
+      refresh-token-ttl: 2592000
+      # RefreshToken滑动窗口（秒，7天内刷新会续期）
+      refresh-token-sliding-window: 604800
+
+  # 分布式锁配置
+  lock:
+    type: redis
+
+  # 用户域配置
+  user-domain:
+    member:
       enabled: true
-      client-id: ${GITHUB_CLIENT_ID:your_github_client_id}
-      client-secret: ${GITHUB_CLIENT_SECRET:your_github_client_secret}
-      authorization-uri: https://github.com/login/oauth/authorize
-      token-uri: https://github.com/login/oauth/access_token
-      user-info-uri: https://api.github.com/user
-      redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:http://localhost:3000}/oauth2/callback/github
-      scope: user:email
+    admin:
+      enabled: false
 
-    # Google OAuth2配置
-    google:
-      enabled: true
-      client-id: ${GOOGLE_CLIENT_ID:your_google_client_id}
-      client-secret: ${GOOGLE_CLIENT_SECRET:your_google_client_secret}
-      authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-      token-uri: https://oauth2.googleapis.com/token
-      user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
-      redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:http://localhost:3000}/oauth2/callback/google
-      scope: openid profile email
-
-    # 微信OAuth2配置（网站应用扫码登录）
-    wechat:
-      enabled: ${WECHAT_ENABLED:false}
-      # 微信开放平台 AppID
-      client-id: ${WECHAT_OPEN_APPID:your_wechat_open_appid}
-      # 微信开放平台 AppSecret
-      client-secret: ${WECHAT_OPEN_APPSECRET:your_wechat_open_appsecret}
-      # 微信网站应用扫码授权URL
-      authorization-uri: https://open.weixin.qq.com/connect/qrconnect
-      # 微信access_token获取URL
-      token-uri: https://api.weixin.qq.com/sns/oauth2/access_token
-      # 微信用户信息获取URL
-      user-info-uri: https://api.weixin.qq.com/sns/userinfo
-      # 授权回调地址（需要在微信开放平台配置）
-      redirect-uri: ${OAUTH2_REDIRECT_BASE_URL:http://localhost:3000}/auth/wechat/callback
-      # 授权作用域（snsapi_login用于网站应用扫码登录）
-      scope: snsapi_login
+# 日志配置
+logging:
+  level:
+    com.pot.auth: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
 
