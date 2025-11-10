@@ -38,185 +38,6 @@ public final class CodeGenerator {
     }
 
     /**
-     * 代码生成配置类
-     *
-     * <p>使用链式调用模式，提供流畅的配置体验</p>
-     *
-     * <h3>使用示例:</h3>
-     * <pre>{@code
-     * CodeGenerator.create()
-     *     .mysql("localhost", 3306, "test_db")
-     *     .auth("root", "password")
-     *     .project("com.example", "user-service")
-     *     .includeTables("user", "role")
-     *     .generate();
-     * }</pre>
-     */
-    @Data
-    @Accessors(chain = true, fluent = true)
-    public static class GeneratorConfig {
-
-        // ========== 数据库连接配置 ==========
-        /**
-         * 数据库连接URL
-         */
-        private String url;
-        /**
-         * 数据库用户名
-         */
-        private String username;
-        /**
-         * 数据库密码
-         */
-        private String password;
-
-        // ========== 项目结构配置 ==========
-        /**
-         * 代码作者名称
-         */
-        private String author = "generator";
-        /**
-         * 项目根路径，默认为当前工作目录
-         */
-        private String projectPath = System.getProperty("user.dir");
-        /**
-         * 模块名称，用于多模块项目
-         */
-        private String moduleName = "";
-        /**
-         * 基础包名
-         */
-        private String basePackage = "com.example";
-
-        // ========== 表相关配置 ==========
-        /**
-         * 表名前缀，生成实体类时会移除此前缀
-         */
-        private String tablePrefix = "";
-        /**
-         * 需要生成的表名列表，为空则生成所有表
-         */
-        private List<String> includeTable;
-        /**
-         * 需要排除的表名列表
-         */
-        private List<String> excludeTable;
-
-        // ========== 代码生成选项 ==========
-        /**
-         * 是否启用Swagger注解
-         */
-        private boolean enableSwagger = false;
-        /**
-         * 是否启用Lombok注解
-         */
-        private boolean enableLombok = true;
-        /**
-         * 是否生成REST风格的Controller
-         */
-        private boolean restController = true;
-        /**
-         * 主键生成策略
-         */
-        private IdType idType = IdType.AUTO;
-        /**
-         * 逻辑删除字段名
-         */
-        private String logicDeleteColumn = "deleted";
-
-        // ========== 字段自动填充配置 ==========
-        /**
-         * 字段自动填充规则列表
-         */
-        private List<Column> tableFills = List.of(
-                new Column("gmt_create", FieldFill.INSERT),
-                new Column("gmt_modified", FieldFill.INSERT_UPDATE),
-                new Column("create_by", FieldFill.INSERT),
-                new Column("update_by", FieldFill.INSERT_UPDATE)
-        );
-
-        /**
-         * 配置MySQL数据库连接
-         *
-         * @param host     数据库主机地址
-         * @param port     数据库端口号
-         * @param database 数据库名称
-         * @return 当前配置实例，支持链式调用
-         */
-        public GeneratorConfig mysql(String host, int port, String database) {
-            this.url = "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true"
-                    .formatted(host, port, database);
-            return this;
-        }
-
-        /**
-         * 配置PostgreSQL数据库连接
-         *
-         * @param host     数据库主机地址
-         * @param port     数据库端口号
-         * @param database 数据库名称
-         * @return 当前配置实例，支持链式调用
-         */
-        public GeneratorConfig postgresql(String host, int port, String database) {
-            this.url = "jdbc:postgresql://%s:%d/%s".formatted(host, port, database);
-            return this;
-        }
-
-        /**
-         * 配置数据库认证信息
-         *
-         * @param username 数据库用户名
-         * @param password 数据库密码
-         * @return 当前配置实例，支持链式调用
-         */
-        public GeneratorConfig auth(String username, String password) {
-            return username(username).password(password);
-        }
-
-        /**
-         * 配置项目结构信息
-         *
-         * @param basePackage 基础包名，如：com.example
-         * @param moduleName  模块名称，用于多模块项目
-         * @return 当前配置实例，支持链式调用
-         */
-        public GeneratorConfig project(String basePackage, String moduleName) {
-            return basePackage(basePackage).moduleName(moduleName);
-        }
-
-        /**
-         * 指定需要生成代码的表
-         *
-         * @param tables 表名数组
-         * @return 当前配置实例，支持链式调用
-         */
-        public GeneratorConfig includeTables(String... tables) {
-            this.includeTable = List.of(tables);
-            return this;
-        }
-
-        /**
-         * 指定需要排除的表
-         *
-         * @param tables 表名数组
-         * @return 当前配置实例，支持链式调用
-         */
-        public GeneratorConfig excludeTables(String... tables) {
-            this.excludeTable = List.of(tables);
-            return this;
-        }
-
-        /**
-         * 执行代码生成
-         *
-         * <p>根据当前配置生成实体类、Mapper、Service、Controller等代码文件</p>
-         */
-        public void generate() {
-            CodeGenerator.execute(this);
-        }
-    }
-
-    /**
      * 创建代码生成器配置实例
      *
      * @return 新的配置实例
@@ -461,6 +282,185 @@ public final class CodeGenerator {
         }
         if (!StringUtils.hasText(config.basePackage())) {
             throw new IllegalArgumentException("❌ 基础包名不能为空");
+        }
+    }
+
+    /**
+     * 代码生成配置类
+     *
+     * <p>使用链式调用模式，提供流畅的配置体验</p>
+     *
+     * <h3>使用示例:</h3>
+     * <pre>{@code
+     * CodeGenerator.create()
+     *     .mysql("localhost", 3306, "test_db")
+     *     .auth("root", "password")
+     *     .project("com.example", "user-service")
+     *     .includeTables("user", "role")
+     *     .generate();
+     * }</pre>
+     */
+    @Data
+    @Accessors(chain = true, fluent = true)
+    public static class GeneratorConfig {
+
+        // ========== 数据库连接配置 ==========
+        /**
+         * 数据库连接URL
+         */
+        private String url;
+        /**
+         * 数据库用户名
+         */
+        private String username;
+        /**
+         * 数据库密码
+         */
+        private String password;
+
+        // ========== 项目结构配置 ==========
+        /**
+         * 代码作者名称
+         */
+        private String author = "generator";
+        /**
+         * 项目根路径，默认为当前工作目录
+         */
+        private String projectPath = System.getProperty("user.dir");
+        /**
+         * 模块名称，用于多模块项目
+         */
+        private String moduleName = "";
+        /**
+         * 基础包名
+         */
+        private String basePackage = "com.example";
+
+        // ========== 表相关配置 ==========
+        /**
+         * 表名前缀，生成实体类时会移除此前缀
+         */
+        private String tablePrefix = "";
+        /**
+         * 需要生成的表名列表，为空则生成所有表
+         */
+        private List<String> includeTable;
+        /**
+         * 需要排除的表名列表
+         */
+        private List<String> excludeTable;
+
+        // ========== 代码生成选项 ==========
+        /**
+         * 是否启用Swagger注解
+         */
+        private boolean enableSwagger = false;
+        /**
+         * 是否启用Lombok注解
+         */
+        private boolean enableLombok = true;
+        /**
+         * 是否生成REST风格的Controller
+         */
+        private boolean restController = true;
+        /**
+         * 主键生成策略
+         */
+        private IdType idType = IdType.AUTO;
+        /**
+         * 逻辑删除字段名
+         */
+        private String logicDeleteColumn = "deleted";
+
+        // ========== 字段自动填充配置 ==========
+        /**
+         * 字段自动填充规则列表
+         */
+        private List<Column> tableFills = List.of(
+                new Column("gmt_create", FieldFill.INSERT),
+                new Column("gmt_modified", FieldFill.INSERT_UPDATE),
+                new Column("create_by", FieldFill.INSERT),
+                new Column("update_by", FieldFill.INSERT_UPDATE)
+        );
+
+        /**
+         * 配置MySQL数据库连接
+         *
+         * @param host     数据库主机地址
+         * @param port     数据库端口号
+         * @param database 数据库名称
+         * @return 当前配置实例，支持链式调用
+         */
+        public GeneratorConfig mysql(String host, int port, String database) {
+            this.url = "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true"
+                    .formatted(host, port, database);
+            return this;
+        }
+
+        /**
+         * 配置PostgreSQL数据库连接
+         *
+         * @param host     数据库主机地址
+         * @param port     数据库端口号
+         * @param database 数据库名称
+         * @return 当前配置实例，支持链式调用
+         */
+        public GeneratorConfig postgresql(String host, int port, String database) {
+            this.url = "jdbc:postgresql://%s:%d/%s".formatted(host, port, database);
+            return this;
+        }
+
+        /**
+         * 配置数据库认证信息
+         *
+         * @param username 数据库用户名
+         * @param password 数据库密码
+         * @return 当前配置实例，支持链式调用
+         */
+        public GeneratorConfig auth(String username, String password) {
+            return username(username).password(password);
+        }
+
+        /**
+         * 配置项目结构信息
+         *
+         * @param basePackage 基础包名，如：com.example
+         * @param moduleName  模块名称，用于多模块项目
+         * @return 当前配置实例，支持链式调用
+         */
+        public GeneratorConfig project(String basePackage, String moduleName) {
+            return basePackage(basePackage).moduleName(moduleName);
+        }
+
+        /**
+         * 指定需要生成代码的表
+         *
+         * @param tables 表名数组
+         * @return 当前配置实例，支持链式调用
+         */
+        public GeneratorConfig includeTables(String... tables) {
+            this.includeTable = List.of(tables);
+            return this;
+        }
+
+        /**
+         * 指定需要排除的表
+         *
+         * @param tables 表名数组
+         * @return 当前配置实例，支持链式调用
+         */
+        public GeneratorConfig excludeTables(String... tables) {
+            this.excludeTable = List.of(tables);
+            return this;
+        }
+
+        /**
+         * 执行代码生成
+         *
+         * <p>根据当前配置生成实体类、Mapper、Service、Controller等代码文件</p>
+         */
+        public void generate() {
+            CodeGenerator.execute(this);
         }
     }
 }

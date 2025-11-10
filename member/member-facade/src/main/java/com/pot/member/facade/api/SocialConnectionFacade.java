@@ -65,7 +65,7 @@ public interface SocialConnectionFacade {
     /**
      * 检查第三方账号是否已被绑定
      *
-     * @param provider 平台提供商
+     * @param provider         平台提供商
      * @param providerMemberId 第三方平台用户ID
      * @return true-已绑定，false-未绑定
      */
@@ -76,7 +76,7 @@ public interface SocialConnectionFacade {
     /**
      * 根据第三方账号查询用户ID
      *
-     * @param provider 平台提供商
+     * @param provider         平台提供商
      * @param providerMemberId 第三方平台用户ID
      * @return 用户ID
      */
@@ -87,11 +87,11 @@ public interface SocialConnectionFacade {
     /**
      * 更新社交账号令牌
      *
-     * @param memberId 用户ID
-     * @param provider 平台提供商
-     * @param accessToken 新的访问令牌
+     * @param memberId     用户ID
+     * @param provider     平台提供商
+     * @param accessToken  新的访问令牌
      * @param refreshToken 新的刷新令牌
-     * @param expiresAt 过期时间
+     * @param expiresAt    过期时间
      * @return 操作结果
      */
     @PutMapping("/update-tokens")

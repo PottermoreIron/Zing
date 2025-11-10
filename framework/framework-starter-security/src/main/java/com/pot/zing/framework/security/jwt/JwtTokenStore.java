@@ -21,11 +21,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class JwtTokenStore {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
     private static final String TOKEN_BLACKLIST_PREFIX = "security:token:blacklist:";
     private static final String REFRESH_TOKEN_PREFIX = "security:token:refresh:";
     private static final String ONLINE_USER_PREFIX = "security:online:user:";
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 将Token加入黑名单

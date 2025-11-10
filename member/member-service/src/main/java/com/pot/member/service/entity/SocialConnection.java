@@ -159,64 +159,6 @@ public class SocialConnection implements Serializable {
     private String extendJson;
 
     /**
-     * 连接状态枚举
-     */
-    @Getter
-    public enum Status {
-        INACTIVE(0, "非活跃"),
-        ACTIVE(1, "活跃");
-
-        private final Integer code;
-        private final String description;
-
-        Status(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static Status fromCode(Integer code) {
-            for (Status status : Status.values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            throw new IllegalArgumentException("未知的连接状态: " + code);
-        }
-    }
-
-    /**
-     * 支持的第三方平台枚举
-     */
-    @Getter
-    public enum Provider {
-        WECHAT("wechat", "微信"),
-        QQ("qq", "QQ"),
-        WEIBO("weibo", "微博"),
-        GITHUB("github", "GitHub"),
-        GOOGLE("google", "Google"),
-        FACEBOOK("facebook", "Facebook"),
-        TWITTER("twitter", "Twitter"),
-        LINKEDIN("linkedin", "LinkedIn");
-
-        private final String code;
-        private final String description;
-
-        Provider(String code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static Provider fromCode(String code) {
-            for (Provider provider : Provider.values()) {
-                if (provider.code.equals(code)) {
-                    return provider;
-                }
-            }
-            throw new IllegalArgumentException("不支持的第三方平台: " + code);
-        }
-    }
-
-    /**
      * 业务方法 - 获取状态枚举
      */
     public Status getStatusEnum() {
@@ -306,5 +248,63 @@ public class SocialConnection implements Serializable {
         return this.memberId != null && this.provider != null &&
                 this.memberId.equals(other.getMemberId()) &&
                 this.provider.equals(other.getProvider());
+    }
+
+    /**
+     * 连接状态枚举
+     */
+    @Getter
+    public enum Status {
+        INACTIVE(0, "非活跃"),
+        ACTIVE(1, "活跃");
+
+        private final Integer code;
+        private final String description;
+
+        Status(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Status fromCode(Integer code) {
+            for (Status status : Status.values()) {
+                if (status.code.equals(code)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("未知的连接状态: " + code);
+        }
+    }
+
+    /**
+     * 支持的第三方平台枚举
+     */
+    @Getter
+    public enum Provider {
+        WECHAT("wechat", "微信"),
+        QQ("qq", "QQ"),
+        WEIBO("weibo", "微博"),
+        GITHUB("github", "GitHub"),
+        GOOGLE("google", "Google"),
+        FACEBOOK("facebook", "Facebook"),
+        TWITTER("twitter", "Twitter"),
+        LINKEDIN("linkedin", "LinkedIn");
+
+        private final String code;
+        private final String description;
+
+        Provider(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Provider fromCode(String code) {
+            for (Provider provider : Provider.values()) {
+                if (provider.code.equals(code)) {
+                    return provider;
+                }
+            }
+            throw new IllegalArgumentException("不支持的第三方平台: " + code);
+        }
     }
 }

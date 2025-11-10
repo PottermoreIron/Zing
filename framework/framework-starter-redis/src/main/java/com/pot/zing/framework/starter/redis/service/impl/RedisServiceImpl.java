@@ -18,15 +18,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RedisServiceImpl implements RedisService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisProperties properties;
-
     private static final String UNLOCK_SCRIPT =
             "if redis.call('get', KEYS[1]) == ARGV[1] then " +
                     "return redis.call('del', KEYS[1]) " +
                     "else return 0 end";
-
     private static final ThreadLocal<String> LOCK_VALUE_HOLDER = new ThreadLocal<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisProperties properties;
 
     // ========== String 操作 ==========
 

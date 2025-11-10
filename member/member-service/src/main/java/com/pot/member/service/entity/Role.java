@@ -128,84 +128,6 @@ public class Role implements Serializable {
     private String extendJson;
 
     /**
-     * 角色状态枚举
-     */
-    @Getter
-    public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
-
-        private final Integer code;
-        private final String description;
-
-        Status(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static Status fromCode(Integer code) {
-            for (Status status : Status.values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            throw new IllegalArgumentException("未知的角色状态: " + code);
-        }
-    }
-
-    /**
-     * 系统角色标识枚举
-     */
-    @Getter
-    public enum SystemFlag {
-        USER_DEFINED(0, "用户自定义"),
-        SYSTEM_BUILTIN(1, "系统内置");
-
-        private final Integer code;
-        private final String description;
-
-        SystemFlag(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static SystemFlag fromCode(Integer code) {
-            for (SystemFlag flag : SystemFlag.values()) {
-                if (flag.code.equals(code)) {
-                    return flag;
-                }
-            }
-            throw new IllegalArgumentException("未知的系统角色标识: " + code);
-        }
-    }
-
-    /**
-     * 预定义角色常量
-     */
-    @Getter
-    public enum PredefinedRoles {
-        SUPER_ADMIN("super_admin", "超级管理员"),
-        ADMIN("admin", "管理员");
-
-        private final String code;
-        private final String description;
-
-        PredefinedRoles(String code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static PredefinedRoles fromCode(String code) {
-            for (PredefinedRoles role : PredefinedRoles.values()) {
-                if (role.code.equals(code)) {
-                    return role;
-                }
-            }
-            throw new IllegalArgumentException("未知的预定义角色: " + code);
-        }
-    }
-
-    /**
      * 业务方法 - 获取状态枚举
      */
     public Status getStatusEnum() {
@@ -284,5 +206,83 @@ public class Role implements Serializable {
     public boolean isAdminRole() {
         return PredefinedRoles.ADMIN.getCode().equals(this.roleCode) ||
                 PredefinedRoles.SUPER_ADMIN.getCode().equals(this.roleCode);
+    }
+
+    /**
+     * 角色状态枚举
+     */
+    @Getter
+    public enum Status {
+        DISABLED(0, "禁用"),
+        ENABLED(1, "启用");
+
+        private final Integer code;
+        private final String description;
+
+        Status(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Status fromCode(Integer code) {
+            for (Status status : Status.values()) {
+                if (status.code.equals(code)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("未知的角色状态: " + code);
+        }
+    }
+
+    /**
+     * 系统角色标识枚举
+     */
+    @Getter
+    public enum SystemFlag {
+        USER_DEFINED(0, "用户自定义"),
+        SYSTEM_BUILTIN(1, "系统内置");
+
+        private final Integer code;
+        private final String description;
+
+        SystemFlag(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static SystemFlag fromCode(Integer code) {
+            for (SystemFlag flag : SystemFlag.values()) {
+                if (flag.code.equals(code)) {
+                    return flag;
+                }
+            }
+            throw new IllegalArgumentException("未知的系统角色标识: " + code);
+        }
+    }
+
+    /**
+     * 预定义角色常量
+     */
+    @Getter
+    public enum PredefinedRoles {
+        SUPER_ADMIN("super_admin", "超级管理员"),
+        ADMIN("admin", "管理员");
+
+        private final String code;
+        private final String description;
+
+        PredefinedRoles(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static PredefinedRoles fromCode(String code) {
+            for (PredefinedRoles role : PredefinedRoles.values()) {
+                if (role.code.equals(code)) {
+                    return role;
+                }
+            }
+            throw new IllegalArgumentException("未知的预定义角色: " + code);
+        }
     }
 }

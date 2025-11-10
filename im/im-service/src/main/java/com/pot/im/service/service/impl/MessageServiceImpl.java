@@ -1,9 +1,9 @@
 package com.pot.im.service.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pot.im.service.entity.Message;
 import com.pot.im.service.mapper.MessageMapper;
 import com.pot.im.service.service.MessageService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

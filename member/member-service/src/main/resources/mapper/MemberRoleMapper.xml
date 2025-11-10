@@ -4,21 +4,22 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pot.member.service.entity.MemberRole">
-        <id column="id" property="id" />
-        <result column="gmt_created_at" property="gmtCreatedAt" />
-        <result column="gmt_updated_at" property="gmtUpdatedAt" />
-        <result column="gmt_deleted_at" property="gmtDeletedAt" />
-        <result column="member_id" property="memberId" />
-        <result column="role_id" property="roleId" />
-        <result column="gmt_expires_at" property="gmtExpiresAt" />
-        <result column="is_active" property="isActive" />
-        <result column="assignment_note" property="assignmentNote" />
-        <result column="extend_json" property="extendJson" />
+        <id column="id" property="id"/>
+        <result column="gmt_created_at" property="gmtCreatedAt"/>
+        <result column="gmt_updated_at" property="gmtUpdatedAt"/>
+        <result column="gmt_deleted_at" property="gmtDeletedAt"/>
+        <result column="member_id" property="memberId"/>
+        <result column="role_id" property="roleId"/>
+        <result column="gmt_expires_at" property="gmtExpiresAt"/>
+        <result column="is_active" property="isActive"/>
+        <result column="assignment_note" property="assignmentNote"/>
+        <result column="extend_json" property="extendJson"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, role_id, gmt_expires_at, is_active, assignment_note, extend_json
+        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, role_id, gmt_expires_at, is_active,
+        assignment_note, extend_json
     </sql>
 
 </mapper>

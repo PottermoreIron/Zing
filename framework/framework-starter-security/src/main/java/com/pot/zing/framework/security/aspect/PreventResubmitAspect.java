@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class PreventResubmitAspect {
 
-    private final RedisTemplate<String, Object> redisTemplate;
     private static final String RESUBMIT_PREFIX = "security:resubmit:";
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Around("@annotation(com.pot.zing.framework.security.annotation.PreventResubmit)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {

@@ -4,24 +4,25 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pot.im.service.entity.GroupRequest">
-        <id column="id" property="id" />
-        <result column="gmt_create" property="gmtCreate" />
-        <result column="gmt_modified" property="gmtModified" />
-        <result column="group_id" property="groupId" />
-        <result column="user_id" property="userId" />
-        <result column="inviter_id" property="inviterId" />
-        <result column="message" property="message" />
-        <result column="type" property="type" />
-        <result column="status" property="status" />
-        <result column="handled_by" property="handledBy" />
-        <result column="handled_at" property="handledAt" />
-        <result column="expire_at" property="expireAt" />
-        <result column="extend_json" property="extendJson" />
+        <id column="id" property="id"/>
+        <result column="gmt_create" property="gmtCreate"/>
+        <result column="gmt_modified" property="gmtModified"/>
+        <result column="group_id" property="groupId"/>
+        <result column="user_id" property="userId"/>
+        <result column="inviter_id" property="inviterId"/>
+        <result column="message" property="message"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="handled_by" property="handledBy"/>
+        <result column="handled_at" property="handledAt"/>
+        <result column="expire_at" property="expireAt"/>
+        <result column="extend_json" property="extendJson"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_create, gmt_modified, group_id, user_id, inviter_id, message, type, status, handled_by, handled_at, expire_at, extend_json
+        id, gmt_create, gmt_modified, group_id, user_id, inviter_id, message, type, status, handled_by, handled_at,
+        expire_at, extend_json
     </sql>
 
 </mapper>

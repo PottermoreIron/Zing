@@ -34,11 +34,10 @@ public class IMClient {
 
     private final ClientConfig config;
     private final ClientChannelInitializer channelInitializer;
-
-    private EventLoopGroup eventLoopGroup;
-    private Channel channel;
     private final AtomicBoolean connected = new AtomicBoolean(false);
     private final AtomicInteger reconnectCount = new AtomicInteger(0);
+    private EventLoopGroup eventLoopGroup;
+    private Channel channel;
     private ScheduledExecutorService scheduledExecutor;
 
     /**

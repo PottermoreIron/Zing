@@ -75,7 +75,7 @@ public interface SocialConnectionsService extends IService<SocialConnection> {
      * 用于检查第三方账号是否已被绑定
      * </p>
      *
-     * @param provider 平台提供商
+     * @param provider         平台提供商
      * @param providerMemberId 第三方平台用户ID
      * @return 连接实体，未找到返回null
      */
@@ -87,14 +87,14 @@ public interface SocialConnectionsService extends IService<SocialConnection> {
      * 用于刷新过期的访问令牌
      * </p>
      *
-     * @param memberId 用户ID
-     * @param provider 平台提供商
-     * @param accessToken 新的访问令牌
+     * @param memberId     用户ID
+     * @param provider     平台提供商
+     * @param accessToken  新的访问令牌
      * @param refreshToken 新的刷新令牌（可选）
-     * @param expiresAt 过期时间（Unix时间戳，可选）
+     * @param expiresAt    过期时间（Unix时间戳，可选）
      */
     void updateTokens(Long memberId, String provider, String accessToken,
-                     String refreshToken, Long expiresAt);
+                      String refreshToken, Long expiresAt);
 
     /**
      * 设置主社交账号

@@ -1,9 +1,9 @@
 package com.pot.member.service.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pot.member.service.entity.RolePermission;
 import com.pot.member.service.mapper.RolePermissionMapper;
 import com.pot.member.service.service.RolePermissionService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

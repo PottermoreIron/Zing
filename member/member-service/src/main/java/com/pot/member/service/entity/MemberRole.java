@@ -112,32 +112,6 @@ public class MemberRole implements Serializable {
     private String extendJson;
 
     /**
-     * 角色状态枚举
-     */
-    @Getter
-    public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
-
-        private final Integer code;
-        private final String description;
-
-        Status(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static Status fromCode(Integer code) {
-            for (Status status : Status.values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            throw new IllegalArgumentException("未知的角色状态: " + code);
-        }
-    }
-
-    /**
      * 业务方法 - 判断角色是否启用
      *
      * @return true-启用，false-禁用
@@ -246,5 +220,31 @@ public class MemberRole implements Serializable {
         LocalDateTime baseTime = this.gmtExpiresAt != null ?
                 this.gmtExpiresAt : LocalDateTime.now();
         this.gmtExpiresAt = baseTime.plusDays(days);
+    }
+
+    /**
+     * 角色状态枚举
+     */
+    @Getter
+    public enum Status {
+        DISABLED(0, "禁用"),
+        ENABLED(1, "启用");
+
+        private final Integer code;
+        private final String description;
+
+        Status(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Status fromCode(Integer code) {
+            for (Status status : Status.values()) {
+                if (status.code.equals(code)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("未知的角色状态: " + code);
+        }
     }
 }

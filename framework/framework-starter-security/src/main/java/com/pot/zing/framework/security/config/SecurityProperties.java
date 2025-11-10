@@ -46,6 +46,20 @@ public class SecurityProperties {
      */
     private CacheProperties cache = new CacheProperties();
 
+    /**
+     * 会话策略枚举
+     */
+    public enum SessionStrategy {
+        /**
+         * 无状态（JWT）
+         */
+        STATELESS,
+        /**
+         * 有状态（Session）
+         */
+        STATEFUL
+    }
+
     @Data
     public static class JwtProperties {
         /**
@@ -90,19 +104,5 @@ public class SecurityProperties {
          * 缓存过期时间（秒）
          */
         private long ttl = 1800L; // 30分钟
-    }
-
-    /**
-     * 会话策略枚举
-     */
-    public enum SessionStrategy {
-        /**
-         * 无状态（JWT）
-         */
-        STATELESS,
-        /**
-         * 有状态（Session）
-         */
-        STATEFUL
     }
 }

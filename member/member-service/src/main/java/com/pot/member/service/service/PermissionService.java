@@ -1,7 +1,7 @@
 package com.pot.member.service.service;
 
-import com.pot.member.service.entity.Permission;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pot.member.service.entity.Permission;
 
 /**
  * <p>

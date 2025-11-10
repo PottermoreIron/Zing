@@ -49,6 +49,10 @@ public class RedisProperties {
      */
     private Cache cache = new Cache();
 
+    public enum SerializerType {
+        JSON, JDK, PROTOSTUFF
+    }
+
     @Data
     public static class Serializer {
         /**
@@ -101,9 +105,5 @@ public class RedisProperties {
          * 缓存过期时间
          */
         private Duration timeToLive = Duration.ofHours(1);
-    }
-
-    public enum SerializerType {
-        JSON, JDK, PROTOSTUFF
     }
 }

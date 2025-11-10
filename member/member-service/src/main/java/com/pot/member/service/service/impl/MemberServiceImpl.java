@@ -1,9 +1,9 @@
 package com.pot.member.service.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pot.member.service.entity.Member;
 import com.pot.member.service.mapper.MemberMapper;
 import com.pot.member.service.service.MemberService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

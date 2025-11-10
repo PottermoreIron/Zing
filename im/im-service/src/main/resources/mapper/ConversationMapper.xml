@@ -4,23 +4,24 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pot.im.service.entity.Conversation">
-        <id column="id" property="id" />
-        <result column="gmt_create" property="gmtCreate" />
-        <result column="gmt_modified" property="gmtModified" />
-        <result column="conversation_id" property="conversationId" />
-        <result column="type" property="type" />
-        <result column="target_id" property="targetId" />
-        <result column="last_message_id" property="lastMessageId" />
-        <result column="last_message_time" property="lastMessageTime" />
-        <result column="last_message_content" property="lastMessageContent" />
-        <result column="message_count" property="messageCount" />
-        <result column="status" property="status" />
-        <result column="extend_json" property="extendJson" />
+        <id column="id" property="id"/>
+        <result column="gmt_create" property="gmtCreate"/>
+        <result column="gmt_modified" property="gmtModified"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="type" property="type"/>
+        <result column="target_id" property="targetId"/>
+        <result column="last_message_id" property="lastMessageId"/>
+        <result column="last_message_time" property="lastMessageTime"/>
+        <result column="last_message_content" property="lastMessageContent"/>
+        <result column="message_count" property="messageCount"/>
+        <result column="status" property="status"/>
+        <result column="extend_json" property="extendJson"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_create, gmt_modified, conversation_id, type, target_id, last_message_id, last_message_time, last_message_content, message_count, status, extend_json
+        id, gmt_create, gmt_modified, conversation_id, type, target_id, last_message_id, last_message_time,
+        last_message_content, message_count, status, extend_json
     </sql>
 
 </mapper>

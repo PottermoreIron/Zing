@@ -25,6 +25,13 @@ public class BeanUtils {
     private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
     /**
+     * 私有构造函数，防止实例化
+     */
+    private BeanUtils() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
+
+    /**
      * 复制属性（浅拷贝，忽略null值）
      *
      * @param source 源对象
@@ -297,7 +304,7 @@ public class BeanUtils {
                 .map(source -> convertHybrid(source, targetSupplier, deepCopyFields))
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * 获取对象中值为null的属性名
      *
@@ -342,12 +349,5 @@ public class BeanUtils {
      */
     public static int getCacheSize() {
         return BEAN_COPIER_CACHE.size();
-    }
-
-    /**
-     * 私有构造函数，防止实例化
-     */
-    private BeanUtils() {
-        throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 }

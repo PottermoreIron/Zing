@@ -156,86 +156,10 @@ public class Permission implements Serializable {
     private String extendJson;
 
     /**
-     * 操作类型枚举
+     * 业务方法 - 生成权限编码
      */
-    @Getter
-    public enum ActionType {
-        CREATE("CREATE", "创建"),
-        READ("READ", "读取"),
-        UPDATE("UPDATE", "更新"),
-        DELETE("DELETE", "删除"),
-        EXECUTE("EXECUTE", "执行"),
-        MANAGE("MANAGE", "管理"),
-        ALL("ALL", "全部权限");
-
-        private final String code;
-        private final String description;
-
-        ActionType(String code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static ActionType fromCode(String code) {
-            for (ActionType type : ActionType.values()) {
-                if (type.code.equals(code)) {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("未知的操作类型: " + code);
-        }
-    }
-
-    /**
-     * 状态枚举
-     */
-    @Getter
-    public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
-
-        private final Integer code;
-        private final String description;
-
-        Status(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static Status fromCode(Integer code) {
-            for (Status status : Status.values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            throw new IllegalArgumentException("未知的权限状态: " + code);
-        }
-    }
-
-    /**
-     * 系统权限标识枚举
-     */
-    @Getter
-    public enum SystemFlag {
-        USER_DEFINED(0, "用户自定义"),
-        SYSTEM_BUILTIN(1, "系统内置");
-
-        private final Integer code;
-        private final String description;
-
-        SystemFlag(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static SystemFlag fromCode(Integer code) {
-            for (SystemFlag flag : SystemFlag.values()) {
-                if (flag.code.equals(code)) {
-                    return flag;
-                }
-            }
-            throw new IllegalArgumentException("未知的系统权限标识: " + code);
-        }
+    public static String generatePermissionCode(String resourceType, ActionType actionType) {
+        return resourceType.toLowerCase() + "." + actionType.getCode().toLowerCase();
     }
 
     /**
@@ -316,13 +240,6 @@ public class Permission implements Serializable {
     }
 
     /**
-     * 业务方法 - 生成权限编码
-     */
-    public static String generatePermissionCode(String resourceType, ActionType actionType) {
-        return resourceType.toLowerCase() + "." + actionType.getCode().toLowerCase();
-    }
-
-    /**
      * 业务方法 - 解析权限编码获取资源类型
      */
     public String getResourceTypeFromCode() {
@@ -343,5 +260,88 @@ public class Permission implements Serializable {
             }
         }
         return this.actionType;
+    }
+
+    /**
+     * 操作类型枚举
+     */
+    @Getter
+    public enum ActionType {
+        CREATE("CREATE", "创建"),
+        READ("READ", "读取"),
+        UPDATE("UPDATE", "更新"),
+        DELETE("DELETE", "删除"),
+        EXECUTE("EXECUTE", "执行"),
+        MANAGE("MANAGE", "管理"),
+        ALL("ALL", "全部权限");
+
+        private final String code;
+        private final String description;
+
+        ActionType(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static ActionType fromCode(String code) {
+            for (ActionType type : ActionType.values()) {
+                if (type.code.equals(code)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("未知的操作类型: " + code);
+        }
+    }
+
+    /**
+     * 状态枚举
+     */
+    @Getter
+    public enum Status {
+        DISABLED(0, "禁用"),
+        ENABLED(1, "启用");
+
+        private final Integer code;
+        private final String description;
+
+        Status(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Status fromCode(Integer code) {
+            for (Status status : Status.values()) {
+                if (status.code.equals(code)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("未知的权限状态: " + code);
+        }
+    }
+
+    /**
+     * 系统权限标识枚举
+     */
+    @Getter
+    public enum SystemFlag {
+        USER_DEFINED(0, "用户自定义"),
+        SYSTEM_BUILTIN(1, "系统内置");
+
+        private final Integer code;
+        private final String description;
+
+        SystemFlag(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static SystemFlag fromCode(Integer code) {
+            for (SystemFlag flag : SystemFlag.values()) {
+                if (flag.code.equals(code)) {
+                    return flag;
+                }
+            }
+            throw new IllegalArgumentException("未知的系统权限标识: " + code);
+        }
     }
 }

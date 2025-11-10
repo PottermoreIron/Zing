@@ -1,7 +1,7 @@
 package com.pot.im.service.service;
 
-import com.pot.im.service.entity.Message;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.pot.im.service.entity.Message;
 
 /**
  * <p>

@@ -141,6 +141,83 @@ public class Device implements Serializable {
     private LocalDateTime gmtLastUsedAt;
 
     /**
+     * 判断设备是否活跃
+     *
+     * @return true-活跃，false-非活跃
+     */
+    public boolean isDeviceActive() {
+        return Status.ACTIVE.getCode().equals(this.isActive);
+    }
+
+    /**
+     * 设置设备为活跃状态
+     */
+    public void setActiveStatus() {
+        this.isActive = Status.ACTIVE.getCode();
+    }
+
+    /**
+     * 设置设备为非活跃状态
+     */
+    public void setInactiveStatus() {
+        this.isActive = Status.INACTIVE.getCode();
+    }
+
+    /**
+     * 获取设备类型枚举
+     *
+     * @return 设备类型枚举
+     */
+    public DeviceType getDeviceTypeEnum() {
+        return this.deviceType != null ? DeviceType.fromCode(this.deviceType) : null;
+    }
+
+    /**
+     * 设置设备类型
+     *
+     * @param deviceType 设备类型枚举
+     */
+    public void setDeviceType(DeviceType deviceType) {
+        this.deviceType = deviceType != null ? deviceType.getCode() : null;
+    }
+
+    /**
+     * 获取平台类型枚举
+     *
+     * @return 平台类型枚举
+     */
+    public Platform getPlatformEnum() {
+        return this.platform != null ? Platform.fromCode(this.platform) : null;
+    }
+
+    /**
+     * 设置平台类型
+     *
+     * @param platform 平台类型枚举
+     */
+    public void setPlatform(Platform platform) {
+        this.platform = platform != null ? platform.getCode() : null;
+    }
+
+    /**
+     * 获取设备状态枚举
+     *
+     * @return 设备状态枚举
+     */
+    public Status getStatusEnum() {
+        return this.isActive != null ? Status.fromCode(this.isActive) : null;
+    }
+
+    /**
+     * 设置设备状态
+     *
+     * @param status 设备状态枚举
+     */
+    public void setStatus(Status status) {
+        this.isActive = status != null ? status.getCode() : null;
+    }
+
+    /**
      * 设备类型枚举
      */
     @Getter
@@ -224,82 +301,5 @@ public class Device implements Serializable {
             }
             throw new IllegalArgumentException("未知的设备状态: " + code);
         }
-    }
-
-    /**
-     * 判断设备是否活跃
-     *
-     * @return true-活跃，false-非活跃
-     */
-    public boolean isDeviceActive() {
-        return Status.ACTIVE.getCode().equals(this.isActive);
-    }
-
-    /**
-     * 设置设备为活跃状态
-     */
-    public void setActiveStatus() {
-        this.isActive = Status.ACTIVE.getCode();
-    }
-
-    /**
-     * 设置设备为非活跃状态
-     */
-    public void setInactiveStatus() {
-        this.isActive = Status.INACTIVE.getCode();
-    }
-
-    /**
-     * 获取设备类型枚举
-     *
-     * @return 设备类型枚举
-     */
-    public DeviceType getDeviceTypeEnum() {
-        return this.deviceType != null ? DeviceType.fromCode(this.deviceType) : null;
-    }
-
-    /**
-     * 设置设备类型
-     *
-     * @param deviceType 设备类型枚举
-     */
-    public void setDeviceType(DeviceType deviceType) {
-        this.deviceType = deviceType != null ? deviceType.getCode() : null;
-    }
-
-    /**
-     * 获取平台类型枚举
-     *
-     * @return 平台类型枚举
-     */
-    public Platform getPlatformEnum() {
-        return this.platform != null ? Platform.fromCode(this.platform) : null;
-    }
-
-    /**
-     * 设置平台类型
-     *
-     * @param platform 平台类型枚举
-     */
-    public void setPlatform(Platform platform) {
-        this.platform = platform != null ? platform.getCode() : null;
-    }
-
-    /**
-     * 获取设备状态枚举
-     *
-     * @return 设备状态枚举
-     */
-    public Status getStatusEnum() {
-        return this.isActive != null ? Status.fromCode(this.isActive) : null;
-    }
-
-    /**
-     * 设置设备状态
-     *
-     * @param status 设备状态枚举
-     */
-    public void setStatus(Status status) {
-        this.isActive = status != null ? status.getCode() : null;
     }
 }

@@ -166,7 +166,7 @@ public class SocialConnectionsServiceImpl extends ServiceImpl<SocialConnectionsM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateTokens(Long memberId, String provider, String accessToken,
-                            String refreshToken, Long expiresAt) {
+                             String refreshToken, Long expiresAt) {
         log.info("[SocialConnectionsService] 更新令牌, memberId={}, provider={}", memberId, provider);
 
         SocialConnection connection = getByMemberIdAndProvider(memberId, provider);

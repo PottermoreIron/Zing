@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "pot.touch.verification-code")
 public class VerificationCodeProperties {
-    
+
     public static final String CODE_KEY_PREFIX = "verification_code";
     public static final String RATE_LIMIT_KEY_PREFIX = "verification_rate";
     public static final String FAILURE_KEY_PREFIX = "verification_failure";

@@ -254,62 +254,6 @@ public class Member implements Serializable {
     private String extendJson;
 
     /**
-     * 性别枚举
-     */
-    @Getter
-    public enum Gender {
-        UNKNOWN(0, "未知"),
-        MALE(1, "男"),
-        FEMALE(2, "女");
-
-        private final Integer code;
-        private final String description;
-
-        Gender(Integer code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static Gender fromCode(Integer code) {
-            for (Gender gender : Gender.values()) {
-                if (gender.code.equals(code)) {
-                    return gender;
-                }
-            }
-            throw new IllegalArgumentException("未知的性别类型: " + code);
-        }
-    }
-
-    /**
-     * 账户状态枚举
-     */
-    @Getter
-    public enum AccountStatus {
-        ACTIVE("ACTIVE", "活跃"),
-        INACTIVE("INACTIVE", "非活跃"),
-        SUSPENDED("SUSPENDED", "暂停"),
-        PENDING("PENDING", "待审核"),
-        DELETED("DELETED", "已删除");
-
-        private final String code;
-        private final String description;
-
-        AccountStatus(String code, String description) {
-            this.code = code;
-            this.description = description;
-        }
-
-        public static AccountStatus fromCode(String code) {
-            for (AccountStatus status : AccountStatus.values()) {
-                if (status.code.equals(code)) {
-                    return status;
-                }
-            }
-            throw new IllegalArgumentException("未知的账户状态: " + code);
-        }
-    }
-
-    /**
      * 业务方法 - 获取性别枚举
      */
     public Gender getGenderEnum() {
@@ -433,5 +377,61 @@ public class Member implements Serializable {
             return nickname;
         }
         return email;
+    }
+
+    /**
+     * 性别枚举
+     */
+    @Getter
+    public enum Gender {
+        UNKNOWN(0, "未知"),
+        MALE(1, "男"),
+        FEMALE(2, "女");
+
+        private final Integer code;
+        private final String description;
+
+        Gender(Integer code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static Gender fromCode(Integer code) {
+            for (Gender gender : Gender.values()) {
+                if (gender.code.equals(code)) {
+                    return gender;
+                }
+            }
+            throw new IllegalArgumentException("未知的性别类型: " + code);
+        }
+    }
+
+    /**
+     * 账户状态枚举
+     */
+    @Getter
+    public enum AccountStatus {
+        ACTIVE("ACTIVE", "活跃"),
+        INACTIVE("INACTIVE", "非活跃"),
+        SUSPENDED("SUSPENDED", "暂停"),
+        PENDING("PENDING", "待审核"),
+        DELETED("DELETED", "已删除");
+
+        private final String code;
+        private final String description;
+
+        AccountStatus(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public static AccountStatus fromCode(String code) {
+            for (AccountStatus status : AccountStatus.values()) {
+                if (status.code.equals(code)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("未知的账户状态: " + code);
+        }
     }
 }
