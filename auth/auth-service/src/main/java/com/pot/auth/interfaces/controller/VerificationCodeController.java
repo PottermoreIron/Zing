@@ -1,6 +1,8 @@
 package com.pot.auth.interfaces.controller;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
+import com.pot.auth.domain.validation.annotations.ValidEmail;
+import com.pot.auth.domain.validation.annotations.ValidPhone;
 import com.pot.zing.framework.common.model.R;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -38,7 +40,7 @@ public class VerificationCodeController {
      * POST /auth/code/email?email=xxx@example.com
      */
     @PostMapping("/email")
-    public R<Void> sendEmailCode(@RequestParam @Email @NotBlank(message = "邮箱不能为空") String email) {
+    public R<Void> sendEmailCode(@RequestParam @NotBlank(message = "邮箱不能为空") @ValidEmail(message = "邮箱格式不正确") String email) {
         log.info("[接口] 发送邮件验证码: email={}", email);
 
         boolean sent = verificationCodeApplicationService.sendEmailCode(email);
@@ -56,7 +58,7 @@ public class VerificationCodeController {
      * POST /auth/code/sms?phone=+8613800138000
      */
     @PostMapping("/sms")
-    public R<Void> sendSmsCode(@RequestParam @Pattern(regexp = PHONE_REGEX, message = "手机不合法") String phone) {
+    public R<Void> sendSmsCode(@RequestParam @NotBlank(message = "手机号不能为空") @ValidPhone(message = "手机号格式不正确") String phone) {
         log.info("[接口] 发送短信验证码: phone={}", phone);
 
         boolean sent = verificationCodeApplicationService.sendSmsCode(phone);
