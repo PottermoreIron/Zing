@@ -1,6 +1,7 @@
 package com.pot.auth.interfaces.dto.login;
 
 import com.pot.auth.domain.shared.valueobject.UserDomain;
+import com.pot.auth.domain.validation.annotations.ValidEmail;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -14,8 +15,7 @@ import jakarta.validation.constraints.Size;
  */
 public record EmailCodeLoginRequest(
         @NotBlank(message = "邮箱不能为空")
-        @Email(message = "邮箱格式不正确")
-        @Size(max = 100, message = "邮箱长度不能超过100个字符")
+        @ValidEmail(message = "邮箱格式不正确")
         String email,
 
         @NotBlank(message = "验证码不能为空")

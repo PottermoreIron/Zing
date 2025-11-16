@@ -26,6 +26,7 @@ import static com.pot.zing.framework.common.util.ValidationUtils.PHONE_REGEX;
  * @since 2025-11-10
  */
 public record PhoneRegisterRequest(
+        @NotBlank
         @ValidPhone(message = "手机号格式不正确")
         String phone,
 

@@ -1,6 +1,7 @@
 package com.pot.auth.interfaces.dto.login;
 
 import com.pot.auth.domain.shared.valueobject.UserDomain;
+import com.pot.auth.domain.validation.annotations.ValidPhone;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -14,7 +15,8 @@ import static com.pot.zing.framework.common.util.ValidationUtils.PHONE_REGEX;
  * @since 2025-11-10
  */
 public record PhoneCodeLoginRequest(
-        @Pattern(regexp = PHONE_REGEX, message = "手机号格式不正确")
+        @NotBlank
+        @ValidPhone(message = "手机号格式不正确")
         String phone,
 
         @NotBlank(message = "验证码不能为空")

@@ -1,5 +1,7 @@
 package com.pot.zing.framework.common.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.regex.Pattern;
 
 /**
@@ -64,5 +66,20 @@ public class ValidationUtils {
             return false;
         }
         return Pattern.compile(pattern).matcher(str).matches();
+    }
+
+    public static boolean isValidIdentifier(String identifier) {
+        return isValidIdentifier(identifier, null);
+    }
+
+    public static boolean isValidIdentifier(String identifier, String pattern) {
+        if (StringUtils.isBlank(pattern)) {
+            boolean isValidNickname = isValidNickname(identifier);
+            boolean isValidEmail = isValidEmail(identifier);
+            boolean isValidPhone = isValidPhone(identifier);
+            return isValidNickname ^ isValidEmail ^ isValidPhone;
+        } else {
+            return isMatch(identifier, pattern);
+        }
     }
 }

@@ -83,7 +83,7 @@ public class RegistrationController {
      */
     @PostMapping("/email")
     public R<RegisterResponse> registerWithEmail(
-            @Valid @RequestBody EmailRegisterRequest request,
+            @RequestBody EmailRegisterRequest request,
             HttpServletRequest httpRequest
     ) {
         log.info("[接口] 邮箱注册请求: email={}", request.email());
@@ -119,7 +119,7 @@ public class RegistrationController {
      */
     @PostMapping("/phone")
     public R<RegisterResponse> registerWithPhone(
-            @Valid @RequestBody PhoneRegisterRequest request,
+            @RequestBody PhoneRegisterRequest request,
             HttpServletRequest httpRequest
     ) {
         log.info("[接口] 手机号注册请求: phone={}", request.phone());
