@@ -14,19 +14,19 @@ public class ValidationUtils {
     public final static String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
     public final static String IP_V4_REGEX = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$";
 
-    public static boolean isPhone(String phone) {
-        return isPhone(phone, PHONE_REGEX);
+    public static boolean isValidPhone(String phone) {
+        return isValidPhone(phone, PHONE_REGEX);
     }
 
-    public static boolean isPhone(String phone, String pattern) {
+    public static boolean isValidPhone(String phone, String pattern) {
         return isMatch(phone, pattern);
     }
 
-    public static boolean isEmail(String email) {
-        return isEmail(email, EMAIL_REGEX);
+    public static boolean isValidEmail(String email) {
+        return isValidEmail(email, EMAIL_REGEX);
     }
 
-    public static boolean isEmail(String email, String pattern) {
+    public static boolean isValidEmail(String email, String pattern) {
         return isMatch(email, pattern);
     }
 

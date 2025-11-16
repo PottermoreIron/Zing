@@ -18,7 +18,7 @@ public abstract class AbstractSmsChannelImpl extends AbstractTouchChannelImpl {
 
     @Override
     protected void validateRequest(TouchRequest request) {
-        if (!ValidationUtils.isPhone(request.getTarget())) {
+        if (!ValidationUtils.isValidPhone(request.getTarget())) {
             throw new TouchException("手机号格式错误: " + request.getTarget());
         }
 

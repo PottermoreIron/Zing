@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth/register")
 @RequiredArgsConstructor
+@Validated
 public class RegistrationController {
 
     private final RegistrationApplicationService registrationApplicationService;
@@ -46,7 +48,7 @@ public class RegistrationController {
      */
     @PostMapping("/username")
     public R<RegisterResponse> registerWithUsername(
-            @Valid @RequestBody UsernameRegisterRequest request,
+            @RequestBody UsernameRegisterRequest request,
             HttpServletRequest httpRequest
     ) {
         log.info("[接口] 用户名注册请求: username={}", request.username());

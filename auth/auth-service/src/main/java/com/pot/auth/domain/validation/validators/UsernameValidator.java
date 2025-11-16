@@ -1,6 +1,5 @@
 package com.pot.auth.domain.validation.validators;
 
-import com.pot.auth.domain.validation.annotations.ValidPhone;
 import com.pot.auth.domain.validation.annotations.ValidUsername;
 import com.pot.zing.framework.common.util.ValidationUtils;
 import jakarta.validation.ConstraintValidator;

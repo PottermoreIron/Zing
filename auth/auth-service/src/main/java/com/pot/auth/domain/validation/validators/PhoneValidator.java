@@ -26,7 +26,7 @@ public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
             return true;
         }
         return StringUtils.isBlank(pattern)
-                ? ValidationUtils.isPhone(phone)
-                : ValidationUtils.isPhone(phone, pattern);
+                ? ValidationUtils.isValidPhone(phone)
+                : ValidationUtils.isValidPhone(phone, pattern);
     }
 }

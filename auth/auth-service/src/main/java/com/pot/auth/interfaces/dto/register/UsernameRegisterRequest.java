@@ -1,10 +1,12 @@
 package com.pot.auth.interfaces.dto.register;
 
 import com.pot.auth.domain.shared.valueobject.UserDomain;
+import com.pot.auth.domain.validation.annotations.ValidPassword;
+import com.pot.auth.domain.validation.annotations.ValidUsername;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import static com.pot.zing.framework.common.util.ValidationUtils.NICKNAME_REGEX;
 import static com.pot.zing.framework.common.util.ValidationUtils.PASSWORD_REGEX;
 
 /**
@@ -23,10 +25,12 @@ import static com.pot.zing.framework.common.util.ValidationUtils.PASSWORD_REGEX;
  * @since 2025-11-10
  */
 public record UsernameRegisterRequest(
-        @Pattern(regexp = NICKNAME_REGEX, message = "用户名只能包含字母、数字、下划线，且长度在1-30个字符之间")
+        @NotBlank
+        @ValidUsername(message = "用户名只允许中文、字母、数字、下划线，连字符，长度在1-30个字符之间")
         String username,
 
-        @Pattern(regexp = PASSWORD_REGEX, message = "密码必须包含大小写字母, 数字, 特殊字符，且长度在8-16个字符之间")
+        @NotBlank
+        @ValidPassword(message = "密码必须包含大小写字母, 数字, 特殊字符，且长度在8-16个字符之间")
         String password,
 
         @Size(max = 20, message = "用户域长度不能超过20个字符")

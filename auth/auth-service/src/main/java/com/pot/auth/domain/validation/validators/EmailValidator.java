@@ -26,7 +26,7 @@ public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
             return true;
         }
         return StringUtils.isBlank(pattern)
-                ? ValidationUtils.isEmail(email)
-                : ValidationUtils.isEmail(email, pattern);
+                ? ValidationUtils.isValidEmail(email)
+                : ValidationUtils.isValidEmail(email, pattern);
     }
 }
