@@ -3,12 +3,9 @@ package com.pot.auth.interfaces.dto.register;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.validation.annotations.ValidEmail;
 import com.pot.auth.domain.validation.annotations.ValidPassword;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
-import static com.pot.zing.framework.common.util.ValidationUtils.PASSWORD_REGEX;
 
 /**
  * 邮箱密码注册请求DTO

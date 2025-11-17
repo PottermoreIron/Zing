@@ -7,9 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import static com.pot.zing.framework.common.util.ValidationUtils.PASSWORD_REGEX;
-import static com.pot.zing.framework.common.util.ValidationUtils.PHONE_REGEX;
-
 /**
  * 手机号密码注册请求DTO
  *
