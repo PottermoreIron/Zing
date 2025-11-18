@@ -34,3 +34,4 @@ build/
 
 **/.mvn
 **/.gitignore
+**/.flattened-pom.xml
