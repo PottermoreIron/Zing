@@ -47,5 +47,21 @@ public enum UserDomain {
         this.code = code;
         this.description = description;
     }
+
+    /**
+     * 根据编码获取用户域枚举
+     *
+     * @param code 用户域编码
+     * @return 用户域枚举
+     * @throws IllegalArgumentException 如果编码无效
+     */
+    public static UserDomain fromCode(String code) {
+        for (UserDomain domain : UserDomain.values()) {
+            if (domain.getCode().equalsIgnoreCase(code)) {
+                return domain;
+            }
+        }
+        throw new IllegalArgumentException("无效的用户域编码: " + code);
+    }
 }
 

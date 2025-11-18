@@ -151,6 +151,31 @@ public enum AuthResultCode implements IResultCode {
      */
     INVALID_PHONE("AUTH_0305", "手机号格式不正确", false),
 
+    /**
+     * 不支持的登录类型
+     */
+    UNSUPPORTED_LOGIN_TYPE("AUTH_0306", "不支持的登录类型", false),
+
+    /**
+     * 不支持的注册类型
+     */
+    UNSUPPORTED_REGISTER_TYPE("AUTH_0307", "不支持的注册类型", false),
+
+    /**
+     * 不支持的认证类型
+     */
+    UNSUPPORTED_AUTHENTICATION_TYPE("AUTH_0308", "不支持的认证类型", false),
+
+    /**
+     * 无效的注册请求
+     */
+    INVALID_REGISTER_REQUEST("AUTH_0309", "无效的注册请求", false),
+
+    /**
+     * 无效的登录请求
+     */
+    INVALID_LOGIN_REQUEST("AUTH_0310", "无效的登录请求", false),
+
     // ========== 权限相关错误 AUTH_0400-AUTH_0499 ==========
 
     /**

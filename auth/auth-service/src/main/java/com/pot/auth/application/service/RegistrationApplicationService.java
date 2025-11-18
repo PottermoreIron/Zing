@@ -1,11 +1,14 @@
 package com.pot.auth.application.service;
 
-import com.pot.auth.application.command.RegisterCommand;
 import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
-import com.pot.auth.domain.registration.entity.RegistrationRequest;
-import com.pot.auth.domain.registration.service.RegistrationDomainService;
-import com.pot.auth.domain.shared.valueobject.*;
+import com.pot.auth.domain.strategy.AuthenticationStrategy;
+import com.pot.auth.domain.strategy.RegisterStrategy;
+import com.pot.auth.domain.strategy.factory.AuthenticationStrategyFactory;
+import com.pot.auth.domain.strategy.factory.RegisterStrategyFactory;
+import com.pot.auth.interfaces.dto.auth.OAuth2RegisterRequest;
+import com.pot.auth.interfaces.dto.auth.RegisterRequest;
+import com.pot.auth.interfaces.dto.auth.WeChatRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,17 @@ import org.springframework.stereotype.Service;
 /**
  * 注册应用服务
  *
- * <p>编排注册流程，协调领域服务完成业务逻辑
+ * <p>编排注册流程，根据注册类型自动选择对应的策略
+ * <p>支持7种注册方式：
+ * <ul>
+ *   <li>用户名密码注册</li>
+ *   <li>手机号密码注册</li>
+ *   <li>邮箱密码注册</li>
+ *   <li>手机号验证码注册</li>
+ *   <li>邮箱验证码注册</li>
+ *   <li>OAuth2注册（Google, GitHub等）</li>
+ *   <li>微信注册</li>
+ * </ul>
  *
  * @author yecao
  * @since 2025-11-10
@@ -23,40 +36,57 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RegistrationApplicationService {
 
-    private final RegistrationDomainService registrationDomainService;
+    private final RegisterStrategyFactory registerStrategyFactory;
+    private final AuthenticationStrategyFactory authenticationStrategyFactory;
 
     /**
-     * 用户名注册
+     * 统一注册入口
      *
-     * <p>最简单的注册方式，不需要验证码
+     * <p>根据注册类型自动选择对应的策略执行注册
      *
-     * @param command 注册命令
-     * @return 注册响应（包含Token）
+     * @param request 注册请求（多态）
+     * @param ipAddress 客户端IP地址
+     * @param userAgent 用户代理信息
+     * @return 注册响应
      */
-    public RegisterResponse registerWithUsername(RegisterCommand command) {
-        log.info("[应用服务] 用户名注册: username={}, userDomain={}",
-                command.username(), command.userDomain());
+    public RegisterResponse register(RegisterRequest request, String ipAddress, String userAgent) {
+        log.info("[应用服务] 注册请求: registerType={}, userDomain={}",
+                request.registerType(), request.userDomain());
 
-        // 1. 构建值对象
-        Password password = Password.of(command.password());
-        IpAddress ipAddress = IpAddress.of(command.ipAddress());
-        DeviceInfo deviceInfo = DeviceInfo.fromUserAgent(command.userAgent());
-        LoginContext loginContext = LoginContext.of(ipAddress, deviceInfo);
+        AuthenticationResult result;
 
-        // 2. 构建注册请求
-        RegistrationRequest request = RegistrationRequest.builder()
-                .registrationType(command.registrationType())
-                .userDomain(command.userDomain())
-                .username(command.username())
-                .password(password)
-                .loginContext(loginContext)
-                .extendAttributes(command.extendAttributes())
-                .build();
+        // 判断是传统注册还是一体化认证（OAuth2/WeChat）
+        if ("OAUTH2".equals(request.registerType())) {
+            // OAuth2注册（实际是认证）
+            OAuth2RegisterRequest oauthReq = (OAuth2RegisterRequest) request;
+            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy("OAUTH2");
+            result = strategy.authenticate(
+                    oauthReq.provider(),
+                    oauthReq.code(),
+                    oauthReq.state(),
+                    oauthReq.userDomain(),
+                    ipAddress,
+                    userAgent
+            );
+        } else if ("WECHAT".equals(request.registerType())) {
+            // 微信注册（实际是认证）
+            WeChatRegisterRequest wechatReq = (WeChatRegisterRequest) request;
+            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy("WECHAT");
+            result = strategy.authenticate(
+                    "wechat",
+                    wechatReq.code(),
+                    wechatReq.state(),
+                    wechatReq.userDomain(),
+                    ipAddress,
+                    userAgent
+            );
+        } else {
+            // 传统注册（用户名/手机/邮箱 + 密码/验证码）
+            RegisterStrategy strategy = registerStrategyFactory.getStrategy(request.registerType());
+            result = strategy.execute(request, ipAddress, userAgent);
+        }
 
-        // 3. 调用领域服务注册
-        AuthenticationResult result = registrationDomainService.registerWithUsername(request);
-
-        // 4. 转换为应用层DTO
+        // 转换为应用层DTO
         RegisterResponse response = RegisterResponse.success(
                 result.userId().value(),
                 result.userDomain().name(),
@@ -69,107 +99,7 @@ public class RegistrationApplicationService {
                 result.refreshTokenExpiresAt()
         );
 
-        log.info("[应用服务] 用户名注册成功: userId={}", result.userId());
-        return response;
-    }
-
-    /**
-     * 邮箱注册
-     *
-     * @param command 注册命令
-     * @return 注册响应（包含Token）
-     */
-    public RegisterResponse registerWithEmail(RegisterCommand command) {
-        log.info("[应用服务] 邮箱注册: email={}, userDomain={}",
-                command.email(), command.userDomain());
-
-        // 1. 构建值对象
-        Email email = Email.of(command.email());
-        Password password = Password.of(command.password());
-        VerificationCode code = VerificationCode.of(command.verificationCode());
-        IpAddress ipAddress = IpAddress.of(command.ipAddress());
-        DeviceInfo deviceInfo = DeviceInfo.fromUserAgent(command.userAgent());
-        LoginContext loginContext = LoginContext.of(ipAddress, deviceInfo);
-
-        // 2. 构建注册请求
-        RegistrationRequest request = RegistrationRequest.builder()
-                .registrationType(command.registrationType())
-                .userDomain(command.userDomain())
-                .username(command.username())
-                .email(email)
-                .password(password)
-                .verificationCode(code)
-                .loginContext(loginContext)
-                .extendAttributes(command.extendAttributes())
-                .build();
-
-        // 3. 调用领域服务注册
-        AuthenticationResult result = registrationDomainService.registerWithEmail(request);
-
-        // 4. 转换为应用层DTO
-        RegisterResponse response = RegisterResponse.success(
-                result.userId().value(),
-                result.userDomain().name(),
-                result.username(),
-                result.email(),
-                result.phone(),
-                result.accessToken(),
-                result.refreshToken(),
-                result.accessTokenExpiresAt(),
-                result.refreshTokenExpiresAt()
-        );
-
-        log.info("[应用服务] 邮箱注册成功: userId={}", result.userId());
-        return response;
-    }
-
-    /**
-     * 手机号注册
-     *
-     * @param command 注册命令
-     * @return 注册响应（包含Token）
-     */
-    public RegisterResponse registerWithPhone(RegisterCommand command) {
-        log.info("[应用服务] 手机号注册: phone={}, userDomain={}",
-                command.phone(), command.userDomain());
-
-        // 1. 构建值对象
-        Phone phoneNumber = Phone.of(command.phone());
-        Password password = Password.of(command.password());
-        VerificationCode code = VerificationCode.of(command.verificationCode());
-        IpAddress ipAddress = IpAddress.of(command.ipAddress());
-        DeviceInfo deviceInfo = DeviceInfo.fromUserAgent(command.userAgent());
-        LoginContext loginContext = LoginContext.of(ipAddress, deviceInfo);
-
-        // 2. 构建注册请求
-        RegistrationRequest request = RegistrationRequest.builder()
-                .registrationType(command.registrationType())
-                .userDomain(command.userDomain())
-                .username(command.username())
-                .phone(phoneNumber)
-                .password(password)
-                .verificationCode(code)
-                .loginContext(loginContext)
-                .extendAttributes(command.extendAttributes())
-                .build();
-
-        // 3. 调用领域服务注册
-        AuthenticationResult result = registrationDomainService.registerWithPhone(request);
-
-        // 4. 转换为应用层DTO
-        RegisterResponse response = RegisterResponse.success(
-                result.userId().value(),
-                result.userDomain().name(),
-                result.username(),
-                result.email(),
-                result.phone(),
-                result.accessToken(),
-                result.refreshToken(),
-                result.accessTokenExpiresAt(),
-                result.refreshTokenExpiresAt()
-        );
-
-        log.info("[应用服务] 手机号注册成功: userId={}", result.userId());
+        log.info("[应用服务] 注册成功: userId={}, registerType={}", result.userId(), request.registerType());
         return response;
     }
 }

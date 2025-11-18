@@ -17,9 +17,12 @@ public record CreateUserCommand(
         Email email,
         Phone phone,
         Password password,
+        String avatarUrl,
         String firstName,
         String lastName,
-        boolean emailVerified
+        boolean emailVerified,
+        String oauth2Provider,
+        String oauth2OpenId
 ) {
 }
 

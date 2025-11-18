@@ -1,0 +1,49 @@
+package com.pot.auth.interfaces.dto.auth;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+/**
+ * 注册请求基础接口
+ *
+ * <p>使用Jackson多态序列化，通过registerType字段识别具体请求类型
+ * <p>采用sealed interface限制所有可能的子类型，保证类型安全
+ *
+ * @author yecao
+ * @since 2025-11-18
+ */
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "registerType",
+        visible = true
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = UsernamePasswordRegisterRequest.class, name = "USERNAME_PASSWORD"),
+        @JsonSubTypes.Type(value = EmailPasswordRegisterRequest.class, name = "EMAIL_PASSWORD"),
+        @JsonSubTypes.Type(value = PhonePasswordRegisterRequest.class, name = "PHONE_PASSWORD"),
+        @JsonSubTypes.Type(value = EmailCodeRegisterRequest.class, name = "EMAIL_CODE"),
+        @JsonSubTypes.Type(value = PhoneCodeRegisterRequest.class, name = "PHONE_CODE"),
+        @JsonSubTypes.Type(value = OAuth2RegisterRequest.class, name = "OAUTH2"),
+        @JsonSubTypes.Type(value = WeChatRegisterRequest.class, name = "WECHAT")
+})
+public sealed interface RegisterRequest permits
+        UsernamePasswordRegisterRequest,
+        EmailPasswordRegisterRequest,
+        PhonePasswordRegisterRequest,
+        EmailCodeRegisterRequest,
+        PhoneCodeRegisterRequest,
+        OAuth2RegisterRequest,
+        WeChatRegisterRequest {
+
+    /**
+     * 获取注册类型
+     */
+    String registerType();
+
+    /**
+     * 获取用户域
+     */
+    String userDomain();
+}
+
