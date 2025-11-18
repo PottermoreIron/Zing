@@ -1,81 +1,68 @@
 package com.pot.auth.infrastructure.adapter.cache;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pot.auth.domain.port.CachePort;
+import com.pot.auth.infrastructure.constant.CacheKeyConstants;
+import com.pot.zing.framework.starter.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * Redis缓��适配器（防腐层实现）
+ * Redis缓存适配器（防腐层实现）
  *
- * <p>将CachePort接口适配到Spring Data Redis
- * <p>领域层通过CachePort接口访问，完全不知道底层使用了Redis
+ * <p>使用框架层的 RedisService 实现 CachePort 接口，提供工业级缓存能力
+ * <p>优势：
+ * <ul>
+ *   <li>统一的 Redis 配置和管理</li>
+ *   <li>自动的 key 前缀和命名空间隔离</li>
+ *   <li>完善的错误处理和日志记录</li>
+ *   <li>支持分布式锁、Lua脚本等高级特性</li>
+ * </ul>
  *
  * @author pot
  * @since 1.0.0
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "auth.cache.type", havingValue = "redis", matchIfMissing = true)
 @RequiredArgsConstructor
 public class RedisCacheAdapter implements CachePort {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
+    private final RedisService redisService;
+
+    // ========== 基本操作 ==========
 
     @Override
     public <T> void set(String key, T value, Duration ttl) {
-        try {
-            redisTemplate.opsForValue().set(key, value, ttl.toMillis(), TimeUnit.MILLISECONDS);
-            log.debug("Redis缓存设置成功: key={}, ttl={}ms", key, ttl.toMillis());
-        } catch (Exception e) {
-            log.error("Redis缓存设置失败: key={}", key, e);
-            throw new CacheException("缓存设置失败", e);
+        String fullKey = buildAuthKey(key);
+        Boolean success = redisService.set(fullKey, value, ttl);
+        if (Boolean.FALSE.equals(success)) {
+            log.error("缓存设置失败: key={}", fullKey);
+            throw new CacheException("缓存设置失败: " + fullKey);
         }
+        log.debug("缓存设置成功: key={}, ttl={}", fullKey, ttl);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> get(String key, Class<T> type) {
-        try {
-            Object value = redisTemplate.opsForValue().get(key);
-            if (value == null) {
-                log.debug("Redis缓存未命中: key={}", key);
-                return Optional.empty();
-            }
-
-            // 如果类型匹配，直接返回
-            if (type.isInstance(value)) {
-                log.debug("Redis缓存命中: key={}", key);
-                return Optional.of((T) value);
-            }
-
-            // 尝试转换
-            T converted = objectMapper.convertValue(value, type);
-            log.debug("Redis缓存命中（转换）: key={}", key);
-            return Optional.of(converted);
-        } catch (Exception e) {
-            log.error("Redis缓存读取失败: key={}", key, e);
+        String fullKey = buildAuthKey(key);
+        T value = redisService.get(fullKey, type);
+        if (value == null) {
+            log.debug("缓存未命中: key={}", fullKey);
             return Optional.empty();
         }
+        log.debug("缓存命中: key={}", fullKey);
+        return Optional.of(value);
     }
 
     @Override
     public void delete(String key) {
-        try {
-            redisTemplate.delete(key);
-            log.debug("Redis缓存删除: key={}", key);
-        } catch (Exception e) {
-            log.error("Redis缓存删除失败: key={}", key, e);
-        }
+        String fullKey = buildAuthKey(key);
+        redisService.delete(fullKey);
+        log.debug("缓存删除: key={}", fullKey);
     }
 
     @Override
@@ -83,210 +70,166 @@ public class RedisCacheAdapter implements CachePort {
         if (keys == null || keys.isEmpty()) {
             return;
         }
-        try {
-            redisTemplate.delete(keys);
-            log.debug("Redis批量删除缓存: count={}", keys.size());
-        } catch (Exception e) {
-            log.error("Redis批量删除失败: keys={}", keys, e);
-        }
+        Set<String> fullKeys = keys.stream()
+                .map(this::buildAuthKey)
+                .collect(Collectors.toSet());
+        Long deleted = redisService.delete(fullKeys);
+        log.debug("批量删除缓存: count={}", deleted);
     }
 
     @Override
     public boolean exists(String key) {
-        try {
-            return redisTemplate.hasKey(key);
-        } catch (Exception e) {
-            log.error("Redis exists检查失败: key={}", key, e);
-            return false;
-        }
+        String fullKey = buildAuthKey(key);
+        Boolean exists = redisService.exists(fullKey);
+        return Boolean.TRUE.equals(exists);
     }
+
+    // ========== 集合操作 ==========
 
     @Override
     public <T> void addToSet(String key, T value, Duration ttl) {
-        try {
-            redisTemplate.opsForSet().add(key, value);
-            redisTemplate.expire(key, ttl.toMillis(), TimeUnit.MILLISECONDS);
-            log.debug("Redis集合添加: key={}, value={}", key, value);
-        } catch (Exception e) {
-            log.error("Redis集合添加失败: key={}", key, e);
-        }
+        String fullKey = buildAuthKey(key);
+        redisService.sAdd(fullKey, value);
+        redisService.expire(fullKey, ttl);
+        log.debug("集合添加元素: key={}, value={}", fullKey, value);
     }
 
     @Override
     public <T> void removeFromSet(String key, T value) {
-        try {
-            redisTemplate.opsForSet().remove(key, value);
-            log.debug("Redis集合删除: key={}, value={}", key, value);
-        } catch (Exception e) {
-            log.error("Redis集合删除失败: key={}", key, e);
-        }
+        String fullKey = buildAuthKey(key);
+        redisService.sRemove(fullKey, value);
+        log.debug("集合删除元素: key={}, value={}", fullKey, value);
     }
 
     @Override
     public <T> Set<T> getSet(String key, Class<T> type) {
-        try {
-            Set<Object> members = redisTemplate.opsForSet().members(key);
-            if (members == null || members.isEmpty()) {
-                return Collections.emptySet();
-            }
-
-            return members.stream()
-                    .map(obj -> objectMapper.convertValue(obj, type))
-                    .collect(Collectors.toSet());
-        } catch (Exception e) {
-            log.error("Redis集合读取失败: key={}", key, e);
-            return Collections.emptySet();
-        }
+        String fullKey = buildAuthKey(key);
+        Set<T> members = redisService.sMembers(fullKey, type);
+        return members != null ? members : Collections.emptySet();
     }
 
     @Override
     public <T> boolean isMemberOfSet(String key, T value) {
-        try {
-            Boolean isMember = redisTemplate.opsForSet().isMember(key, value);
-            return Boolean.TRUE.equals(isMember);
-        } catch (Exception e) {
-            log.error("Redis集合成员检查失败: key={}", key, e);
-            return false;
-        }
+        String fullKey = buildAuthKey(key);
+        Boolean isMember = redisService.sIsMember(fullKey, value);
+        return Boolean.TRUE.equals(isMember);
     }
+
+    // ========== Hash操作 ==========
 
     @Override
     public <T> void setHash(String key, String field, T value, Duration ttl) {
-        try {
-            redisTemplate.opsForHash().put(key, field, value);
-            redisTemplate.expire(key, ttl.toMillis(), TimeUnit.MILLISECONDS);
-            log.debug("Redis Hash设置: key={}, field={}", key, field);
-        } catch (Exception e) {
-            log.error("Redis Hash设置失败: key={}, field={}", key, field, e);
-        }
+        String fullKey = buildAuthKey(key);
+        redisService.hSet(fullKey, field, value);
+        redisService.expire(fullKey, ttl);
+        log.debug("Hash设置字段: key={}, field={}", fullKey, field);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> getHash(String key, String field, Class<T> type) {
-        try {
-            Object value = redisTemplate.opsForHash().get(key, field);
-            if (value == null) {
-                return Optional.empty();
-            }
-
-            if (type.isInstance(value)) {
-                return Optional.of((T) value);
-            }
-
-            T converted = objectMapper.convertValue(value, type);
-            return Optional.of(converted);
-        } catch (Exception e) {
-            log.error("Redis Hash读取失败: key={}, field={}", key, field, e);
-            return Optional.empty();
-        }
+        String fullKey = buildAuthKey(key);
+        T value = redisService.hGet(fullKey, field, type);
+        return Optional.ofNullable(value);
     }
 
     @Override
     public <T> Map<String, T> getAllHash(String key, Class<T> type) {
-        try {
-            Map<Object, Object> entries = redisTemplate.opsForHash().entries(key);
-            if (entries.isEmpty()) {
-                return Collections.emptyMap();
-            }
-
-            Map<String, T> result = new HashMap<>();
-            entries.forEach((k, v) -> {
-                String fieldKey = k.toString();
-                T value = objectMapper.convertValue(v, type);
-                result.put(fieldKey, value);
-            });
-            return result;
-        } catch (Exception e) {
-            log.error("Redis Hash全部读取失败: key={}", key, e);
+        String fullKey = buildAuthKey(key);
+        Map<Object, Object> entries = redisService.hGetAll(fullKey);
+        if (entries == null || entries.isEmpty()) {
             return Collections.emptyMap();
         }
+
+        Map<String, T> result = new HashMap<>();
+        entries.forEach((k, v) -> {
+            String fieldKey = k.toString();
+            @SuppressWarnings("unchecked")
+            T value = (T) v;
+            result.put(fieldKey, value);
+        });
+        return result;
     }
 
     @Override
     public void deleteHash(String key, String field) {
-        try {
-            redisTemplate.opsForHash().delete(key, field);
-            log.debug("Redis Hash删除: key={}, field={}", key, field);
-        } catch (Exception e) {
-            log.error("Redis Hash删除失败: key={}, field={}", key, field, e);
-        }
+        String fullKey = buildAuthKey(key);
+        redisService.hDelete(fullKey, field);
+        log.debug("Hash删除字段: key={}, field={}", fullKey, field);
     }
+
+    // ========== 计数器操作 ==========
 
     @Override
     public long increment(String key, long delta, Duration ttl) {
-        try {
-            Long result = redisTemplate.opsForValue().increment(key, delta);
-            redisTemplate.expire(key, ttl.toMillis(), TimeUnit.MILLISECONDS);
-            return result != null ? result : 0;
-        } catch (Exception e) {
-            log.error("Redis递增失败: key={}", key, e);
-            return 0;
-        }
+        String fullKey = buildAuthKey(key);
+        Long result = redisService.increment(fullKey, delta);
+        redisService.expire(fullKey, ttl);
+        return result != null ? result : 0;
     }
 
     @Override
     public long decrement(String key, long delta) {
-        try {
-            Long result = redisTemplate.opsForValue().decrement(key, delta);
-            return result != null ? result : 0;
-        } catch (Exception e) {
-            log.error("Redis递减失败: key={}", key, e);
-            return 0;
-        }
+        String fullKey = buildAuthKey(key);
+        Long result = redisService.increment(fullKey, -delta);
+        return result != null ? result : 0;
     }
+
+    // ========== 高级操作 ==========
 
     @Override
     public <T> boolean setIfAbsent(String key, T value, Duration ttl) {
-        try {
-            Boolean result = redisTemplate.opsForValue().setIfAbsent(
-                    key, value, ttl.toMillis(), TimeUnit.MILLISECONDS
-            );
-            return Boolean.TRUE.equals(result);
-        } catch (Exception e) {
-            log.error("Redis setIfAbsent失败: key={}", key, e);
-            return false;
-        }
+        String fullKey = buildAuthKey(key);
+        Boolean success = redisService.setIfAbsent(fullKey, value, ttl);
+        return Boolean.TRUE.equals(success);
     }
 
     @Override
     public void expire(String key, Duration ttl) {
-        try {
-            redisTemplate.expire(key, ttl.toMillis(), TimeUnit.MILLISECONDS);
-            log.debug("Redis设置过期时间: key={}, ttl={}ms", key, ttl.toMillis());
-        } catch (Exception e) {
-            log.error("Redis设置过期时间失败: key={}", key, e);
-        }
+        String fullKey = buildAuthKey(key);
+        redisService.expire(fullKey, ttl);
+        log.debug("设置过期时间: key={}, ttl={}", fullKey, ttl);
     }
 
     @Override
     public Optional<Duration> getTtl(String key) {
-        try {
-            Long ttl = redisTemplate.getExpire(key, TimeUnit.MILLISECONDS);
-            if (ttl < 0) {
-                return Optional.empty();
-            }
-            return Optional.of(Duration.ofMillis(ttl));
-        } catch (Exception e) {
-            log.error("Redis获取TTL失败: key={}", key, e);
-            return Optional.empty();
-        }
+        String fullKey = buildAuthKey(key);
+        Duration ttl = redisService.getExpireDuration(fullKey);
+        return Optional.ofNullable(ttl);
     }
 
     @Override
     public void persist(String key) {
-        try {
-            redisTemplate.persist(key);
-            log.debug("Redis持久化: key={}", key);
-        } catch (Exception e) {
-            log.error("Redis持久化失败: key={}", key, e);
+        String fullKey = buildAuthKey(key);
+        Boolean success = redisService.persist(fullKey);
+        if (Boolean.TRUE.equals(success)) {
+            log.debug("持久化成功: key={}", fullKey);
+        } else {
+            log.warn("持久化失败: key={}", fullKey);
         }
+    }
+
+    // ========== 工具方法 ==========
+
+    /**
+     * 构建带有 auth 前缀的完整 key
+     * <p>最终格式：pot:auth:业务key（由 RedisService 自动添加 pot: 前缀）
+     *
+     * @param key 业务 key
+     * @return 完整的 Redis key
+     */
+    private String buildAuthKey(String key) {
+        return CacheKeyConstants.buildKey(key);
     }
 
     /**
      * 缓存异常
+     * <p>用于关键操作失败时的异常抛出，体现领域层防腐策略
      */
     public static class CacheException extends RuntimeException {
+        public CacheException(String message) {
+            super(message);
+        }
+
         public CacheException(String message, Throwable cause) {
             super(message, cause);
         }

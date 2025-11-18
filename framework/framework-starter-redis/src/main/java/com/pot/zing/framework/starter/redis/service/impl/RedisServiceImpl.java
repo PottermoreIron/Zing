@@ -166,6 +166,42 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
+    /**
+     * 获取剩余过期时间（返回Duration）
+     *
+     * @param key 键名
+     * @return null表示不存在或没有设置过期时间
+     */
+    @Override
+    public Duration getExpireDuration(String key) {
+        try {
+            long expireSeconds = redisTemplate.getExpire(buildKey(key), TimeUnit.SECONDS);
+            if (expireSeconds < 0) {
+                return null;
+            }
+            return Duration.ofSeconds(expireSeconds);
+        } catch (Exception e) {
+            log.error("Redis getExpireDuration failed: key={}", key, e);
+            return null;
+        }
+    }
+
+    /**
+     * 持久化键（移除过期时间）
+     *
+     * @param key 键名
+     * @return true表示成功，false表示失败
+     */
+    @Override
+    public Boolean persist(String key) {
+        try {
+            return redisTemplate.persist(buildKey(key));
+        } catch (Exception e) {
+            log.error("Redis persist failed: key={}", key, e);
+            return false;
+        }
+    }
+
     @Override
     public String type(String key) {
         try {

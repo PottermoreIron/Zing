@@ -84,6 +84,16 @@ public interface RedisService {
     Long getExpire(String key);
 
     /**
+     * 获取剩余过期时间（返回Duration）
+     */
+    Duration getExpireDuration(String key);
+
+    /**
+     * 持久化键（移除过期时间）
+     */
+    Boolean persist(String key);
+
+    /**
      * 获取键的类型
      */
     String type(String key);
