@@ -5,6 +5,7 @@ import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
@@ -52,7 +53,7 @@ public class PhonePasswordLoginStrategy extends AbstractLoginStrategy {
         log.info("[手机号登录] 开始登录: phone={}", req.phone());
 
         // 1. 获取用户模块适配器
-        UserDomain userDomain = UserDomain.fromCode(req.userDomain());
+        UserDomain userDomain = req.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 2. 调用用户模块进行密码验证
@@ -73,13 +74,13 @@ public class PhonePasswordLoginStrategy extends AbstractLoginStrategy {
     }
 
     @Override
-    protected String getSupportedLoginType() {
-        return "PHONE_PASSWORD";
+    protected LoginType getSupportedLoginType() {
+        return LoginType.PHONE_PASSWORD;
     }
 
     @Override
-    public boolean supports(String loginType) {
-        return "PHONE_PASSWORD".equals(loginType);
+    public boolean supports(LoginType loginType) {
+        return LoginType.PHONE_PASSWORD.equals(loginType);
     }
 
     /**
@@ -97,4 +98,3 @@ public class PhonePasswordLoginStrategy extends AbstractLoginStrategy {
         }
     }
 }
-

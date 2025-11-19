@@ -1,10 +1,13 @@
 package com.pot.auth.interfaces.dto.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pot.auth.domain.shared.enums.RegisterType;
+import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.validation.annotations.ValidEmail;
 import com.pot.auth.domain.validation.annotations.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 /**
  * 邮箱密码注册请求
@@ -13,8 +16,9 @@ import jakarta.validation.constraints.Size;
  * @since 2025-11-18
  */
 public record EmailPasswordRegisterRequest(
-        @NotBlank(message = "注册类型不能为空")
-        String registerType,
+        @NotNull(message = "注册类型不能为空")
+        @JsonProperty("registerType")
+        RegisterType registerType,
 
         @NotBlank(message = "邮箱不能为空")
         @ValidEmail(message = "邮箱格式不正确")
@@ -28,8 +32,8 @@ public record EmailPasswordRegisterRequest(
         @Pattern(regexp = "^[0-9]{6}$", message = "验证码必须是6位数字")
         String verificationCode,
 
-        @Size(max = 20, message = "用户域长度不能超过20个字符")
-        String userDomain
+        @JsonProperty("userDomain")
+        UserDomain userDomain
 ) implements RegisterRequest {
 }
 

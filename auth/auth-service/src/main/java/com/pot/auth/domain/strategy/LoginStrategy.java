@@ -1,6 +1,7 @@
 package com.pot.auth.domain.strategy;
 
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
+import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
 
 /**
@@ -30,6 +31,6 @@ public interface LoginStrategy {
      * @param loginType 登录类型
      * @return true if支持, false otherwise
      */
-    boolean supports(String loginType);
+    boolean supports(LoginType loginType);
 }
 

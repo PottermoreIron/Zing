@@ -1,6 +1,8 @@
 package com.pot.auth.domain.strategy.factory;
 
 import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.enums.LoginType;
+import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.strategy.AuthenticationStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +36,9 @@ public class AuthenticationStrategyFactory {
         log.info("[认证策略工厂] 开始初始化，共有 {} 个策略", strategies.size());
 
         for (AuthenticationStrategy strategy : strategies) {
-            // 尝试所有可能的认证类型，找到该策略支持的类型
-            registerStrategy(strategy, "OAUTH2");
-            registerStrategy(strategy, "WECHAT");
+            // OAuth2 和 WeChat 认证策略
+            registerStrategy(strategy, LoginType.OAUTH2.name());
+            registerStrategy(strategy, LoginType.WECHAT.name());
         }
 
         log.info("[认证策略工厂] 初始化完成，已注册策略: {}", strategyMap.keySet());
@@ -54,13 +56,35 @@ public class AuthenticationStrategyFactory {
     }
 
     /**
+     * 根据认证类型获取对应的策略（LoginType）
+     *
+     * @param loginType 登录类型
+     * @return 认证策略
+     * @throws DomainException 当找不到对应策略时
+     */
+    public AuthenticationStrategy getStrategy(LoginType loginType) {
+        return getStrategy(loginType.name());
+    }
+
+    /**
+     * 根据认证类型获取对应的策略（RegisterType）
+     *
+     * @param registerType 注册类型
+     * @return 认证策略
+     * @throws DomainException 当找不到对应策略时
+     */
+    public AuthenticationStrategy getStrategy(RegisterType registerType) {
+        return getStrategy(registerType.name());
+    }
+
+    /**
      * 根据认证类型获取对应的策略
      *
      * @param authenticationType 认证类型（OAUTH2, WECHAT等）
      * @return 认证策略
      * @throws DomainException 当找不到对应策略时
      */
-    public AuthenticationStrategy getStrategy(String authenticationType) {
+    private AuthenticationStrategy getStrategy(String authenticationType) {
         AuthenticationStrategy strategy = strategyMap.get(authenticationType);
 
         if (strategy == null) {

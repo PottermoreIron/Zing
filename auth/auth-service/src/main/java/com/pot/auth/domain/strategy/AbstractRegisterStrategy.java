@@ -3,6 +3,7 @@ package com.pot.auth.domain.strategy;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.port.dto.UserDTO;
+import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
@@ -50,7 +51,7 @@ public abstract class AbstractRegisterStrategy implements RegisterStrategy {
             // 4. 生成认证结果
             AuthenticationResult result = generateAuthenticationResult(
                     user,
-                    UserDomain.fromCode(request.userDomain()),
+                    request.userDomain(),
                     loginContext
             );
 
@@ -120,11 +121,10 @@ public abstract class AbstractRegisterStrategy implements RegisterStrategy {
     /**
      * 获取策略支持的注册类型（由子类实现）
      */
-    protected abstract String getSupportedRegisterType();
+    protected abstract RegisterType getSupportedRegisterType();
 
     @Override
-    public boolean supports(String registerType) {
+    public boolean supports(RegisterType registerType) {
         return getSupportedRegisterType().equals(registerType);
     }
 }
-

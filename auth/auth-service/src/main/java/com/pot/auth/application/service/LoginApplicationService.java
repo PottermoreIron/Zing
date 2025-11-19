@@ -2,6 +2,7 @@ package com.pot.auth.application.service;
 
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
+import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.strategy.AuthenticationStrategy;
 import com.pot.auth.domain.strategy.LoginStrategy;
 import com.pot.auth.domain.strategy.factory.AuthenticationStrategyFactory;
@@ -56,27 +57,27 @@ public class LoginApplicationService {
         AuthenticationResult result;
 
         // 判断是传统登录还是一体化认证（OAuth2/WeChat）
-        if ("OAUTH2".equals(request.loginType())) {
+        if (LoginType.OAUTH2.equals(request.loginType())) {
             // OAuth2登录
             OAuth2LoginRequest oauthReq = (OAuth2LoginRequest) request;
-            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy("OAUTH2");
+            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy(LoginType.OAUTH2);
             result = strategy.authenticate(
-                    oauthReq.provider(),
+                    oauthReq.provider().getCode(),
                     oauthReq.code(),
                     oauthReq.state(),
-                    oauthReq.userDomain(),
+                    oauthReq.userDomain().getCode(),
                     ipAddress,
                     userAgent
             );
-        } else if ("WECHAT".equals(request.loginType())) {
+        } else if (LoginType.WECHAT.equals(request.loginType())) {
             // 微信登录
             WeChatLoginRequest wechatReq = (WeChatLoginRequest) request;
-            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy("WECHAT");
+            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy(LoginType.WECHAT);
             result = strategy.authenticate(
-                    "wechat",
+                    LoginType.WECHAT.getCode(),
                     wechatReq.code(),
                     wechatReq.state(),
-                    wechatReq.userDomain(),
+                    wechatReq.userDomain().getCode(),
                     ipAddress,
                     userAgent
             );
@@ -103,4 +104,3 @@ public class LoginApplicationService {
         return response;
     }
 }
-

@@ -1,9 +1,12 @@
 package com.pot.auth.interfaces.dto.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.pot.auth.domain.shared.enums.LoginType;
+import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.validation.annotations.ValidEmail;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 /**
  * 邮箱验证码登录请求
@@ -12,8 +15,9 @@ import jakarta.validation.constraints.Size;
  * @since 2025-11-18
  */
 public record EmailCodeLoginRequest(
-        @NotBlank(message = "登录类型不能为空")
-        String loginType,
+        @NotNull(message = "登录类型不能为空")
+        @JsonProperty("loginType")
+        LoginType loginType,
 
         @NotBlank(message = "邮箱不能为空")
         @ValidEmail(message = "邮箱格式不正确")
@@ -23,8 +27,8 @@ public record EmailCodeLoginRequest(
         @Pattern(regexp = "^[0-9]{6}$", message = "验证码必须是6位数字")
         String verificationCode,
 
-        @Size(max = 20, message = "用户域长度不能超过20个字符")
-        String userDomain
+        @JsonProperty("userDomain")
+        UserDomain userDomain
 ) implements LoginRequest {
 }
 

@@ -6,6 +6,7 @@ import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
@@ -63,7 +64,7 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategy {
         }
 
         // 2. 获取用户模块适配器
-        UserDomain userDomain = UserDomain.fromCode(req.userDomain());
+        UserDomain userDomain = req.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 3. 根据邮箱查找用户
@@ -84,13 +85,13 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategy {
     }
 
     @Override
-    protected String getSupportedLoginType() {
-        return "EMAIL_CODE";
+    protected LoginType getSupportedLoginType() {
+        return LoginType.EMAIL_CODE;
     }
 
     @Override
-    public boolean supports(String loginType) {
-        return "EMAIL_CODE".equals(loginType);
+    public boolean supports(LoginType loginType) {
+        return LoginType.EMAIL_CODE.equals(loginType);
     }
 
     /**
@@ -108,4 +109,3 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategy {
         }
     }
 }
-

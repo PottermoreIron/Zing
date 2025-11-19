@@ -1,6 +1,7 @@
 package com.pot.auth.domain.strategy.factory;
 
 import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.strategy.RegisterStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RegisterStrategyFactory {
 
-    private final Map<String, RegisterStrategy> strategyMap = new ConcurrentHashMap<>();
+    private final Map<RegisterType, RegisterStrategy> strategyMap = new ConcurrentHashMap<>();
 
     /**
      * 构造函数，Spring自动注入所有RegisterStrategy实现类
@@ -34,12 +35,10 @@ public class RegisterStrategyFactory {
         log.info("[注册策略工厂] 开始初始化，共有 {} 个策略", strategies.size());
 
         for (RegisterStrategy strategy : strategies) {
-            // 尝试所有可能的注册类型，找到该策略支持的类型
-            registerStrategy(strategy, "USERNAME_PASSWORD");
-            registerStrategy(strategy, "EMAIL_PASSWORD");
-            registerStrategy(strategy, "PHONE_PASSWORD");
-            registerStrategy(strategy, "EMAIL_CODE");
-            registerStrategy(strategy, "PHONE_CODE");
+            // 遍历所有注册类型枚举值，找到该策略支持的类型
+            for (RegisterType registerType : RegisterType.values()) {
+                registerStrategy(strategy, registerType);
+            }
         }
 
         log.info("[注册策略工厂] 初始化完成，已注册策略: {}", strategyMap.keySet());
@@ -48,7 +47,7 @@ public class RegisterStrategyFactory {
     /**
      * 注册策略到Map
      */
-    private void registerStrategy(RegisterStrategy strategy, String registerType) {
+    private void registerStrategy(RegisterStrategy strategy, RegisterType registerType) {
         if (strategy.supports(registerType)) {
             strategyMap.put(registerType, strategy);
             log.info("[注册策略工厂] 注册策略: {} -> {}", registerType, strategy.getClass().getSimpleName());
@@ -62,7 +61,7 @@ public class RegisterStrategyFactory {
      * @return 注册策略
      * @throws DomainException 当找不到对应策略时
      */
-    public RegisterStrategy getStrategy(String registerType) {
+    public RegisterStrategy getStrategy(RegisterType registerType) {
         RegisterStrategy strategy = strategyMap.get(registerType);
 
         if (strategy == null) {
@@ -81,7 +80,7 @@ public class RegisterStrategyFactory {
      * @param registerType 注册类型
      * @return true if支持, false otherwise
      */
-    public boolean supports(String registerType) {
+    public boolean supports(RegisterType registerType) {
         return strategyMap.containsKey(registerType);
     }
 }

@@ -7,6 +7,7 @@ import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.CreateUserCommand;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.*;
 import com.pot.auth.domain.strategy.AbstractRegisterStrategy;
@@ -66,7 +67,7 @@ public class PhonePasswordRegisterStrategy extends AbstractRegisterStrategy {
         }
 
         // 2. 获取用户模块适配器
-        UserDomain userDomain = UserDomain.fromCode(req.userDomain());
+        UserDomain userDomain = req.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 3. 检查手机号是否已存在
@@ -96,8 +97,7 @@ public class PhonePasswordRegisterStrategy extends AbstractRegisterStrategy {
     }
 
     @Override
-    protected String getSupportedRegisterType() {
-        return "PHONE_PASSWORD";
+    protected RegisterType getSupportedRegisterType() {
+        return RegisterType.PHONE_PASSWORD;
     }
 }
-

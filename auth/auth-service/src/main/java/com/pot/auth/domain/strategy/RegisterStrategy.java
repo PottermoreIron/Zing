@@ -1,6 +1,7 @@
 package com.pot.auth.domain.strategy;
 
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
+import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.interfaces.dto.auth.RegisterRequest;
 
 /**
@@ -30,6 +31,6 @@ public interface RegisterStrategy {
      * @param registerType 注册类型
      * @return true if支持, false otherwise
      */
-    boolean supports(String registerType);
+    boolean supports(RegisterType registerType);
 }
 

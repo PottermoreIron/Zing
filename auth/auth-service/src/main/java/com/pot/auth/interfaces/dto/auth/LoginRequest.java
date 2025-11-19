@@ -2,6 +2,8 @@ package com.pot.auth.interfaces.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pot.auth.domain.shared.enums.LoginType;
+import com.pot.auth.domain.shared.valueobject.UserDomain;
 
 /**
  * 登录请求基础接口
@@ -39,11 +41,11 @@ public sealed interface LoginRequest permits
     /**
      * 获取登录类型
      */
-    String loginType();
+    LoginType loginType();
 
     /**
      * 获取用户域
      */
-    String userDomain();
+    UserDomain userDomain();
 }
 
