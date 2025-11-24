@@ -50,6 +50,7 @@ public class LoginApplicationService {
      * @param userAgent 用户代理信息
      * @return 登录响应
      */
+    @SuppressWarnings("unchecked")
     public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
         log.info("[应用服务] 登录请求: loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
@@ -83,8 +84,9 @@ public class LoginApplicationService {
             );
         } else {
             // 传统登录（用户名/手机/邮箱 + 密码/验证码）
-            LoginStrategy strategy = loginStrategyFactory.getStrategy(request.loginType());
-            result = strategy.execute(request, ipAddress, userAgent);
+            LoginStrategy<?> strategy = loginStrategyFactory.getStrategy(request.loginType());
+            // 此处的类型转换是安全的，因为工厂根据loginType返回对应的策略
+            result = ((LoginStrategy<LoginRequest>) strategy).execute(request, ipAddress, userAgent);
         }
 
         // 转换为应用层DTO

@@ -50,6 +50,7 @@ public class RegistrationApplicationService {
      * @param userAgent 用户代理信息
      * @return 注册响应
      */
+    @SuppressWarnings("unchecked")
     public RegisterResponse register(RegisterRequest request, String ipAddress, String userAgent) {
         log.info("[应用服务] 注册请求: registerType={}, userDomain={}",
                 request.registerType(), request.userDomain());
@@ -83,8 +84,9 @@ public class RegistrationApplicationService {
             );
         } else {
             // 传统注册（用户名/手机/邮箱 + 密码/验证码）
-            RegisterStrategy strategy = registerStrategyFactory.getStrategy(request.registerType());
-            result = strategy.execute(request, ipAddress, userAgent);
+            RegisterStrategy<?> strategy = registerStrategyFactory.getStrategy(request.registerType());
+            // 此处的类型转换是安全的，因为工厂根据registerType返回对应的策略
+            result = ((RegisterStrategy<RegisterRequest>) strategy).execute(request, ipAddress, userAgent);
         }
 
         // 转换为应用层DTO

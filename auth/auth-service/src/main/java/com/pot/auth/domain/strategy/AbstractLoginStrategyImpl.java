@@ -24,17 +24,18 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>记录日志（模板方法）</li>
  * </ol>
  *
+ * @param <T> 具体的登录请求类型，必须继承自 LoginRequest
  * @author yecao
  * @since 2025-11-18
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractLoginStrategy implements LoginStrategy {
+public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implements LoginStrategy<T> {
 
     protected final JwtTokenService jwtTokenService;
 
     @Override
-    public final AuthenticationResult execute(LoginRequest request, String ipAddress, String userAgent) {
+    public final AuthenticationResult execute(T request, String ipAddress, String userAgent) {
         log.info("[登录策略] 开始执行登录: type={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
@@ -69,7 +70,7 @@ public abstract class AbstractLoginStrategy implements LoginStrategy {
      *
      * @param request 登录请求
      */
-    protected abstract void validateRequest(LoginRequest request);
+    protected abstract void validateRequest(T request);
 
     /**
      * 执行登录核心逻辑（由子类实现）
@@ -78,7 +79,7 @@ public abstract class AbstractLoginStrategy implements LoginStrategy {
      * @param loginContext 登录上下文
      * @return 登录后的用户信息
      */
-    protected abstract UserDTO doLogin(LoginRequest request, LoginContext loginContext);
+    protected abstract UserDTO doLogin(T request, LoginContext loginContext);
 
     /**
      * 构建登录上下文
@@ -128,3 +129,4 @@ public abstract class AbstractLoginStrategy implements LoginStrategy {
         return getSupportedLoginType().equals(loginType);
     }
 }
+

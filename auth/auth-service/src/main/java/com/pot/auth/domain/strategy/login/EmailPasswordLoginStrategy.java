@@ -9,9 +9,8 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
-import com.pot.auth.domain.strategy.AbstractLoginStrategy;
+import com.pot.auth.domain.strategy.AbstractLoginStrategyImpl;
 import com.pot.auth.interfaces.dto.auth.EmailPasswordLoginRequest;
-import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-public class EmailPasswordLoginStrategy extends AbstractLoginStrategy {
+public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailPasswordLoginRequest> {
 
     private final UserModulePortFactory userModulePortFactory;
 
@@ -40,27 +39,23 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategy {
     }
 
     @Override
-    protected void validateRequest(LoginRequest request) {
-        if (!(request instanceof EmailPasswordLoginRequest)) {
-            throw new DomainException(AuthResultCode.INVALID_LOGIN_REQUEST);
-        }
+    protected void validateRequest(EmailPasswordLoginRequest request) {
+        // Jakarta Validation已在Controller层完成，这里可以添加额外的业务验证
     }
 
     @Override
-    protected UserDTO doLogin(LoginRequest request, LoginContext loginContext) {
-        EmailPasswordLoginRequest req = (EmailPasswordLoginRequest) request;
-
-        log.info("[邮箱登录] 开始登录: email={}", req.email());
+    protected UserDTO doLogin(EmailPasswordLoginRequest request, LoginContext loginContext) {
+        log.info("[邮箱登录] 开始登录: email={}", request.email());
 
         // 1. 获取用户模块适配器
-        UserDomain userDomain = req.userDomain();
+        UserDomain userDomain = request.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 2. 调用用户模块进行密码验证
-        Optional<UserDTO> userOpt = userModulePort.authenticateWithPassword(req.email(), req.password());
+        Optional<UserDTO> userOpt = userModulePort.authenticateWithPassword(request.email(), request.password());
 
         if (userOpt.isEmpty()) {
-            log.warn("[邮箱登录] 认证失败: email={}", req.email());
+            log.warn("[邮箱登录] 认证失败: email={}", request.email());
             throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
         }
 

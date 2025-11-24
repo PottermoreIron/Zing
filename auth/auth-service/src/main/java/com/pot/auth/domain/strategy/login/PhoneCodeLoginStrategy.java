@@ -10,8 +10,7 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
-import com.pot.auth.domain.strategy.AbstractLoginStrategy;
-import com.pot.auth.interfaces.dto.auth.LoginRequest;
+import com.pot.auth.domain.strategy.AbstractLoginStrategyImpl;
 import com.pot.auth.interfaces.dto.auth.PhoneCodeLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-public class PhoneCodeLoginStrategy extends AbstractLoginStrategy {
+public class PhoneCodeLoginStrategy extends AbstractLoginStrategyImpl<PhoneCodeLoginRequest> {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -44,34 +43,30 @@ public class PhoneCodeLoginStrategy extends AbstractLoginStrategy {
     }
 
     @Override
-    protected void validateRequest(LoginRequest request) {
-        if (!(request instanceof PhoneCodeLoginRequest)) {
-            throw new DomainException(AuthResultCode.INVALID_LOGIN_REQUEST);
-        }
+    protected void validateRequest(PhoneCodeLoginRequest request) {
+        // Jakarta Validation已在Controller层完成，这里可以添加额外的业务验证
     }
 
     @Override
-    protected UserDTO doLogin(LoginRequest request, LoginContext loginContext) {
-        PhoneCodeLoginRequest req = (PhoneCodeLoginRequest) request;
-
-        log.info("[手机号验证码登录] 开始登录: phone={}", req.phone());
+    protected UserDTO doLogin(PhoneCodeLoginRequest request, LoginContext loginContext) {
+        log.info("[手机号验证码登录] 开始登录: phone={}", request.phone());
 
         // 1. 验证验证码
-        boolean codeValid = verificationCodeService.verifyCode(req.phone(), req.verificationCode());
+        boolean codeValid = verificationCodeService.verifyCode(request.phone(), request.verificationCode());
         if (!codeValid) {
-            log.warn("[手机号验证码登录] 验证码验证失败: phone={}", req.phone());
+            log.warn("[手机号验证码登录] 验证码验证失败: phone={}", request.phone());
             throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
         }
 
         // 2. 获取用户模块适配器
-        UserDomain userDomain = req.userDomain();
+        UserDomain userDomain = request.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 3. 根据手机号查找用户
-        Optional<UserDTO> userOpt = userModulePort.findByPhone(req.phone());
+        Optional<UserDTO> userOpt = userModulePort.findByPhone(request.phone());
 
         if (userOpt.isEmpty()) {
-            log.warn("[手机号验证码登录] 用户不存在: phone={}", req.phone());
+            log.warn("[手机号验证码登录] 用户不存在: phone={}", request.phone());
             throw new DomainException(AuthResultCode.USER_NOT_FOUND);
         }
 

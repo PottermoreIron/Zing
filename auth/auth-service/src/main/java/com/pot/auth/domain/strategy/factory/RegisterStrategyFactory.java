@@ -24,17 +24,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RegisterStrategyFactory {
 
-    private final Map<RegisterType, RegisterStrategy> strategyMap = new ConcurrentHashMap<>();
+    private final Map<RegisterType, RegisterStrategy<?>> strategyMap = new ConcurrentHashMap<>();
 
     /**
      * 构造函数，Spring自动注入所有RegisterStrategy实现类
      *
      * @param strategies 所有注册策略实现类
      */
-    public RegisterStrategyFactory(List<RegisterStrategy> strategies) {
+    public RegisterStrategyFactory(List<RegisterStrategy<?>> strategies) {
         log.info("[注册策略工厂] 开始初始化，共有 {} 个策略", strategies.size());
 
-        for (RegisterStrategy strategy : strategies) {
+        for (RegisterStrategy<?> strategy : strategies) {
             // 遍历所有注册类型枚举值，找到该策略支持的类型
             for (RegisterType registerType : RegisterType.values()) {
                 registerStrategy(strategy, registerType);
@@ -47,7 +47,7 @@ public class RegisterStrategyFactory {
     /**
      * 注册策略到Map
      */
-    private void registerStrategy(RegisterStrategy strategy, RegisterType registerType) {
+    private void registerStrategy(RegisterStrategy<?> strategy, RegisterType registerType) {
         if (strategy.supports(registerType)) {
             strategyMap.put(registerType, strategy);
             log.info("[注册策略工厂] 注册策略: {} -> {}", registerType, strategy.getClass().getSimpleName());
@@ -61,8 +61,8 @@ public class RegisterStrategyFactory {
      * @return 注册策略
      * @throws DomainException 当找不到对应策略时
      */
-    public RegisterStrategy getStrategy(RegisterType registerType) {
-        RegisterStrategy strategy = strategyMap.get(registerType);
+    public RegisterStrategy<?> getStrategy(RegisterType registerType) {
+        RegisterStrategy<?> strategy = strategyMap.get(registerType);
 
         if (strategy == null) {
             log.error("[注册策略工厂] 未找到注册策略: registerType={}", registerType);

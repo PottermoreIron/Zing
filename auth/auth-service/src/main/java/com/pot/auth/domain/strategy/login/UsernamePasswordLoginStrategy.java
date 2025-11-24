@@ -9,8 +9,7 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
-import com.pot.auth.domain.strategy.AbstractLoginStrategy;
-import com.pot.auth.interfaces.dto.auth.LoginRequest;
+import com.pot.auth.domain.strategy.AbstractLoginStrategyImpl;
 import com.pot.auth.interfaces.dto.auth.UsernamePasswordLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-public class UsernamePasswordLoginStrategy extends AbstractLoginStrategy {
+public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyImpl<UsernamePasswordLoginRequest> {
 
     private final UserModulePortFactory userModulePortFactory;
 
@@ -40,28 +39,23 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategy {
     }
 
     @Override
-    protected void validateRequest(LoginRequest request) {
-        if (!(request instanceof UsernamePasswordLoginRequest)) {
-            throw new DomainException(AuthResultCode.INVALID_LOGIN_REQUEST);
-        }
+    protected void validateRequest(UsernamePasswordLoginRequest request) {
         // Jakarta Validation已在Controller层完成，这里可以添加额外的业务验证
     }
 
     @Override
-    protected UserDTO doLogin(LoginRequest request, LoginContext loginContext) {
-        UsernamePasswordLoginRequest req = (UsernamePasswordLoginRequest) request;
-
-        log.info("[用户名登录] 开始登录: username={}", req.username());
+    protected UserDTO doLogin(UsernamePasswordLoginRequest request, LoginContext loginContext) {
+        log.info("[用户名登录] 开始登录: username={}", request.username());
 
         // 1. 获取用户模块适配器
-        UserDomain userDomain = req.userDomain();
+        UserDomain userDomain = request.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 2. 调用用户模块进行密码验证
-        Optional<UserDTO> userOpt = userModulePort.authenticateWithPassword(req.username(), req.password());
+        Optional<UserDTO> userOpt = userModulePort.authenticateWithPassword(request.username(), request.password());
 
         if (userOpt.isEmpty()) {
-            log.warn("[用户名登录] 认证失败: username={}", req.username());
+            log.warn("[用户名登录] 认证失败: username={}", request.username());
             throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
         }
 

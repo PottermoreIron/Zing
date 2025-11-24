@@ -24,17 +24,18 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>记录日志（模板方法）</li>
  * </ol>
  *
+ * @param <T> 具体的注册请求类型，必须继承自 RegisterRequest
  * @author yecao
  * @since 2025-11-18
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractRegisterStrategy implements RegisterStrategy {
+public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
 
     protected final JwtTokenService jwtTokenService;
 
     @Override
-    public final AuthenticationResult execute(RegisterRequest request, String ipAddress, String userAgent) {
+    public final AuthenticationResult execute(T request, String ipAddress, String userAgent) {
         log.info("[注册策略] 开始执行注册: type={}, userDomain={}",
                 request.registerType(), request.userDomain());
 
@@ -69,7 +70,7 @@ public abstract class AbstractRegisterStrategy implements RegisterStrategy {
      *
      * @param request 注册请求
      */
-    protected abstract void validateRequest(RegisterRequest request);
+    protected abstract void validateRequest(T request);
 
     /**
      * 执行注册核心逻辑（由子类实现）
@@ -78,7 +79,7 @@ public abstract class AbstractRegisterStrategy implements RegisterStrategy {
      * @param loginContext 登录上下文
      * @return 注册后的用户信息
      */
-    protected abstract UserDTO doRegister(RegisterRequest request, LoginContext loginContext);
+    protected abstract UserDTO doRegister(T request, LoginContext loginContext);
 
     /**
      * 构建登录上下文
@@ -128,3 +129,4 @@ public abstract class AbstractRegisterStrategy implements RegisterStrategy {
         return getSupportedRegisterType().equals(registerType);
     }
 }
+

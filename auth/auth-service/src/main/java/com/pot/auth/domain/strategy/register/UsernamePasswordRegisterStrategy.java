@@ -11,8 +11,7 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.LoginContext;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
-import com.pot.auth.domain.strategy.AbstractRegisterStrategy;
-import com.pot.auth.interfaces.dto.auth.RegisterRequest;
+import com.pot.auth.domain.strategy.AbstractRegisterStrategyImpl;
 import com.pot.auth.interfaces.dto.auth.UsernamePasswordRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategy {
+public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyImpl<UsernamePasswordRegisterRequest> {
 
     private final UserModulePortFactory userModulePortFactory;
 
@@ -42,33 +41,28 @@ public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategy {
     }
 
     @Override
-    protected void validateRequest(RegisterRequest request) {
-        if (!(request instanceof UsernamePasswordRegisterRequest)) {
-            throw new DomainException(AuthResultCode.INVALID_REGISTER_REQUEST);
-        }
+    protected void validateRequest(UsernamePasswordRegisterRequest request) {
         // Jakarta Validation已在Controller层完成，这里可以添加额外的业务验证
     }
 
     @Override
-    protected UserDTO doRegister(RegisterRequest request, LoginContext loginContext) {
-        UsernamePasswordRegisterRequest req = (UsernamePasswordRegisterRequest) request;
-
-        log.info("[用户名注册] 开始注册: username={}", req.username());
+    protected UserDTO doRegister(UsernamePasswordRegisterRequest request, LoginContext loginContext) {
+        log.info("[用户名注册] 开始注册: username={}", request.username());
 
         // 1. 获取用户模块适配器
-        UserDomain userDomain = req.userDomain();
+        UserDomain userDomain = request.userDomain();
         UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
 
         // 2. 检查用户名是否已存在
-        if (userModulePort.existsByUsername(req.username())) {
-            log.warn("[用户名注册] 用户名已存在: username={}", req.username());
+        if (userModulePort.existsByUsername(request.username())) {
+            log.warn("[用户名注册] 用户名已存在: username={}", request.username());
             throw new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS);
         }
 
         // 3. 创建用户
-        Password password = Password.of(req.password());
+        Password password = Password.of(request.password());
         CreateUserCommand createCommand = CreateUserCommand.builder()
-                .username(req.username())
+                .username(request.username())
                 .password(password)
                 .build();
 
