@@ -8,7 +8,7 @@
         <version>${revision}</version>
     </parent>
     <artifactId>framework-starter-id</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <name>framework-starter-id</name>
     <description>framework-starter-id</description>
     <developers>

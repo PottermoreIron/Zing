@@ -1,6 +1,5 @@
 package com.pot.auth.domain.validation.annotations;
 
-import com.pot.auth.domain.validation.validators.EmailValidator;
 import com.pot.auth.domain.validation.validators.PasswordValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
