@@ -3,7 +3,7 @@ package com.pot.auth.application.dto;
 /**
  * 登录响应DTO
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record LoginResponse(

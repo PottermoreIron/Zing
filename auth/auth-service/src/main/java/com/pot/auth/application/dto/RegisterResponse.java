@@ -5,7 +5,7 @@ package com.pot.auth.application.dto;
  *
  * <p>注册成功后自动登录，返回Token信息
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record RegisterResponse(

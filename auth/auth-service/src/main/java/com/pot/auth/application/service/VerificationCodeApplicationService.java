@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  *
  * <p>负责验证码的发送和验证
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Slf4j

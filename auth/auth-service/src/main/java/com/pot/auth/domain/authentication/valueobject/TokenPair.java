@@ -5,7 +5,7 @@ package com.pot.auth.domain.authentication.valueobject;
  *
  * <p>封装AccessToken和RefreshToken的配对关系
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record TokenPair(

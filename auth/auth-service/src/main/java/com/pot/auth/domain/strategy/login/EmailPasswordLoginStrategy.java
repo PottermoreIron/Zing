@@ -1,15 +1,16 @@
 package com.pot.auth.domain.strategy.login;
 
 import com.pot.auth.domain.authentication.service.JwtTokenService;
+import com.pot.auth.domain.context.AuthenticationContext;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
-import com.pot.auth.domain.shared.valueobject.LoginContext;
-import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.strategy.AbstractLoginStrategyImpl;
+import com.pot.auth.domain.validation.ValidationChain;
+import com.pot.auth.domain.validation.handler.AuthenticationParameterValidator;
 import com.pot.auth.interfaces.dto.auth.EmailPasswordLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,12 +18,13 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 /**
- * 邮箱密码登录策略
+ * 邮箱密码登录策略（重构版）
  *
- * <p>通过邮箱和密码进行登录认证
+ * <p>
+ * 通过邮箱和密码进行登录认证
  *
- * @author yecao
- * @since 2025-11-19
+ * @author pot
+ * @since 2025-11-29
  */
 @Slf4j
 @Component
@@ -32,64 +34,55 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailP
 
     public EmailPasswordLoginStrategy(
             JwtTokenService jwtTokenService,
-            UserModulePortFactory userModulePortFactory
-    ) {
-        super(jwtTokenService);
+            UserModulePortFactory userModulePortFactory) {
+        super(jwtTokenService, createValidationChain());
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    @Override
-    protected void validateRequest(EmailPasswordLoginRequest request) {
-        // Jakarta Validation已在Controller层完成，这里可以添加额外的业务验证
+    private static ValidationChain<AuthenticationContext> createValidationChain() {
+        ValidationChain<AuthenticationContext> chain = new ValidationChain<>();
+        chain.addHandler(new AuthenticationParameterValidator());
+        return chain;
     }
 
     @Override
-    protected UserDTO doLogin(EmailPasswordLoginRequest request, LoginContext loginContext) {
-        log.info("[邮箱登录] 开始登录: email={}", request.email());
+    protected void validateCredential(AuthenticationContext context) {
+        EmailPasswordLoginRequest request = (EmailPasswordLoginRequest) context.request();
 
-        // 1. 获取用户模块适配器
-        UserDomain userDomain = request.userDomain();
-        UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
+        log.debug("[邮箱登录] 开始验证凭证: email={}", request.email());
 
-        // 2. 调用用户模块进行密码验证
-        Optional<UserDTO> userOpt = userModulePort.authenticateWithPassword(request.email(), request.password());
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        Optional<UserDTO> userOpt = userModulePort.authenticateWithPassword(
+                request.email(),
+                request.password());
 
         if (userOpt.isEmpty()) {
-            log.warn("[邮箱登录] 认证失败: email={}", request.email());
+            log.warn("[邮箱登录] 密码验证失败: email={}", request.email());
             throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
         }
 
-        UserDTO user = userOpt.get();
+        log.debug("[邮箱登录] 凭证验证通过: email={}", request.email());
+    }
 
-        // 3. 检查用户状态
-        validateUserStatus(user);
+    @Override
+    protected UserDTO getUserInfo(AuthenticationContext context) {
+        EmailPasswordLoginRequest request = (EmailPasswordLoginRequest) context.request();
 
-        log.info("[邮箱登录] 登录成功: userId={}", user.userId());
-        return user;
+        log.debug("[邮箱登录] 获取用户信息: email={}", request.email());
+
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        Optional<UserDTO> userOpt = userModulePort.findByEmail(request.email());
+
+        if (userOpt.isEmpty()) {
+            log.error("[邮箱登录] 用户不存在: email={}", request.email());
+            throw new DomainException(AuthResultCode.USER_NOT_FOUND);
+        }
+
+        return userOpt.get();
     }
 
     @Override
     protected LoginType getSupportedLoginType() {
         return LoginType.EMAIL_PASSWORD;
-    }
-
-    @Override
-    public boolean supports(LoginType loginType) {
-        return LoginType.EMAIL_PASSWORD.equals(loginType);
-    }
-
-    /**
-     * 验证用户状态
-     */
-    private void validateUserStatus(UserDTO user) {
-        if ("LOCKED".equals(user.status())) {
-            log.warn("[邮箱登录] 用户已被锁定: userId={}", user.userId());
-            throw new DomainException(AuthResultCode.ACCOUNT_LOCKED);
-        }
-
-        if ("DISABLED".equals(user.status())) {
-            log.warn("[邮箱登录] 用户已被禁用: userId={}", user.userId());
-            throw new DomainException(AuthResultCode.ACCOUNT_DISABLED);
-        }
     }
 }

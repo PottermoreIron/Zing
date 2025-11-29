@@ -28,7 +28,7 @@ import java.util.Optional;
  *
  * <p>负责OAuth2登录的核心业务逻辑
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Slf4j

@@ -12,7 +12,7 @@ package com.pot.auth.domain.port;
  *   <li>支持多种通知渠道（邮件、短信）</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public interface NotificationPort {

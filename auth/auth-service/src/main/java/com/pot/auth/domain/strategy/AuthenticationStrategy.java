@@ -13,7 +13,7 @@ import com.pot.auth.domain.authentication.entity.AuthenticationResult;
  *   <li>无需用户显式选择注册或登录</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 public interface AuthenticationStrategy {
@@ -21,12 +21,12 @@ public interface AuthenticationStrategy {
     /**
      * 执行认证逻辑（自动处理注册或登录）
      *
-     * @param provider OAuth2提供商或认证方式标识（如google, github, wechat）
+     * @param provider          OAuth2提供商或认证方式标识（如google, github, wechat）
      * @param authorizationCode 授权码
-     * @param state 状态参数（可选，用于防CSRF攻击）
-     * @param userDomain 用户域
-     * @param ipAddress 客户端IP地址
-     * @param userAgent 用户代理信息
+     * @param state             状态参数（可选，用于防CSRF攻击）
+     * @param userDomain        用户域
+     * @param ipAddress         客户端IP地址
+     * @param userAgent         用户代理信息
      * @return 认证结果（包含Token）
      */
     AuthenticationResult authenticate(

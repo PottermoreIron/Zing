@@ -7,7 +7,7 @@ import lombok.Getter;
  *
  * <p>定义系统支持的OAuth2第三方登录提供商
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Getter

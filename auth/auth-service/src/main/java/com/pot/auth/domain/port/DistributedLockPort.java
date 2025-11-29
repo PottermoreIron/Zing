@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  *   <li>支持自动释放和重试机制</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public interface DistributedLockPort {

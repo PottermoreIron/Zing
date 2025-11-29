@@ -9,7 +9,7 @@ import com.pot.auth.domain.oauth2.valueobject.OAuth2Provider;
  *
  * <p>定义OAuth2认证的抽象能力，隔离具体OAuth2提供商实现
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public interface OAuth2Port {

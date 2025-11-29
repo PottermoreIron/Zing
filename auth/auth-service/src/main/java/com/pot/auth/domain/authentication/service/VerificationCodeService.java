@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>尝试次数限制</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Slf4j

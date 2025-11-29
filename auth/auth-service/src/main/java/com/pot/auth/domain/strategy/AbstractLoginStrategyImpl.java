@@ -2,92 +2,134 @@ package com.pot.auth.domain.strategy;
 
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
+import com.pot.auth.domain.context.AuthenticationContext;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.LoginType;
-import com.pot.auth.domain.shared.valueobject.DeviceInfo;
-import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.domain.shared.valueobject.LoginContext;
-import com.pot.auth.domain.shared.valueobject.UserDomain;
+import com.pot.auth.domain.validation.ValidationChain;
+import com.pot.auth.domain.validation.handler.UserStatusValidator;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 登录策略抽象模板类
+ * 登录策略抽象模板类（重构版）
  *
- * <p>封装登录流程的通用逻辑，采用模板方法模式
- * <p>通用流程：
+ * <p>
+ * 采用模板方法模式，定义统一的登录流程：
  * <ol>
- *   <li>参数验证（由子类实现）</li>
- *   <li>执行登录（由子类实现）</li>
- *   <li>生成Token（模板方法）</li>
- *   <li>记录日志（模板方法）</li>
+ * <li>责任链校验（参数校验→业务规则校验→风控校验）</li>
+ * <li>凭证验证（由子类实现）</li>
+ * <li>获取用户信息（由子类实现）</li>
+ * <li>用户状态验证</li>
+ * <li>登录前置钩子（可选，供子类扩展）</li>
+ * <li>生成Token并构建结果</li>
+ * <li>登录后置钩子（可选，供子类扩展）</li>
+ * <li>返回响应</li>
  * </ol>
  *
  * @param <T> 具体的登录请求类型，必须继承自 LoginRequest
- * @author yecao
- * @since 2025-11-18
+ * @author pot
+ * @since 2025-11-29
  */
 @Slf4j
-@RequiredArgsConstructor
 public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implements LoginStrategy<T> {
 
     protected final JwtTokenService jwtTokenService;
+    protected final ValidationChain<AuthenticationContext> validationChain;
+
+    protected AbstractLoginStrategyImpl(
+            JwtTokenService jwtTokenService,
+            ValidationChain<AuthenticationContext> validationChain) {
+        this.jwtTokenService = jwtTokenService;
+        this.validationChain = validationChain;
+    }
 
     @Override
-    public final AuthenticationResult execute(T request, String ipAddress, String userAgent) {
-        log.info("[登录策略] 开始执行登录: type={}, userDomain={}",
-                request.loginType(), request.userDomain());
+    public final AuthenticationResult execute(AuthenticationContext context) {
+        T request = (T) context.request();
+
+        log.info("[登录策略] 开始执行登录: type={}, userDomain={}, ip={}",
+                request.loginType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 构建登录上下文
-            LoginContext loginContext = buildLoginContext(ipAddress, userAgent);
+            // 1. 责任链校验
+            validationChain.validate(context);
 
-            // 2. 参数验证（由子类实现）
-            validateRequest(request);
+            // 2. 凭证验证（由子类实现）
+            validateCredential(context);
 
-            // 3. 执行登录核心逻辑（由子类实现）
-            UserDTO user = doLogin(request, loginContext);
+            // 3. 获取用户信息（由子类实现）
+            UserDTO user = getUserInfo(context);
 
-            // 4. 生成认证结果
-            AuthenticationResult result = generateAuthenticationResult(
-                    user,
-                    request.userDomain(),
-                    loginContext
-            );
+            // 4. 用户状态验证（使用健壮的状态处理器）
+            UserStatusValidator.validate(user);
 
-            log.info("[登录策略] 登录成功: userId={}, type={}", user.userId(), request.loginType());
+            // 5. 登录前置钩子（由子类可选实现）
+            beforeLogin(user, context);
+
+            // 6. 生成Token并构建结果
+            AuthenticationResult result = generateAuthenticationResult(user, context);
+
+            // 7. 登录后置钩子（由子类可选实现）
+            afterLogin(user, result, context);
+
+            log.info("[登录策略] 登录成功: userId={}, username={}, type={}",
+                    user.userId(), user.username(), request.loginType());
+
             return result;
 
         } catch (Exception e) {
-            log.error("[登录策略] 登录失败: type={}, error={}", request.loginType(), e.getMessage(), e);
+            handleLoginFailure(context, e);
             throw e;
         }
     }
 
     /**
-     * 参数验证（由子类实现）
+     * 凭证验证（由子类实现）
      *
-     * @param request 登录请求
+     * <p>
+     * 不同登录方式的凭证验证逻辑不同：
+     * <ul>
+     * <li>密码登录：验证密码哈希</li>
+     * <li>验证码登录：验证验证码</li>
+     * </ul>
+     *
+     * @param context 认证上下文
      */
-    protected abstract void validateRequest(T request);
+    protected abstract void validateCredential(AuthenticationContext context);
 
     /**
-     * 执行登录核心逻辑（由子类实现）
+     * 获取用户信息（由子类实现）
      *
-     * @param request 登录请求
-     * @param loginContext 登录上下文
-     * @return 登录后的用户信息
+     * <p>
+     * 根据登录方式的不同，查询用户的方式也不同：
+     * <ul>
+     * <li>用户名登录：通过用户名查询</li>
+     * <li>邮箱登录：通过邮箱查询</li>
+     * <li>手机号登录：通过手机号查询</li>
+     * </ul>
+     *
+     * @param context 认证上下文
+     * @return 用户信息
      */
-    protected abstract UserDTO doLogin(T request, LoginContext loginContext);
+    protected abstract UserDTO getUserInfo(AuthenticationContext context);
 
     /**
-     * 构建登录上下文
+     * 登录前置钩子（由子类可选实现）
+     *
+     * <p>
+     * 可用于：
+     * <ul>
+     * <li>记录登录尝试</li>
+     * <li>更新最后登录时间</li>
+     * <li>清除之前的登录失败记录</li>
+     * </ul>
+     *
+     * @param user    用户信息
+     * @param context 认证上下文
      */
-    protected LoginContext buildLoginContext(String ipAddress, String userAgent) {
-        IpAddress ip = IpAddress.of(ipAddress);
-        DeviceInfo deviceInfo = DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown");
-        return LoginContext.of(ip, deviceInfo);
+    protected void beforeLogin(UserDTO user, AuthenticationContext context) {
+        // 默认实现为空，子类可选择性覆盖
+        log.debug("[登录钩子] 登录前置处理: userId={}", user.userId());
     }
 
     /**
@@ -95,19 +137,16 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
      */
     protected AuthenticationResult generateAuthenticationResult(
             UserDTO user,
-            UserDomain userDomain,
-            LoginContext loginContext
-    ) {
+            AuthenticationContext context) {
         var tokenPair = jwtTokenService.generateTokenPair(
                 user.userId(),
-                userDomain,
+                context.request().userDomain(),
                 user.username(),
-                user.permissions()
-        );
+                user.permissions());
 
         return AuthenticationResult.builder()
                 .userId(user.userId())
-                .userDomain(userDomain)
+                .userDomain(context.request().userDomain())
                 .username(user.username())
                 .email(user.email())
                 .phone(user.phone())
@@ -115,8 +154,44 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
                 .refreshToken(tokenPair.refreshToken().rawToken())
                 .accessTokenExpiresAt(tokenPair.accessToken().expiresAt())
                 .refreshTokenExpiresAt(tokenPair.refreshToken().expiresAt())
-                .loginContext(loginContext)
+                .loginContext(com.pot.auth.domain.shared.valueobject.LoginContext.of(
+                        context.ipAddress(),
+                        context.deviceInfo()))
                 .build();
+    }
+
+    /**
+     * 登录后置钩子（由子类可选实现）
+     *
+     * <p>
+     * 可用于：
+     * <ul>
+     * <li>清理验证码</li>
+     * <li>发送登录通知</li>
+     * <li>记录登录日志</li>
+     * <li>触发登录事件</li>
+     * </ul>
+     *
+     * @param user    用户信息
+     * @param result  认证结果
+     * @param context 认证上下文
+     */
+    protected void afterLogin(UserDTO user, AuthenticationResult result, AuthenticationContext context) {
+        // 默认实现为空，子类可选择性覆盖
+        log.debug("[登录钩子] 登录后置处理: userId={}", user.userId());
+    }
+
+    /**
+     * 处理登录失败
+     *
+     * <p>
+     * 记录失败日志，子类可扩展以实现登录失败次数限制等功能
+     */
+    protected void handleLoginFailure(AuthenticationContext context, Exception e) {
+        log.error("[登录策略] 登录失败: type={}, ip={}, error={}",
+                context.request().loginType(),
+                context.ipAddress().value(),
+                e.getMessage());
     }
 
     /**
@@ -129,4 +204,3 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
         return getSupportedLoginType().equals(loginType);
     }
 }
-

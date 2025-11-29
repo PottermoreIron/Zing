@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.dto.auth;
+package com.pot.auth.interfaces.dto.register;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -8,22 +8,18 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
 /**
  * 注册请求基础接口
  *
- * <p>使用Jackson多态序列化，通过registerType字段识别具体请求类型
- * <p>采用sealed interface限制所有可能的子类型，保证类型安全
+ * <p>
+ * 使用Jackson多态序列化，通过registerType字段识别具体请求类型
+ * <p>
+ * 采用sealed interface限制所有可能的子类型，保证类型安全
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "registerType",
-        visible = true
-)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "registerType", visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = UsernamePasswordRegisterRequest.class, name = "USERNAME_PASSWORD"),
         @JsonSubTypes.Type(value = EmailPasswordRegisterRequest.class, name = "EMAIL_PASSWORD"),
-        @JsonSubTypes.Type(value = PhonePasswordRegisterRequest.class, name = "PHONE_PASSWORD"),
         @JsonSubTypes.Type(value = EmailCodeRegisterRequest.class, name = "EMAIL_CODE"),
         @JsonSubTypes.Type(value = PhoneCodeRegisterRequest.class, name = "PHONE_CODE"),
         @JsonSubTypes.Type(value = OAuth2RegisterRequest.class, name = "OAUTH2"),
@@ -32,7 +28,6 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
 public sealed interface RegisterRequest permits
         UsernamePasswordRegisterRequest,
         EmailPasswordRegisterRequest,
-        PhonePasswordRegisterRequest,
         EmailCodeRegisterRequest,
         PhoneCodeRegisterRequest,
         OAuth2RegisterRequest,
@@ -48,4 +43,3 @@ public sealed interface RegisterRequest permits
      */
     UserDomain userDomain();
 }
-

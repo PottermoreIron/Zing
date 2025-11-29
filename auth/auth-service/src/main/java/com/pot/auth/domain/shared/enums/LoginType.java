@@ -5,9 +5,10 @@ import lombok.Getter;
 /**
  * 登录类型枚举
  *
- * <p>定义系统支持的所有登录方式
+ * <p>
+ * 定义系统支持的所有登录方式
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 @Getter
@@ -22,11 +23,6 @@ public enum LoginType {
      * 邮箱密码登录
      */
     EMAIL_PASSWORD("email_password", "邮箱密码登录"),
-
-    /**
-     * 手机号密码登录
-     */
-    PHONE_PASSWORD("phone_password", "手机号密码登录"),
 
     /**
      * 邮箱验证码登录
@@ -68,4 +64,3 @@ public enum LoginType {
         throw new IllegalArgumentException("未知的登录类型: " + code);
     }
 }
-

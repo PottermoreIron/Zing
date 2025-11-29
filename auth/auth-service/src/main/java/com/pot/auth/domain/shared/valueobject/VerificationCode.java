@@ -15,7 +15,7 @@ import java.security.SecureRandom;
  *   <li>最多3次验证尝试</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Builder

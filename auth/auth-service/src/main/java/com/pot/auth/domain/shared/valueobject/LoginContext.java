@@ -10,7 +10,7 @@ import java.util.Objects;
  *
  * <p>封装登录时的上下文信息，用于安全审计和异常检测
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Builder

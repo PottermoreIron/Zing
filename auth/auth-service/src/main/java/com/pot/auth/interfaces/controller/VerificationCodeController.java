@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * <p>提供验证码相关的REST API
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Slf4j

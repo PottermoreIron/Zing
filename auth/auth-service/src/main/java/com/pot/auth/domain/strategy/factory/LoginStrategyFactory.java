@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>负责根据登录类型自动选择对应的登录策略
  * <p>通过Spring自动注入所有LoginStrategy实现类，避免硬编码
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-19
  */
 @Slf4j

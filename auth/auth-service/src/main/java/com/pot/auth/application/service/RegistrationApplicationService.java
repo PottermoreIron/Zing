@@ -2,35 +2,39 @@ package com.pot.auth.application.service;
 
 import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
+import com.pot.auth.domain.context.RegistrationContext;
 import com.pot.auth.domain.shared.enums.RegisterType;
+import com.pot.auth.domain.shared.valueobject.DeviceInfo;
+import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.domain.strategy.AuthenticationStrategy;
 import com.pot.auth.domain.strategy.RegisterStrategy;
 import com.pot.auth.domain.strategy.factory.AuthenticationStrategyFactory;
 import com.pot.auth.domain.strategy.factory.RegisterStrategyFactory;
-import com.pot.auth.interfaces.dto.auth.OAuth2RegisterRequest;
-import com.pot.auth.interfaces.dto.auth.RegisterRequest;
-import com.pot.auth.interfaces.dto.auth.WeChatRegisterRequest;
+import com.pot.auth.interfaces.dto.register.OAuth2RegisterRequest;
+import com.pot.auth.interfaces.dto.register.RegisterRequest;
+import com.pot.auth.interfaces.dto.register.WeChatRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 注册应用服务
+ * 注册应用服务（重构版）
  *
- * <p>编排注册流程，根据注册类型自动选择对应的策略
- * <p>支持7种注册方式：
+ * <p>
+ * 编排注册流程，根据注册类型自动选择对应的策略
+ * <p>
+ * 支持5种注册方式（已移除手机号密码注册）：
  * <ul>
- *   <li>用户名密码注册</li>
- *   <li>手机号密码注册</li>
- *   <li>邮箱密码注册</li>
- *   <li>手机号验证码注册</li>
- *   <li>邮箱验证码注册</li>
- *   <li>OAuth2注册（Google, GitHub等）</li>
- *   <li>微信注册</li>
+ * <li>用户名密码注册</li>
+ * <li>邮箱密码注册</li>
+ * <li>手机号验证码注册</li>
+ * <li>邮箱验证码注册</li>
+ * <li>OAuth2注册（Google, GitHub等）</li>
+ * <li>微信注册</li>
  * </ul>
  *
- * @author yecao
- * @since 2025-11-10
+ * @author pot
+ * @since 2025-11-29
  */
 @Slf4j
 @Service
@@ -43,9 +47,10 @@ public class RegistrationApplicationService {
     /**
      * 统一注册入口
      *
-     * <p>根据注册类型自动选择对应的策略执行注册
+     * <p>
+     * 根据注册类型自动选择对应的策略执行注册
      *
-     * @param request 注册请求（多态）
+     * @param request   注册请求（多态）
      * @param ipAddress 客户端IP地址
      * @param userAgent 用户代理信息
      * @return 注册响应
@@ -68,8 +73,7 @@ public class RegistrationApplicationService {
                     oauthReq.state(),
                     oauthReq.userDomain().getCode(),
                     ipAddress,
-                    userAgent
-            );
+                    userAgent);
         } else if (RegisterType.WECHAT.equals(request.registerType())) {
             // 微信注册（实际是认证）
             WeChatRegisterRequest wechatReq = (WeChatRegisterRequest) request;
@@ -80,13 +84,19 @@ public class RegistrationApplicationService {
                     wechatReq.state(),
                     wechatReq.userDomain().getCode(),
                     ipAddress,
-                    userAgent
-            );
+                    userAgent);
         } else {
             // 传统注册（用户名/手机/邮箱 + 密码/验证码）
+            // 构建注册上下文
+            RegistrationContext context = RegistrationContext.builder()
+                    .request(request)
+                    .ipAddress(IpAddress.of(ipAddress))
+                    .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
+                    .build();
+
             RegisterStrategy<?> strategy = registerStrategyFactory.getStrategy(request.registerType());
             // 此处的类型转换是安全的，因为工厂根据registerType返回对应的策略
-            result = ((RegisterStrategy<RegisterRequest>) strategy).execute(request, ipAddress, userAgent);
+            result = strategy.execute(context);
         }
 
         // 转换为应用层DTO
@@ -99,8 +109,7 @@ public class RegistrationApplicationService {
                 result.accessToken(),
                 result.refreshToken(),
                 result.accessTokenExpiresAt(),
-                result.refreshTokenExpiresAt()
-        );
+                result.refreshTokenExpiresAt());
 
         log.info("[应用服务] 注册成功: userId={}, registerType={}", result.userId(), request.registerType());
         return response;

@@ -10,7 +10,7 @@ import lombok.Getter;
  *
  * <p>封装从OAuth2提供商获取的用户信息
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Getter

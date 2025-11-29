@@ -5,9 +5,10 @@ import lombok.Getter;
 /**
  * 注册类型枚举
  *
- * <p>定义系统支持的所有注册方式
+ * <p>
+ * 定义系统支持的所有注册方式
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 @Getter
@@ -22,11 +23,6 @@ public enum RegisterType {
      * 邮箱密码注册
      */
     EMAIL_PASSWORD("email_password", "邮箱密码注册"),
-
-    /**
-     * 手机号密码注册
-     */
-    PHONE_PASSWORD("phone_password", "手机号密码注册"),
 
     /**
      * 邮箱验证码注册

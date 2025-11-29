@@ -5,7 +5,7 @@ package com.pot.auth.domain.shared.valueobject;
  *
  * <p>包含设备的详细信息，用于设备管理和安全审计
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record DeviceInfo(
@@ -45,14 +45,7 @@ public record DeviceInfo(
         String osName = detectOsName(userAgent);
         String browserName = detectBrowserName(userAgent);
 
-        return new DeviceInfo(
-                deviceType,
-                osName,
-                "Unknown",
-                browserName,
-                "Unknown",
-                userAgent
-        );
+        return new DeviceInfo(deviceType, osName, "Unknown", browserName, "Unknown", userAgent);
     }
 
     /**

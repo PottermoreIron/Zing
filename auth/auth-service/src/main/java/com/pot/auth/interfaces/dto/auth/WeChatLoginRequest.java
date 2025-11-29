@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 /**
  * 微信登录请求
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 public record WeChatLoginRequest(

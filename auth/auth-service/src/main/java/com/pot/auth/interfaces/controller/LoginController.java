@@ -16,21 +16,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
+
 /**
- * 认证控制器（重构版）
+ * 登录控制器
  *
- * <p>提供认证相关的REST API
- * <p>支持7种登录方式的统一入口
+ * <p>
+ * 负责传统登录流程，要求用户已注册
  *
- * @author yecao
- * @since 2025-11-19
+ * @author pot
+ * @since 2025-11-29
  */
 @Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Validated
-public class AuthenticationControllerV2 {
+public class LoginController {
 
     private final LoginApplicationService loginApplicationService;
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
@@ -38,18 +40,20 @@ public class AuthenticationControllerV2 {
     /**
      * 统一登录入口
      *
-     * <p>支持7种登录方式，通过loginType字段自动识别：
+     * <p>
+     * 支持6种登录方式（已移除手机号密码登录），通过loginType字段自动识别：
      * <ul>
-     *   <li>USERNAME_PASSWORD - 用户名密码登录</li>
-     *   <li>EMAIL_PASSWORD - 邮箱密码登录</li>
-     *   <li>PHONE_PASSWORD - 手机号密码登录</li>
-     *   <li>EMAIL_CODE - 邮箱验证码登录</li>
-     *   <li>PHONE_CODE - 手机号验证码登录</li>
-     *   <li>OAUTH2 - OAuth2登录（Google, GitHub等）</li>
-     *   <li>WECHAT - 微信登录</li>
+     * <li>USERNAME_PASSWORD - 用户名密码登录</li>
+     * <li>EMAIL_PASSWORD - 邮箱密码登录</li>
+     * <li>EMAIL_CODE - 邮箱验证码登录</li>
+     * <li>PHONE_CODE - 手机号验证码登录</li>
+     * <li>OAUTH2 - OAuth2登录（Google, GitHub等）</li>
+     * <li>WECHAT - 微信登录</li>
      * </ul>
      *
-     * <p>请求示例（用户名密码）：
+     * <p>
+     * 请求示例（用户名密码）：
+     *
      * <pre>
      * POST /auth/v2/login
      * {
@@ -60,7 +64,9 @@ public class AuthenticationControllerV2 {
      * }
      * </pre>
      *
-     * <p>请求示例（OAuth2）：
+     * <p>
+     * 请求示例（OAuth2）：
+     *
      * <pre>
      * POST /auth/v2/login
      * {
@@ -72,19 +78,13 @@ public class AuthenticationControllerV2 {
      * }
      * </pre>
      */
-    @PostMapping("/v2/login")
-    public R<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request,
-            HttpServletRequest httpRequest
-    ) {
-        log.info("[接口V2] 登录请求: loginType={}", request.loginType());
+    @PostMapping("api/v1/login")
+    public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        log.info("登录请求: loginType={}", request.loginType());
 
         // 执行登录
-        LoginResponse response = loginApplicationService.login(
-                request,
-                getClientIp(httpRequest),
-                httpRequest.getHeader("User-Agent")
-        );
+        LoginResponse response = loginApplicationService.login(request, getClientIp(httpRequest),
+                httpRequest.getHeader("User-Agent"));
 
         return R.success(response);
     }
@@ -92,7 +92,9 @@ public class AuthenticationControllerV2 {
     /**
      * 刷新Token
      *
-     * <p>请求示例：
+     * <p>
+     * 请求示例：
+     *
      * <pre>
      * POST /auth/v2/refresh
      * {
@@ -108,23 +110,4 @@ public class AuthenticationControllerV2 {
 
         return R.success(response);
     }
-
-    /**
-     * 获取客户端IP地址
-     */
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        // 如果是多级代理，取第一个IP
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip != null ? ip : "0.0.0.0";
-    }
 }
-

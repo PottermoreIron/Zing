@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 /**
  * 刷新Token请求
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record RefreshTokenRequest(

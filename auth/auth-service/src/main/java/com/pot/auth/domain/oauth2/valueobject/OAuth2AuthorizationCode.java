@@ -3,7 +3,7 @@ package com.pot.auth.domain.oauth2.valueobject;
 /**
  * OAuth2授权码值对象
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record OAuth2AuthorizationCode(String value) {

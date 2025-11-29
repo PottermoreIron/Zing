@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  *
  * <p>实现NotificationPort接口，调用framework-starter-touch发送通知
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Slf4j

@@ -15,6 +15,7 @@ public class ValidationUtils {
     public final static String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,16}$";
     public final static String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
     public final static String IP_V4_REGEX = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$";
+    public final static String VERIFICATION_CODE_REGEX = "^[0-9]{6}$";
 
     public static boolean isValidPhone(String phone) {
         return isValidPhone(phone, PHONE_REGEX);
@@ -56,6 +57,13 @@ public class ValidationUtils {
         return isMatch(ip, pattern);
     }
 
+    public static boolean isValidVerificationCode(String code) {
+        return isValidVerificationCode(code, VERIFICATION_CODE_REGEX);
+    }
+
+    public static boolean isValidVerificationCode(String code, String pattern) {
+        return isMatch(code, pattern);
+    }
 
     public static void main(String[] args) {
         System.out.println(isValidPassword("Aa1!Bc2@"));

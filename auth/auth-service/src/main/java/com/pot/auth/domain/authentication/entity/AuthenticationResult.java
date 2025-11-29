@@ -17,7 +17,7 @@ import lombok.Builder;
  *   <li>✅ 自动生成equals/hashCode/toString</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Builder

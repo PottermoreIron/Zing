@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * JWT配置属性
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Data

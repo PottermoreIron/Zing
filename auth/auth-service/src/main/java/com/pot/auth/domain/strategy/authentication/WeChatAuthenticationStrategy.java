@@ -25,7 +25,7 @@ import java.util.Optional;
  *   <li>若用户未绑定，则自动创建新用户并登录</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 @Slf4j

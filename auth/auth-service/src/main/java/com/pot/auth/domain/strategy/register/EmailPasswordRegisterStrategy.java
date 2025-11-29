@@ -2,6 +2,7 @@ package com.pot.auth.domain.strategy.register;
 
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
+import com.pot.auth.domain.context.RegistrationContext;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.CreateUserCommand;
@@ -9,21 +10,26 @@ import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
-import com.pot.auth.domain.shared.valueobject.*;
+import com.pot.auth.domain.shared.valueobject.Email;
+import com.pot.auth.domain.shared.valueobject.Password;
+import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import com.pot.auth.domain.strategy.AbstractRegisterStrategyImpl;
-import com.pot.auth.interfaces.dto.auth.EmailPasswordRegisterRequest;
+import com.pot.auth.domain.validation.ValidationChain;
+import com.pot.auth.domain.validation.handler.RegistrationParameterValidator;
+import com.pot.auth.interfaces.dto.register.EmailPasswordRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 /**
- * 邮箱密码注册策略
+ * 邮箱密码注册策略（重构版）
  *
- * <p>使用邮箱+密码+验证码注册
+ * <p>
+ * 使用邮箱+密码+验证码注册
  *
- * @author yecao
- * @since 2025-11-18
+ * @author pot
+ * @since 2025-11-29
  */
 @Slf4j
 @Component
@@ -35,60 +41,85 @@ public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl<
     public EmailPasswordRegisterStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService
-    ) {
-        super(jwtTokenService);
+            VerificationCodeService verificationCodeService) {
+        super(jwtTokenService, createValidationChain());
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    @Override
-    protected void validateRequest(EmailPasswordRegisterRequest request) {
-        // Jakarta Validation已在Controller层完成，这里可以添加额外的业务验证
+    private static ValidationChain<RegistrationContext> createValidationChain() {
+        ValidationChain<RegistrationContext> chain = new ValidationChain<>();
+        chain.addHandler(new RegistrationParameterValidator());
+        return chain;
     }
 
     @Override
-    protected UserDTO doRegister(EmailPasswordRegisterRequest request, LoginContext loginContext) {
-        log.info("[邮箱注册] 开始注册: email={}", request.email());
+    protected void validateCredential(RegistrationContext context) {
+        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
 
-        // 1. 验证验证码
-        boolean codeValid = verificationCodeService.verifyCode(
-                request.email(),
-                VerificationCode.of(request.verificationCode())
-        );
+        log.debug("[邮箱密码注册] 开始验证凭证: email={}", request.email());
+
+        // 验证验证码
+        boolean codeValid = verificationCodeService.verifyCode(request.email(), VerificationCode.of(request.verificationCode()));
+
         if (!codeValid) {
-            log.warn("[邮箱注册] 验证码无效: email={}", request.email());
+            log.warn("[邮箱密码注册] 验证码无效: email={}", request.email());
             throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
         }
 
-        // 2. 获取用户模块适配器
-        UserDomain userDomain = request.userDomain();
-        UserModulePort userModulePort = userModulePortFactory.getPort(userDomain);
+        log.debug("[邮箱密码注册] 验证码验证通过: email={}", request.email());
+    }
 
-        // 3. 检查邮箱是否已存在
+    @Override
+    protected void beforeRegister(RegistrationContext context) {
+        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+
+        log.debug("[邮箱密码注册] 注册前置检查: email={}", request.email());
+
+        // 检查邮箱是否已存在
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         if (userModulePort.existsByEmail(Email.of(request.email()))) {
-            log.warn("[邮箱注册] 邮箱已存在: email={}", request.email());
+            log.warn("[邮箱密码注册] 邮箱已存在: email={}", request.email());
             throw new DomainException(AuthResultCode.EMAIL_ALREADY_EXISTS);
         }
+    }
 
-        // 4. 创建用户
+    @Override
+    protected UserDTO createUser(RegistrationContext context) {
+        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+
+        log.info("[邮箱密码注册] 创建用户: email={}", request.email());
+
+        // 创建用户
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         Email email = Email.of(request.email());
         Password password = Password.of(request.password());
+
         CreateUserCommand createCommand = CreateUserCommand.builder()
                 .email(email)
                 .password(password)
                 .build();
 
         var userId = userModulePort.createUser(createCommand);
-        log.info("[邮箱注册] 用户创建成功: userId={}", userId.value());
+        log.info("[邮箱密码注册] 用户创建成功: userId={}", userId.value());
 
-        // 5. 查询完整用户信息
+        // 查询完整用户信息
         Optional<UserDTO> userOpt = userModulePort.findById(userId);
         if (userOpt.isEmpty()) {
             throw new DomainException(AuthResultCode.USER_NOT_FOUND);
         }
 
         return userOpt.get();
+    }
+
+    @Override
+    protected void afterRegister(UserDTO user, RegistrationContext context) {
+        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+
+        // 注册成功后清理验证码
+        verificationCodeService.deleteCode(request.email());
+
+        log.debug("[邮箱密码注册] 已清理验证码: email={}", request.email());
     }
 
     @Override

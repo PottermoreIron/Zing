@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  *
  * <p>使用Auth服务专属的错误码（AuthResultCode）
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Slf4j

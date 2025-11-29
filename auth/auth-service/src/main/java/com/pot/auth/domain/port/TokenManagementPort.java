@@ -17,7 +17,7 @@ import java.util.Set;
  *   <li>SpringSecurityJwtAdapter - 基于Spring Security + JJWT实现</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public interface TokenManagementPort {

@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>负责管理OAuth2、WeChat等一体化认证策略
  * <p>这类策略的特点是注册和登录合二为一，无需用户显式选择
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-19
  */
 @Slf4j

@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.dto.auth;
+package com.pot.auth.interfaces.dto.register;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.pot.auth.domain.shared.enums.RegisterType;
@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
  * <p>注意：微信的注册和登录是一体化的，使用AuthenticationStrategy处理
  * <p>此DTO主要用于类型完整性，实际使用WeChatLoginRequest
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-19
  */
 public record WeChatRegisterRequest(

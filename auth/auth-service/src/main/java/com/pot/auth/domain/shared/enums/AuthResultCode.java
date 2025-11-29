@@ -16,7 +16,7 @@ import lombok.Getter;
  *   <li>A0400-A0499: 权限相关错误</li>
  * </ul>
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 @Getter

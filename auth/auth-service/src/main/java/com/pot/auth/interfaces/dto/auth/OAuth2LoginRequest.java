@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotNull;
  *
  * <p>支持Google、GitHub、Facebook、Apple等OAuth2提供商
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 public record OAuth2LoginRequest(

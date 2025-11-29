@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * <p>封装JWT Token的业务含义和验证规则
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record JwtToken(

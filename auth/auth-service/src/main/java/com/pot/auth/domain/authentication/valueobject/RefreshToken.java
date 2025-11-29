@@ -10,7 +10,7 @@ import com.pot.auth.domain.shared.valueobject.UserId;
  *
  * <p>封装RefreshToken的业务含义和滑动窗口续期规则
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-10
  */
 public record RefreshToken(

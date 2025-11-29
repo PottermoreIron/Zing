@@ -1,34 +1,27 @@
 package com.pot.auth.interfaces.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.validation.annotations.ValidPhone;
-import jakarta.validation.constraints.NotBlank;
+import com.pot.auth.domain.validation.annotations.ValidVerificationCode;
+import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
 /**
  * 手机号验证码登录请求
  *
- * @author yecao
+ * @author pot
  * @since 2025-11-18
  */
 public record PhoneCodeLoginRequest(
-        @NotNull(message = "登录类型不能为空")
-        @JsonProperty("loginType")
-        LoginType loginType,
+        @NotNull(message = "登录类型不能为空") @JsonProperty("loginType") LoginType loginType,
 
-        @NotBlank(message = "手机号不能为空")
-        @ValidPhone(message = "手机号格式不正确")
-        String phone,
+        @ValidPhone String phone,
 
-        @NotBlank(message = "验证码不能为空")
-        @Pattern(regexp = "^[0-9]{6}$", message = "验证码必须是6位数字")
-        String verificationCode,
+        @ValidVerificationCode String verificationCode,
 
-        @JsonProperty("userDomain")
-        UserDomain userDomain
-) implements LoginRequest {
+        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+        implements LoginRequest {
 }
-

@@ -10,39 +10,34 @@ package com.pot.auth.infrastructure.constant;
  */
 public final class CacheKeyConstants {
 
-    private CacheKeyConstants() {
-        throw new UnsupportedOperationException("工具类不允许实例化");
-    }
-
     /**
      * Auth服务缓存key前缀
      */
     public static final String AUTH_PREFIX = "auth";
-
     /**
      * Token相关
      */
     public static final String TOKEN = "token";
-
     /**
      * 验证码相关
      */
     public static final String CAPTCHA = "captcha";
-
     /**
      * 黑名单相关
      */
     public static final String BLACKLIST = "blacklist";
-
     /**
      * 用户会话相关
      */
     public static final String SESSION = "session";
-
     /**
      * 限流相关
      */
     public static final String RATE_LIMIT = "ratelimit";
+
+    private CacheKeyConstants() {
+        throw new UnsupportedOperationException("工具类不允许实例化");
+    }
 
     /**
      * 构建完整的缓存key
