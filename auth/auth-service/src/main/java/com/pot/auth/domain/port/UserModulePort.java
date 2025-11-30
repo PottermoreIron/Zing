@@ -14,15 +14,18 @@ import java.util.Set;
 /**
  * 用户模块端口接口（防腐层核心⭐⭐⭐）
  *
- * <p>领域层通过此接口访问用户模块(member/admin-service)，不依赖Feign Client
- * <p>每个用户域都有对应的适配器实现：
+ * <p>
+ * 领域层通过此接口访问用户模块(member/admin-service)，不依赖Feign Client
+ * <p>
+ * 每个用户域都有对应的适配器实现：
  * <ul>
- *   <li>MemberModuleAdapter - 适配member-service</li>
- *   <li>AdminModuleAdapter - 适配admin-service（预留）</li>
- *   <li>MerchantModuleAdapter - 适配merchant-service（未来扩展）</li>
+ * <li>MemberModuleAdapter - 适配member-service</li>
+ * <li>AdminModuleAdapter - 适配admin-service（预留）</li>
+ * <li>MerchantModuleAdapter - 适配merchant-service（未来扩展）</li>
  * </ul>
  *
- * <p>通过UserModulePortFactory根据UserDomain动态获取对应的适配器
+ * <p>
+ * 通过UserModulePortFactory根据UserDomain动态获取对应的适配器
  *
  * @author pot
  * @since 1.0.0
@@ -141,16 +144,33 @@ public interface UserModulePort {
      */
     void kickDevice(UserId userId, DeviceId deviceId);
 
-    // ========== OAuth2绑定 ==========
+    // ========== 社交账号绑定 ==========
 
     /**
-     * 通过OAuth2信息查找用户ID
+     * 通过OAuth2信息查找用户
+     *
+     * <p>
+     * 根据 OAuth2 提供商和 openId 查找已绑定的用户
+     *
+     * @param provider OAuth2提供商（如：google、github、facebook）
+     * @param openId   第三方平台的用户唯一标识
+     * @return 用户信息（如果找到）
      */
-    Optional<UserId> findUserIdByOAuth2(String provider, String providerId);
+    Optional<UserDTO> findUserByOAuth2(String provider, String openId);
+
+    /**
+     * 通过微信 OpenID 查找用户
+     *
+     * <p>
+     * 根据微信 openId 查找已绑定的用户
+     *
+     * @param weChatOpenId 微信用户的 OpenID
+     * @return 用户信息（如果找到）
+     */
+    Optional<UserDTO> findUserByWeChat(String weChatOpenId);
 
     /**
      * 绑定OAuth2账号
      */
     void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo);
 }
-

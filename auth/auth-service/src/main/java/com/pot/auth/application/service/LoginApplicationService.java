@@ -3,32 +3,36 @@ package com.pot.auth.application.service;
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.context.AuthenticationContext;
-import com.pot.auth.domain.shared.enums.LoginType;
-import com.pot.auth.domain.strategy.AuthenticationStrategy;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.strategy.LoginStrategy;
-import com.pot.auth.domain.strategy.factory.AuthenticationStrategyFactory;
 import com.pot.auth.domain.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
-import com.pot.auth.interfaces.dto.auth.OAuth2LoginRequest;
-import com.pot.auth.interfaces.dto.auth.WeChatLoginRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 /**
- * 登录应用服务（重构版）
+ * 登录应用服务
  *
  * <p>
- * 编排登录流程，根据登录类型自动选择对应的策略
+ * 负责传统登录流程（要求用户已注册）
+ *
  * <p>
- * 支持5种登录方式（已移除手机号密码登录）：
+ * 支持的登录方式：
  * <ul>
- * <li>用户名密码登录</li>
- * <li>邮箱密码登录</li>
- * <li>手机号验证码登录</li>
- * <li>邮箱验证码登录</li>
- * <li>OAuth2登录（Google, GitHub等）</li>
- * <li>微信登录</li>
+ * <li>用户名 + 密码</li>
+ * <li>邮箱 + 密码</li>
+ * <li>邮箱 + 验证码</li>
+ * <li>手机号 + 验证码</li>
+ * </ul>
+ *
+ * <p>
+ * 注意：
+ * <ul>
+ * <li>如需一键认证（自动注册/登录，包括 OAuth2/WeChat），请使用
+ * {@link OneStopAuthenticationService}</li>
  * </ul>
  *
  * @author pot
@@ -40,64 +44,40 @@ import org.springframework.stereotype.Service;
 public class LoginApplicationService {
 
     private final LoginStrategyFactory loginStrategyFactory;
-    private final AuthenticationStrategyFactory authenticationStrategyFactory;
 
     /**
-     * 统一登录入口
+     * 传统登录入口
      *
      * <p>
      * 根据登录类型自动选择对应的策略执行登录
+     *
+     * <p>
+     * 不支持第三方登录（OAuth2/WeChat），这些已迁移到 AuthenticationController
      *
      * @param request   登录请求（多态）
      * @param ipAddress 客户端IP地址
      * @param userAgent 用户代理信息
      * @return 登录响应
+     * @throws DomainException 如果使用不支持的登录类型
      */
-    @SuppressWarnings("unchecked")
     public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
-        log.info("[应用服务] 登录请求: loginType={}, userDomain={}",
+        log.info("[登录服务] 登录请求: loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
-        AuthenticationResult result;
+        // 传统登录（用户名/邮箱/手机号 + 密码/验证码）
+        // 构建认证上下文
+        AuthenticationContext context = AuthenticationContext.builder()
+                .request(request)
+                .ipAddress(com.pot.auth.domain.shared.valueobject.IpAddress.of(ipAddress))
+                .deviceInfo(com.pot.auth.domain.shared.valueobject.DeviceInfo
+                        .fromUserAgent(userAgent != null ? userAgent : "Unknown"))
+                .sessionId(generateSessionId())
+                .build();
 
-        // 判断是传统登录还是一体化认证（OAuth2/WeChat）
-        if (LoginType.OAUTH2.equals(request.loginType())) {
-            // OAuth2登录
-            OAuth2LoginRequest oauthReq = (OAuth2LoginRequest) request;
-            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy(LoginType.OAUTH2);
-            result = strategy.authenticate(
-                    oauthReq.provider().getCode(),
-                    oauthReq.code(),
-                    oauthReq.state(),
-                    oauthReq.userDomain().getCode(),
-                    ipAddress,
-                    userAgent);
-        } else if (LoginType.WECHAT.equals(request.loginType())) {
-            // 微信登录
-            WeChatLoginRequest wechatReq = (WeChatLoginRequest) request;
-            AuthenticationStrategy strategy = authenticationStrategyFactory.getStrategy(LoginType.WECHAT);
-            result = strategy.authenticate(
-                    LoginType.WECHAT.getCode(),
-                    wechatReq.code(),
-                    wechatReq.state(),
-                    wechatReq.userDomain().getCode(),
-                    ipAddress,
-                    userAgent);
-        } else {
-            // 传统登录（用户名/手机/邮箱 + 密码/验证码）
-            // 构建认证上下文
-            AuthenticationContext context = AuthenticationContext.builder()
-                    .request(request)
-                    .ipAddress(com.pot.auth.domain.shared.valueobject.IpAddress.of(ipAddress))
-                    .deviceInfo(com.pot.auth.domain.shared.valueobject.DeviceInfo
-                            .fromUserAgent(userAgent != null ? userAgent : "Unknown"))
-                    .sessionId(generateSessionId())
-                    .build();
-
-            LoginStrategy<?> strategy = loginStrategyFactory.getStrategy(request.loginType());
-            // 此处的类型转换是安全的，因为工厂根据loginType返回对应的策略
-            result = ((LoginStrategy<LoginRequest>) strategy).execute(context);
-        }
+        // 获取策略并执行
+        LoginStrategy<?> strategy = loginStrategyFactory.getStrategy(request.loginType());
+        // 此处的类型转换是安全的，因为工厂根据loginType返回对应的策略
+        AuthenticationResult result = strategy.execute(context);
 
         // 转换为应用层DTO
         LoginResponse response = new LoginResponse(
@@ -111,7 +91,7 @@ public class LoginApplicationService {
                 result.accessTokenExpiresAt(),
                 result.refreshTokenExpiresAt());
 
-        log.info("[应用服务] 登录成功: userId={}, loginType={}", result.userId(), request.loginType());
+        log.info("[登录服务] 登录成功: userId={}, loginType={}", result.userId(), request.loginType());
         return response;
     }
 
@@ -121,7 +101,6 @@ public class LoginApplicationService {
      * @return 会话ID
      */
     private String generateSessionId() {
-        // 简单实现，实际可以用UUID或其他方式
-        return java.util.UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 }

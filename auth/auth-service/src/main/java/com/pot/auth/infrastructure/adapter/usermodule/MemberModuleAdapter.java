@@ -23,23 +23,27 @@ import java.util.*;
 /**
  * Member域适配器（防腐层核心实现⭐⭐⭐）
  *
- * <p><strong>职责</strong>：
+ * <p>
+ * <strong>职责</strong>：
  * <ul>
- *   <li>实现UserModulePort接口</li>
- *   <li>调用MemberServiceClient（Feign）</li>
- *   <li>将member-facade的DTO转换成auth领域层DTO（防腐）</li>
- *   <li>处理member-service的异常并转换成领域异常</li>
+ * <li>实现UserModulePort接口</li>
+ * <li>调用MemberServiceClient（Feign）</li>
+ * <li>将member-facade的DTO转换成auth领域层DTO（防腐）</li>
+ * <li>处理member-service的异常并转换成领域异常</li>
  * </ul>
  *
- * <p><strong>防腐层价值</strong>：
+ * <p>
+ * <strong>防腐层价值</strong>：
  * <ul>
- *   <li>✅ member-facade的DTO变更不影响auth领域层</li>
- *   <li>✅ member-service的API变更只需修改此Adapter</li>
- *   <li>✅ 可以轻松Mock此Adapter进行单元测试</li>
- *   <li>✅ 符合依赖倒置原则（DIP）</li>
+ * <li>✅ member-facade的DTO变更不影响auth领域层</li>
+ * <li>✅ member-service的API变更只需修改此Adapter</li>
+ * <li>✅ 可以轻松Mock此Adapter进行单元测试</li>
+ * <li>✅ 符合依赖倒置原则（DIP）</li>
  * </ul>
  *
- * <p><strong>示例</strong>：
+ * <p>
+ * <strong>示例</strong>：
+ *
  * <pre>
  * // 领域层使用
  * UserModulePort userPort = userModulePortFactory.getPort(UserDomain.MEMBER);
@@ -332,22 +336,6 @@ public class MemberModuleAdapter implements UserModulePort {
     // ========== OAuth2绑定 ==========
 
     @Override
-    public Optional<UserId> findUserIdByOAuth2(String provider, String providerId) {
-        try {
-            R<MemberDTO> response = memberServiceClient.getMemberByOAuth2(provider, providerId);
-
-            if (response == null || !response.isSuccess() || response.getData() == null) {
-                return Optional.empty();
-            }
-
-            return Optional.of(UserId.of(response.getData().getMemberId()));
-        } catch (Exception e) {
-            log.error("根据OAuth2信息查询用户失败: provider={}, providerId={}", provider, providerId, e);
-            return Optional.empty();
-        }
-    }
-
-    @Override
     public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
         try {
             R<Void> response = memberServiceClient.bindOAuth2Account(userId.value(), provider, providerId);
@@ -369,7 +357,8 @@ public class MemberModuleAdapter implements UserModulePort {
     /**
      * 将member-facade的MemberDTO转换成auth领域层的UserDTO
      *
-     * <p>这是防腐层的核心：隔离member-facade的DTO变更
+     * <p>
+     * 这是防腐层的核心：隔离member-facade的DTO变更
      */
     private UserDTO convertToUserDTO(MemberDTO memberDTO) {
         return UserDTO.builder()
@@ -395,8 +384,37 @@ public class MemberModuleAdapter implements UserModulePort {
         }
         return LocalDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp),
-                ZoneId.systemDefault()
-        );
+                ZoneId.systemDefault());
+    }
+
+    // ========== 社交账号查询 ==========
+
+    @Override
+    public Optional<UserDTO> findUserByOAuth2(String provider, String openId) {
+        try {
+            // TODO: 调用 member-service 的社交连接查询 API
+            // 目前 member-service 还没有提供根据 OAuth2 信息查询用户的 API
+            // 暂时返回空，等待 member-service 实现后再补充
+            log.debug("查询OAuth2绑定用户: provider={}, openId={}", provider, openId);
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("查询OAuth2绑定用户失败: provider={}, openId={}", provider, openId, e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<UserDTO> findUserByWeChat(String weChatOpenId) {
+        try {
+            // TODO: 调用 member-service 的社交连接查询 API
+            // 目前 member-service 还没有提供根据微信 OpenId 查询用户的 API
+            // 暂时返回空，等待 member-service 实现后再补充
+            log.debug("查询微信绑定用户: weChatOpenId={}", weChatOpenId);
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("查询微信绑定用户失败: weChatOpenId={}", weChatOpenId, e);
+            return Optional.empty();
+        }
     }
 
     // ========== 异常定义 ==========
@@ -421,4 +439,3 @@ public class MemberModuleAdapter implements UserModulePort {
         }
     }
 }
-

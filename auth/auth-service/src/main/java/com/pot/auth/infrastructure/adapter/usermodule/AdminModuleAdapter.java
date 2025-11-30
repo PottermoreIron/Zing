@@ -15,15 +15,18 @@ import java.util.*;
 /**
  * Admin域适配器（预留）
  *
- * <p><strong>扩展示例</strong>：
+ * <p>
+ * <strong>扩展示例</strong>：
  * <ul>
- *   <li>当admin-service开发完成后，只需实现此Adapter</li>
- *   <li>创建AdminServiceClient（Feign）</li>
- *   <li>配置文件启用：auth.user-domain.admin.enabled=true</li>
- *   <li>无需修改auth-service的其他代码</li>
+ * <li>当admin-service开发完成后，只需实现此Adapter</li>
+ * <li>创建AdminServiceClient（Feign）</li>
+ * <li>配置文件启用：auth.user-domain.admin.enabled=true</li>
+ * <li>无需修改auth-service的其他代码</li>
  * </ul>
  *
- * <p><strong>使用方式</strong>：
+ * <p>
+ * <strong>使用方式</strong>：
+ *
  * <pre>
  * // 领域层自动支持Admin域
  * UserModulePort adminPort = userModulePortFactory.getPort(UserDomain.ADMIN);
@@ -151,12 +154,21 @@ public class AdminModuleAdapter implements UserModulePort {
     }
 
     @Override
-    public Optional<UserId> findUserIdByOAuth2(String provider, String providerId) {
+    public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
+        throw new UnsupportedOperationException("Admin域暂未实现");
+    }
+
+    @Override
+    public Optional<UserDTO> findUserByOAuth2(String provider, String openId) {
+        // Admin域暂不支持社交登录
+        log.debug("Admin域不支持OAuth2登录: provider={}, openId={}", provider, openId);
         return Optional.empty();
     }
 
     @Override
-    public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
-        throw new UnsupportedOperationException("Admin域暂未实现");
+    public Optional<UserDTO> findUserByWeChat(String weChatOpenId) {
+        // Admin域暂不支持微信登录
+        log.debug("Admin域不支持微信登录: weChatOpenId={}", weChatOpenId);
+        return Optional.empty();
     }
 }

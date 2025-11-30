@@ -22,7 +22,22 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * 登录控制器
  *
  * <p>
- * 负责传统登录流程，要求用户已注册
+ * 负责传统登录流程（要求用户已注册）
+ *
+ * <p>
+ * 支持的登录方式：
+ * <ul>
+ * <li>用户名 + 密码</li>
+ * <li>邮箱 + 密码</li>
+ * <li>邮箱 + 验证码</li>
+ * <li>手机号 + 验证码</li>
+ * </ul>
+ *
+ * <p>
+ * 注意：
+ * <ul>
+ * <li>如需一键认证（自动注册），请使用 {@link OneStopAuthenticationController}</li>
+ * </ul>
  *
  * @author pot
  * @since 2025-11-29
@@ -38,24 +53,20 @@ public class LoginController {
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
 
     /**
-     * 统一登录入口
+     * 传统登录入口
      *
      * <p>
-     * 支持6种登录方式（已移除手机号密码登录），通过loginType字段自动识别：
+     * 支持4种登录方式，通过loginType字段自动识别：
      * <ul>
      * <li>USERNAME_PASSWORD - 用户名密码登录</li>
      * <li>EMAIL_PASSWORD - 邮箱密码登录</li>
      * <li>EMAIL_CODE - 邮箱验证码登录</li>
      * <li>PHONE_CODE - 手机号验证码登录</li>
-     * <li>OAUTH2 - OAuth2登录（Google, GitHub等）</li>
-     * <li>WECHAT - 微信登录</li>
      * </ul>
-     *
-     * <p>
      * 请求示例（用户名密码）：
      *
      * <pre>
-     * POST /auth/v2/login
+     * POST /auth/api/v1/login
      * {
      *   "loginType": "USERNAME_PASSWORD",
      *   "username": "john_doe",
@@ -65,22 +76,22 @@ public class LoginController {
      * </pre>
      *
      * <p>
-     * 请求示例（OAuth2）：
+     * 请求示例（邮箱验证码）：
      *
      * <pre>
-     * POST /auth/v2/login
+     * POST /auth/api/v1/login
      * {
-     *   "loginType": "OAUTH2",
-     *   "provider": "google",
-     *   "code": "4/0AY0e-g7...",
-     *   "state": "random_state",
+     *   "loginType": "EMAIL_CODE",
+     *   "email": "user@example.com",
+     *   "code": "123456",
      *   "userDomain": "MEMBER"
      * }
      * </pre>
      */
-    @PostMapping("api/v1/login")
+    @PostMapping("/api/v1/login")
     public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        log.info("登录请求: loginType={}", request.loginType());
+        log.info("[登录] 传统登录请求: loginType={}, userDomain={}",
+                request.loginType(), request.userDomain());
 
         // 执行登录
         LoginResponse response = loginApplicationService.login(request, getClientIp(httpRequest),
@@ -93,18 +104,21 @@ public class LoginController {
      * 刷新Token
      *
      * <p>
+     * 使用 refreshToken 获取新的 accessToken
+     *
+     * <p>
      * 请求示例：
      *
      * <pre>
-     * POST /auth/v2/refresh
+     * POST /auth/api/v1/refresh
      * {
      *   "refreshToken": "xxx"
      * }
      * </pre>
      */
-    @PostMapping("/v2/refresh")
+    @PostMapping("/api/v1/refresh")
     public R<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        log.info("[接口V2] 刷新Token请求");
+        log.info("[登录] 刷新Token请求");
 
         LoginResponse response = tokenRefreshApplicationService.refreshToken(request.refreshToken());
 
