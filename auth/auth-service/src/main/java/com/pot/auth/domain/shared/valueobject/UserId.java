@@ -9,7 +9,7 @@ import lombok.Builder;
  * <p>使用分布式ID生成器生成（Snowflake算法）
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @Builder
 public record UserId(Long value) {

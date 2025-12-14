@@ -6,7 +6,7 @@ import java.util.UUID;
  * Token ID值对象
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 public record TokenId(String value) {
 

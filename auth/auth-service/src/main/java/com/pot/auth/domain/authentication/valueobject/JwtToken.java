@@ -4,25 +4,28 @@ import com.pot.auth.domain.shared.valueobject.TokenId;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
  * JWT Token值对象
  *
- * <p>封装JWT Token的业务含义和验证规则
+ * <p>
+ * 封装JWT Token的业务含义和验证规则
  *
  * @author pot
  * @since 2025-11-10
  */
 public record JwtToken(
-        TokenId tokenId,              // JTI - Token唯一标识
-        UserId userId,                // 用户ID
-        UserDomain userDomain,        // 用户域
-        String username,              // 用户名
-        Set<String> authorities,      // 权限列表
-        Long issuedAt,                // 签发时间（Unix时间戳）
-        Long expiresAt,               // 过期时间（Unix时间戳）
-        String rawToken               // 原始Token字符串
+        TokenId tokenId, // JTI - Token唯一标识
+        UserId userId, // 用户ID
+        UserDomain userDomain, // 用户域
+        String username, // 用户名
+        Set<String> authorities, // 权限列表
+        Long issuedAt, // 签发时间（Unix时间戳）
+        Long expiresAt, // 过期时间（Unix时间戳）
+        String rawToken, // 原始Token字符串
+        Map<String, Object> claimsMap // 【新增】完整的Claims Map，用于获取自定义字段
 ) {
 
     /**
@@ -49,6 +52,39 @@ public record JwtToken(
         }
         if (rawToken == null || rawToken.isBlank()) {
             throw new IllegalArgumentException("Token字符串不能为空");
+        }
+        if (claimsMap == null) {
+            claimsMap = Map.of();
+        }
+    }
+
+    /**
+     * 获取指定类型的Claim
+     *
+     * @param key   Claim的key
+     * @param clazz 值的类型
+     * @param <T>   泛型类型
+     * @return Claim的值，如果不存在则返回null
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getClaim(String key, Class<T> clazz) {
+        Object value = claimsMap.get(key);
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            // 数字类型的特殊处理
+            if (clazz == Long.class && value instanceof Number) {
+                return (T) Long.valueOf(((Number) value).longValue());
+            }
+            if (clazz == Integer.class && value instanceof Number) {
+                return (T) Integer.valueOf(((Number) value).intValue());
+            }
+
+            return clazz.cast(value);
+        } catch (ClassCastException e) {
+            return null;
         }
     }
 
@@ -99,4 +135,3 @@ public record JwtToken(
         return authorities.containsAll(requiredAuthorities);
     }
 }
-

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * </ul>
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @Slf4j
 @Component

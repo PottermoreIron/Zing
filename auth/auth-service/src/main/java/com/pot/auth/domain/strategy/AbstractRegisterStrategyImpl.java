@@ -37,6 +37,7 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     protected final ValidationChain<RegistrationContext> validationChain;
 
     @Override
+    @SuppressWarnings("unchecked")
     public final AuthenticationResult execute(RegistrationContext context) {
         T request = (T) context.request();
 

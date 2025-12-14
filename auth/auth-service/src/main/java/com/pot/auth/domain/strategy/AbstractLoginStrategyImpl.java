@@ -44,6 +44,7 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final AuthenticationResult execute(AuthenticationContext context) {
         T request = (T) context.request();
 

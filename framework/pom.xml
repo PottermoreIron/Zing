@@ -24,6 +24,5 @@
         <module>framework-starter-ratelimit</module>
         <module>framework-starter-code-generator</module>
         <module>framework-starter-touch</module>
-        <module>framework-starter-security</module>
     </modules>
 </project>

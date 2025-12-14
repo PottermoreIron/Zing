@@ -3,6 +3,7 @@ package com.pot.auth.domain.port;
 import com.pot.auth.domain.authentication.valueobject.JwtToken;
 import com.pot.auth.domain.authentication.valueobject.RefreshToken;
 import com.pot.auth.domain.authentication.valueobject.TokenPair;
+import com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
 
@@ -11,10 +12,12 @@ import java.util.Set;
 /**
  * Token管理端口接口（防腐层）
  *
- * <p>领域层通过此接口管理JWT Token，不依赖具体的安全框架
- * <p>实现类：
+ * <p>
+ * 领域层通过此接口管理JWT Token，不依赖具体的安全框架
+ * <p>
+ * 实现类：
  * <ul>
- *   <li>SpringSecurityJwtAdapter - 基于Spring Security + JJWT实现</li>
+ * <li>SpringSecurityJwtAdapter - 基于Spring Security + JJWT实现</li>
  * </ul>
  *
  * @author pot
@@ -29,14 +32,15 @@ public interface TokenManagementPort {
      * @param userDomain  用户域
      * @param username    用户名
      * @param authorities 权限集合
+     * @param metadata    【新增】权限缓存元数据（版本号+摘要）
      * @return Token对
      */
     TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
             String username,
-            Set<String> authorities
-    );
+            Set<String> authorities,
+            PermissionCacheMetadata metadata);
 
     /**
      * 解析AccessToken

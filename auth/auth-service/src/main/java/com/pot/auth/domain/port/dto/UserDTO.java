@@ -14,7 +14,7 @@ import java.util.Set;
  * <p>由MemberModuleAdapter负责将facade的DTO转换成此DTO
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @Builder
 public record UserDTO(

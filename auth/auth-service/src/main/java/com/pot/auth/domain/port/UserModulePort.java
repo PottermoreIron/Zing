@@ -28,7 +28,7 @@ import java.util.Set;
  * 通过UserModulePortFactory根据UserDomain动态获取对应的适配器
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 public interface UserModulePort {
 

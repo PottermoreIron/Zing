@@ -4,7 +4,7 @@ package com.pot.auth.domain.shared.valueobject;
  * 设备ID值对象
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 public record DeviceId(Long value) {
 

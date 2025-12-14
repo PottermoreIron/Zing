@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * <p>封装手机号的验证规则和业务行为
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @Builder
 public record Phone(String value) {

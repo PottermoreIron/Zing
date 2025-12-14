@@ -1,6 +1,5 @@
 package com.pot.auth.interfaces.exception;
 
-import com.pot.auth.domain.authentication.service.AuthenticationDomainService;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
@@ -23,7 +22,8 @@ import java.util.stream.Collectors;
 /**
  * 全局异常处理器
  *
- * <p>使用Auth服务专属的错误码（AuthResultCode）
+ * <p>
+ * 使用Auth服务专属的错误码（AuthResultCode）
  *
  * @author pot
  * @since 2025-11-10
@@ -31,36 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    /**
-     * 处理认证失败异常
-     */
-    @ExceptionHandler(AuthenticationDomainService.AuthenticationFailedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public R<Void> handleAuthenticationFailed(AuthenticationDomainService.AuthenticationFailedException e) {
-        log.warn("[异常] 认证失败: {}", e.getMessage());
-        return R.fail(AuthResultCode.AUTHENTICATION_FAILED);
-    }
-
-    /**
-     * 处理账户锁定异常
-     */
-    @ExceptionHandler(AuthenticationDomainService.AccountLockedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public R<Void> handleAccountLocked(AuthenticationDomainService.AccountLockedException e) {
-        log.warn("[异常] 账户锁定: {}", e.getMessage());
-        return R.fail(AuthResultCode.ACCOUNT_LOCKED);
-    }
-
-    /**
-     * 处理账户禁用异常
-     */
-    @ExceptionHandler(AuthenticationDomainService.AccountDisabledException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public R<Void> handleAccountDisabled(AuthenticationDomainService.AccountDisabledException e) {
-        log.warn("[异常] 账户禁用: {}", e.getMessage());
-        return R.fail(AuthResultCode.ACCOUNT_DISABLED);
-    }
 
     /**
      * 处理Token过期异常
@@ -207,4 +177,3 @@ public class GlobalExceptionHandler {
         return R.fail(AuthResultCode.SYSTEM_ERROR);
     }
 }
-

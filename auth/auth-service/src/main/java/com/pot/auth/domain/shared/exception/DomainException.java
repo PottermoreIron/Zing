@@ -7,7 +7,7 @@ import lombok.Getter;
  * 领域层基础异常
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @Getter
 public class DomainException extends RuntimeException {

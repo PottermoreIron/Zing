@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * </ul>
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @Builder
 public record IpAddress(String value) {

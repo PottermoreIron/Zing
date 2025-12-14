@@ -29,7 +29,8 @@ import java.util.*;
 /**
  * Spring Security JWT适配器
  *
- * <p>实现TokenManagementPort接口，使用JWT进行Token管理
+ * <p>
+ * 实现TokenManagementPort接口，使用JWT进行Token管理
  *
  * @author pot
  * @since 2025-11-10
@@ -86,8 +87,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
             UserId userId,
             UserDomain userDomain,
             String username,
-            Set<String> authorities
-    ) {
+            Set<String> authorities,
+            com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata metadata) {
         long currentTime = System.currentTimeMillis() / 1000;
 
         // 生成AccessToken
@@ -101,10 +102,18 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                 .claim("userDomain", userDomain.name())
                 .claim("username", username)
                 .claim("authorities", authorities)
+                // 【新增】写入权限元数据
+                .claim("perm_version", metadata.version())
+                .claim("perm_digest", metadata.digest())
                 .issuedAt(new Date(currentTime * 1000))
                 .expiration(new Date(accessTokenExpiresAt * 1000))
                 .signWith(privateKey)
                 .compact();
+
+        // 构建Claims Map
+        Map<String, Object> claimsMap = new java.util.HashMap<>();
+        claimsMap.put("perm_version", metadata.version());
+        claimsMap.put("perm_digest", metadata.digest());
 
         JwtToken accessToken = new JwtToken(
                 accessTokenId,
@@ -114,8 +123,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                 authorities,
                 currentTime,
                 accessTokenExpiresAt,
-                accessTokenString
-        );
+                accessTokenString,
+                claimsMap);
 
         // 生成RefreshToken
         TokenId refreshTokenId = TokenId.generate();
@@ -141,8 +150,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                 deviceId,
                 currentTime,
                 refreshTokenExpiresAt,
-                refreshTokenString
-        );
+                refreshTokenString);
 
         return new TokenPair(accessToken, refreshToken);
     }
@@ -168,6 +176,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
             long issuedAt = claims.getIssuedAt().getTime() / 1000;
             long expiresAt = claims.getExpiration().getTime() / 1000;
 
+            // 【新增】传递完整的Claims Map
             return new JwtToken(
                     tokenId,
                     userId,
@@ -176,7 +185,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                     authorities,
                     issuedAt,
                     expiresAt,
-                    tokenString
+                    tokenString,
+                    new HashMap<>(claims) // 完整的Claims Map
             );
         } catch (Exception e) {
             log.error("[JWT] AccessToken解析失败", e);
@@ -208,12 +218,10 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                     deviceId,
                     issuedAt,
                     expiresAt,
-                    tokenString
-            );
+                    tokenString);
         } catch (Exception e) {
             log.error("[JWT] RefreshToken解析失败", e);
             throw new RuntimeException("Token解析失败", e);
         }
     }
 }
-

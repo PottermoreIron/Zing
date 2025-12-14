@@ -25,7 +25,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * </ul>
  *
  * @author pot
- * @since 1.0.0
+ * @since 2025-12-14
  */
 @SpringBootApplication
 @EnableDiscoveryClient

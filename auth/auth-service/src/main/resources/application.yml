@@ -61,6 +61,39 @@ auth:
     admin:
       enabled: false
 
+  # 权限系统配置
+  permission:
+    # 权限缓存配置
+    cache:
+      # Redis缓存过期时间（秒）
+      redis-ttl: 3600
+      # 本地缓存过期时间（秒）
+      local-ttl: 300
+      # 本地缓存最大条目数
+      local-max-size: 10000
+      # 布隆过滤器预期容量
+      bloom-capacity: 100000
+      # 布隆过滤器误判率
+      bloom-fpp: 0.01
+
+    # 消息队列配置
+    mq:
+      # 交换机名称
+      exchange: auth.permission.exchange
+      # 队列名称
+      queue: auth.permission.changed
+      # 路由键
+      routing-key: permission.changed
+      # 是否启用MQ
+      enabled: false
+
+    # 权限表达式配置
+    expression:
+      # 是否启用缓存
+      cache-enabled: true
+      # 表达式缓存大小
+      cache-size: 1000
+
 # 日志配置
 logging:
   level:
@@ -68,4 +101,3 @@ logging:
     org.springframework.security: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
-
