@@ -76,23 +76,23 @@ public class JwtTokenService {
      * @param userId      用户ID
      * @param userDomain  用户域
      * @param username    用户名
-     * @param authorities 权限集合
+     * @param permissions 权限集合
      * @return Token对
      */
     public TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
             String username,
-            Set<String> authorities) {
+            Set<String> permissions) {
         log.info("[Token] 生成Token对: userId={}, userDomain={}, username={}, permCount={}",
-                userId, userDomain, username, authorities.size());
+                userId, userDomain, username, permissions.size());
 
         try {
             // 【增强】1. 缓存权限到Redis（调用PermissionDomainService）
             PermissionCacheMetadata metadata = permissionDomainService.cachePermissionsWithMetadata(
                     userId,
                     userDomain,
-                    authorities);
+                    permissions);
 
             log.debug("[Token] 权限已缓存: userId={}, version={}, digest={}",
                     userId, metadata.version(), metadata.digest());
@@ -102,7 +102,7 @@ public class JwtTokenService {
                     userId,
                     userDomain,
                     username,
-                    authorities,
+                    permissions,
                     metadata);
 
             // 3. 存储RefreshToken到缓存
