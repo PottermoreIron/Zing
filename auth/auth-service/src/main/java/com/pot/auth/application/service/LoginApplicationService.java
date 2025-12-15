@@ -4,6 +4,8 @@ import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.context.AuthenticationContext;
 import com.pot.auth.domain.shared.exception.DomainException;
+import com.pot.auth.domain.shared.valueobject.DeviceInfo;
+import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.domain.strategy.LoginStrategy;
 import com.pot.auth.domain.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
@@ -68,9 +70,8 @@ public class LoginApplicationService {
         // 构建认证上下文
         AuthenticationContext context = AuthenticationContext.builder()
                 .request(request)
-                .ipAddress(com.pot.auth.domain.shared.valueobject.IpAddress.of(ipAddress))
-                .deviceInfo(com.pot.auth.domain.shared.valueobject.DeviceInfo
-                        .fromUserAgent(userAgent != null ? userAgent : "Unknown"))
+                .ipAddress(IpAddress.of(ipAddress))
+                .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                 .sessionId(generateSessionId())
                 .build();
 
