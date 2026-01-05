@@ -10,7 +10,6 @@ package com.pot.zing.framework.mq.core;
  * @author Copilot
  * @since 2026-01-05
  */
-@FunctionalInterface
 public interface MessageConsumer<T> {
 
     /**
@@ -19,4 +18,18 @@ public interface MessageConsumer<T> {
      * @param message 消息内容
      */
     void consume(T message);
+    
+    /**
+     * 获取消息类型
+     *
+     * @return 消息类型的Class对象
+     */
+    Class<T> getMessageType();
+    
+    /**
+     * 获取队列名称
+     *
+     * @return 队列名称
+     */
+    String getQueue();
 }

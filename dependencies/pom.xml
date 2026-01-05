@@ -38,7 +38,7 @@
         <weixin-java-mp.version>4.7.7.B</weixin-java-mp.version>
         <netty.version>4.2.3.Final</netty.version>
         <dotenv.version>3.0.0</dotenv.version>
-        <flyway.version>10.24.0</flyway.version>
+        <flyway.version>10.21.0</flyway.version>
         <!-- Maven 插件版本 -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
