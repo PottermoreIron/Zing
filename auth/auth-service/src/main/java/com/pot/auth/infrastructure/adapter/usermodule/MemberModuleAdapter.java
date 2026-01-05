@@ -76,29 +76,25 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> authenticateWithPassword(String identifier, String password) {
         try {
-            // 1. 尝试通过不同方式查找用户
-            R<MemberDTO> response = findMemberByIdentifier(identifier);
+            // 1. 调用member-service的内部认证API进行密码验证
+            R<Boolean> verifyResponse = memberServiceClient.verifyPassword(identifier, password);
 
-            if (response == null || !response.isSuccess() || response.getData() == null) {
-                log.debug("用户不存在: identifier={}", identifier);
+            if (verifyResponse == null || !verifyResponse.isSuccess()
+                    || !Boolean.TRUE.equals(verifyResponse.getData())) {
+                log.debug("密码验证失败: identifier={}", identifier);
                 return Optional.empty();
             }
 
-            MemberDTO memberDTO = response.getData();
+            // 2. 验证成功，查询用户信息
+            R<MemberDTO> response = findMemberByIdentifier(identifier);
 
-            // 2. 验证密码（这里简化处理，实际应该调用member-service的认证API）
-            // TODO: member-service应该提供专门的认证API，包含密码验证和登录失败追踪
-            // 当前member-service的password字段已经是BCrypt加密后的hash
-            // auth-service不应该直接访问password字段，应该调用member-service的认证API
-
-            log.warn("⚠️ 当前使用临时方案：auth-service获取password_hash进行验证");
-            log.warn("⚠️ TODO: member-service应提供内部认证API: POST /internal/authenticate");
-
-            // 临时方案：假设验证成功（实际应该调用BCrypt验证）
-            // 生产环境必须改为调用member-service的认证API
+            if (response == null || !response.isSuccess() || response.getData() == null) {
+                log.error("密码验证成功但用户信息查询失败: identifier={}", identifier);
+                return Optional.empty();
+            }
 
             // 3. 转换DTO
-            return Optional.of(convertToUserDTO(memberDTO));
+            return Optional.of(convertToUserDTO(response.getData()));
 
         } catch (Exception e) {
             log.error("密码认证失败: identifier={}", identifier, e);

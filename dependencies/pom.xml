@@ -37,6 +37,8 @@
         <guava.version>33.4.6-jre</guava.version>
         <weixin-java-mp.version>4.7.7.B</weixin-java-mp.version>
         <netty.version>4.2.3.Final</netty.version>
+        <dotenv.version>3.0.0</dotenv.version>
+        <flyway.version>10.24.0</flyway.version>
         <!-- Maven 插件版本 -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
@@ -155,11 +157,35 @@
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
             </dependency>
+            
+            <!-- dotenv-java for loading .env files -->
+            <dependency>
+                <groupId>io.github.cdimascio</groupId>
+                <artifactId>dotenv-java</artifactId>
+                <version>${dotenv.version}</version>
+            </dependency>
+            
+            <!-- Flyway for database migration -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-mysql</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
 
             <!-- 自定义starter -->
             <dependency>
                 <groupId>com.pot</groupId>
                 <artifactId>framework-starter-redis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.pot</groupId>
+                <artifactId>framework-starter-mq</artifactId>
                 <version>${revision}</version>
             </dependency>
 

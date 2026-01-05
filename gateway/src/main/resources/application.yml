@@ -1,0 +1,48 @@
+server:
+  port: ${GATEWAY_PORT:8080}
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:dev}
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+        - id: member-service
+          uri: lb://member-service
+          predicates:
+            - Path=/member/**
+          filters:
+            - StripPrefix=1
+
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+      timeout: 3000ms
+
+# JWT配置
+gateway:
+  jwt:
+    # 公钥文件路径（从auth-service复制公钥文件到gateway的resources/keys目录）
+    public-key-location: ${JWT_PUBLIC_KEY_PATH:classpath:keys/jwt_public_key.pem}
+    # 或直接配置公钥内容（Base64编码）
+    # public-key: ${JWT_PUBLIC_KEY:}

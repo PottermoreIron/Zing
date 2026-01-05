@@ -1,6 +1,5 @@
 package com.pot.gateway.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.List;
 
 /**
@@ -42,10 +38,7 @@ import java.util.List;
 public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
-
-    // TODO: 从配置中心加载公钥
-    private static final String PUBLIC_KEY = "";
+    private final PublicKey jwtPublicKey;
 
     // 白名单路径
     private static final List<String> WHITE_LIST = List.of(
@@ -125,24 +118,11 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
      * 解析Token
      */
     private Claims parseToken(String token) throws Exception {
-        // TODO: 使用真实公钥
-        PublicKey publicKey = loadPublicKey();
         return Jwts.parser()
-                .verifyWith(publicKey)
+                .verifyWith(jwtPublicKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    /**
-     * 加载公钥
-     */
-    private PublicKey loadPublicKey() throws Exception {
-        // TODO: 从配置中心加载
-        byte[] keyBytes = Base64.getDecoder().decode(PUBLIC_KEY);
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePublic(spec);
     }
 
     /**

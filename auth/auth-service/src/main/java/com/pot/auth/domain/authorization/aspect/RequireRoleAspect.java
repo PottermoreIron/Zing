@@ -2,7 +2,6 @@ package com.pot.auth.domain.authorization.aspect;
 
 import com.pot.auth.domain.authorization.annotation.RequireRole;
 import com.pot.auth.domain.port.SecurityPort;
-import com.pot.auth.domain.shared.enums.Logical;
 import com.pot.auth.infrastructure.security.exception.PermissionDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

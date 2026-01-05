@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 /**
  * Touch模块适配器（通知服务）
  *
- * <p>实现NotificationPort接口，调用framework-starter-touch发送通知
+ * <p>
+ * 实现NotificationPort接口，调用framework-starter-touch发送通知
  *
  * @author pot
  * @since 2025-11-10
@@ -60,12 +61,12 @@ public class TouchModuleAdapter implements NotificationPort {
 
         try {
             // TODO: 调用framework-starter-touch发送登录通知邮件
-            String content = String.format(
-                    "您的账号 %s 于 %s 在 %s 设备上登录",
-                    username,
-                    ipAddress,
-                    deviceInfo
-            );
+            // String content = String.format(
+            // "您的账号 %s 于 %s 在 %s 设备上登录",
+            // username,
+            // ipAddress,
+            // deviceInfo
+            // );
             // touchService.sendEmail(email, "登录通知", content);
 
             log.info("[通知] 登录通知已发送");
@@ -82,12 +83,12 @@ public class TouchModuleAdapter implements NotificationPort {
 
         try {
             // TODO: 调用framework-starter-touch发送告警邮件
-            String content = String.format(
-                    "检测到您的账号 %s 在异地 %s 登录，设备信息：%s。如非本人操作，请立即修改密码。",
-                    username,
-                    ipAddress,
-                    deviceInfo
-            );
+            // String content = String.format(
+            // "检测到您的账号 %s 在异地 %s 登录，设备信息：%s。如非本人操作，请立即修改密码。",
+            // username,
+            // ipAddress,
+            // deviceInfo
+            // );
             // touchService.sendEmail(email, "【安全告警】异地登录", content);
 
             log.warn("[通知] 异地登录告警已发送");
@@ -98,4 +99,3 @@ public class TouchModuleAdapter implements NotificationPort {
         }
     }
 }
-
