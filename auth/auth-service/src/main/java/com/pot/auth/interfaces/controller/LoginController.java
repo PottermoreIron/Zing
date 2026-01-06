@@ -6,6 +6,8 @@ import com.pot.auth.application.service.TokenRefreshApplicationService;
 import com.pot.auth.interfaces.dto.RefreshTokenRequest;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import com.pot.zing.framework.common.model.R;
+import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
+import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -88,6 +90,7 @@ public class LoginController {
      * }
      * </pre>
      */
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "登录请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/login")
     public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         log.info("[登录] 传统登录请求: loginType={}, userDomain={}",
@@ -116,6 +119,7 @@ public class LoginController {
      * }
      * </pre>
      */
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 10.0, message = "Token刷新请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/refresh")
     public R<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         log.info("[登录] 刷新Token请求");

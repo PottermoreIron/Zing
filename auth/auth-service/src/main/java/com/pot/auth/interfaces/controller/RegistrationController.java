@@ -4,6 +4,8 @@ import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.service.RegistrationApplicationService;
 import com.pot.auth.interfaces.dto.register.RegisterRequest;
 import com.pot.zing.framework.common.model.R;
+import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
+import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,12 +49,14 @@ public class RegistrationController {
      * <li>WECHAT - 微信注册</li>
      * </ul>
      */
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "注册请求过于频繁，请稍后再试")
     @PostMapping("api/v1/register")
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         log.info("注册请求: registerType={}", request.registerType());
 
         // 执行注册
-        RegisterResponse response = registrationApplicationService.register(request, getClientIp(httpRequest), httpRequest.getHeader("User-Agent"));
+        RegisterResponse response = registrationApplicationService.register(request, getClientIp(httpRequest),
+                httpRequest.getHeader("User-Agent"));
 
         return R.success(response);
     }
