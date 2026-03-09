@@ -268,6 +268,53 @@ public class JwtTokenService {
     }
 
     /**
+     * 登出：将 AccessToken 加入黑名单，并删除 RefreshToken 缓存
+     *
+     * <p>
+     * 设计原则：
+     * <ul>
+     * <li>解析失败不抛异常，以容忍已过期/已篡改的 Token（防止绕过登出）</li>
+     * <li>RefreshToken 可选，不提供时仅吊销 AccessToken</li>
+     * </ul>
+     *
+     * @param accessTokenStr  Access Token 字符串
+     * @param refreshTokenStr Refresh Token 字符串（可为 null）
+     */
+    public void logout(String accessTokenStr, String refreshTokenStr) {
+        log.info("[Token] 执行登出");
+
+        // 1. 将 AccessToken 加入黑名单
+        try {
+            JwtToken token = tokenManagementPort.parseAccessToken(accessTokenStr);
+            long remaining = token.getRemainingSeconds();
+            if (remaining > 0) {
+                addToBlacklist(token.tokenId(), remaining);
+                log.info("[Token] AccessToken 已加入黑名单: tokenId={}, ttl={}s",
+                        token.tokenId(), remaining);
+            } else {
+                log.debug("[Token] AccessToken 已自然过期，无需加入黑名单");
+            }
+        } catch (Exception e) {
+            // Token 无效/已过期时，解析失败属正常情况，记录警告即可
+            log.warn("[Token] 登出时 AccessToken 解析失败（忽略）: {}", e.getMessage());
+        }
+
+        // 2. 删除 RefreshToken 缓存（如已提供）
+        if (refreshTokenStr != null && !refreshTokenStr.isBlank()) {
+            try {
+                RefreshToken refreshToken = tokenManagementPort.parseRefreshToken(refreshTokenStr);
+                String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
+                cachePort.delete(cacheKey);
+                log.info("[Token] RefreshToken 缓存已删除: tokenId={}", refreshToken.tokenId());
+            } catch (Exception e) {
+                log.warn("[Token] 登出时 RefreshToken 解析失败（忽略）: {}", e.getMessage());
+            }
+        }
+
+        log.info("[Token] 登出完成");
+    }
+
+    /**
      * 检查Token是否在黑名单
      */
     private boolean isInBlacklist(TokenId tokenId) {

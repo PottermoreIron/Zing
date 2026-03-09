@@ -76,6 +76,29 @@ auth:
     admin:
       enabled: false
 
+  # OAuth2 第三方登录配置（按需启用，未配置 clientId/secret 则无法使用）
+  oauth2:
+    enabled: false
+    providers:
+      google:
+        client-id: ${GOOGLE_CLIENT_ID:}
+        client-secret: ${GOOGLE_CLIENT_SECRET:}
+      github:
+        client-id: ${GITHUB_CLIENT_ID:}
+        client-secret: ${GITHUB_CLIENT_SECRET:}
+      facebook:
+        client-id: ${FACEBOOK_CLIENT_ID:}
+        client-secret: ${FACEBOOK_CLIENT_SECRET:}
+      apple:
+        client-id: ${APPLE_CLIENT_ID:}
+        client-secret: ${APPLE_CLIENT_SECRET:}
+
+  # 微信登录配置（按需启用）
+  wechat:
+    enabled: false
+    app-id: ${WECHAT_APP_ID:}
+    app-secret: ${WECHAT_APP_SECRET:}
+
   # 权限系统配置
   permission:
     # 权限缓存配置
@@ -99,8 +122,8 @@ auth:
       queue: auth.permission.changed
       # 路由键
       routing-key: permission.changed
-      # 是否启用MQ
-      enabled: false
+      # 是否启用MQ（生产环境应设为true，以实时同步权限变更）
+      enabled: true
 
     # 权限表达式配置
     expression:
@@ -115,4 +138,5 @@ logging:
     com.pot.auth: DEBUG
     org.springframework.security: DEBUG
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    # 包含 X-Trace-Id，与网关日志关联；MDC key 由 TraceIdGatewayFilter 写入
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{X-Trace-Id:-}] %logger{50} - %msg%n"

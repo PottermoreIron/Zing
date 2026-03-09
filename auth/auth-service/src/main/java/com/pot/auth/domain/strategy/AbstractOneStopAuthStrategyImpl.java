@@ -84,6 +84,9 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
             log.error("[一键认证] 认证失败: authType={}, error={}",
                     request.authType(), e.getMessage(), e);
             throw e;
+        } finally {
+            // 请求结束后清理线程级资源（如ThreadLocal），防止内存泄漏
+            cleanupAfterAuthentication();
         }
     }
 
@@ -266,6 +269,17 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
                         context.ipAddress(),
                         context.deviceInfo()))
                 .build();
+    }
+
+    /**
+     * 认证流程结束后的清理钩子
+     *
+     * <p>
+     * 在 {@code execute()} 的 finally 块中调用，子类可覆盖以释放线程级资源
+     * （例如：清理 ThreadLocal，避免内存泄漏）。
+     */
+    protected void cleanupAfterAuthentication() {
+        // 默认空实现，子类按需覆盖
     }
 
     @Override

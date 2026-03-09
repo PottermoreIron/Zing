@@ -46,11 +46,14 @@ public class WeChatOneStopAuthStrategy
     private final UserModulePortFactory userModulePortFactory;
 
     /**
-     * 微信用户信息缓存（每次认证请求的临时缓存）
+     * 线程级微信用户信息缓存
+     *
      * <p>
-     * 用于避免在 findUser、validateCredential、registerUser 中重复调用微信 API
+     * 使用 ThreadLocal 替代实例字段，确保并发安全：每个请求线程拥有独立副本，
+     * 避免多并发请求互相覆盖。在 {@code cleanupAfterAuthentication()} 中显式清理，
+     * 防止线程池复用时的内存泄漏。
      */
-    private WeChatUserInfo cachedWeChatUserInfo;
+    private static final ThreadLocal<WeChatUserInfo> USER_INFO_CACHE = new ThreadLocal<>();
 
     public WeChatOneStopAuthStrategy(
             JwtTokenService jwtTokenService,
@@ -154,24 +157,36 @@ public class WeChatOneStopAuthStrategy
     }
 
     /**
-     * 获取或从缓存中读取微信用户信息
+     * 清理线程级缓存，防止线程池复用时的内存泄漏
+     */
+    @Override
+    protected void cleanupAfterAuthentication() {
+        USER_INFO_CACHE.remove();
+    }
+
+    /**
+     * 获取或从 ThreadLocal 缓存中读取微信用户信息
+     *
      * <p>
-     * 避免在同一次认证请求中重复调用微信 API
+     * 避免在同一请求的 findUser、validateCredential、createUser 三步中重复调用微信 API。
+     * 线程安全：ThreadLocal 保证每个请求线程有独立副本。
      *
      * @param request 微信认证请求
      * @return 微信用户信息
      */
     private WeChatUserInfo getOrFetchWeChatUserInfo(WeChatAuthRequest request) {
-        if (cachedWeChatUserInfo != null) {
-            return cachedWeChatUserInfo;
+        WeChatUserInfo cached = USER_INFO_CACHE.get();
+        if (cached != null) {
+            return cached;
         }
 
-        cachedWeChatUserInfo = weChatPort.getUserInfo(request.code(), request.state());
+        WeChatUserInfo weChatUserInfo = weChatPort.getUserInfo(request.code(), request.state());
+        USER_INFO_CACHE.set(weChatUserInfo);
 
         log.debug("[微信认证] 微信用户信息获取成功: openId={}, nickname={}",
-                cachedWeChatUserInfo.getOpenId(),
-                cachedWeChatUserInfo.getNickname());
+                weChatUserInfo.getOpenId(),
+                weChatUserInfo.getNickname());
 
-        return cachedWeChatUserInfo;
+        return weChatUserInfo;
     }
 }

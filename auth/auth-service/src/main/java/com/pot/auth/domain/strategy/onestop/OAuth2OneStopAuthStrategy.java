@@ -49,11 +49,14 @@ public class OAuth2OneStopAuthStrategy
     private final UserModulePortFactory userModulePortFactory;
 
     /**
-     * OAuth2 用户信息缓存（每次认证请求的临时缓存）
+     * 线程级 OAuth2 用户信息缓存
+     *
      * <p>
-     * 用于避免在 findUser、validateCredential、registerUser 中重复调用 OAuth2 API
+     * 使用 ThreadLocal 替代实例字段，确保并发安全：每个请求线程拥有独立副本，
+     * 避免多并发请求互相覆盖。在 {@code cleanupAfterAuthentication()} 中显式清理，
+     * 防止线程池复用时的内存泄漏。
      */
-    private OAuth2UserInfo cachedOAuth2UserInfo;
+    private static final ThreadLocal<OAuth2UserInfo> USER_INFO_CACHE = new ThreadLocal<>();
 
     public OAuth2OneStopAuthStrategy(
             JwtTokenService jwtTokenService,
@@ -167,27 +170,39 @@ public class OAuth2OneStopAuthStrategy
     }
 
     /**
-     * 获取或从缓存中读取 OAuth2 用户信息
+     * 清理线程级缓存，防止线程池复用时的内存泄漏
+     */
+    @Override
+    protected void cleanupAfterAuthentication() {
+        USER_INFO_CACHE.remove();
+    }
+
+    /**
+     * 获取或从 ThreadLocal 缓存中读取 OAuth2 用户信息
+     *
      * <p>
-     * 避免在同一次认证请求中重复调用 OAuth2 API
+     * 避免在同一请求的 findUser、validateCredential、createUser 三步中重复调用 OAuth2 API。
+     * 线程安全：ThreadLocal 保证每个请求线程有独立副本。
      *
      * @param request OAuth2 认证请求
      * @return OAuth2 用户信息
      */
     private OAuth2UserInfo getOrFetchOAuth2UserInfo(OAuth2AuthRequest request) {
-        if (cachedOAuth2UserInfo != null) {
-            return cachedOAuth2UserInfo;
+        OAuth2UserInfo cached = USER_INFO_CACHE.get();
+        if (cached != null) {
+            return cached;
         }
 
         OAuth2Provider provider = OAuth2Provider.fromCode(request.provider().getCode());
         OAuth2AuthorizationCode code = OAuth2AuthorizationCode.of(request.code());
 
-        cachedOAuth2UserInfo = oauth2Port.getUserInfo(provider, code, request.state());
+        OAuth2UserInfo oauth2UserInfo = oauth2Port.getUserInfo(provider, code, request.state());
+        USER_INFO_CACHE.set(oauth2UserInfo);
 
         log.debug("[OAuth2认证] OAuth2用户信息获取成功: openId={}, email={}",
-                cachedOAuth2UserInfo.openId().value(),
-                cachedOAuth2UserInfo.email());
+                oauth2UserInfo.openId().value(),
+                oauth2UserInfo.email());
 
-        return cachedOAuth2UserInfo;
+        return oauth2UserInfo;
     }
 }

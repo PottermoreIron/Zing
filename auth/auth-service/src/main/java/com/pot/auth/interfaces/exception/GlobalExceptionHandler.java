@@ -159,16 +159,24 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理通用领域异常
+     *
+     * <p>
+     * 若异常携带 {@link AuthResultCode}，优先使用其 code 和 msg；
+     * 否则降级使用 {@code SYSTEM_ERROR}。
      */
     @ExceptionHandler(DomainException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleDomainException(DomainException e) {
+        if (e.getResultCode() != null) {
+            log.warn("[异常] 领域异常: code={}, msg={}", e.getResultCode().getCode(), e.getMessage());
+            return R.fail(e.getResultCode());
+        }
         log.warn("[异常] 领域异常: {}", e.getMessage());
-        return R.fail(e.getMessage());
+        return R.fail(AuthResultCode.SYSTEM_ERROR, e.getMessage());
     }
 
     /**
-     * 处理未知异常
+     * 处理未知异常（最后一道防线）
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
