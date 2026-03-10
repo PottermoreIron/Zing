@@ -14,10 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +44,7 @@ public class PermissionDomainService {
                 .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
 
-        RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
+        roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
                 .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
 
         member.assignRole(roleId);
@@ -84,7 +80,7 @@ public class PermissionDomainService {
         RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
                 .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
 
-        PermissionAggregate permission = permissionRepository
+        permissionRepository
                 .findById(com.pot.member.service.domain.model.permission.PermissionId.of(permissionId))
                 .orElseThrow(() -> new IllegalArgumentException("权限不存在"));
 

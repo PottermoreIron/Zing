@@ -102,6 +102,18 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Testcontainers - 集成测试用真实Redis容器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- WxJava - 微信开发工具包 -->
         <dependency>
             <groupId>com.github.binarywang</groupId>
@@ -142,6 +154,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <!-- 保留方法参数名，让Spring MVC能通过反射解析@RequestParam参数名 -->
+                    <parameters>true</parameters>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

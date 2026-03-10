@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pot.zing.framework.mq.core.MessageConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -28,26 +27,28 @@ import java.util.Map;
 @ConditionalOnClass(ConnectionFactory.class)
 @RequiredArgsConstructor
 public class MessageConsumerRegistry {
-    
+
     private final ApplicationContext applicationContext;
     private final ConnectionFactory connectionFactory;
     private final ObjectMapper objectMapper;
-    
+
     @PostConstruct
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void registerConsumers() {
-        Map<String, MessageConsumer> consumers = applicationContext.getBeansOfType(MessageConsumer.class);
-        
+        Map<String, MessageConsumer<?>> consumers = (Map<String, MessageConsumer<?>>) (Map<String, ? extends MessageConsumer>) applicationContext
+                .getBeansOfType(MessageConsumer.class);
+
         if (consumers.isEmpty()) {
             log.info("[MQ] 未找到MessageConsumer，跳过消费者注册");
             return;
         }
-        
+
         log.info("[MQ] 发现{}个MessageConsumer，开始注册", consumers.size());
-        
-        for (Map.Entry<String, MessageConsumer> entry : consumers.entrySet()) {
+
+        for (Map.Entry<String, MessageConsumer<?>> entry : consumers.entrySet()) {
             String beanName = entry.getKey();
             MessageConsumer<?> consumer = entry.getValue();
-            
+
             try {
                 registerConsumer(beanName, consumer);
             } catch (Exception e) {
@@ -55,19 +56,16 @@ public class MessageConsumerRegistry {
             }
         }
     }
-    
+
     private <T> void registerConsumer(String beanName, MessageConsumer<T> consumer) {
         String queueName = consumer.getQueue();
         Class<T> messageType = consumer.getMessageType();
-        
-        // 创建队列（如果不存在）
-        Queue queue = new Queue(queueName, true, false, false);
-        
+
         // 创建消息监听容器
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(queueName);
-        
+
         // 创建消息监听适配器
         MessageListenerAdapter adapter = new MessageListenerAdapter(new Object() {
             @SuppressWarnings("unused")
@@ -82,11 +80,11 @@ public class MessageConsumerRegistry {
                 }
             }
         });
-        
+
         container.setMessageListener(adapter);
         container.start();
-        
-        log.info("[MQ] 消费者注册成功: bean={}, queue={}, messageType={}", 
+
+        log.info("[MQ] 消费者注册成功: bean={}, queue={}, messageType={}",
                 beanName, queueName, messageType.getSimpleName());
     }
 }

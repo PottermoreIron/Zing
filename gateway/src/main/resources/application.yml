@@ -158,7 +158,7 @@ resilience4j:
 # ----------------------------------------------------------------
 logging:
   level:
-    com.pot.gateway: DEBUG
+    "[com.pot.gateway]": DEBUG
     org.springframework.cloud.gateway: INFO
     io.github.resilience4j: INFO
   pattern:

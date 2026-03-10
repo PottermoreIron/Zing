@@ -60,6 +60,13 @@ public class RandomUtils {
     }
 
     /**
+     * 生成默认长度（6位）随机数字验证码
+     */
+    public static String generateRandomCode() {
+        return generateRandomCode(CODE_DEFAULT_LENGTH);
+    }
+
+    /**
      * 生成随机字符串
      */
     public static String generateRandomString(int length) {

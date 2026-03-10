@@ -8,11 +8,12 @@ import java.security.SecureRandom;
 /**
  * 验证码值对象
  *
- * <p>业务规则：
+ * <p>
+ * 业务规则：
  * <ul>
- *   <li>必须是6位数字</li>
- *   <li>5分钟有效期</li>
- *   <li>最多3次验证尝试</li>
+ * <li>必须是6位数字</li>
+ * <li>5分钟有效期</li>
+ * <li>最多3次验证尝试</li>
  * </ul>
  *
  * @author pot
@@ -33,8 +34,8 @@ public record VerificationCode(String value) {
         if (value == null || value.isBlank()) {
             throw new InvalidVerificationCodeException("验证码不能为空");
         }
-        if (!value.matches("^\\d{6}$")) {
-            throw new InvalidVerificationCodeException("验证码必须是6位数字");
+        if (!value.matches("^\\d{" + CODE_LENGTH + "}$")) {
+            throw new InvalidVerificationCodeException("验证码必须是" + CODE_LENGTH + "位数字");
         }
     }
 
@@ -49,8 +50,9 @@ public record VerificationCode(String value) {
      * 生成新的验证码
      */
     public static VerificationCode generate() {
-        int code = RANDOM.nextInt(1000000);
-        String codeStr = String.format("%06d", code);
+        int bound = (int) Math.pow(10, CODE_LENGTH);
+        int code = RANDOM.nextInt(bound);
+        String codeStr = String.format("%0" + CODE_LENGTH + "d", code);
         return new VerificationCode(codeStr);
     }
 
@@ -77,4 +79,3 @@ public record VerificationCode(String value) {
         }
     }
 }
-

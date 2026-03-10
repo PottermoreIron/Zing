@@ -13,9 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 
 import java.util.stream.Collectors;
 
@@ -173,6 +178,42 @@ public class GlobalExceptionHandler {
         }
         log.warn("[异常] 领域异常: {}", e.getMessage());
         return R.fail(AuthResultCode.SYSTEM_ERROR, e.getMessage());
+    }
+
+    /**
+     * 处理@RequestParam、@PathVariable等方法参数上的Constraint违反异常
+     *
+     * <p>
+     * 由@Validated注解在Controller类上触发，当@ValidEmail/@ValidPhone等校验失败时
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public R<Void> handleConstraintViolation(ConstraintViolationException e) {
+        String errorMessage = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(java.util.stream.Collectors.joining("; "));
+        log.warn("[异常] 参数约束违反: {}", errorMessage);
+        return R.fail(AuthResultCode.INVALID_PARAMETER, errorMessage);
+    }
+
+    /**
+     * 处理请求体反序列化失败（如无效的JSON格式或未知的枚举值）
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public R<Void> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        log.warn("[异常] 请求体解析失败: {}", e.getMessage());
+        return R.fail(AuthResultCode.INVALID_PARAMETER, "请求参数格式错误");
+    }
+
+    /**
+     * 处理缺少必填请求参数异常
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public R<Void> handleMissingServletRequestParameter(MissingServletRequestParameterException e) {
+        log.warn("[异常] 缺少请求参数: {}", e.getParameterName());
+        return R.fail(AuthResultCode.INVALID_PARAMETER, "缺少必填参数: " + e.getParameterName());
     }
 
     /**
