@@ -4,6 +4,9 @@ import com.pot.auth.application.service.LogoutApplicationService;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.interfaces.dto.LogoutRequest;
 import com.pot.zing.framework.common.model.R;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author pot
  * @since 2025-12-14
  */
+@Tag(name = "登出", description = "吊销 AccessToken 和 RefreshToken，防止已登出 Token 继续使用")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -64,6 +68,8 @@ public class LogoutController {
      * 注意：网关会将 AccessToken 传递在 {@code Authorization: Bearer &lt;token&gt;} 头部，
      * 本接口直接读取此头部，无需在请求体中重复传递。
      */
+    @Operation(summary = "登出", description = "将当前 AccessToken 加入黑名单，可选同步删除 RefreshToken")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/api/v1/logout")
     public R<Void> logout(
             HttpServletRequest httpRequest,

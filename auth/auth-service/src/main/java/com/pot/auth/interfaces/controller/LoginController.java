@@ -8,6 +8,8 @@ import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import com.pot.zing.framework.common.model.R;
 import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
 import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
+@Tag(name = "登录", description = "传统登录（用户名密码 / 邮箱密码 / 验证码）和 Token 刷新")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -90,6 +93,7 @@ public class LoginController {
      * }
      * </pre>
      */
+    @Operation(summary = "传统登录", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE 四种登录方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "登录请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/login")
     public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
@@ -119,6 +123,7 @@ public class LoginController {
      * }
      * </pre>
      */
+    @Operation(summary = "刷新 Token", description = "使用 refreshToken 换取新的 accessToken，refreshToken 在滑动窗口内自动续期")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 10.0, message = "Token刷新请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/refresh")
     public R<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {

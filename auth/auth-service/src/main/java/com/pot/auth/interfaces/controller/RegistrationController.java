@@ -6,6 +6,8 @@ import com.pot.auth.interfaces.dto.register.RegisterRequest;
 import com.pot.zing.framework.common.model.R;
 import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
 import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
+@Tag(name = "注册", description = "用户注册，支持用户名密码 / 邮箱 / 手机号 / OAuth2 / 微信等多种方式")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -49,6 +52,7 @@ public class RegistrationController {
      * <li>WECHAT - 微信注册</li>
      * </ul>
      */
+    @Operation(summary = "注册", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT 六种注册方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "注册请求过于频繁，请稍后再试")
     @PostMapping("api/v1/register")
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {

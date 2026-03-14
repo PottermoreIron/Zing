@@ -132,6 +132,21 @@ auth:
       # 表达式缓存大小
       cache-size: 1000
 
+# SpringDoc OpenAPI 文档配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    # 默认展开所有接口
+    doc-expansion: list
+    # 显示请求耗时
+    display-request-duration: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+
 # 日志配置
 logging:
   level:

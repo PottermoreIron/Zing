@@ -6,6 +6,8 @@ import com.pot.auth.domain.validation.annotations.ValidPhone;
 import com.pot.zing.framework.common.model.R;
 import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
 import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author pot
  * @since 2025-11-10
  */
+@Tag(name = "验证码", description = "发送邮件/短信验证码，用于注册、登录等场景")
 @Slf4j
 @RestController
 @RequestMapping("/auth/code")
@@ -38,6 +41,7 @@ public class VerificationCodeController {
      * <p>
      * POST /auth/code/email?email=xxx@example.com
      */
+    @Operation(summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，有效期 5 分钟，限 1 次/分钟")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/email")
     public R<Void> sendEmailCode(
@@ -58,6 +62,7 @@ public class VerificationCodeController {
      * <p>
      * POST /auth/code/sms?phone=+8613800138000
      */
+    @Operation(summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，有效期 5 分钟，限 1 次/分钟")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/sms")
     public R<Void> sendSmsCode(
