@@ -45,3 +45,21 @@ pot:
       enable-lombok: true
       rest-controller: true
       enabled: true
+
+# SpringDoc OpenAPI 文档配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    doc-expansion: list
+    display-request-duration: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+# 日志配置
+logging:
+  level:
+    com.pot.member: DEBUG
