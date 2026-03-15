@@ -7,7 +7,6 @@ import com.pot.member.service.mapper.MemberMapper;
 import com.pot.member.service.service.MemberAuthInternalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class MemberAuthInternalServiceImpl implements MemberAuthInternalService {
 
     private final MemberMapper memberMapper;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public boolean verifyPassword(String identifier, String password) {
@@ -35,9 +34,9 @@ public class MemberAuthInternalServiceImpl implements MemberAuthInternalService 
             return false;
         }
 
-        // 2. 检查账户状态
-        if (member.getStatus() != null && "2".equals(member.getStatus())) {
-            log.warn("[密码验证] 账户已锁定: identifier={}, userId={}", identifier, member.getMemberId());
+        // 2. 检查账户状态（DB ENUM: active | inactive | suspended | pending_verification）
+        if (member.getStatus() != null && "suspended".equalsIgnoreCase(member.getStatus())) {
+            log.warn("[密码验证] 账户已被暂停: identifier={}, userId={}", identifier, member.getMemberId());
             return false;
         }
 
@@ -85,7 +84,7 @@ public class MemberAuthInternalServiceImpl implements MemberAuthInternalService 
 
         LambdaUpdateWrapper<Member> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Member::getMemberId, Long.parseLong(userId))
-                .set(Member::getStatus, "2"); // 2=已锁定
+                .set(Member::getStatus, "suspended"); // DB ENUM: suspended = 已暂停/锁定
 
         int updated = memberMapper.update(null, updateWrapper);
 
@@ -102,7 +101,7 @@ public class MemberAuthInternalServiceImpl implements MemberAuthInternalService 
 
         LambdaUpdateWrapper<Member> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Member::getMemberId, Long.parseLong(userId))
-                .set(Member::getStatus, "1"); // 1=正常
+                .set(Member::getStatus, "active"); // DB ENUM: active = 正常
 
         int updated = memberMapper.update(null, updateWrapper);
 

@@ -45,36 +45,29 @@ public class MemberApplicationService {
     public MemberDTO register(RegisterMemberCommand command) {
         log.info("注册新会员: {}", command.getEmail());
 
-        // 检查邮箱是否已存在
-        Email email = Email.of(command.getEmail());
-        if (memberRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("邮箱已被注册");
-        }
-
-        // 检查用户名是否已存在
+        // 检查用户名是否已存在（邮箱唯一性由领域服务负责校验）
         Username username = Username.of(command.getUsername());
         if (memberRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("用户名已被使用");
         }
 
-        // 如果提供了手机号，检查是否已存在
+        // 如果提供了手机号，提前检查是否已存在
+        PhoneNumber phoneNumber = null;
         if (command.getPhoneNumber() != null && !command.getPhoneNumber().isBlank()) {
-            PhoneNumber phoneNumber = PhoneNumber.of(command.getPhoneNumber());
+            phoneNumber = PhoneNumber.of(command.getPhoneNumber());
             if (memberRepository.existsByPhoneNumber(phoneNumber)) {
                 throw new IllegalArgumentException("手机号已被注册");
             }
         }
 
-        // 调用领域服务注册
+        // 调用领域服务注册（内部检查邮箱唯一性并保存）
+        Email email = Email.of(command.getEmail());
         MemberAggregate member = memberDomainService.register(username, email, command.getPassword());
 
-        // 如果提供了手机号，绑定手机号
-        if (command.getPhoneNumber() != null && !command.getPhoneNumber().isBlank()) {
-            PhoneNumber phoneNumber = PhoneNumber.of(command.getPhoneNumber());
-            memberDomainService.bindPhoneNumber(member, phoneNumber);
-            // 重新加载会员信息
-            member = memberRepository.findById(member.getMemberId())
-                    .orElseThrow(() -> new IllegalStateException("会员注册后未找到"));
+        // 如果提供了手机号，绑定并合并到一次 save
+        if (phoneNumber != null) {
+            member.updatePhoneNumber(phoneNumber);
+            member = memberRepository.save(member);
         }
 
         log.info("会员注册成功: memberId={}, email={}", member.getMemberId().value(), email.getValue());

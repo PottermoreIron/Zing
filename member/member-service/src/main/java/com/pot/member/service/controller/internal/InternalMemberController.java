@@ -1,4 +1,4 @@
-package com.pot.member.service.controller;
+package com.pot.member.service.controller.internal;
 
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.dto.MemberDTO;
@@ -7,6 +7,7 @@ import com.pot.member.service.application.query.GetMemberPermissionsQuery;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.application.service.MemberApplicationService;
 import com.pot.zing.framework.common.model.R;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class InternalMemberController {
      * 注册新会员（内部API）
      */
     @PostMapping("/register")
-    public R<MemberDTO> register(@RequestBody RegisterMemberCommand command) {
+    public R<MemberDTO> register(@Valid @RequestBody RegisterMemberCommand command) {
         log.info("内部API - 注册新会员: email={}", command.getEmail());
         MemberDTO member = memberApplicationService.register(command);
         return R.success(member);
@@ -41,8 +42,8 @@ public class InternalMemberController {
     /**
      * 根据邮箱获取会员信息
      */
-    @GetMapping("/by-email/{email}")
-    public R<MemberDTO> getMemberByEmail(@PathVariable String email) {
+    @GetMapping("/by-email")
+    public R<MemberDTO> getMemberByEmail(@RequestParam String email) {
         GetMemberQuery query = GetMemberQuery.builder()
                 .email(email)
                 .build();

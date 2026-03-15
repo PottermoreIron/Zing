@@ -21,7 +21,6 @@ import java.util.Objects;
 
 import static com.pot.zing.framework.common.util.ValidationUtils.PHONE_REGEX;
 
-
 /**
  * 用户信息实体
  * <p>
@@ -50,7 +49,7 @@ public class Member implements Serializable {
     /**
      * 创建时间
      */
-    @Null(groups = {Create.class, Update.class}, message = "创建时间由系统自动生成，不可手动设置")
+    @Null(groups = { Create.class, Update.class }, message = "创建时间由系统自动生成，不可手动设置")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("gmt_created_at")
     private LocalDateTime gmtCreatedAt;
@@ -58,7 +57,7 @@ public class Member implements Serializable {
     /**
      * 更新时间
      */
-    @Null(groups = {Create.class, Update.class}, message = "更新时间由系统自动生成，不可手动设置")
+    @Null(groups = { Create.class, Update.class }, message = "更新时间由系统自动生成，不可手动设置")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("gmt_updated_at")
     private LocalDateTime gmtUpdatedAt;
@@ -66,7 +65,7 @@ public class Member implements Serializable {
     /**
      * 软删除时间
      */
-    @Null(groups = {Create.class, Update.class}, message = "删除时间由系统自动生成，不可手动设置")
+    @Null(groups = { Create.class, Update.class }, message = "删除时间由系统自动生成，不可手动设置")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("gmt_deleted_at")
     private LocalDateTime gmtDeletedAt;
@@ -84,10 +83,9 @@ public class Member implements Serializable {
      * 用户名/昵称
      */
     @NotBlank(groups = Create.class, message = "用户名不能为空")
-    @Length(min = 2, max = 50, groups = {Create.class, Update.class}, message = "用户名长度必须在2-50个字符之间")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_-]+$",
-            groups = {Create.class, Update.class},
-            message = "用户名只能包含中文、英文、数字、下划线和横线")
+    @Length(min = 2, max = 50, groups = { Create.class, Update.class }, message = "用户名长度必须在2-50个字符之间")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_-]+$", groups = { Create.class,
+            Update.class }, message = "用户名只能包含中文、英文、数字、下划线和横线")
     @TableField("nickname")
     private String nickname;
 
@@ -95,17 +93,15 @@ public class Member implements Serializable {
      * 邮箱地址
      */
     @NotBlank(groups = Create.class, message = "邮箱地址不能为空")
-    @Email(groups = {Create.class, Update.class}, message = "邮箱格式不正确")
-    @Length(max = 100, groups = {Create.class, Update.class}, message = "邮箱地址不能超过100个字符")
+    @Email(groups = { Create.class, Update.class }, message = "邮箱格式不正确")
+    @Length(max = 100, groups = { Create.class, Update.class }, message = "邮箱地址不能超过100个字符")
     @TableField("email")
     private String email;
 
     /**
      * 手机号码
      */
-    @Pattern(regexp = PHONE_REGEX,
-            groups = {Create.class, Update.class},
-            message = "手机号码格式不正确")
+    @Pattern(regexp = PHONE_REGEX, groups = { Create.class, Update.class }, message = "手机号码格式不正确")
     @TableField("phone")
     private String phone;
 
@@ -120,35 +116,33 @@ public class Member implements Serializable {
     /**
      * 名
      */
-    @Length(max = 50, groups = {Create.class, Update.class}, message = "名不能超过50个字符")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]*$",
-            groups = {Create.class, Update.class},
-            message = "名只能包含中文、英文和空格")
+    @Length(max = 50, groups = { Create.class, Update.class }, message = "名不能超过50个字符")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]*$", groups = { Create.class,
+            Update.class }, message = "名只能包含中文、英文和空格")
     @TableField("first_name")
     private String firstName;
 
     /**
      * 姓
      */
-    @Length(max = 50, groups = {Create.class, Update.class}, message = "姓不能超过50个字符")
-    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]*$",
-            groups = {Create.class, Update.class},
-            message = "姓只能包含中文、英文和空格")
+    @Length(max = 50, groups = { Create.class, Update.class }, message = "姓不能超过50个字符")
+    @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z\\s]*$", groups = { Create.class,
+            Update.class }, message = "姓只能包含中文、英文和空格")
     @TableField("last_name")
     private String lastName;
 
     /**
      * 性别：0-未知，1-男，2-女
      */
-    @Min(value = 0, groups = {Create.class, Update.class}, message = "性别值不能小于0")
-    @Max(value = 2, groups = {Create.class, Update.class}, message = "性别值不能大于2")
+    @Min(value = 0, groups = { Create.class, Update.class }, message = "性别值不能小于0")
+    @Max(value = 2, groups = { Create.class, Update.class }, message = "性别值不能大于2")
     @TableField("gender")
     private Integer gender;
 
     /**
      * 出生日期
      */
-    @Past(groups = {Create.class, Update.class}, message = "出生日期必须是过去的日期")
+    @Past(groups = { Create.class, Update.class }, message = "出生日期必须是过去的日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     @TableField("birth")
     private LocalDate birth;
@@ -156,67 +150,62 @@ public class Member implements Serializable {
     /**
      * 头像URL
      */
-    @URL(groups = {Create.class, Update.class}, message = "头像URL格式不正确")
-    @Length(max = 500, groups = {Create.class, Update.class}, message = "头像URL不能超过500个字符")
+    @URL(groups = { Create.class, Update.class }, message = "头像URL格式不正确")
+    @Length(max = 500, groups = { Create.class, Update.class }, message = "头像URL不能超过500个字符")
     @TableField("avatar_url")
     private String avatarUrl;
 
     /**
      * ISO 3166-1 alpha-2 国家代码
      */
-    @Pattern(regexp = "^[A-Z]{2}$",
-            groups = {Create.class, Update.class},
-            message = "国家代码必须为2位大写字母")
+    @Pattern(regexp = "^[A-Z]{2}$", groups = { Create.class, Update.class }, message = "国家代码必须为2位大写字母")
     @TableField("country_code")
     private String countryCode;
 
     /**
      * 省/州/地区
      */
-    @Length(max = 100, groups = {Create.class, Update.class}, message = "地区名称不能超过100个字符")
+    @Length(max = 100, groups = { Create.class, Update.class }, message = "地区名称不能超过100个字符")
     @TableField("region")
     private String region;
 
     /**
      * 城市
      */
-    @Length(max = 100, groups = {Create.class, Update.class}, message = "城市名称不能超过100个字符")
+    @Length(max = 100, groups = { Create.class, Update.class }, message = "城市名称不能超过100个字符")
     @TableField("city")
     private String city;
 
     /**
      * 时区
      */
-    @Pattern(regexp = "^[A-Za-z_]+/[A-Za-z_]+$",
-            groups = {Create.class, Update.class},
-            message = "时区格式不正确，应为 Region/City 格式")
-    @Length(max = 50, groups = {Create.class, Update.class}, message = "时区不能超过50个字符")
+    @Pattern(regexp = "^[A-Za-z_]+/[A-Za-z_]+$", groups = { Create.class,
+            Update.class }, message = "时区格式不正确，应为 Region/City 格式")
+    @Length(max = 50, groups = { Create.class, Update.class }, message = "时区不能超过50个字符")
     @TableField("timezone")
     private String timezone;
 
     /**
      * 语言区域设置
      */
-    @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$",
-            groups = {Create.class, Update.class},
-            message = "语言区域设置格式不正确，应为 zh-CN 格式")
+    @Pattern(regexp = "^[a-z]{2}(-[A-Z]{2})?$", groups = { Create.class,
+            Update.class }, message = "语言区域设置格式不正确，应为 zh-CN 格式")
     @TableField("locale")
     private String locale;
 
     /**
-     * 账户状态
+     * 账户状态：active | inactive | suspended | pending_verification
      */
     @NotBlank(groups = Create.class, message = "账户状态不能为空")
-    @Pattern(regexp = "^(ACTIVE|INACTIVE|SUSPENDED|PENDING|DELETED)$",
-            groups = {Create.class, Update.class},
-            message = "账户状态必须为: ACTIVE, INACTIVE, SUSPENDED, PENDING, DELETED 中的一种")
+    @Pattern(regexp = "^(active|inactive|suspended|pending_verification)$", groups = { Create.class,
+            Update.class }, message = "账户状态必须为: active, inactive, suspended, pending_verification 中的一种")
     @TableField("status")
     private String status;
 
     /**
      * 邮箱验证时间
      */
-    @Null(groups = {Create.class, Update.class}, message = "邮箱验证时间由系统自动生成，不可手动设置")
+    @Null(groups = { Create.class, Update.class }, message = "邮箱验证时间由系统自动生成，不可手动设置")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("gmt_email_verified_at")
     private LocalDateTime gmtEmailVerifiedAt;
@@ -224,7 +213,7 @@ public class Member implements Serializable {
     /**
      * 手机验证时间
      */
-    @Null(groups = {Create.class, Update.class}, message = "手机验证时间由系统自动生成，不可手动设置")
+    @Null(groups = { Create.class, Update.class }, message = "手机验证时间由系统自动生成，不可手动设置")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("gmt_phone_verified_at")
     private LocalDateTime gmtPhoneVerifiedAt;
@@ -232,7 +221,7 @@ public class Member implements Serializable {
     /**
      * 最后登录时间
      */
-    @Null(groups = {Create.class, Update.class}, message = "最后登录时间由系统自动生成，不可手动设置")
+    @Null(groups = { Create.class, Update.class }, message = "最后登录时间由系统自动生成，不可手动设置")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @TableField("gmt_last_login_at")
     private LocalDateTime gmtLastLoginAt;
@@ -240,16 +229,15 @@ public class Member implements Serializable {
     /**
      * 最后登录IP地址
      */
-    @Null(groups = {Create.class, Update.class}, message = "最后登录IP由系统自动生成，不可手动设置")
-    @Pattern(regexp = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$",
-            message = "IP地址格式不正确")
+    @Null(groups = { Create.class, Update.class }, message = "最后登录IP由系统自动生成，不可手动设置")
+    @Pattern(regexp = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$", message = "IP地址格式不正确")
     @TableField("last_login_ip")
     private String lastLoginIp;
 
     /**
      * 扩展元数据（JSON格式）
      */
-    @Length(max = 2000, groups = {Create.class, Update.class}, message = "扩展数据不能超过2000个字符")
+    @Length(max = 2000, groups = { Create.class, Update.class }, message = "扩展数据不能超过2000个字符")
     @TableField("extend_json")
     private String extendJson;
 
@@ -407,15 +395,14 @@ public class Member implements Serializable {
     }
 
     /**
-     * 账户状态枚举
+     * 账户状态枚举（与 DB ENUM 保持一致：小写）
      */
     @Getter
     public enum AccountStatus {
-        ACTIVE("ACTIVE", "活跃"),
-        INACTIVE("INACTIVE", "非活跃"),
-        SUSPENDED("SUSPENDED", "暂停"),
-        PENDING("PENDING", "待审核"),
-        DELETED("DELETED", "已删除");
+        ACTIVE("active", "活跃"),
+        INACTIVE("inactive", "非活跃"),
+        SUSPENDED("suspended", "暂停"),
+        PENDING_VERIFICATION("pending_verification", "待验证");
 
         private final String code;
         private final String description;

@@ -4,13 +4,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pot.member.service.domain.model.member.*;
 import com.pot.member.service.domain.repository.MemberRepository;
 import com.pot.member.service.entity.Member;
+import com.pot.member.service.entity.MemberRole;
 import com.pot.member.service.mapper.MemberMapper;
+import com.pot.member.service.mapper.MemberRoleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 会员仓储实现
@@ -24,6 +29,7 @@ import java.util.Optional;
 public class MemberRepositoryImpl implements MemberRepository {
 
     private final MemberMapper memberMapper;
+    private final MemberRoleMapper memberRoleMapper;
 
     @Override
     public MemberAggregate save(MemberAggregate aggregate) {
@@ -99,6 +105,16 @@ public class MemberRepositoryImpl implements MemberRepository {
         log.debug("删除会员: {}", memberId.value());
     }
 
+    @Override
+    public Set<Long> findMemberIdsByRoleId(Long roleId) {
+        LambdaQueryWrapper<MemberRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MemberRole::getRoleId, roleId);
+        List<MemberRole> memberRoles = memberRoleMapper.selectList(wrapper);
+        return memberRoles.stream()
+                .map(MemberRole::getMemberId)
+                .collect(Collectors.toSet());
+    }
+
     /**
      * 将实体转换为聚合根
      */
@@ -140,27 +156,33 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     /**
      * 将数据库状态字符串映射到领域模型状态
+     * <p>
+     * DB ENUM: active | inactive | suspended | pending_verification
+     * </p>
      */
     private MemberStatus mapStatus(String status) {
         if (status == null) {
             return MemberStatus.ACTIVE;
         }
-        return switch (status) {
-            case "ACTIVE" -> MemberStatus.ACTIVE;
-            case "SUSPENDED", "INACTIVE" -> MemberStatus.DISABLED;
-            case "DELETED", "PENDING" -> MemberStatus.LOCKED;
+        return switch (status.toLowerCase()) {
+            case "active" -> MemberStatus.ACTIVE;
+            case "inactive", "pending_verification" -> MemberStatus.DISABLED;
+            case "suspended" -> MemberStatus.LOCKED;
             default -> MemberStatus.ACTIVE;
         };
     }
 
     /**
      * 将领域模型状态映射到数据库状态字符串
+     * <p>
+     * DB ENUM: active | inactive | suspended | pending_verification
+     * </p>
      */
     private String mapStatusToString(MemberStatus status) {
         return switch (status) {
-            case ACTIVE -> "ACTIVE";
-            case DISABLED -> "SUSPENDED";
-            case LOCKED -> "DELETED";
+            case ACTIVE -> "active";
+            case DISABLED -> "inactive";
+            case LOCKED -> "suspended";
         };
     }
 }

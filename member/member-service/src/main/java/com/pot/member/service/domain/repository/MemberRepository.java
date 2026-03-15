@@ -3,6 +3,7 @@ package com.pot.member.service.domain.repository;
 import com.pot.member.service.domain.model.member.*;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * 会员仓储接口
@@ -51,6 +52,11 @@ public interface MemberRepository {
      * 检查用户名是否存在
      */
     boolean existsByUsername(Username username);
+
+    /**
+     * 查找拥有指定角色的所有会员ID
+     */
+    Set<Long> findMemberIdsByRoleId(Long roleId);
 
     /**
      * 删除会员（软删除）

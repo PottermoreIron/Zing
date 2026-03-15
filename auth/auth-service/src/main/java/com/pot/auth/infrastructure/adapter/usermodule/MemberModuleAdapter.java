@@ -262,49 +262,98 @@ public class MemberModuleAdapter implements UserModulePort {
 
     @Override
     public void lockAccount(UserId userId) {
-        // TODO: 等member-service提供锁定账户的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: PUT /internal/member/{}/lock", userId);
-        throw new UnsupportedOperationException("锁定账户功能待member-service提供内部API");
+        try {
+            memberServiceClient.lockAccount(userId.value().toString());
+            log.info("锁定账户成功: userId={}", userId);
+        } catch (Exception e) {
+            log.error("锁定账户失败: userId={}", userId, e);
+            throw new RuntimeException("锁定账户失败: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void unlockAccount(UserId userId) {
-        // TODO: 等member-service提供解锁账户的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: PUT /internal/member/{}/unlock", userId);
-        throw new UnsupportedOperationException("解锁账户功能待member-service提供内部API");
+        try {
+            memberServiceClient.unlockAccount(userId.value().toString());
+            log.info("解锁账户成功: userId={}", userId);
+        } catch (Exception e) {
+            log.error("解锁账户失败: userId={}", userId, e);
+            throw new RuntimeException("解锁账户失败: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void recordLoginAttempt(UserId userId, boolean success, IpAddress ip, Long timestamp) {
-        // TODO: 等member-service提供记录登录尝试的内部API
-        log.debug("记录登录尝试: userId={}, success={}, ip={}", userId, success, ip);
-        // 临时不抛异常，仅记录日志
+        try {
+            memberServiceClient.recordLoginAttempt(
+                    userId.value().toString(),
+                    success,
+                    ip != null ? ip.value() : "unknown");
+        } catch (Exception e) {
+            // 登录尝试记录不阻断主流程
+            log.warn("记录登录尝试失败（非关键操作）: userId={}, error={}", userId, e.getMessage());
+        }
     }
 
     // ========== 权限查询 ==========
 
     @Override
     public Set<String> getPermissions(UserId userId) {
-        // TODO: 等member-service提供权限查询的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: GET /internal/member/{}/permissions", userId);
-
-        // 临时返回默认权限
-        log.debug("临时返回默认权限: userId={}", userId);
-        return Set.of("user:read", "user:write");
+        try {
+            R<Set<String>> response = memberServiceClient.getPermissions(userId.value().toString());
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                return response.getData();
+            }
+            log.warn("获取权限返回空结果: userId={}", userId);
+            return Collections.emptySet();
+        } catch (Exception e) {
+            log.error("获取用户权限失败: userId={}", userId, e);
+            return Collections.emptySet();
+        }
     }
 
     @Override
     public Set<RoleDTO> getRoles(UserId userId) {
-        // TODO: 等member-service提供角色查询的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: GET /internal/member/{}/roles", userId);
-        return Collections.emptySet();
+        try {
+            R<Set<String>> response = memberServiceClient.getRoles(userId.value().toString());
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                return response.getData().stream()
+                        .map(roleCode -> RoleDTO.builder()
+                                .roleCode(roleCode)
+                                .roleName(roleCode)
+                                .build())
+                        .collect(java.util.stream.Collectors.toSet());
+            }
+            return Collections.emptySet();
+        } catch (Exception e) {
+            log.error("获取用户角色失败: userId={}", userId, e);
+            return Collections.emptySet();
+        }
     }
 
     @Override
     public Map<UserId, Set<String>> getPermissionsBatch(List<UserId> userIds) {
-        // TODO: 等member-service提供批量权限查询的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: POST /internal/member/permissions/batch");
-        return Collections.emptyMap();
+        try {
+            Set<String> userIdStrings = userIds.stream()
+                    .map(id -> id.value().toString())
+                    .collect(java.util.stream.Collectors.toSet());
+            R<Map<String, Set<String>>> response = memberServiceClient.batchQueryPermissions(userIdStrings);
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                Map<UserId, Set<String>> result = new java.util.HashMap<>();
+                response.getData().forEach((idStr, perms) -> {
+                    try {
+                        result.put(UserId.of(Long.parseLong(idStr)), perms);
+                    } catch (NumberFormatException ignore) {
+                        log.warn("批量权限查询 userId 格式异常: {}", idStr);
+                    }
+                });
+                return result;
+            }
+            return Collections.emptyMap();
+        } catch (Exception e) {
+            log.error("批量获取用户权限失败", e);
+            return Collections.emptyMap();
+        }
     }
 
     // ========== 设备管理 ==========

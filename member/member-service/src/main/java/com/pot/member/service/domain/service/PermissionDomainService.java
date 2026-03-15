@@ -1,6 +1,5 @@
 package com.pot.member.service.domain.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pot.member.service.domain.event.PermissionChangeEventPublisher;
 import com.pot.member.service.domain.model.member.MemberAggregate;
 import com.pot.member.service.domain.model.permission.PermissionAggregate;
@@ -8,8 +7,6 @@ import com.pot.member.service.domain.model.role.RoleAggregate;
 import com.pot.member.service.domain.repository.MemberRepository;
 import com.pot.member.service.domain.repository.PermissionRepository;
 import com.pot.member.service.domain.repository.RoleRepository;
-import com.pot.member.service.entity.MemberRole;
-import com.pot.member.service.mapper.MemberRoleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +31,6 @@ public class PermissionDomainService {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final PermissionChangeEventPublisher eventPublisher;
-    private final MemberRoleMapper memberRoleMapper;
 
     /**
      * 为会员分配角色
@@ -143,11 +139,6 @@ public class PermissionDomainService {
      * 查找拥有指定角色的所有会员ID
      */
     private Set<Long> findMemberIdsByRoleId(Long roleId) {
-        LambdaQueryWrapper<MemberRole> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(MemberRole::getRoleId, roleId);
-        List<MemberRole> memberRoles = memberRoleMapper.selectList(wrapper);
-        return memberRoles.stream()
-                .map(MemberRole::getMemberId)
-                .collect(Collectors.toSet());
+        return memberRepository.findMemberIdsByRoleId(roleId);
     }
 }

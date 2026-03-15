@@ -6,7 +6,9 @@ import com.pot.member.facade.dto.request.CreateMemberRequest;
 import com.pot.member.service.converter.MemberConverter;
 import com.pot.member.service.entity.Member;
 import com.pot.member.service.entity.SocialConnection;
+import com.pot.member.service.service.MemberAuthInternalService;
 import com.pot.member.service.service.MemberService;
+import com.pot.member.service.service.PermissionQueryInternalService;
 import com.pot.member.service.service.SocialConnectionsService;
 import com.pot.member.service.validator.MemberValidator;
 import com.pot.zing.framework.common.excption.BusinessException;
@@ -16,10 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Member Facade实现类
@@ -34,6 +43,8 @@ import java.util.Optional;
  * @since 2025-08-31
  */
 @Slf4j
+@RestController
+@RequestMapping("/member")
 @Service
 @RequiredArgsConstructor
 public class MemberFacadeImpl implements MemberFacade {
@@ -42,6 +53,8 @@ public class MemberFacadeImpl implements MemberFacade {
     private final MemberValidator memberValidator;
     private final MemberConverter memberConverter;
     private final SocialConnectionsService socialConnectionsService;
+    private final MemberAuthInternalService memberAuthInternalService;
+    private final PermissionQueryInternalService permissionQueryService;
 
     @Override
     public String sayHello(@RequestParam("name") String name) {
@@ -240,7 +253,7 @@ public class MemberFacadeImpl implements MemberFacade {
 
     @Override
     public R<MemberDTO> getMemberByOAuth2(@RequestParam("provider") String provider,
-                                          @RequestParam("openId") String openId) {
+            @RequestParam("openId") String openId) {
         log.info("根据OAuth2信息查询会员: provider={}, openId={}", provider, openId);
 
         if (StringUtils.isBlank(provider)) {
@@ -293,10 +306,10 @@ public class MemberFacadeImpl implements MemberFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<MemberDTO> createMemberFromOAuth2(@RequestParam("provider") String provider,
-                                               @RequestParam("openId") String openId,
-                                               @RequestParam(value = "email", required = false) String email,
-                                               @RequestParam(value = "nickname", required = false) String nickname,
-                                               @RequestParam(value = "avatarUrl", required = false) String avatarUrl) {
+            @RequestParam("openId") String openId,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "nickname", required = false) String nickname,
+            @RequestParam(value = "avatarUrl", required = false) String avatarUrl) {
         log.info("从OAuth2信息创建会员: provider={}, openId={}, email={}, nickname={}",
                 provider, openId, email, nickname);
 
@@ -429,8 +442,8 @@ public class MemberFacadeImpl implements MemberFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<Void> bindOAuth2Account(@RequestParam("memberId") Long memberId,
-                                     @RequestParam("provider") String provider,
-                                     @RequestParam("openId") String openId) {
+            @RequestParam("provider") String provider,
+            @RequestParam("openId") String openId) {
         log.info("绑定OAuth2账号: memberId={}, provider={}, openId={}", memberId, provider, openId);
 
         // 参数校验
@@ -512,7 +525,7 @@ public class MemberFacadeImpl implements MemberFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public R<Void> updateUnionId(@RequestParam("memberId") Long memberId,
-                                 @RequestParam("unionId") String unionId) {
+            @RequestParam("unionId") String unionId) {
         log.info("更新UnionID: memberId={}, unionId={}", memberId, unionId);
 
         // 参数校验
@@ -597,5 +610,86 @@ public class MemberFacadeImpl implements MemberFacade {
         }
 
         return String.format("%s用户_%s", providerName, suffix);
+    }
+
+    // ========== 内部认证 API（供 auth-service 调用，路径前缀 /member） ==========
+
+    /**
+     * 验证用户密码（内部 API）
+     * 对应 auth-service MemberServiceClient: POST
+     * /member/internal/auth/verify-password
+     */
+    @PostMapping("/internal/auth/verify-password")
+    public R<Boolean> verifyPassword(
+            @RequestParam("identifier") String identifier,
+            @RequestParam("password") String password) {
+        log.info("[内部接口] 验证密码: identifier={}", identifier);
+        boolean valid = memberAuthInternalService.verifyPassword(identifier, password);
+        return R.success(valid);
+    }
+
+    /**
+     * 记录登录尝试（内部 API）
+     */
+    @PostMapping("/internal/auth/login-attempt")
+    public R<Void> recordLoginAttempt(
+            @RequestParam("userId") String userId,
+            @RequestParam("success") Boolean success,
+            @RequestParam("ip") String ip) {
+        log.info("[内部接口] 记录登录尝试: userId={}, success={}", userId, success);
+        memberAuthInternalService.recordLoginAttempt(userId, success, ip);
+        return R.success();
+    }
+
+    /**
+     * 锁定账户（内部 API）
+     */
+    @PutMapping("/internal/auth/lock/{userId}")
+    public R<Void> lockAccount(@PathVariable("userId") String userId) {
+        log.info("[内部接口] 锁定账户: userId={}", userId);
+        memberAuthInternalService.lockAccount(userId);
+        return R.success();
+    }
+
+    /**
+     * 解锁账户（内部 API）
+     */
+    @PutMapping("/internal/auth/unlock/{userId}")
+    public R<Void> unlockAccount(@PathVariable("userId") String userId) {
+        log.info("[内部接口] 解锁账户: userId={}", userId);
+        memberAuthInternalService.unlockAccount(userId);
+        return R.success();
+    }
+
+    // ========== 权限查询 API（供 auth-service 调用） ==========
+
+    /**
+     * 查询用户权限（内部 API）
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/internal/member/{userId}/permissions")
+    public R<Set<String>> getPermissions(@PathVariable("userId") String userId) {
+        log.debug("[内部接口] 查询用户权限: userId={}", userId);
+        Set<String> permissions = permissionQueryService.queryUserPermissions(userId);
+        return R.success(permissions);
+    }
+
+    /**
+     * 查询用户角色（内部 API）
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/internal/member/{userId}/roles")
+    public R<Set<String>> getRoles(@PathVariable("userId") String userId) {
+        log.debug("[内部接口] 查询用户角色: userId={}", userId);
+        Set<String> roles = permissionQueryService.queryUserRoles(userId);
+        return R.success(roles);
+    }
+
+    /**
+     * 批量查询用户权限（内部 API）
+     */
+    @PostMapping("/internal/member/permissions/batch")
+    public R<Map<String, Set<String>>> batchQueryPermissions(@RequestBody Set<String> userIds) {
+        log.debug("[内部接口] 批量查询用户权限: count={}", userIds.size());
+        Map<String, Set<String>> result = permissionQueryService.batchQueryUserPermissions(userIds);
+        return R.success(result);
     }
 }

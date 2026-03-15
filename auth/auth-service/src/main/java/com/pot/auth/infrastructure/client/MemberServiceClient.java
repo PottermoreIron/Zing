@@ -5,9 +5,14 @@ import com.pot.member.facade.dto.request.CreateMemberRequest;
 import com.pot.zing.framework.common.model.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Member服务的Feign Client（防腐层设计）
@@ -125,16 +130,46 @@ public interface MemberServiceClient {
                         @RequestParam("provider") String provider,
                         @RequestParam("openId") String openId);
 
-        // ========== 权限相关（未来member-service提供内部API时添加）==========
+        // ========== 账户管理 ==========
 
-        // TODO: 等member-service提供权限查询内部API后添加以下方法
-        // R<Set<String>> getPermissions(@RequestParam("memberId") Long memberId);
-        // R<Set<RoleDTO>> getRoles(@RequestParam("memberId") Long memberId);
+        /**
+         * 记录登录尝试
+         */
+        @PostMapping("/internal/auth/login-attempt")
+        R<Void> recordLoginAttempt(
+                        @RequestParam("userId") String userId,
+                        @RequestParam("success") Boolean success,
+                        @RequestParam("ip") String ip);
 
-        // ========== 设备管理（未来member-service提供内部API时添加）==========
+        /**
+         * 锁定账户
+         */
+        @PutMapping("/internal/auth/lock/{userId}")
+        R<Void> lockAccount(@PathVariable("userId") String userId);
 
-        // TODO: 等member-service提供设备管理内部API后添加以下方法
-        // R<List<DeviceDTO>> getDevices(@RequestParam("memberId") Long memberId);
-        // R<Void> recordDeviceLogin(@RequestParam("memberId") Long memberId,
-        // @RequestBody DeviceLoginRequest request);
+        /**
+         * 解锁账户
+         */
+        @PutMapping("/internal/auth/unlock/{userId}")
+        R<Void> unlockAccount(@PathVariable("userId") String userId);
+
+        // ========== 权限相关 ==========
+
+        /**
+         * 查询用户权限集合
+         */
+        @GetMapping("/internal/member/{userId}/permissions")
+        R<Set<String>> getPermissions(@PathVariable("userId") String userId);
+
+        /**
+         * 查询用户角色集合
+         */
+        @GetMapping("/internal/member/{userId}/roles")
+        R<Set<String>> getRoles(@PathVariable("userId") String userId);
+
+        /**
+         * 批量查询用户权限
+         */
+        @PostMapping("/internal/member/permissions/batch")
+        R<Map<String, Set<String>>> batchQueryPermissions(@RequestBody Set<String> userIds);
 }

@@ -8,6 +8,7 @@ import com.pot.member.service.application.query.GetMemberPermissionsQuery;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.application.service.MemberApplicationService;
 import com.pot.zing.framework.common.model.R;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -61,7 +62,7 @@ public class MemberController {
     @PutMapping("/{memberId}/profile")
     public R<MemberDTO> updateProfile(
             @PathVariable Long memberId,
-            @RequestBody UpdateMemberProfileCommand command) {
+            @Valid @RequestBody UpdateMemberProfileCommand command) {
         command.setMemberId(memberId);
         MemberDTO member = memberApplicationService.updateProfile(command);
         return R.success(member);
@@ -73,7 +74,7 @@ public class MemberController {
     @PutMapping("/{memberId}/password")
     public R<Void> changePassword(
             @PathVariable Long memberId,
-            @RequestBody ChangePasswordCommand command) {
+            @Valid @RequestBody ChangePasswordCommand command) {
         command.setMemberId(memberId);
         memberApplicationService.changePassword(command);
         return R.success();
