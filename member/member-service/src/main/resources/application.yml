@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:member}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:}
+    password: ${DB_PASSWORD:000802}
 
   # RabbitMQ配置
   rabbitmq:
@@ -36,7 +36,7 @@ pot:
       port: ${DB_PORT:3306}
       database: ${DB_NAME:member}
       username: ${DB_USERNAME:root}
-      password: ${DB_PASSWORD:}
+      password: ${DB_PASSWORD:000802}
       base-package: com.pot.member.service
       module-name: ""
       project-path: /Users/yecao/Project/Pot/Zing/zing/member/member-service
