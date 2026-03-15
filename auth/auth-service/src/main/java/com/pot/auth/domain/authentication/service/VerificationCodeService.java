@@ -17,19 +17,20 @@ import java.util.concurrent.TimeUnit;
 /**
  * 验证码领域服务
  *
- * <p>负责验证码的生命周期管理：
+ * <p>
+ * 负责验证码的生命周期管理：
  * <ul>
- *   <li>生成验证码</li>
- *   <li>发送验证码（邮件/短信）</li>
- *   <li>验证验证码</li>
- *   <li>尝试次数限制</li>
+ * <li>生成验证码</li>
+ * <li>发送验证码（邮件/短信）</li>
+ * <li>验证验证码</li>
+ * <li>尝试次数限制</li>
  * </ul>
  *
  * @author pot
  * @since 2025-11-10
  */
 @Slf4j
-@Service
+@Service("authVerificationCodeService")
 @RequiredArgsConstructor
 public class VerificationCodeService {
 
@@ -236,4 +237,3 @@ public class VerificationCodeService {
         }
     }
 }
-

@@ -20,6 +20,7 @@ import com.pot.auth.domain.strategy.AbstractOneStopAuthStrategyImpl;
 import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.interfaces.dto.onestop.OAuth2AuthRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "auth.oauth2.enabled", havingValue = "true")
 public class OAuth2OneStopAuthStrategy
         extends AbstractOneStopAuthStrategyImpl<OAuth2AuthRequest> {
 

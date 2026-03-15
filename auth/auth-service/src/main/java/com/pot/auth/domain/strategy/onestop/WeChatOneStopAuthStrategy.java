@@ -17,6 +17,7 @@ import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.domain.wechat.entity.WeChatUserInfo;
 import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "auth.wechat.enabled", havingValue = "true")
 public class WeChatOneStopAuthStrategy
         extends AbstractOneStopAuthStrategyImpl<WeChatAuthRequest> {
 

@@ -18,7 +18,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -54,7 +53,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
         try {
             // 加载私钥
             Resource privateKeyResource = resourceLoader.getResource(jwtProperties.getPrivateKeyLocation());
-            byte[] privateKeyBytes = Files.readAllBytes(privateKeyResource.getFile().toPath());
+            byte[] privateKeyBytes = privateKeyResource.getInputStream().readAllBytes();
             String privateKeyPEM = new String(privateKeyBytes)
                     .replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "")
@@ -66,7 +65,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
 
             // 加载公钥
             Resource publicKeyResource = resourceLoader.getResource(jwtProperties.getPublicKeyLocation());
-            byte[] publicKeyBytes = Files.readAllBytes(publicKeyResource.getFile().toPath());
+            byte[] publicKeyBytes = publicKeyResource.getInputStream().readAllBytes();
             String publicKeyPEM = new String(publicKeyBytes)
                     .replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")

@@ -11,6 +11,9 @@ spring:
         server-addr: localhost:8848
         namespace: dev
         group: DEFAULT_GROUP
+        # 本地开发时 Nacos 不可用，允许注册失败，不阻断启动
+        fail-fast: false
+        register-enabled: ${NACOS_REGISTER_ENABLED:true}
 
   # Redis配置
   data:

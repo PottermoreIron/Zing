@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -88,7 +89,8 @@ public class MQAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public MessageProducer kafkaMessageProducer(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+        public MessageProducer kafkaMessageProducer(KafkaTemplate<String, String> kafkaTemplate,
+                ObjectMapper objectMapper) {
             log.info("[MQ] 使用Kafka作为消息队列");
             return new KafkaMessageProducer(kafkaTemplate, objectMapper);
         }
@@ -99,6 +101,7 @@ public class MQAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(MessageProducer.class)
     public MessageTemplate messageTemplate(MessageProducer messageProducer) {
         log.info("[MQ] MessageTemplate配置完成");
         return new MessageTemplate(messageProducer);
