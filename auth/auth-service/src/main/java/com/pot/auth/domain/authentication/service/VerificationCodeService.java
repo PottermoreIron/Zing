@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2025-11-10
  */
 @Slf4j
-@Service("authVerificationCodeService")
+@Service
 @RequiredArgsConstructor
 public class VerificationCodeService {
 

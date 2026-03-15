@@ -1,12 +1,8 @@
 package com.pot.zing.framework.starter.touch.config;
 
-import com.pot.zing.framework.starter.redis.service.RedisService;
 import com.pot.zing.framework.starter.touch.properties.TouchProperties;
-import com.pot.zing.framework.starter.touch.properties.VerificationCodeProperties;
 import com.pot.zing.framework.starter.touch.service.TouchChannel;
-import com.pot.zing.framework.starter.touch.service.VerificationCodeService;
 import com.pot.zing.framework.starter.touch.service.impl.TouchServiceImpl;
-import com.pot.zing.framework.starter.touch.service.impl.VerificationCodeServiceImpl;
 import com.pot.zing.framework.starter.touch.strategy.ChannelSelectionStrategy;
 import com.pot.zing.framework.starter.touch.strategy.impl.DefaultChannelSelectionStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +21,7 @@ import java.util.List;
  */
 @Slf4j
 @AutoConfiguration
-@EnableConfigurationProperties({TouchProperties.class, VerificationCodeProperties.class})
+@EnableConfigurationProperties(TouchProperties.class)
 @ConditionalOnProperty(prefix = "pot.touch", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class TouchAutoConfiguration {
 
@@ -44,19 +40,4 @@ public class TouchAutoConfiguration {
         return new TouchServiceImpl(channels, selectionStrategy);
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public VerificationCodeService verificationCodeService(
-            TouchServiceImpl touchService,
-            RedisService redisService,
-            TouchProperties touchProperties,
-            VerificationCodeProperties verificationCodeProperties) {
-        log.info("初始化 VerificationCodeService");
-        return new VerificationCodeServiceImpl(
-                touchService,
-                redisService,
-                touchProperties,
-                verificationCodeProperties
-        );
-    }
 }
