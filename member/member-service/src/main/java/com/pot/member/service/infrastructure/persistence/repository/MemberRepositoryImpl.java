@@ -2,6 +2,7 @@ package com.pot.member.service.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pot.member.service.domain.model.member.*;
+import com.pot.member.service.domain.port.MemberIdGenerator;
 import com.pot.member.service.domain.repository.MemberRepository;
 import com.pot.member.service.entity.Member;
 import com.pot.member.service.entity.MemberRole;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -30,19 +30,27 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     private final MemberMapper memberMapper;
     private final MemberRoleMapper memberRoleMapper;
+    private final MemberIdGenerator memberIdGenerator;
 
     @Override
     public MemberAggregate save(MemberAggregate aggregate) {
+        boolean isNew = (aggregate.getMemberId() == null);
+
+        if (isNew) {
+            // 新增：预先分配 memberId
+            aggregate.assignMemberId(MemberId.of(memberIdGenerator.nextId()));
+        }
+
         Member entity = toEntity(aggregate);
 
-        if (entity.getId() == null) {
-            // 新增
+        if (isNew) {
             memberMapper.insert(entity);
-            log.debug("新增会员: {}", entity.getId());
+            log.debug("新增会员: memberId={}", entity.getMemberId());
         } else {
-            // 更新
-            memberMapper.updateById(entity);
-            log.debug("更新会员: {}", entity.getId());
+            LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Member::getMemberId, aggregate.getMemberId().value());
+            memberMapper.update(entity, wrapper);
+            log.debug("更新会员: memberId={}", entity.getMemberId());
         }
 
         return toAggregate(entity);
@@ -50,7 +58,9 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     @Override
     public Optional<MemberAggregate> findById(MemberId memberId) {
-        Member entity = memberMapper.selectById(memberId.value());
+        LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Member::getMemberId, memberId.value());
+        Member entity = memberMapper.selectOne(wrapper);
         return Optional.ofNullable(entity).map(this::toAggregate);
     }
 
@@ -71,9 +81,9 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Optional<MemberAggregate> findByUsername(Username username) {
+    public Optional<MemberAggregate> findByNickname(Nickname nickname) {
         LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Member::getNickname, username.getValue());
+        wrapper.eq(Member::getNickname, nickname.getValue());
         Member entity = memberMapper.selectOne(wrapper);
         return Optional.ofNullable(entity).map(this::toAggregate);
     }
@@ -93,15 +103,17 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public boolean existsByUsername(Username username) {
+    public boolean existsByNickname(Nickname nickname) {
         LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Member::getNickname, username.getValue());
+        wrapper.eq(Member::getNickname, nickname.getValue());
         return memberMapper.selectCount(wrapper) > 0;
     }
 
     @Override
     public void delete(MemberId memberId) {
-        memberMapper.deleteById(memberId.value());
+        LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Member::getMemberId, memberId.value());
+        memberMapper.delete(wrapper);
         log.debug("删除会员: {}", memberId.value());
     }
 
@@ -119,19 +131,44 @@ public class MemberRepositoryImpl implements MemberRepository {
      * 将实体转换为聚合根
      */
     private MemberAggregate toAggregate(Member entity) {
+        MemberProfile profile = MemberProfile.builder()
+                .nickname(entity.getNickname())
+                .firstName(entity.getFirstName())
+                .lastName(entity.getLastName())
+                .gender(entity.getGender())
+                .birthDate(entity.getBirth() != null ? entity.getBirth().toString() : null)
+                .countryCode(entity.getCountryCode())
+                .region(entity.getRegion())
+                .city(entity.getCity())
+                .timezone(entity.getTimezone())
+                .locale(entity.getLocale())
+                .build();
+
+        Set<Long> roleIds = loadRoleIds(entity.getMemberId());
+
         return MemberAggregate.reconstitute(
-                MemberId.of(entity.getId()),
-                Username.of(entity.getNickname()),
+                MemberId.of(entity.getMemberId()),
+                entity.getNickname() != null ? Nickname.of(entity.getNickname()) : null,
                 entity.getEmail() != null ? Email.of(entity.getEmail()) : null,
                 entity.getPhone() != null ? PhoneNumber.of(entity.getPhone()) : null,
                 entity.getPasswordHash(),
                 mapStatus(entity.getStatus()),
-                entity.getAvatarUrl(),
-                null, // bio - Member entity doesn't have bio field
-                new HashSet<>(), // roleIds - loaded separately
+                profile,
+                roleIds,
                 entity.getGmtCreatedAt(),
                 entity.getGmtUpdatedAt(),
                 entity.getGmtLastLoginAt());
+    }
+
+    /**
+     * 加载会员的角色ID集合
+     */
+    private Set<Long> loadRoleIds(Long memberId) {
+        LambdaQueryWrapper<MemberRole> q = new LambdaQueryWrapper<>();
+        q.eq(MemberRole::getMemberId, memberId);
+        return memberRoleMapper.selectList(q).stream()
+                .map(MemberRole::getRoleId)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -140,17 +177,37 @@ public class MemberRepositoryImpl implements MemberRepository {
     private Member toEntity(MemberAggregate aggregate) {
         Member entity = new Member();
         if (aggregate.getMemberId() != null) {
-            entity.setId(aggregate.getMemberId().value());
+            // memberId is the business ID — set it so MyBatisPlus UPDATE can find the
+            // record via memberId
+            entity.setMemberId(aggregate.getMemberId().value());
         }
-        entity.setNickname(aggregate.getUsername().getValue());
+        entity.setNickname(aggregate.getNickname() != null ? aggregate.getNickname().getValue() : null);
         entity.setEmail(aggregate.getEmail() != null ? aggregate.getEmail().getValue() : null);
         entity.setPhone(aggregate.getPhoneNumber() != null ? aggregate.getPhoneNumber().getValue() : null);
         entity.setPasswordHash(aggregate.getPasswordHash());
-        entity.setAvatarUrl(aggregate.getAvatar());
         entity.setStatus(mapStatusToString(aggregate.getStatus()));
         entity.setGmtLastLoginAt(aggregate.getLastLoginAt());
-        entity.setGmtCreatedAt(aggregate.getCreatedAt());
-        entity.setGmtUpdatedAt(aggregate.getUpdatedAt());
+        entity.setGmtCreatedAt(
+                aggregate.getCreatedAt() != null ? aggregate.getCreatedAt() : java.time.LocalDateTime.now());
+        entity.setGmtUpdatedAt(
+                aggregate.getUpdatedAt() != null ? aggregate.getUpdatedAt() : java.time.LocalDateTime.now());
+
+        // Profile 字段映射
+        MemberProfile profile = aggregate.getProfile();
+        if (profile != null) {
+            entity.setFirstName(profile.getFirstName());
+            entity.setLastName(profile.getLastName());
+            entity.setGender(
+                    profile.getGender() != null ? Member.Gender.fromCode(profile.getGender()) : Member.Gender.UNKNOWN);
+            entity.setBirth(profile.getBirthDate() != null
+                    ? java.time.LocalDate.parse(profile.getBirthDate())
+                    : null);
+            entity.setCountryCode(profile.getCountryCode());
+            entity.setRegion(profile.getRegion());
+            entity.setCity(profile.getCity());
+            entity.setTimezone(profile.getTimezone());
+            entity.setLocale(profile.getLocale());
+        }
         return entity;
     }
 

@@ -20,5 +20,5 @@ public class GetMemberQuery {
     private Long memberId;
     private String email;
     private String phoneNumber;
-    private String username;
+    private String nickname;
 }

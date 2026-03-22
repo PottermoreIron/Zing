@@ -34,9 +34,9 @@ public interface MemberRepository {
     Optional<MemberAggregate> findByPhoneNumber(PhoneNumber phoneNumber);
 
     /**
-     * 根据用户名查找会员
+     * 根据昵称查找会员
      */
-    Optional<MemberAggregate> findByUsername(Username username);
+    Optional<MemberAggregate> findByNickname(Nickname nickname);
 
     /**
      * 检查邮箱是否存在
@@ -49,9 +49,9 @@ public interface MemberRepository {
     boolean existsByPhoneNumber(PhoneNumber phoneNumber);
 
     /**
-     * 检查用户名是否存在
+     * 检查昵称是否存在
      */
-    boolean existsByUsername(Username username);
+    boolean existsByNickname(Nickname nickname);
 
     /**
      * 查找拥有指定角色的所有会员ID

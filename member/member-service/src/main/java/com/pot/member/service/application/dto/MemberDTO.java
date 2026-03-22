@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * 会员DTO
- * 
+ * 会员DTO（应用层内部使用）
+ *
  * @author Pot
  * @since 2026-01-06
  */
@@ -21,11 +21,9 @@ import java.util.Set;
 public class MemberDTO {
 
     private Long memberId;
-    private String username;
+    private String nickname;
     private String email;
     private String phoneNumber;
-    private String avatar;
-    private String bio;
     private String status;
     private Set<Long> roleIds;
     private LocalDateTime createdAt;

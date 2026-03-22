@@ -1,9 +1,10 @@
 package com.pot.member.service.domain.service;
 
-import com.pot.member.service.domain.event.PermissionChangeEventPublisher;
+import com.pot.member.service.domain.event.PermissionChangedEvent;
 import com.pot.member.service.domain.model.member.MemberAggregate;
 import com.pot.member.service.domain.model.permission.PermissionAggregate;
 import com.pot.member.service.domain.model.role.RoleAggregate;
+import com.pot.member.service.domain.port.DomainEventPublisher;
 import com.pot.member.service.domain.repository.MemberRepository;
 import com.pot.member.service.domain.repository.PermissionRepository;
 import com.pot.member.service.domain.repository.RoleRepository;
@@ -30,7 +31,7 @@ public class PermissionDomainService {
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    private final PermissionChangeEventPublisher eventPublisher;
+    private final DomainEventPublisher eventPublisher;
 
     /**
      * 为会员分配角色
@@ -47,7 +48,11 @@ public class PermissionDomainService {
         memberRepository.save(member);
 
         // 发布权限变更事件
-        eventPublisher.publishMemberRoleAssigned(memberId, roleId, operator);
+        eventPublisher.publish(new PermissionChangedEvent(
+                String.valueOf(memberId),
+                Set.of(memberId),
+                PermissionChangedEvent.ChangeType.MEMBER_ROLE_ASSIGNED,
+                roleId, null, operator));
 
         log.info("为会员{}分配角色{}", memberId, roleId);
     }
@@ -64,7 +69,11 @@ public class PermissionDomainService {
         memberRepository.save(member);
 
         // 发布权限变更事件
-        eventPublisher.publishMemberRoleRevoked(memberId, roleId, operator);
+        eventPublisher.publish(new PermissionChangedEvent(
+                String.valueOf(memberId),
+                Set.of(memberId),
+                PermissionChangedEvent.ChangeType.MEMBER_ROLE_REVOKED,
+                roleId, null, operator));
 
         log.info("撤销会员{}的角色{}", memberId, roleId);
     }
@@ -88,7 +97,11 @@ public class PermissionDomainService {
 
         // 发布权限变更事件
         if (!affectedMemberIds.isEmpty()) {
-            eventPublisher.publishRolePermissionAdded(affectedMemberIds, roleId, permissionId, operator);
+            eventPublisher.publish(new PermissionChangedEvent(
+                    String.valueOf(roleId),
+                    affectedMemberIds,
+                    PermissionChangedEvent.ChangeType.ROLE_PERMISSION_ADDED,
+                    roleId, permissionId, operator));
         }
 
         log.info("为角色{}添加权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
@@ -109,7 +122,11 @@ public class PermissionDomainService {
 
         // 发布权限变更事件
         if (!affectedMemberIds.isEmpty()) {
-            eventPublisher.publishRolePermissionRemoved(affectedMemberIds, roleId, permissionId, operator);
+            eventPublisher.publish(new PermissionChangedEvent(
+                    String.valueOf(roleId),
+                    affectedMemberIds,
+                    PermissionChangedEvent.ChangeType.ROLE_PERMISSION_REMOVED,
+                    roleId, permissionId, operator));
         }
 
         log.info("从角色{}移除权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());

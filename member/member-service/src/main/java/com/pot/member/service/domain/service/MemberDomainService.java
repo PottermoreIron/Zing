@@ -2,12 +2,12 @@ package com.pot.member.service.domain.service;
 
 import com.pot.member.service.domain.model.member.Email;
 import com.pot.member.service.domain.model.member.MemberAggregate;
+import com.pot.member.service.domain.model.member.Nickname;
 import com.pot.member.service.domain.model.member.PhoneNumber;
-import com.pot.member.service.domain.model.member.Username;
+import com.pot.member.service.domain.port.PasswordEncoder;
 import com.pot.member.service.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,7 +28,7 @@ public class MemberDomainService {
      * 注册新会员
      */
     public MemberAggregate register(
-            Username username,
+            Nickname nickname,
             Email email,
             String rawPassword) {
 
@@ -41,7 +41,7 @@ public class MemberDomainService {
         String passwordHash = passwordEncoder.encode(rawPassword);
 
         // 创建会员
-        MemberAggregate member = MemberAggregate.create(username, email, passwordHash);
+        MemberAggregate member = MemberAggregate.create(nickname, email, passwordHash);
 
         // 保存会员
         return memberRepository.save(member);

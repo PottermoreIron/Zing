@@ -8,6 +8,7 @@ import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.valueobject.*;
 import com.pot.auth.infrastructure.client.MemberServiceClient;
 import com.pot.member.facade.dto.MemberDTO;
+import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import com.pot.member.facade.dto.request.CreateMemberRequest;
 import com.pot.zing.framework.common.model.R;
 import lombok.RequiredArgsConstructor;
@@ -76,20 +77,11 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> authenticateWithPassword(String identifier, String password) {
         try {
-            // 1. 调用member-service的内部认证API进行密码验证
-            R<Boolean> verifyResponse = memberServiceClient.verifyPassword(identifier, password);
-
-            if (verifyResponse == null || !verifyResponse.isSuccess()
-                    || !Boolean.TRUE.equals(verifyResponse.getData())) {
-                log.debug("密码验证失败: identifier={}", identifier);
-                return Optional.empty();
-            }
-
-            // 2. 验证成功，查询用户信息
-            R<MemberDTO> response = findMemberByIdentifier(identifier);
+            // 直接调用member-service的密码认证接口（认证+查询一步完成）
+            R<MemberDTO> response = memberServiceClient.authenticateWithPassword(identifier, password);
 
             if (response == null || !response.isSuccess() || response.getData() == null) {
-                log.error("密码验证成功但用户信息查询失败: identifier={}", identifier);
+                log.debug("密码验证失败: identifier={}", identifier);
                 return Optional.empty();
             }
 
@@ -106,23 +98,19 @@ public class MemberModuleAdapter implements UserModulePort {
      * 根据标识符查找用户（支持用户名/邮箱/手机号）
      */
     private R<MemberDTO> findMemberByIdentifier(String identifier) {
-        // 1. 判断identifier类型
         if (identifier.contains("@")) {
-            // 邮箱
-            return memberServiceClient.getMemberByEmail(identifier);
+            return memberServiceClient.findByEmail(identifier);
         } else if (identifier.matches("^1[3-9]\\d{9}$")) {
-            // 中国手机号
-            return memberServiceClient.getMemberByPhone(identifier);
+            return memberServiceClient.findByPhone(identifier);
         } else {
-            // 用户名
-            return memberServiceClient.getMemberByUsername(identifier);
+            return memberServiceClient.findByNickname(identifier);
         }
     }
 
     @Override
     public Optional<UserDTO> findById(UserId userId) {
         try {
-            R<MemberDTO> response = memberServiceClient.getMemberById(userId.value());
+            R<MemberDTO> response = memberServiceClient.findById(userId.value());
 
             if (response == null || !response.isSuccess() || response.getData() == null) {
                 return Optional.empty();
@@ -154,7 +142,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> findByEmail(String email) {
         try {
-            R<MemberDTO> response = memberServiceClient.getMemberByEmail(email);
+            R<MemberDTO> response = memberServiceClient.findByEmail(email);
 
             if (response == null || !response.isSuccess() || response.getData() == null) {
                 return Optional.empty();
@@ -170,7 +158,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> findByPhone(String phone) {
         try {
-            R<MemberDTO> response = memberServiceClient.getMemberByPhone(phone);
+            R<MemberDTO> response = memberServiceClient.findByPhone(phone);
 
             if (response == null || !response.isSuccess() || response.getData() == null) {
                 return Optional.empty();
@@ -206,7 +194,7 @@ public class MemberModuleAdapter implements UserModulePort {
 
             // 3. 返回用户ID
             MemberDTO memberDTO = response.getData();
-            log.info("用户创建成功: memberId={}, username={}", memberDTO.getMemberId(), memberDTO.getUsername());
+            log.info("用户创建成功: memberId={}, nickname={}", memberDTO.getMemberId(), memberDTO.getUsername());
 
             return UserId.of(memberDTO.getMemberId());
 
@@ -219,10 +207,10 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public boolean existsByUsername(String username) {
         try {
-            R<MemberDTO> response = memberServiceClient.getMemberByUsername(username);
-            return response != null && response.isSuccess() && response.getData() != null;
+            R<Boolean> response = memberServiceClient.existsByNickname(username);
+            return response != null && response.isSuccess() && Boolean.TRUE.equals(response.getData());
         } catch (Exception e) {
-            log.error("检查用户名是否存在失败: username={}", username, e);
+            log.error("检查昵称是否存在失败: username={}", username, e);
             return false;
         }
     }
@@ -230,7 +218,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public boolean existsByEmail(Email email) {
         try {
-            R<Boolean> response = memberServiceClient.checkEmailExists(email.value());
+            R<Boolean> response = memberServiceClient.existsByEmail(email.value());
             return response != null && response.isSuccess() && Boolean.TRUE.equals(response.getData());
         } catch (Exception e) {
             log.error("检查邮箱是否存在失败: email={}", email, e);
@@ -241,7 +229,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public boolean existsByPhone(Phone phone) {
         try {
-            R<Boolean> response = memberServiceClient.checkPhoneExists(phone.value());
+            R<Boolean> response = memberServiceClient.existsByPhone(phone.value());
             return response != null && response.isSuccess() && Boolean.TRUE.equals(response.getData());
         } catch (Exception e) {
             log.error("检查手机号是否存在失败: phone={}", phone, e);
@@ -253,9 +241,13 @@ public class MemberModuleAdapter implements UserModulePort {
 
     @Override
     public void updatePassword(UserId userId, Password newPassword) {
-        // TODO: 等member-service提供更新密码的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: PUT /internal/member/{}/password", userId);
-        throw new UnsupportedOperationException("更新密码功能待member-service提供内部API");
+        try {
+            memberServiceClient.updatePassword(userId.value(), newPassword.value());
+            log.info("密码更新成功: userId={}", userId);
+        } catch (Exception e) {
+            log.error("密码更新失败: userId={}", userId, e);
+            throw new RuntimeException("密码更新失败: " + e.getMessage(), e);
+        }
     }
 
     // ========== 账户管理 ==========
@@ -263,7 +255,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public void lockAccount(UserId userId) {
         try {
-            memberServiceClient.lockAccount(userId.value().toString());
+            memberServiceClient.lockAccount(userId.value());
             log.info("锁定账户成功: userId={}", userId);
         } catch (Exception e) {
             log.error("锁定账户失败: userId={}", userId, e);
@@ -274,7 +266,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public void unlockAccount(UserId userId) {
         try {
-            memberServiceClient.unlockAccount(userId.value().toString());
+            memberServiceClient.unlockAccount(userId.value());
             log.info("解锁账户成功: userId={}", userId);
         } catch (Exception e) {
             log.error("解锁账户失败: userId={}", userId, e);
@@ -286,9 +278,10 @@ public class MemberModuleAdapter implements UserModulePort {
     public void recordLoginAttempt(UserId userId, boolean success, IpAddress ip, Long timestamp) {
         try {
             memberServiceClient.recordLoginAttempt(
-                    userId.value().toString(),
+                    userId.value(),
                     success,
-                    ip != null ? ip.value() : "unknown");
+                    ip != null ? ip.value() : "unknown",
+                    timestamp);
         } catch (Exception e) {
             // 登录尝试记录不阻断主流程
             log.warn("记录登录尝试失败（非关键操作）: userId={}, error={}", userId, e.getMessage());
@@ -300,7 +293,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Set<String> getPermissions(UserId userId) {
         try {
-            R<Set<String>> response = memberServiceClient.getPermissions(userId.value().toString());
+            R<Set<String>> response = memberServiceClient.getPermissions(userId.value());
             if (response != null && response.isSuccess() && response.getData() != null) {
                 return response.getData();
             }
@@ -315,12 +308,12 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Set<RoleDTO> getRoles(UserId userId) {
         try {
-            R<Set<String>> response = memberServiceClient.getRoles(userId.value().toString());
+            R<List<com.pot.member.facade.dto.RoleDTO>> response = memberServiceClient.getRoles(userId.value());
             if (response != null && response.isSuccess() && response.getData() != null) {
                 return response.getData().stream()
-                        .map(roleCode -> RoleDTO.builder()
-                                .roleCode(roleCode)
-                                .roleName(roleCode)
+                        .map(r -> RoleDTO.builder()
+                                .roleCode(r.getRoleCode())
+                                .roleName(r.getRoleName())
                                 .build())
                         .collect(java.util.stream.Collectors.toSet());
             }
@@ -334,19 +327,13 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Map<UserId, Set<String>> getPermissionsBatch(List<UserId> userIds) {
         try {
-            Set<String> userIdStrings = userIds.stream()
-                    .map(id -> id.value().toString())
-                    .collect(java.util.stream.Collectors.toSet());
-            R<Map<String, Set<String>>> response = memberServiceClient.batchQueryPermissions(userIdStrings);
+            List<Long> idList = userIds.stream()
+                    .map(UserId::value)
+                    .collect(java.util.stream.Collectors.toList());
+            R<Map<Long, Set<String>>> response = memberServiceClient.getPermissionsBatch(idList);
             if (response != null && response.isSuccess() && response.getData() != null) {
                 Map<UserId, Set<String>> result = new java.util.HashMap<>();
-                response.getData().forEach((idStr, perms) -> {
-                    try {
-                        result.put(UserId.of(Long.parseLong(idStr)), perms);
-                    } catch (NumberFormatException ignore) {
-                        log.warn("批量权限查询 userId 格式异常: {}", idStr);
-                    }
-                });
+                response.getData().forEach((id, perms) -> result.put(UserId.of(id), perms));
                 return result;
             }
             return Collections.emptyMap();
@@ -360,9 +347,21 @@ public class MemberModuleAdapter implements UserModulePort {
 
     @Override
     public List<DeviceDTO> getDevices(UserId userId) {
-        // TODO: 等member-service提供设备列表查询的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: GET /internal/member/{}/devices", userId);
-        return Collections.emptyList();
+        try {
+            R<List<com.pot.member.facade.dto.DeviceDTO>> response = memberServiceClient.getDevices(userId.value());
+            if (response != null && response.isSuccess() && response.getData() != null) {
+                return response.getData().stream()
+                        .map(d -> DeviceDTO.builder()
+                                .deviceId(d.getDeviceToken() != null ? DeviceId.of(d.getDeviceToken()) : null)
+                                .deviceType(d.getDeviceType())
+                                .build())
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            return Collections.emptyList();
+        } catch (Exception e) {
+            log.warn("获取设备列表失败（非关键操作）: userId={}, error={}", userId, e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -373,9 +372,13 @@ public class MemberModuleAdapter implements UserModulePort {
 
     @Override
     public void kickDevice(UserId userId, DeviceId deviceId) {
-        // TODO: 等member-service提供踢出设备的内部API
-        log.warn("⚠️ TODO: member-service需提供内部API: DELETE /internal/member/{}/devices/{}", userId, deviceId);
-        throw new UnsupportedOperationException("踢出设备功能待member-service提供内部API");
+        try {
+            memberServiceClient.kickDevice(userId.value(), deviceId.value());
+            log.info("踢出设备成功: userId={}, deviceId={}", userId, deviceId);
+        } catch (Exception e) {
+            log.error("踢出设备失败: userId={}, deviceId={}", userId, deviceId, e);
+            throw new RuntimeException("踢出设备失败: " + e.getMessage(), e);
+        }
     }
 
     // ========== OAuth2绑定 ==========
@@ -383,7 +386,12 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
         try {
-            R<Void> response = memberServiceClient.bindOAuth2Account(userId.value(), provider, providerId);
+            BindSocialAccountRequest request = BindSocialAccountRequest.builder()
+                    .memberId(userId.value())
+                    .provider(provider)
+                    .providerMemberId(providerId)
+                    .build();
+            R<Void> response = memberServiceClient.bindOAuth2(userId.value(), request);
 
             if (response == null || !response.isSuccess()) {
                 String errorMsg = response != null ? response.getMsg() : "绑定OAuth2账号失败";
@@ -413,10 +421,10 @@ public class MemberModuleAdapter implements UserModulePort {
                 .email(memberDTO.getEmail())
                 .phone(memberDTO.getPhone())
                 .status(memberDTO.getStatus())
-                .emailVerifiedAt(convertToLocalDateTime(memberDTO.getGmtEmailVerifiedAt()))
-                .phoneVerifiedAt(convertToLocalDateTime(memberDTO.getGmtPhoneVerifiedAt()))
-                .lastLoginAt(null) // MemberDTO中没有此字段，需member-service扩展
-                .lastLoginIp(null) // MemberDTO中没有此字段，需member-service扩展
+                .emailVerifiedAt(null) // MemberDTO暂不包含验证时间
+                .phoneVerifiedAt(null) // MemberDTO暂不包含验证时间
+                .lastLoginAt(convertToLocalDateTime(memberDTO.getGmtLastLoginAt()))
+                .lastLoginIp(null)
                 .build();
     }
 

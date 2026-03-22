@@ -104,7 +104,7 @@ CREATE TABLE `member_device`
   COLLATE = utf8mb4_unicode_ci COMMENT ='用户设备信息表';
 
 -- 第三方平台连接表
-CREATE TABLE `member_social_connections`
+CREATE TABLE `member_social_connection`
 (
     `id`                   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `gmt_created_at`       TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

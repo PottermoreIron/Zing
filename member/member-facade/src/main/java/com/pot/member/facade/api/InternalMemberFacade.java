@@ -1,4 +1,4 @@
-package com.pot.auth.infrastructure.client;
+package com.pot.member.facade.api;
 
 import com.pot.member.facade.dto.DeviceDTO;
 import com.pot.member.facade.dto.MemberDTO;
@@ -15,17 +15,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Member服务的Feign Client（防腐层设计）
+ * 会员服务内部 RPC 接口（DDD 统一入口）
  *
  * <p>
- * 调用 member-service 的 {@code /internal/member} 内部 API。
- * 只定义 auth-service 实际需要的方法。
+ * <b>设计原则</b>：
+ * <ul>
+ * <li>所有服务间调用统一走 {@code /internal/member} 路径</li>
+ * <li>接口方法全部对应 {@code UserModulePort}，保持契约完整</li>
+ * <li>只暴露 auth-service / admin-service 等外部系统实际需要的能力</li>
+ * <li>DTO 字段最小化暴露，不含敏感信息（如密码哈希）</li>
+ * </ul>
  *
- * @author pot
- * @since 2026-03-22
+ * @author Pot
+ * @since 2026-03-18
  */
 @FeignClient(name = "member-service", path = "/internal/member")
-public interface MemberServiceClient {
+public interface InternalMemberFacade {
 
         // ========== 用户查询 ==========
 
@@ -116,7 +121,7 @@ public interface MemberServiceClient {
         R<Void> kickDevice(@PathVariable("memberId") Long memberId,
                         @PathVariable("deviceId") Long deviceId);
 
-        // ========== OAuth2 ==========
+        // ========== OAuth2 / 社交账号绑定 ==========
 
         @PostMapping("/{memberId}/oauth2")
         R<Void> bindOAuth2(@PathVariable("memberId") Long memberId,
