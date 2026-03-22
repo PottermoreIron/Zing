@@ -1,4 +1,4 @@
-package com.pot.member.service.utils;
+package com.pot.member.service.infrastructure.util;
 
 import com.pot.zing.framework.starter.code.generator.service.CodeGenerationService;
 import lombok.RequiredArgsConstructor;

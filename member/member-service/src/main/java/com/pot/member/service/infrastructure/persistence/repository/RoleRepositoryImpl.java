@@ -5,10 +5,10 @@ import com.pot.member.service.domain.model.role.RoleAggregate;
 import com.pot.member.service.domain.model.role.RoleId;
 import com.pot.member.service.domain.model.role.RoleName;
 import com.pot.member.service.domain.repository.RoleRepository;
-import com.pot.member.service.entity.Role;
-import com.pot.member.service.entity.RolePermission;
-import com.pot.member.service.mapper.RoleMapper;
-import com.pot.member.service.mapper.RolePermissionMapper;
+import com.pot.member.service.infrastructure.persistence.entity.Role;
+import com.pot.member.service.infrastructure.persistence.entity.RolePermission;
+import com.pot.member.service.infrastructure.persistence.mapper.RoleMapper;
+import com.pot.member.service.infrastructure.persistence.mapper.RolePermissionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -31,7 +31,7 @@ public class RoleRepositoryImpl implements RoleRepository {
 
     private final RoleMapper roleMapper;
     private final RolePermissionMapper rolePermissionMapper;
-    private final com.pot.member.service.mapper.MemberRoleMapper memberRoleMapper;
+    private final com.pot.member.service.infrastructure.persistence.mapper.MemberRoleMapper memberRoleMapper;
 
     @Override
     public RoleAggregate save(RoleAggregate aggregate) {
@@ -77,16 +77,16 @@ public class RoleRepositoryImpl implements RoleRepository {
     @Override
     public List<RoleAggregate> findByMemberId(Long memberId) {
         // 通过member_role关联表查询
-        LambdaQueryWrapper<com.pot.member.service.entity.MemberRole> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(com.pot.member.service.entity.MemberRole::getMemberId, memberId);
-        List<com.pot.member.service.entity.MemberRole> memberRoles = memberRoleMapper.selectList(wrapper);
+        LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.MemberRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(com.pot.member.service.infrastructure.persistence.entity.MemberRole::getMemberId, memberId);
+        List<com.pot.member.service.infrastructure.persistence.entity.MemberRole> memberRoles = memberRoleMapper.selectList(wrapper);
 
         if (memberRoles.isEmpty()) {
             return List.of();
         }
 
         Set<Long> roleIds = memberRoles.stream()
-                .map(com.pot.member.service.entity.MemberRole::getRoleId)
+                .map(com.pot.member.service.infrastructure.persistence.entity.MemberRole::getRoleId)
                 .collect(Collectors.toSet());
 
         return findByIds(roleIds);

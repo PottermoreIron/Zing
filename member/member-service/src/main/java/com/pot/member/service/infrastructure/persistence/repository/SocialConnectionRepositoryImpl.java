@@ -3,7 +3,7 @@ package com.pot.member.service.infrastructure.persistence.repository;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.pot.member.service.domain.model.social.SocialConnection;
 import com.pot.member.service.domain.repository.SocialConnectionRepository;
-import com.pot.member.service.mapper.SocialConnectionsMapper;
+import com.pot.member.service.infrastructure.persistence.mapper.SocialConnectionsMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -29,7 +29,7 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
 
     @Override
     public SocialConnection save(SocialConnection domain) {
-        com.pot.member.service.entity.SocialConnection entity = toEntity(domain);
+        com.pot.member.service.infrastructure.persistence.entity.SocialConnection entity = toEntity(domain);
         if (domain.getId() == null) {
             mapper.insert(entity);
         } else {
@@ -40,10 +40,10 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
 
     @Override
     public Optional<SocialConnection> findActiveByMemberIdAndProvider(Long memberId, String provider) {
-        LambdaQueryWrapper<com.pot.member.service.entity.SocialConnection> q = new LambdaQueryWrapper<>();
-        q.eq(com.pot.member.service.entity.SocialConnection::getMemberId, memberId)
-                .eq(com.pot.member.service.entity.SocialConnection::getProvider, provider.toLowerCase())
-                .isNull(com.pot.member.service.entity.SocialConnection::getGmtDeletedAt)
+        LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.SocialConnection> q = new LambdaQueryWrapper<>();
+        q.eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getMemberId, memberId)
+                .eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getProvider, provider.toLowerCase())
+                .isNull(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getGmtDeletedAt)
                 .last("LIMIT 1");
         var entity = mapper.selectOne(q);
         return Optional.ofNullable(entity).map(this::toDomain);
@@ -51,10 +51,10 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
 
     @Override
     public Optional<SocialConnection> findActiveByProviderAndProviderId(String provider, String providerMemberId) {
-        LambdaQueryWrapper<com.pot.member.service.entity.SocialConnection> q = new LambdaQueryWrapper<>();
-        q.eq(com.pot.member.service.entity.SocialConnection::getProvider, provider.toLowerCase())
-                .eq(com.pot.member.service.entity.SocialConnection::getProviderMemberId, providerMemberId)
-                .isNull(com.pot.member.service.entity.SocialConnection::getGmtDeletedAt)
+        LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.SocialConnection> q = new LambdaQueryWrapper<>();
+        q.eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getProvider, provider.toLowerCase())
+                .eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getProviderMemberId, providerMemberId)
+                .isNull(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getGmtDeletedAt)
                 .last("LIMIT 1");
         var entity = mapper.selectOne(q);
         return Optional.ofNullable(entity).map(this::toDomain);
@@ -63,10 +63,10 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
     @Override
     public Optional<SocialConnection> findActiveByMemberIdAndWeChatOpenId(String weChatOpenId) {
         // WeChat is stored as provider = "wechat"
-        LambdaQueryWrapper<com.pot.member.service.entity.SocialConnection> q = new LambdaQueryWrapper<>();
-        q.eq(com.pot.member.service.entity.SocialConnection::getProvider, "wechat")
-                .eq(com.pot.member.service.entity.SocialConnection::getProviderMemberId, weChatOpenId)
-                .isNull(com.pot.member.service.entity.SocialConnection::getGmtDeletedAt)
+        LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.SocialConnection> q = new LambdaQueryWrapper<>();
+        q.eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getProvider, "wechat")
+                .eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getProviderMemberId, weChatOpenId)
+                .isNull(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getGmtDeletedAt)
                 .last("LIMIT 1");
         var entity = mapper.selectOne(q);
         return Optional.ofNullable(entity).map(this::toDomain);
@@ -74,23 +74,23 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
 
     @Override
     public List<SocialConnection> findActiveByMemberId(Long memberId) {
-        LambdaQueryWrapper<com.pot.member.service.entity.SocialConnection> q = new LambdaQueryWrapper<>();
-        q.eq(com.pot.member.service.entity.SocialConnection::getMemberId, memberId)
-                .isNull(com.pot.member.service.entity.SocialConnection::getGmtDeletedAt)
-                .orderByDesc(com.pot.member.service.entity.SocialConnection::getGmtCreatedAt);
+        LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.SocialConnection> q = new LambdaQueryWrapper<>();
+        q.eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getMemberId, memberId)
+                .isNull(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getGmtDeletedAt)
+                .orderByDesc(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getGmtCreatedAt);
         return mapper.selectList(q).stream().map(this::toDomain).collect(Collectors.toList());
     }
 
     @Override
     public long countActiveByMemberId(Long memberId) {
-        LambdaQueryWrapper<com.pot.member.service.entity.SocialConnection> q = new LambdaQueryWrapper<>();
-        q.eq(com.pot.member.service.entity.SocialConnection::getMemberId, memberId)
-                .isNull(com.pot.member.service.entity.SocialConnection::getGmtDeletedAt)
-                .eq(com.pot.member.service.entity.SocialConnection::getIsActive, 1);
+        LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.SocialConnection> q = new LambdaQueryWrapper<>();
+        q.eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getMemberId, memberId)
+                .isNull(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getGmtDeletedAt)
+                .eq(com.pot.member.service.infrastructure.persistence.entity.SocialConnection::getIsActive, 1);
         return mapper.selectCount(q);
     }
 
-    private SocialConnection toDomain(com.pot.member.service.entity.SocialConnection e) {
+    private SocialConnection toDomain(com.pot.member.service.infrastructure.persistence.entity.SocialConnection e) {
         return SocialConnection.reconstitute(
                 e.getId(), e.getMemberId(), e.getProvider(),
                 e.getProviderMemberId(), e.getProviderUsername(),
@@ -105,13 +105,13 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
                         : null);
     }
 
-    private com.pot.member.service.entity.SocialConnection toEntity(SocialConnection d) {
-        var e = new com.pot.member.service.entity.SocialConnection();
+    private com.pot.member.service.infrastructure.persistence.entity.SocialConnection toEntity(SocialConnection d) {
+        var e = new com.pot.member.service.infrastructure.persistence.entity.SocialConnection();
         if (d.getId() != null)
             e.setId(d.getId());
         e.setMemberId(d.getMemberId());
         if (d.getProvider() != null) {
-            e.setProvider(com.pot.member.service.entity.SocialConnection.Provider.fromCode(d.getProvider()));
+            e.setProvider(com.pot.member.service.infrastructure.persistence.entity.SocialConnection.Provider.fromCode(d.getProvider()));
         }
         e.setProviderMemberId(d.getProviderMemberId());
         e.setProviderUsername(d.getProviderUsername());

@@ -1,4 +1,4 @@
-package com.pot.member.service.controller.internal;
+package com.pot.member.service.interfaces.rest.internal;
 
 import com.pot.member.facade.dto.DeviceDTO;
 import com.pot.member.facade.dto.MemberDTO;

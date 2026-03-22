@@ -1,7 +1,7 @@
-package com.pot.member.service.mapper;
+package com.pot.member.service.infrastructure.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.pot.member.service.entity.Device;
+import com.pot.member.service.infrastructure.persistence.entity.Device;
 
 /**
  * <p>

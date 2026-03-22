@@ -1,4 +1,4 @@
-package com.pot.member.service.controller;
+package com.pot.member.service.interfaces.rest;
 
 import com.pot.member.service.application.command.ChangePasswordCommand;
 import com.pot.member.service.application.command.UpdateMemberProfileCommand;

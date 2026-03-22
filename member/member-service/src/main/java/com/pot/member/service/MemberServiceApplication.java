@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.pot.member.service.mapper")
+@MapperScan("com.pot.member.service.infrastructure.persistence.mapper")
 public class MemberServiceApplication {
 
     public static void main(String[] args) {

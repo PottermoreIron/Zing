@@ -1,4 +1,4 @@
-package com.pot.member.service.config;
+package com.pot.member.service.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
