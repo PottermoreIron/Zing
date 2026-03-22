@@ -5,7 +5,7 @@ import com.pot.member.service.application.assembler.PermissionAssembler;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.dto.MemberDTO;
 import com.pot.member.service.domain.model.member.*;
-import com.pot.member.service.domain.model.social.SocialConnection;
+import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 import com.pot.member.service.domain.port.DomainEventPublisher;
 import com.pot.member.service.domain.repository.DeviceRepository;
 import com.pot.member.service.domain.repository.MemberRepository;
@@ -26,9 +26,11 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 /**
  * {@link MemberApplicationService} 单元测试（基于 Mockito 的用例编排验证）
@@ -61,7 +63,9 @@ class MemberApplicationServiceTest {
 
     // ========== 测试夹具 ==========
 
-    /** 构造一个已持久化的会员聚合根（含 memberId） */
+    /**
+     * 构造一个已持久化的会员聚合根（含 memberId）
+     */
     private MemberAggregate persistedMember(Long id) {
         return MemberAggregate.reconstitute(
                 MemberId.of(id),
@@ -271,14 +275,14 @@ class MemberApplicationServiceTest {
 
             service.bindOAuth2(1L, req);
 
-            then(socialConnectionRepository).should().save(any(SocialConnection.class));
+            then(socialConnectionRepository).should().save(any(SocialConnectionAggregate.class));
         }
 
         @Test
         @DisplayName("已有绑定：更新 token")
         void bindOAuth2_existingBinding_updatesTokens() {
             MemberAggregate member = persistedMember(1L);
-            SocialConnection existing = SocialConnection.create(
+            SocialConnectionAggregate existing = SocialConnectionAggregate.create(
                     1L, "github", "gh123", "ghuser", "gh@test.com",
                     "old_at", "old_rt", 1000L, "repo", null);
 

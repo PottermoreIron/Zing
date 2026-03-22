@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 分配角色命令
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

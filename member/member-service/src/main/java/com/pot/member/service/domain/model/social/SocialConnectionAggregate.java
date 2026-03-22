@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
  * @since 2026-03-18
  */
 @Getter
-public class SocialConnection {
+public class SocialConnectionAggregate {
 
     private Long id;
     private Long memberId;
@@ -33,23 +33,23 @@ public class SocialConnection {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
-    private SocialConnection() {
+    private SocialConnectionAggregate() {
     }
 
     /**
      * 创建新社交连接
      */
-    public static SocialConnection create(Long memberId,
-            String provider,
-            String providerMemberId,
-            String providerUsername,
-            String providerEmail,
-            String accessToken,
-            String refreshToken,
-            Long tokenExpiresAt,
-            String scope,
-            String extendJson) {
-        SocialConnection conn = new SocialConnection();
+    public static SocialConnectionAggregate create(Long memberId,
+                                                   String provider,
+                                                   String providerMemberId,
+                                                   String providerUsername,
+                                                   String providerEmail,
+                                                   String accessToken,
+                                                   String refreshToken,
+                                                   Long tokenExpiresAt,
+                                                   String scope,
+                                                   String extendJson) {
+        SocialConnectionAggregate conn = new SocialConnectionAggregate();
         conn.memberId = memberId;
         conn.provider = provider.toLowerCase();
         conn.providerMemberId = providerMemberId;
@@ -69,14 +69,14 @@ public class SocialConnection {
     /**
      * 重建（从数据库）
      */
-    public static SocialConnection reconstitute(Long id, Long memberId, String provider,
-            String providerMemberId, String providerUsername,
-            String providerEmail, String accessToken,
-            String refreshToken, Long tokenExpiresAt,
-            String scope, String extendJson,
-            boolean active, LocalDateTime createdAt,
-            LocalDateTime updatedAt, LocalDateTime deletedAt) {
-        SocialConnection conn = new SocialConnection();
+    public static SocialConnectionAggregate reconstitute(Long id, Long memberId, String provider,
+                                                         String providerMemberId, String providerUsername,
+                                                         String providerEmail, String accessToken,
+                                                         String refreshToken, Long tokenExpiresAt,
+                                                         String scope, String extendJson,
+                                                         boolean active, LocalDateTime createdAt,
+                                                         LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        SocialConnectionAggregate conn = new SocialConnectionAggregate();
         conn.id = id;
         conn.memberId = memberId;
         conn.provider = provider;

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 注册会员命令
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

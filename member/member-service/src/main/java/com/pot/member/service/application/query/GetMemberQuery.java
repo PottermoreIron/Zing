@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 获取会员查询
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

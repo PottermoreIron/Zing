@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * 权限领域服务
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * 权限仓储实现
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

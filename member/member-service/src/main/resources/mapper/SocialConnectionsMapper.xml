@@ -24,7 +24,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, provider, provider_member_id, provider_username,
+        id
+        , gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, provider, provider_member_id, provider_username,
         provider_email, access_token, refresh_token, gmt_token_expires_at, scope, is_active, gmt_last_sync_at,
         extend_json
     </sql>

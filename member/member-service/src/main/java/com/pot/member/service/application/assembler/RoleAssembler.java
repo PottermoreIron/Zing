@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * 角色装配器 - 负责聚合根与DTO之间的转换
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

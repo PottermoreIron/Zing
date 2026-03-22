@@ -33,7 +33,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, nickname, email, phone, password_hash,
+        id
+        , gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, nickname, email, phone, password_hash,
         first_name, last_name, gender, birth, avatar_url, country_code, region, city, timezone, locale, status,
         gmt_email_verified_at, gmt_phone_verified_at, gmt_last_login_at, last_login_ip, extend_json
     </sql>

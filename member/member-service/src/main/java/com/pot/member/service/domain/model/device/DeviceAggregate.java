@@ -37,10 +37,10 @@ public class DeviceAggregate {
      * 记录设备登录（新设备或更新已有设备）
      */
     public static DeviceAggregate create(Long memberId, String deviceToken,
-            String deviceType, String deviceName,
-            String osType, String osVersion,
-            String appVersion, String lastLoginIp,
-            String refreshToken) {
+                                         String deviceType, String deviceName,
+                                         String osType, String osVersion,
+                                         String appVersion, String lastLoginIp,
+                                         String refreshToken) {
         DeviceAggregate device = new DeviceAggregate();
         device.memberId = memberId;
         device.deviceToken = deviceToken;
@@ -58,11 +58,11 @@ public class DeviceAggregate {
     }
 
     public static DeviceAggregate reconstitute(Long id, Long memberId, String deviceToken,
-            String deviceType, String deviceName,
-            String osType, String osVersion,
-            String appVersion, String lastLoginIp,
-            LocalDateTime lastLoginAt, String refreshToken,
-            LocalDateTime createdAt, LocalDateTime updatedAt) {
+                                               String deviceType, String deviceName,
+                                               String osType, String osVersion,
+                                               String appVersion, String lastLoginIp,
+                                               LocalDateTime lastLoginAt, String refreshToken,
+                                               LocalDateTime createdAt, LocalDateTime updatedAt) {
         DeviceAggregate device = new DeviceAggregate();
         device.id = id;
         device.memberId = memberId;

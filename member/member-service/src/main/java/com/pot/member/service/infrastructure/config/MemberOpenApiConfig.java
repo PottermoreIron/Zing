@@ -36,11 +36,11 @@ public class MemberOpenApiConfig {
                         .title("Member Service API")
                         .description("""
                                 会员服务接口文档。
-
+                                
                                 **接口说明：**
                                 提供会员信息查询、资料更新、密码修改等功能。
                                 部分接口需要通过请求属性传递 memberId（在正式环境由网关注入）。
-
+                                
                                 **快速开始：**
                                 1. 直接访问各接口进行测试
                                 2. 需要 memberId 的接口，在测试时可通过直接调用方式传参

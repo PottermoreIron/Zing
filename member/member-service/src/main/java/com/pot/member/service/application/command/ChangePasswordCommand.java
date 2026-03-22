@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 修改密码命令
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

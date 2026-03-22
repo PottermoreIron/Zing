@@ -4,11 +4,7 @@ import com.pot.member.service.domain.event.MemberDomainEvent;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 会员聚合根
@@ -28,6 +24,10 @@ import java.util.Set;
 @Getter
 public class MemberAggregate {
 
+    /**
+     * 未发布的领域事件（事务提交后由基础设施发布）
+     */
+    private final List<MemberDomainEvent> domainEvents = new ArrayList<>();
     private MemberId memberId;
     private Nickname nickname;
     private Email email;
@@ -39,9 +39,6 @@ public class MemberAggregate {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLoginAt;
-
-    /** 未发布的领域事件（事务提交后由基础设施发布） */
-    private final List<MemberDomainEvent> domainEvents = new ArrayList<>();
 
     /**
      * 创建新会员（用于注册）
@@ -63,7 +60,7 @@ public class MemberAggregate {
      * 通过 OAuth2 创建新会员
      */
     public static MemberAggregate createFromOAuth2(Nickname nickname, Email email,
-            String avatarUrl) {
+                                                   String avatarUrl) {
         MemberAggregate member = new MemberAggregate();
         member.nickname = nickname;
         member.email = email;
@@ -216,7 +213,9 @@ public class MemberAggregate {
         this.domainEvents.add(event);
     }
 
-    /** 取走所有未发布事件（取出即清空） */
+    /**
+     * 取走所有未发布事件（取出即清空）
+     */
     public List<MemberDomainEvent> pullDomainEvents() {
         List<MemberDomainEvent> events = new ArrayList<>(this.domainEvents);
         this.domainEvents.clear();

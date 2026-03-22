@@ -19,7 +19,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, role_code, role_name, role_description, role_level,
+        id
+        , gmt_created_at, gmt_updated_at, gmt_deleted_at, role_code, role_name, role_description, role_level,
         is_system_role, is_active, extend_json
     </sql>
 

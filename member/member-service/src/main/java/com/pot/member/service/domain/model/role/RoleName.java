@@ -4,7 +4,7 @@ import lombok.Value;
 
 /**
  * 角色名称值对象
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

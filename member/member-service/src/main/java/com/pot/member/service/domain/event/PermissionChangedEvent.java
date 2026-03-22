@@ -17,27 +17,37 @@ import java.util.Set;
 @Getter
 public class PermissionChangedEvent extends MemberDomainEvent {
 
-    /** 受影响的会员ID集合 */
+    /**
+     * 受影响的会员ID集合
+     */
     private final Set<Long> affectedMemberIds;
 
-    /** 变更类型 */
+    /**
+     * 变更类型
+     */
     private final ChangeType changeType;
 
-    /** 变更的角色ID（角色变更时填充） */
+    /**
+     * 变更的角色ID（角色变更时填充）
+     */
     private final Long roleId;
 
-    /** 变更的权限ID（权限变更时填充） */
+    /**
+     * 变更的权限ID（权限变更时填充）
+     */
     private final Long permissionId;
 
-    /** 变更原因/操作人 */
+    /**
+     * 变更原因/操作人
+     */
     private final String reason;
 
     public PermissionChangedEvent(String aggregateId,
-            Set<Long> affectedMemberIds,
-            ChangeType changeType,
-            Long roleId,
-            Long permissionId,
-            String reason) {
+                                  Set<Long> affectedMemberIds,
+                                  ChangeType changeType,
+                                  Long roleId,
+                                  Long permissionId,
+                                  String reason) {
         super(aggregateId);
         this.affectedMemberIds = affectedMemberIds;
         this.changeType = changeType;

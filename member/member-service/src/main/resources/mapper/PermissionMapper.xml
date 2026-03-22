@@ -22,7 +22,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, permission_code, permission_name, permission_description,
+        id
+        , gmt_created_at, gmt_updated_at, gmt_deleted_at, permission_code, permission_name, permission_description,
         resource_type, action_type, parent_id, permission_level, is_system_permission, is_active, extend_json
     </sql>
 

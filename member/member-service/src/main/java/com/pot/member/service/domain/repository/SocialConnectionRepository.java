@@ -1,6 +1,6 @@
 package com.pot.member.service.domain.repository;
 
-import com.pot.member.service.domain.model.social.SocialConnection;
+import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,15 +13,15 @@ import java.util.Optional;
  */
 public interface SocialConnectionRepository {
 
-    SocialConnection save(SocialConnection connection);
+    SocialConnectionAggregate save(SocialConnectionAggregate connection);
 
-    Optional<SocialConnection> findActiveByMemberIdAndProvider(Long memberId, String provider);
+    Optional<SocialConnectionAggregate> findActiveByMemberIdAndProvider(Long memberId, String provider);
 
-    Optional<SocialConnection> findActiveByProviderAndProviderId(String provider, String providerMemberId);
+    Optional<SocialConnectionAggregate> findActiveByProviderAndProviderId(String provider, String providerMemberId);
 
-    Optional<SocialConnection> findActiveByMemberIdAndWeChatOpenId(String weChatOpenId);
+    Optional<SocialConnectionAggregate> findActiveByMemberIdAndWeChatOpenId(String weChatOpenId);
 
-    List<SocialConnection> findActiveByMemberId(Long memberId);
+    List<SocialConnectionAggregate> findActiveByMemberId(Long memberId);
 
     long countActiveByMemberId(Long memberId);
 }

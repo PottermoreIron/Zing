@@ -21,7 +21,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, device_id, device_type, platform, browser,
+        id
+        , gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, device_id, device_type, platform, browser,
         app_version, push_token, is_active, gmt_last_used_at
     </sql>
 

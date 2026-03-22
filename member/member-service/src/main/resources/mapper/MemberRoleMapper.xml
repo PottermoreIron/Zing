@@ -18,7 +18,8 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, role_id, gmt_expires_at, is_active,
+        id
+        , gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, role_id, gmt_expires_at, is_active,
         assignment_note, extend_json
     </sql>
 

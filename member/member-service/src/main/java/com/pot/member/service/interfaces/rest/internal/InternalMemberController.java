@@ -114,7 +114,7 @@ public class InternalMemberController {
 
     @PostMapping("/auth/verify-password")
     public R<MemberDTO> authenticateWithPassword(@RequestParam String identifier,
-            @RequestParam String password) {
+                                                 @RequestParam String password) {
         var internalDTO = memberApplicationService.authenticateWithPassword(identifier, password);
         return R.success(toFacadeDTO(internalDTO, null));
     }
@@ -123,7 +123,7 @@ public class InternalMemberController {
 
     @PutMapping("/{memberId}/password")
     public R<Void> updatePassword(@PathVariable Long memberId,
-            @RequestParam String newPasswordHash) {
+                                  @RequestParam String newPasswordHash) {
         memberApplicationService.updatePasswordHash(memberId, newPasswordHash);
         return R.success(null);
     }
@@ -144,9 +144,9 @@ public class InternalMemberController {
 
     @PostMapping("/{memberId}/login-attempt")
     public R<Void> recordLoginAttempt(@PathVariable Long memberId,
-            @RequestParam boolean success,
-            @RequestParam String ip,
-            @RequestParam Long timestamp) {
+                                      @RequestParam boolean success,
+                                      @RequestParam String ip,
+                                      @RequestParam Long timestamp) {
         memberApplicationService.recordLoginAttempt(memberId, success, ip, timestamp);
         return R.success(null);
     }
@@ -177,16 +177,16 @@ public class InternalMemberController {
 
     @PostMapping("/{memberId}/devices")
     public R<Void> recordDeviceLogin(@PathVariable Long memberId,
-            @RequestBody DeviceDTO device,
-            @RequestParam String ip,
-            @RequestParam String refreshToken) {
+                                     @RequestBody DeviceDTO device,
+                                     @RequestParam String ip,
+                                     @RequestParam String refreshToken) {
         memberApplicationService.recordDeviceLogin(memberId, device, ip, refreshToken);
         return R.success(null);
     }
 
     @DeleteMapping("/{memberId}/devices/{deviceId}")
     public R<Void> kickDevice(@PathVariable Long memberId,
-            @PathVariable Long deviceId) {
+                              @PathVariable Long deviceId) {
         memberApplicationService.kickDevice(memberId, deviceId);
         return R.success(null);
     }
@@ -195,7 +195,7 @@ public class InternalMemberController {
 
     @PostMapping("/{memberId}/oauth2")
     public R<Void> bindOAuth2(@PathVariable Long memberId,
-            @RequestBody @Valid BindSocialAccountRequest request) {
+                              @RequestBody @Valid BindSocialAccountRequest request) {
         memberApplicationService.bindOAuth2(memberId, request);
         return R.success(null);
     }

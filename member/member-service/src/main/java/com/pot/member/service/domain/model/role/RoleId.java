@@ -2,7 +2,7 @@ package com.pot.member.service.domain.model.role;
 
 /**
  * 角色ID值对象
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

@@ -4,7 +4,7 @@ import lombok.Value;
 
 /**
  * 邮箱值对象
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */
@@ -22,12 +22,12 @@ public class Email {
         this.value = value.trim().toLowerCase();
     }
 
+    public static Email of(String value) {
+        return new Email(value);
+    }
+
     private boolean isValidEmail(String email) {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         return email.matches(emailRegex);
-    }
-
-    public static Email of(String value) {
-        return new Email(value);
     }
 }

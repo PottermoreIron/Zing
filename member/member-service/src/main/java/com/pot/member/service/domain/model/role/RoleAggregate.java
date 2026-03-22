@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * 角色聚合根
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */

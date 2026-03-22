@@ -1,5 +1,9 @@
 package com.pot.member.service.application.service;
 
+import com.pot.member.facade.dto.DeviceDTO;
+import com.pot.member.facade.dto.MemberProfileDTO;
+import com.pot.member.facade.dto.RoleDTO;
+import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import com.pot.member.service.application.assembler.MemberAssembler;
 import com.pot.member.service.application.assembler.PermissionAssembler;
 import com.pot.member.service.application.command.ChangePasswordCommand;
@@ -13,8 +17,7 @@ import com.pot.member.service.domain.model.device.DeviceAggregate;
 import com.pot.member.service.domain.model.member.*;
 import com.pot.member.service.domain.model.permission.PermissionAggregate;
 import com.pot.member.service.domain.model.role.RoleAggregate;
-import com.pot.member.service.domain.model.role.RoleId;
-import com.pot.member.service.domain.model.social.SocialConnection;
+import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 import com.pot.member.service.domain.port.DomainEventPublisher;
 import com.pot.member.service.domain.repository.DeviceRepository;
 import com.pot.member.service.domain.repository.MemberRepository;
@@ -22,16 +25,11 @@ import com.pot.member.service.domain.repository.RoleRepository;
 import com.pot.member.service.domain.repository.SocialConnectionRepository;
 import com.pot.member.service.domain.service.MemberDomainService;
 import com.pot.member.service.domain.service.PermissionDomainService;
-import com.pot.member.facade.dto.DeviceDTO;
-import com.pot.member.facade.dto.MemberProfileDTO;
-import com.pot.member.facade.dto.RoleDTO;
-import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -102,8 +100,8 @@ public class MemberApplicationService {
      */
     @Transactional
     public MemberDTO createFromOAuth2(String provider, String openId,
-            String email, String nickname, String avatarUrl,
-            String accessToken, String refreshToken, Long tokenExpiresAt) {
+                                      String email, String nickname, String avatarUrl,
+                                      String accessToken, String refreshToken, Long tokenExpiresAt) {
         log.info("OAuth2 创建会员: provider={}, openId={}", provider, openId);
 
         Email emailVo = email != null ? Email.of(email) : null;
@@ -112,15 +110,15 @@ public class MemberApplicationService {
         String nicknameStr = (nickname != null && !nickname.isBlank())
                 ? nickname
                 : (emailVo != null
-                        ? emailVo.getValue().split("@")[0] + "_" + System.currentTimeMillis()
-                        : provider + "_" + openId.substring(0, Math.min(8, openId.length())));
+                ? emailVo.getValue().split("@")[0] + "_" + System.currentTimeMillis()
+                : provider + "_" + openId.substring(0, Math.min(8, openId.length())));
         Nickname nicknameVo = Nickname.of(nicknameStr);
 
         MemberAggregate member = MemberAggregate.createFromOAuth2(nicknameVo, emailVo, avatarUrl);
         member = memberRepository.save(member);
 
         // 绑定社交账号
-        SocialConnection social = SocialConnection.create(
+        SocialConnectionAggregate social = SocialConnectionAggregate.create(
                 member.getMemberId().value(), provider, openId,
                 nicknameStr, email, accessToken, refreshToken, tokenExpiresAt, null, null);
         socialConnectionRepository.save(social);
@@ -371,15 +369,15 @@ public class MemberApplicationService {
     public void bindOAuth2(Long memberId, BindSocialAccountRequest request) {
         requireMember(memberId);
 
-        Optional<SocialConnection> existing = socialConnectionRepository
+        Optional<SocialConnectionAggregate> existing = socialConnectionRepository
                 .findActiveByProviderAndProviderId(request.getProvider(), request.getProviderMemberId());
 
         if (existing.isPresent()) {
-            SocialConnection sc = existing.get();
+            SocialConnectionAggregate sc = existing.get();
             sc.updateTokens(request.getAccessToken(), request.getRefreshToken(), request.getTokenExpiresAt());
             socialConnectionRepository.save(sc);
         } else {
-            SocialConnection sc = SocialConnection.create(
+            SocialConnectionAggregate sc = SocialConnectionAggregate.create(
                     memberId, request.getProvider(), request.getProviderMemberId(),
                     request.getProviderUsername(), request.getProviderEmail(),
                     request.getAccessToken(), request.getRefreshToken(),

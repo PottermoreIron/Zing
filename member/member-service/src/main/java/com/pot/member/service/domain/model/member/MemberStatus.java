@@ -2,7 +2,7 @@ package com.pot.member.service.domain.model.member;
 
 /**
  * 会员状态枚举
- * 
+ *
  * @author Pot
  * @since 2026-01-06
  */
@@ -30,14 +30,6 @@ public enum MemberStatus {
         this.description = description;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     public static MemberStatus fromCode(int code) {
         for (MemberStatus status : values()) {
             if (status.code == code) {
@@ -45,6 +37,14 @@ public enum MemberStatus {
             }
         }
         throw new IllegalArgumentException("未知的会员状态代码: " + code);
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public boolean isActive() {
