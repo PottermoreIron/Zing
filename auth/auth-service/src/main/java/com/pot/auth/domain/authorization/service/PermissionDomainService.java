@@ -7,10 +7,7 @@ import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
 import com.pot.auth.infrastructure.constant.CacheKeyConstants;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -36,14 +33,15 @@ import java.util.Set;
  * @since 2025-12-14
  */
 @Slf4j
-@Service
-@RequiredArgsConstructor
 public class PermissionDomainService {
 
     private final CachePort cachePort;
+    private final long permissionCacheTtl;
 
-    @Value("${auth.permission.cache.ttl:3600}")
-    private long permissionCacheTtl; // 权限缓存TTL（默认1小时）
+    public PermissionDomainService(CachePort cachePort, long permissionCacheTtl) {
+        this.cachePort = cachePort;
+        this.permissionCacheTtl = permissionCacheTtl;
+    }
 
     /**
      * 缓存权限并生成元数据

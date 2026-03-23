@@ -2,15 +2,16 @@ package com.pot.auth.application;
 
 import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.service.OneStopAuthenticationService;
+import com.pot.auth.application.strategy.OneStopAuthStrategy;
+import com.pot.auth.application.strategy.factory.OneStopAuthStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.context.OneStopAuthContext;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;
-import com.pot.auth.domain.strategy.OneStopAuthStrategy;
-import com.pot.auth.domain.strategy.factory.OneStopAuthStrategyFactory;
+import com.pot.auth.domain.shared.valueobject.UserDomain;
+import com.pot.auth.domain.shared.valueobject.UserId;
 import com.pot.auth.interfaces.dto.onestop.UsernamePasswordAuthRequest;
-import com.pot.auth.support.TestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,15 @@ import static org.mockito.Mockito.*;
 @DisplayName("OneStopAuthenticationService 单元测试")
 class OneStopAuthenticationServiceTest {
 
+    private static final UserId USER_ID = UserId.of(10001L);
+    private static final UserDomain USER_DOMAIN = UserDomain.MEMBER;
+    private static final String USERNAME = "test_user";
+    private static final String PASSWORD = "Password123!";
+    private static final String EMAIL = "test@example.com";
+    private static final String PHONE = "+8613800138000";
+    private static final String ACCESS_TOKEN = "fake.access.token";
+    private static final String REFRESH_TOKEN = "fake.refresh.token";
+
     @Mock
     private OneStopAuthStrategyFactory strategyFactory;
 
@@ -55,11 +65,11 @@ class OneStopAuthenticationServiceTest {
         // given
         UsernamePasswordAuthRequest request = new UsernamePasswordAuthRequest(
                 AuthType.USERNAME_PASSWORD,
-                TestFixtures.USERNAME,
-                TestFixtures.PASSWORD,
-                TestFixtures.USER_DOMAIN);
+                USERNAME,
+                PASSWORD,
+                USER_DOMAIN);
 
-        AuthenticationResult authResult = TestFixtures.authResult();
+        AuthenticationResult authResult = authResult();
         OneStopAuthStrategy<UsernamePasswordAuthRequest> mockStrategy = mock(OneStopAuthStrategy.class);
         doReturn(mockStrategy).when(strategyFactory).getStrategy(AuthType.USERNAME_PASSWORD);
         when(mockStrategy.execute(any(OneStopAuthContext.class))).thenReturn(authResult);
@@ -69,11 +79,11 @@ class OneStopAuthenticationServiceTest {
 
         // then: 响应字段正确映射
         assertThat(response).isNotNull();
-        assertThat(response.userId()).isEqualTo(TestFixtures.USER_ID);
-        assertThat(response.userDomain()).isEqualTo(TestFixtures.USER_DOMAIN);
-        assertThat(response.username()).isEqualTo(TestFixtures.USERNAME);
-        assertThat(response.accessToken()).isEqualTo(TestFixtures.FAKE_ACCESS_TOKEN);
-        assertThat(response.refreshToken()).isEqualTo(TestFixtures.FAKE_REFRESH_TOKEN);
+        assertThat(response.userId()).isEqualTo(USER_ID);
+        assertThat(response.userDomain()).isEqualTo(USER_DOMAIN);
+        assertThat(response.username()).isEqualTo(USERNAME);
+        assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
+        assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
 
         // then: 正确的AuthType传入Factory
         verify(strategyFactory).getStrategy(AuthType.USERNAME_PASSWORD);
@@ -93,13 +103,13 @@ class OneStopAuthenticationServiceTest {
         // given
         UsernamePasswordAuthRequest request = new UsernamePasswordAuthRequest(
                 AuthType.USERNAME_PASSWORD,
-                TestFixtures.USERNAME,
-                TestFixtures.PASSWORD,
-                TestFixtures.USER_DOMAIN);
+                USERNAME,
+                PASSWORD,
+                USER_DOMAIN);
 
         OneStopAuthStrategy<UsernamePasswordAuthRequest> mockStrategy = mock(OneStopAuthStrategy.class);
         doReturn(mockStrategy).when(strategyFactory).getStrategy(any());
-        when(mockStrategy.execute(any())).thenReturn(TestFixtures.authResult());
+        when(mockStrategy.execute(any())).thenReturn(authResult());
 
         // when & then
         OneStopAuthResponse response = service.authenticate(request, "127.0.0.1", null);
@@ -114,9 +124,9 @@ class OneStopAuthenticationServiceTest {
         // given
         UsernamePasswordAuthRequest request = new UsernamePasswordAuthRequest(
                 AuthType.USERNAME_PASSWORD,
-                TestFixtures.USERNAME,
-                TestFixtures.PASSWORD,
-                TestFixtures.USER_DOMAIN);
+                USERNAME,
+                PASSWORD,
+                USER_DOMAIN);
 
         OneStopAuthStrategy<UsernamePasswordAuthRequest> mockStrategy = mock(OneStopAuthStrategy.class);
         doReturn(mockStrategy).when(strategyFactory).getStrategy(any());
@@ -125,5 +135,20 @@ class OneStopAuthenticationServiceTest {
         // when & then
         assertThatThrownBy(() -> service.authenticate(request, "127.0.0.1", "UA"))
                 .isInstanceOf(DomainException.class);
+    }
+
+    private AuthenticationResult authResult() {
+        long now = System.currentTimeMillis() / 1000;
+        return AuthenticationResult.builder()
+                .userId(USER_ID)
+                .userDomain(USER_DOMAIN)
+                .username(USERNAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .accessToken(ACCESS_TOKEN)
+                .refreshToken(REFRESH_TOKEN)
+                .accessTokenExpiresAt(now + 3600)
+                .refreshTokenExpiresAt(now + 2592000)
+                .build();
     }
 }

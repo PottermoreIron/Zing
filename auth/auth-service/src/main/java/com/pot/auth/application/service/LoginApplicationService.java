@@ -1,13 +1,13 @@
 package com.pot.auth.application.service;
 
 import com.pot.auth.application.dto.LoginResponse;
+import com.pot.auth.application.strategy.LoginStrategy;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
+import com.pot.auth.application.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.domain.context.AuthenticationContext;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.domain.strategy.LoginStrategy;
-import com.pot.auth.domain.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -8,7 +8,6 @@ import com.pot.member.service.domain.port.PasswordEncoder;
 import com.pot.member.service.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * 会员领域服务
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
  * @since 2026-01-06
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class MemberDomainService {
 

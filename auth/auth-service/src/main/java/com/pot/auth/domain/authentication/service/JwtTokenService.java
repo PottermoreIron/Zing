@@ -8,17 +8,13 @@ import com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata;
 import com.pot.auth.domain.authorization.valueobject.PermissionVersion;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.TokenManagementPort;
-import com.pot.auth.domain.port.UserModulePort;
-import com.pot.auth.domain.port.dto.UserDTO;
+import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.TokenId;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Set;
@@ -43,23 +39,32 @@ import java.util.Set;
  * @since 2025-11-10
  */
 @Slf4j
-@Service
-@RequiredArgsConstructor
 public class JwtTokenService {
 
     private final TokenManagementPort tokenManagementPort;
     private final CachePort cachePort;
-    private final UserModulePort userModulePort;
+    private final UserModulePortFactory userModulePortFactory;
     private final PermissionDomainService permissionDomainService;
+    private final long refreshTokenTtl;
+    private final long refreshTokenSlidingWindow;
+    private final boolean permissionVersionEnabled;
 
-    @Value("${auth.token.jwt.refresh-token-ttl:2592000}")
-    private long refreshTokenTtl; // 30天
-
-    @Value("${auth.token.jwt.refresh-token-sliding-window:604800}")
-    private long refreshTokenSlidingWindow; // 7天
-
-    @Value("${auth.permission.cache.version-enabled:true}")
-    private boolean permissionVersionEnabled; // 是否启用权限版本号机制
+    public JwtTokenService(
+            TokenManagementPort tokenManagementPort,
+            CachePort cachePort,
+            UserModulePortFactory userModulePortFactory,
+            PermissionDomainService permissionDomainService,
+            long refreshTokenTtl,
+            long refreshTokenSlidingWindow,
+            boolean permissionVersionEnabled) {
+        this.tokenManagementPort = tokenManagementPort;
+        this.cachePort = cachePort;
+        this.userModulePortFactory = userModulePortFactory;
+        this.permissionDomainService = permissionDomainService;
+        this.refreshTokenTtl = refreshTokenTtl;
+        this.refreshTokenSlidingWindow = refreshTokenSlidingWindow;
+        this.permissionVersionEnabled = permissionVersionEnabled;
+    }
 
     /**
      * 生成Token对（AccessToken + RefreshToken）
@@ -219,8 +224,10 @@ public class JwtTokenService {
             throw new TokenInvalidException("RefreshToken已失效，请重新登录");
         }
 
-        // 4. 获取用户权限
-        Set<String> authorities = userModulePort.getPermissions(oldRefreshToken.userId());
+        // 4. 获取用户权限（根据token携带的userDomain选择正确的适配器）
+        Set<String> authorities = userModulePortFactory
+                .getPort(oldRefreshToken.userDomain())
+                .getPermissions(oldRefreshToken.userId());
 
         // 5. 缓存权限（获取元数据）
         PermissionCacheMetadata metadata = permissionDomainService.cachePermissionsWithMetadata(
@@ -327,18 +334,17 @@ public class JwtTokenService {
      */
     private void storeRefreshToken(RefreshToken refreshToken) {
         String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
-        long ttl = refreshToken.getRemainingSeconds();
+        long ttl = Math.min(refreshToken.getRemainingSeconds(), refreshTokenTtl);
         cachePort.set(cacheKey, refreshToken.rawToken(), Duration.ofSeconds(ttl));
     }
 
     /**
-     * 从缓存获取用户名（简化实现）
+     * 从用户模块获取用户名
      */
     private String getUsernameFromCache(RefreshToken refreshToken) {
-        // TODO: 从缓存或用户模块获取用户名
-        // 临时方案：从userId获取用户信息
-        return userModulePort.findById(refreshToken.userId())
-                .map(UserDTO::username)
+        return userModulePortFactory.getPort(refreshToken.userDomain())
+                .findById(refreshToken.userId())
+                .map(user -> user.username())
                 .orElse("unknown");
     }
 

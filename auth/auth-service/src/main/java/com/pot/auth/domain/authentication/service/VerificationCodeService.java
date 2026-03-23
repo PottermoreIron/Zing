@@ -7,9 +7,7 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Phone;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +28,6 @@ import java.util.concurrent.TimeUnit;
  * @since 2025-11-10
  */
 @Slf4j
-@Service
-@RequiredArgsConstructor
 public class VerificationCodeService {
 
     private static final String CODE_KEY_PREFIX = "auth:code:";
@@ -40,6 +36,15 @@ public class VerificationCodeService {
     private final CachePort cachePort;
     private final NotificationPort notificationPort;
     private final DistributedLockPort distributedLockPort;
+
+    public VerificationCodeService(
+            CachePort cachePort,
+            NotificationPort notificationPort,
+            DistributedLockPort distributedLockPort) {
+        this.cachePort = cachePort;
+        this.notificationPort = notificationPort;
+        this.distributedLockPort = distributedLockPort;
+    }
 
     /**
      * 发送邮件验证码

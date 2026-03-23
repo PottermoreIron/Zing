@@ -1,0 +1,118 @@
+package com.pot.auth.application.strategy.onestop;
+
+import com.pot.auth.application.strategy.AbstractOneStopAuthStrategyImpl;
+import com.pot.auth.domain.authentication.service.JwtTokenService;
+import com.pot.auth.domain.context.OneStopAuthContext;
+import com.pot.auth.domain.port.UserModulePort;
+import com.pot.auth.domain.port.UserModulePortFactory;
+import com.pot.auth.domain.port.WeChatPort;
+import com.pot.auth.domain.port.dto.CreateUserCommand;
+import com.pot.auth.domain.port.dto.UserDTO;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.enums.AuthType;
+import com.pot.auth.domain.shared.exception.DomainException;
+import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
+import com.pot.auth.domain.shared.valueobject.Password;
+import com.pot.auth.domain.validation.ValidationChain;
+import com.pot.auth.domain.wechat.entity.WeChatUserInfo;
+import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@ConditionalOnProperty(name = "auth.wechat.enabled", havingValue = "true")
+public class WeChatOneStopAuthStrategy
+        extends AbstractOneStopAuthStrategyImpl<WeChatAuthRequest> {
+
+    private final WeChatPort weChatPort;
+    private final UserModulePortFactory userModulePortFactory;
+    private static final ThreadLocal<WeChatUserInfo> USER_INFO_CACHE = new ThreadLocal<>();
+
+    public WeChatOneStopAuthStrategy(
+            JwtTokenService jwtTokenService,
+            WeChatPort weChatPort,
+            UserModulePortFactory userModulePortFactory,
+            UserDefaultsGenerator userDefaultsGenerator) {
+        super(jwtTokenService, createValidationChain(), userDefaultsGenerator);
+        this.weChatPort = weChatPort;
+        this.userModulePortFactory = userModulePortFactory;
+    }
+
+    private static ValidationChain<OneStopAuthContext> createValidationChain() {
+        return new ValidationChain<>();
+    }
+
+    @Override
+    protected UserDTO findUser(OneStopAuthContext context) {
+        WeChatAuthRequest request = (WeChatAuthRequest) context.request();
+        try {
+            WeChatUserInfo weChatUserInfo = getOrFetchWeChatUserInfo(request);
+            UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+            return userModulePort.findUserByWeChat(weChatUserInfo.getOpenId()).orElse(null);
+        } catch (Exception e) {
+            throw new DomainException("获取微信用户信息失败: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
+        log.debug("[微信认证] 用户已绑定，直接登录: userId={}", user.userId());
+    }
+
+    @Override
+    protected void validateCredentialForRegister(OneStopAuthContext context) {
+        getOrFetchWeChatUserInfo((WeChatAuthRequest) context.request());
+    }
+
+    @Override
+    protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
+        WeChatAuthRequest request = (WeChatAuthRequest) context.request();
+        WeChatUserInfo weChatUserInfo = getOrFetchWeChatUserInfo(request);
+        String username = userDefaultsGenerator.generateUsername();
+        String password = userDefaultsGenerator.generateRandomPassword();
+        String avatarUrl = weChatUserInfo.getAvatar() != null
+                ? weChatUserInfo.getAvatar()
+                : userDefaultsGenerator.getDefaultAvatarUrl();
+
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        CreateUserCommand command = CreateUserCommand.builder()
+                .username(username)
+                .password(Password.of(password))
+                .nickname(weChatUserInfo.getDisplayName())
+                .avatarUrl(avatarUrl)
+                .weChatOpenId(weChatUserInfo.getOpenId())
+                .weChatUnionId(weChatUserInfo.getUnionId())
+                .build();
+
+        var userId = userModulePort.createUser(command);
+        return userModulePort.findById(userId)
+                .orElseThrow(() -> new DomainException(AuthResultCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public boolean supports(AuthType authType) {
+        return authType == AuthType.WECHAT;
+    }
+
+    @Override
+    public AuthType getSupportedAuthType() {
+        return AuthType.WECHAT;
+    }
+
+    @Override
+    protected void cleanupAfterAuthentication() {
+        USER_INFO_CACHE.remove();
+    }
+
+    private WeChatUserInfo getOrFetchWeChatUserInfo(WeChatAuthRequest request) {
+        WeChatUserInfo cached = USER_INFO_CACHE.get();
+        if (cached != null) {
+            return cached;
+        }
+        WeChatUserInfo weChatUserInfo = weChatPort.getUserInfo(request.code(), request.state());
+        USER_INFO_CACHE.set(weChatUserInfo);
+        return weChatUserInfo;
+    }
+}

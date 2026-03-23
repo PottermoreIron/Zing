@@ -10,7 +10,6 @@ import com.pot.member.service.domain.repository.PermissionRepository;
 import com.pot.member.service.domain.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,138 +23,137 @@ import java.util.stream.Collectors;
  * @since 2026-01-06
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class PermissionDomainService {
 
-    private final MemberRepository memberRepository;
-    private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
-    private final DomainEventPublisher eventPublisher;
+        private final MemberRepository memberRepository;
+        private final RoleRepository roleRepository;
+        private final PermissionRepository permissionRepository;
+        private final DomainEventPublisher eventPublisher;
 
-    /**
-     * 为会员分配角色
-     */
-    public void assignRoleToMember(Long memberId, Long roleId, String operator) {
-        MemberAggregate member = memberRepository
-                .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
+        /**
+         * 为会员分配角色
+         */
+        public void assignRoleToMember(Long memberId, Long roleId, String operator) {
+                MemberAggregate member = memberRepository
+                                .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
+                                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
 
-        roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
-                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+                roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
+                                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
 
-        member.assignRole(roleId);
-        memberRepository.save(member);
+                member.assignRole(roleId);
+                memberRepository.save(member);
 
-        // 发布权限变更事件
-        eventPublisher.publish(new PermissionChangedEvent(
-                String.valueOf(memberId),
-                Set.of(memberId),
-                PermissionChangedEvent.ChangeType.MEMBER_ROLE_ASSIGNED,
-                roleId, null, operator));
+                // 发布权限变更事件
+                eventPublisher.publish(new PermissionChangedEvent(
+                                String.valueOf(memberId),
+                                Set.of(memberId),
+                                PermissionChangedEvent.ChangeType.MEMBER_ROLE_ASSIGNED,
+                                roleId, null, operator));
 
-        log.info("为会员{}分配角色{}", memberId, roleId);
-    }
-
-    /**
-     * 撤销会员的角色
-     */
-    public void revokeRoleFromMember(Long memberId, Long roleId, String operator) {
-        MemberAggregate member = memberRepository
-                .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
-
-        member.revokeRole(roleId);
-        memberRepository.save(member);
-
-        // 发布权限变更事件
-        eventPublisher.publish(new PermissionChangedEvent(
-                String.valueOf(memberId),
-                Set.of(memberId),
-                PermissionChangedEvent.ChangeType.MEMBER_ROLE_REVOKED,
-                roleId, null, operator));
-
-        log.info("撤销会员{}的角色{}", memberId, roleId);
-    }
-
-    /**
-     * 为角色添加权限
-     */
-    public void addPermissionToRole(Long roleId, Long permissionId, String operator) {
-        RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
-                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
-
-        permissionRepository
-                .findById(com.pot.member.service.domain.model.permission.PermissionId.of(permissionId))
-                .orElseThrow(() -> new IllegalArgumentException("权限不存在"));
-
-        role.addPermission(permissionId);
-        roleRepository.save(role);
-
-        // 查找所有拥有该角色的会员
-        Set<Long> affectedMemberIds = findMemberIdsByRoleId(roleId);
-
-        // 发布权限变更事件
-        if (!affectedMemberIds.isEmpty()) {
-            eventPublisher.publish(new PermissionChangedEvent(
-                    String.valueOf(roleId),
-                    affectedMemberIds,
-                    PermissionChangedEvent.ChangeType.ROLE_PERMISSION_ADDED,
-                    roleId, permissionId, operator));
+                log.info("为会员{}分配角色{}", memberId, roleId);
         }
 
-        log.info("为角色{}添加权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
-    }
+        /**
+         * 撤销会员的角色
+         */
+        public void revokeRoleFromMember(Long memberId, Long roleId, String operator) {
+                MemberAggregate member = memberRepository
+                                .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
+                                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
 
-    /**
-     * 从角色移除权限
-     */
-    public void removePermissionFromRole(Long roleId, Long permissionId, String operator) {
-        RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
-                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+                member.revokeRole(roleId);
+                memberRepository.save(member);
 
-        role.removePermission(permissionId);
-        roleRepository.save(role);
+                // 发布权限变更事件
+                eventPublisher.publish(new PermissionChangedEvent(
+                                String.valueOf(memberId),
+                                Set.of(memberId),
+                                PermissionChangedEvent.ChangeType.MEMBER_ROLE_REVOKED,
+                                roleId, null, operator));
 
-        // 查找所有拥有该角色的会员
-        Set<Long> affectedMemberIds = findMemberIdsByRoleId(roleId);
-
-        // 发布权限变更事件
-        if (!affectedMemberIds.isEmpty()) {
-            eventPublisher.publish(new PermissionChangedEvent(
-                    String.valueOf(roleId),
-                    affectedMemberIds,
-                    PermissionChangedEvent.ChangeType.ROLE_PERMISSION_REMOVED,
-                    roleId, permissionId, operator));
+                log.info("撤销会员{}的角色{}", memberId, roleId);
         }
 
-        log.info("从角色{}移除权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
-    }
+        /**
+         * 为角色添加权限
+         */
+        public void addPermissionToRole(Long roleId, Long permissionId, String operator) {
+                RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
+                                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
 
-    /**
-     * 获取会员的所有权限
-     */
-    public Set<PermissionAggregate> getMemberPermissions(Long memberId) {
-        MemberAggregate member = memberRepository
-                .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
+                permissionRepository
+                                .findById(com.pot.member.service.domain.model.permission.PermissionId.of(permissionId))
+                                .orElseThrow(() -> new IllegalArgumentException("权限不存在"));
 
-        // 获取会员的所有角色
-        List<RoleAggregate> roles = roleRepository.findByIds(member.getRoleIds());
+                role.addPermission(permissionId);
+                roleRepository.save(role);
 
-        // 收集所有权限ID
-        Set<Long> permissionIds = roles.stream()
-                .flatMap(role -> role.getPermissionIds().stream())
-                .collect(Collectors.toSet());
+                // 查找所有拥有该角色的会员
+                Set<Long> affectedMemberIds = findMemberIdsByRoleId(roleId);
 
-        // 获取所有权限
-        return new HashSet<>(permissionRepository.findByIds(permissionIds));
-    }
+                // 发布权限变更事件
+                if (!affectedMemberIds.isEmpty()) {
+                        eventPublisher.publish(new PermissionChangedEvent(
+                                        String.valueOf(roleId),
+                                        affectedMemberIds,
+                                        PermissionChangedEvent.ChangeType.ROLE_PERMISSION_ADDED,
+                                        roleId, permissionId, operator));
+                }
 
-    /**
-     * 查找拥有指定角色的所有会员ID
-     */
-    private Set<Long> findMemberIdsByRoleId(Long roleId) {
-        return memberRepository.findMemberIdsByRoleId(roleId);
-    }
+                log.info("为角色{}添加权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
+        }
+
+        /**
+         * 从角色移除权限
+         */
+        public void removePermissionFromRole(Long roleId, Long permissionId, String operator) {
+                RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
+                                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+
+                role.removePermission(permissionId);
+                roleRepository.save(role);
+
+                // 查找所有拥有该角色的会员
+                Set<Long> affectedMemberIds = findMemberIdsByRoleId(roleId);
+
+                // 发布权限变更事件
+                if (!affectedMemberIds.isEmpty()) {
+                        eventPublisher.publish(new PermissionChangedEvent(
+                                        String.valueOf(roleId),
+                                        affectedMemberIds,
+                                        PermissionChangedEvent.ChangeType.ROLE_PERMISSION_REMOVED,
+                                        roleId, permissionId, operator));
+                }
+
+                log.info("从角色{}移除权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
+        }
+
+        /**
+         * 获取会员的所有权限
+         */
+        public Set<PermissionAggregate> getMemberPermissions(Long memberId) {
+                MemberAggregate member = memberRepository
+                                .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
+                                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
+
+                // 获取会员的所有角色
+                List<RoleAggregate> roles = roleRepository.findByIds(member.getRoleIds());
+
+                // 收集所有权限ID
+                Set<Long> permissionIds = roles.stream()
+                                .flatMap(role -> role.getPermissionIds().stream())
+                                .collect(Collectors.toSet());
+
+                // 获取所有权限
+                return new HashSet<>(permissionRepository.findByIds(permissionIds));
+        }
+
+        /**
+         * 查找拥有指定角色的所有会员ID
+         */
+        private Set<Long> findMemberIdsByRoleId(Long roleId) {
+                return memberRepository.findMemberIdsByRoleId(roleId);
+        }
 }
