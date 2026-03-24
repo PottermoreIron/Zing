@@ -8,7 +8,7 @@ import com.pot.auth.domain.authentication.valueobject.TokenPair;
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.TokenManagementPort;
-import com.pot.auth.domain.port.UserModulePort;
+import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.shared.valueobject.TokenId;
 import com.pot.auth.support.TestFixtures;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 
@@ -54,7 +53,7 @@ class JwtTokenServiceTest {
     private CachePort cachePort;
 
     @Mock
-    private UserModulePort userModulePort;
+    private UserModulePortFactory userModulePortFactory;
 
     @Mock
     private PermissionDomainService permissionDomainService;
@@ -64,12 +63,13 @@ class JwtTokenServiceTest {
     @BeforeEach
     void setUp() {
         jwtTokenService = new JwtTokenService(
-                tokenManagementPort, cachePort, userModulePort, permissionDomainService);
-
-        // 注入@Value字段（Mockito不处理Spring注入，需手动设置）
-        ReflectionTestUtils.setField(jwtTokenService, "refreshTokenTtl", 2592000L);
-        ReflectionTestUtils.setField(jwtTokenService, "refreshTokenSlidingWindow", 604800L);
-        ReflectionTestUtils.setField(jwtTokenService, "permissionVersionEnabled", false); // 单元测试关闭版本校验，简化测试
+                tokenManagementPort,
+                cachePort,
+                userModulePortFactory,
+                permissionDomainService,
+                2592000L,
+                604800L,
+                false);
     }
 
     // ================================================================

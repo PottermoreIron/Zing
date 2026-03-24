@@ -2,7 +2,7 @@ package com.pot.auth.application.strategy;
 
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
-import com.pot.auth.domain.context.AuthenticationContext;
+import com.pot.auth.application.context.AuthenticationContext;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.validation.ValidationChain;

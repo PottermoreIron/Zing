@@ -1,7 +1,7 @@
 package com.pot.auth.application.strategy.register;
 
 import com.pot.auth.domain.authentication.service.JwtTokenService;
-import com.pot.auth.domain.context.RegistrationContext;
+import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.CreateUserCommand;
@@ -12,7 +12,7 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.application.strategy.AbstractRegisterStrategyImpl;
 import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.domain.validation.handler.RegistrationParameterValidator;
+import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
 import com.pot.auth.interfaces.dto.register.UsernamePasswordRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,14 +30,16 @@ public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyIm
 
     public UsernamePasswordRegisterStrategy(
             JwtTokenService jwtTokenService,
-            UserModulePortFactory userModulePortFactory) {
-        super(jwtTokenService, buildValidationChain());
+            UserModulePortFactory userModulePortFactory,
+            RegistrationParameterValidator registrationParameterValidator) {
+        super(jwtTokenService, buildValidationChain(registrationParameterValidator));
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    private static ValidationChain<RegistrationContext> buildValidationChain() {
+    private static ValidationChain<RegistrationContext> buildValidationChain(
+            RegistrationParameterValidator registrationParameterValidator) {
         ValidationChain<RegistrationContext> chain = new ValidationChain<>();
-        chain.addHandler(new RegistrationParameterValidator());
+        chain.addHandler(registrationParameterValidator);
         return chain;
     }
 

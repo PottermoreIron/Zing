@@ -5,7 +5,7 @@ import com.pot.auth.application.service.OneStopAuthenticationService;
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
 import com.pot.auth.application.strategy.factory.OneStopAuthStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
-import com.pot.auth.domain.context.OneStopAuthContext;
+import com.pot.auth.application.context.OneStopAuthContext;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;

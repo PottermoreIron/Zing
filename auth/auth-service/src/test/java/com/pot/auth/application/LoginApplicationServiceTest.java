@@ -5,7 +5,7 @@ import com.pot.auth.application.service.LoginApplicationService;
 import com.pot.auth.application.strategy.LoginStrategy;
 import com.pot.auth.application.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
-import com.pot.auth.domain.context.AuthenticationContext;
+import com.pot.auth.application.context.AuthenticationContext;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;

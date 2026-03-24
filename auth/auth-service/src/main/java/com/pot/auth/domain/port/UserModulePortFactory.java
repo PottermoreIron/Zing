@@ -1,7 +1,6 @@
 package com.pot.auth.domain.port;
 
 import com.pot.auth.domain.shared.valueobject.UserDomain;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -11,25 +10,27 @@ import java.util.stream.Collectors;
 /**
  * 用户模块端口工厂（防腐层核心⭐⭐⭐）
  *
- * <p>根据UserDomain动态获取对应的适配器
- * <p>支持多用户域扩展：
+ * <p>
+ * 根据UserDomain动态获取对应的适配器
+ * <p>
+ * 支持多用户域扩展：
  * <ul>
- *   <li>MEMBER → MemberModuleAdapter</li>
- *   <li>ADMIN → AdminModuleAdapter</li>
- *   <li>MERCHANT → MerchantModuleAdapter（未来）</li>
+ * <li>MEMBER → MemberModuleAdapter</li>
+ * <li>ADMIN → AdminModuleAdapter</li>
+ * <li>MERCHANT → MerchantModuleAdapter（未来）</li>
  * </ul>
  *
- * <p>扩展新用户域：
+ * <p>
+ * 扩展新用户域：
  * <ol>
- *   <li>在UserDomain枚举添加新域</li>
- *   <li>实现UserModulePort接口（如MerchantModuleAdapter）</li>
- *   <li>Spring自动注册，无需修改此类</li>
+ * <li>在UserDomain枚举添加新域</li>
+ * <li>实现UserModulePort接口（如MerchantModuleAdapter）</li>
+ * <li>Spring自动注册，无需修改此类</li>
  * </ol>
  *
  * @author pot
  * @since 2025-12-14
  */
-@Component
 public class UserModulePortFactory {
 
     private final Map<UserDomain, UserModulePort> adapters;
@@ -41,8 +42,7 @@ public class UserModulePortFactory {
         this.adapters = adapterList.stream()
                 .collect(Collectors.toMap(
                         UserModulePort::supportedDomain,
-                        adapter -> adapter
-                ));
+                        adapter -> adapter));
     }
 
     /**
@@ -83,4 +83,3 @@ public class UserModulePortFactory {
         }
     }
 }
-

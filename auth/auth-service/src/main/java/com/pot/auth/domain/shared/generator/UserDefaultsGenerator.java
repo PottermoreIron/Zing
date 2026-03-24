@@ -1,8 +1,6 @@
 package com.pot.auth.domain.shared.generator;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -29,8 +27,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * @since 2025-11-29
  */
 @Slf4j
-@Component
-@RequiredArgsConstructor
 public class UserDefaultsGenerator {
 
     /**

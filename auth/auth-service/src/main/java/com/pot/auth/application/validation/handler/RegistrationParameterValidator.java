@@ -1,30 +1,22 @@
-package com.pot.auth.domain.validation.handler;
+package com.pot.auth.application.validation.handler;
 
-import com.pot.auth.domain.context.RegistrationContext;
+import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.validation.ValidationHandler;
-import com.pot.auth.interfaces.dto.register.*;
+import com.pot.auth.interfaces.dto.register.EmailCodeRegisterRequest;
+import com.pot.auth.interfaces.dto.register.EmailPasswordRegisterRequest;
+import com.pot.auth.interfaces.dto.register.PhoneCodeRegisterRequest;
+import com.pot.auth.interfaces.dto.register.RegisterRequest;
+import com.pot.auth.interfaces.dto.register.UsernamePasswordRegisterRequest;
 import com.pot.zing.framework.common.util.ValidationUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-/**
- * 注册参数校验处理器
- *
- * <p>
- * 对注册请求进行基础参数校验
- *
- * @author pot
- * @since 2025-11-29
- */
 @Slf4j
-@Component
 public class RegistrationParameterValidator implements ValidationHandler<RegistrationContext> {
 
     @Override
     public void validate(RegistrationContext context) {
         RegisterRequest request = context.request();
-
         log.debug("[参数校验] 开始校验注册请求: type={}", request.registerType());
 
         switch (request.registerType()) {
@@ -33,7 +25,6 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
             case EMAIL_CODE -> validateEmailCode((EmailCodeRegisterRequest) request);
             case PHONE_CODE -> validatePhoneCode((PhoneCodeRegisterRequest) request);
             case OAUTH2, WECHAT -> {
-                // OAuth2 和 WeChat 由其他策略处理
             }
             default -> throw new DomainException("不支持的注册类型: " + request.registerType());
         }
@@ -77,6 +68,6 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
 
     @Override
     public int getOrder() {
-        return 10; // 参数校验优先级最高
+        return 10;
     }
 }

@@ -2,7 +2,7 @@ package com.pot.auth.application.strategy.login;
 
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
-import com.pot.auth.domain.context.AuthenticationContext;
+import com.pot.auth.application.context.AuthenticationContext;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
@@ -10,7 +10,7 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.application.strategy.AbstractLoginStrategyImpl;
 import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.domain.validation.handler.AuthenticationParameterValidator;
+import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
 import com.pot.auth.interfaces.dto.auth.EmailCodeLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -30,15 +30,17 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategyImpl<EmailCodeL
     public EmailCodeLoginStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService) {
-        super(jwtTokenService, buildValidationChain());
+            VerificationCodeService verificationCodeService,
+            AuthenticationParameterValidator authenticationParameterValidator) {
+        super(jwtTokenService, buildValidationChain(authenticationParameterValidator));
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<AuthenticationContext> buildValidationChain() {
+    private static ValidationChain<AuthenticationContext> buildValidationChain(
+            AuthenticationParameterValidator authenticationParameterValidator) {
         ValidationChain<AuthenticationContext> chain = new ValidationChain<>();
-        chain.addHandler(new AuthenticationParameterValidator());
+        chain.addHandler(authenticationParameterValidator);
         return chain;
     }
 

@@ -2,15 +2,22 @@ package com.pot.auth.infrastructure.config;
 
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
+import com.pot.auth.domain.authorization.expression.PermissionExpressionParser;
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.DistributedLockPort;
 import com.pot.auth.domain.port.NotificationPort;
+import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.TokenManagementPort;
 import com.pot.auth.domain.port.UserModulePortFactory;
+import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
+import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
+import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /**
  * 领域服务 Spring Bean 装配配置
@@ -24,6 +31,31 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class DomainServiceConfig {
+
+    @Bean
+    public UserModulePortFactory userModulePortFactory(List<UserModulePort> userModulePorts) {
+        return new UserModulePortFactory(userModulePorts);
+    }
+
+    @Bean
+    public AuthenticationParameterValidator authenticationParameterValidator() {
+        return new AuthenticationParameterValidator();
+    }
+
+    @Bean
+    public RegistrationParameterValidator registrationParameterValidator() {
+        return new RegistrationParameterValidator();
+    }
+
+    @Bean
+    public PermissionExpressionParser permissionExpressionParser() {
+        return new PermissionExpressionParser();
+    }
+
+    @Bean
+    public UserDefaultsGenerator userDefaultsGenerator() {
+        return new UserDefaultsGenerator();
+    }
 
     @Bean
     public PermissionDomainService permissionDomainService(

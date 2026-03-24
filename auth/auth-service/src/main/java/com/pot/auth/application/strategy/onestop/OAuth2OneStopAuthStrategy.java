@@ -2,7 +2,7 @@ package com.pot.auth.application.strategy.onestop;
 
 import com.pot.auth.application.strategy.AbstractOneStopAuthStrategyImpl;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
-import com.pot.auth.domain.context.OneStopAuthContext;
+import com.pot.auth.application.context.OneStopAuthContext;
 import com.pot.auth.domain.oauth2.entity.OAuth2UserInfo;
 import com.pot.auth.domain.oauth2.valueobject.OAuth2AuthorizationCode;
 import com.pot.auth.domain.oauth2.valueobject.OAuth2Provider;

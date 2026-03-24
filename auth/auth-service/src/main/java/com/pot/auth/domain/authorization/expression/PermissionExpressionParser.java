@@ -4,7 +4,6 @@ import com.pot.auth.domain.shared.enums.Logical;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -25,7 +24,6 @@ import java.util.regex.Pattern;
  * @since 2025-12-14
  */
 @Slf4j
-@Component
 public class PermissionExpressionParser {
 
     private static final Pattern SIMPLE_PERMISSION_PATTERN = Pattern.compile("^[a-z][a-z0-9]*([:.][a-z0-9#*]+)*$");

@@ -5,7 +5,7 @@ import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.strategy.RegisterStrategy;
 import com.pot.auth.application.strategy.factory.RegisterStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
-import com.pot.auth.domain.context.RegistrationContext;
+import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;

@@ -4,7 +4,7 @@ import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
 import com.pot.auth.application.strategy.factory.OneStopAuthStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
-import com.pot.auth.domain.context.OneStopAuthContext;
+import com.pot.auth.application.context.OneStopAuthContext;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;

@@ -3,7 +3,7 @@ package com.pot.auth.application.strategy.register;
 import com.pot.auth.application.strategy.AbstractRegisterStrategyImpl;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
-import com.pot.auth.domain.context.RegistrationContext;
+import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.CreateUserCommand;
@@ -14,7 +14,7 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.domain.validation.handler.RegistrationParameterValidator;
+import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
 import com.pot.auth.interfaces.dto.register.EmailCodeRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,15 +29,17 @@ public class EmailCodeRegisterStrategy extends AbstractRegisterStrategyImpl<Emai
     public EmailCodeRegisterStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService) {
-        super(jwtTokenService, createValidationChain());
+            VerificationCodeService verificationCodeService,
+            RegistrationParameterValidator registrationParameterValidator) {
+        super(jwtTokenService, createValidationChain(registrationParameterValidator));
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<RegistrationContext> createValidationChain() {
+    private static ValidationChain<RegistrationContext> createValidationChain(
+            RegistrationParameterValidator registrationParameterValidator) {
         ValidationChain<RegistrationContext> chain = new ValidationChain<>();
-        chain.addHandler(new RegistrationParameterValidator());
+        chain.addHandler(registrationParameterValidator);
         return chain;
     }
 
