@@ -13,6 +13,7 @@ import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
 import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
+import com.pot.auth.infrastructure.expression.DefaultPermissionExpressionParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,7 +50,7 @@ public class DomainServiceConfig {
 
     @Bean
     public PermissionExpressionParser permissionExpressionParser() {
-        return new PermissionExpressionParser();
+        return new DefaultPermissionExpressionParser();
     }
 
     @Bean

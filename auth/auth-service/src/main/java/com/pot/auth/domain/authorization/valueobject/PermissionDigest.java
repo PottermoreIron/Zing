@@ -1,8 +1,9 @@
 package com.pot.auth.domain.authorization.valueobject;
 
-import org.springframework.util.DigestUtils;
-
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.*;
 
 /**
@@ -49,8 +50,7 @@ public record PermissionDigest(String value) {
         Collections.sort(sortedPerms);
         String permsStr = String.join(",", sortedPerms);
 
-        String digest = DigestUtils.md5DigestAsHex(permsStr.getBytes(StandardCharsets.UTF_8));
-        return new PermissionDigest(digest);
+        return new PermissionDigest(md5Hex(permsStr));
     }
 
     /**
@@ -59,8 +59,7 @@ public record PermissionDigest(String value) {
      * @return 空摘要
      */
     public static PermissionDigest empty() {
-        String digest = DigestUtils.md5DigestAsHex("empty".getBytes(StandardCharsets.UTF_8));
-        return new PermissionDigest(digest);
+        return new PermissionDigest(md5Hex("empty"));
     }
 
     /**
@@ -86,5 +85,15 @@ public record PermissionDigest(String value) {
     @Override
     public String toString() {
         return value;
+    }
+
+    private static String md5Hex(String content) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            byte[] digestBytes = messageDigest.digest(content.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digestBytes);
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("MD5 algorithm is not available", exception);
+        }
     }
 }

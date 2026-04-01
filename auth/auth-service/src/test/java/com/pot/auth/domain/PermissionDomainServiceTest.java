@@ -2,6 +2,7 @@ package com.pot.auth.domain;
 
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
 import com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata;
+import com.pot.auth.domain.authorization.valueobject.PermissionDigest;
 import com.pot.auth.domain.authorization.valueobject.PermissionVersion;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
@@ -12,10 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -49,7 +48,6 @@ class PermissionDomainServiceTest {
     @Mock
     private CachePort cachePort;
 
-    @InjectMocks
     private PermissionDomainService permissionDomainService;
 
     private static final UserId USER_ID = TestFixtures.USER_ID;
@@ -57,8 +55,7 @@ class PermissionDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 注入 @Value 字段
-        ReflectionTestUtils.setField(permissionDomainService, "permissionCacheTtl", 3600L);
+        permissionDomainService = new PermissionDomainService(cachePort, 3600L);
     }
 
     // ================================================================
@@ -300,9 +297,7 @@ class PermissionDomainServiceTest {
         void whenDigestMatches_thenReturnTrue() {
             // given: 缓存存储"member:read"的MD5
             Set<String> permissions = Set.of("member:read");
-            // 先计算真实的摘要
-            String realDigest = org.springframework.util.DigestUtils
-                    .md5DigestAsHex("member:read".getBytes());
+            String realDigest = PermissionDigest.from(permissions).value();
             when(cachePort.get(any(), eq(String.class))).thenReturn(Optional.of(realDigest));
 
             // when

@@ -1,6 +1,11 @@
-package com.pot.auth.domain;
+package com.pot.auth.infrastructure.expression;
 
-import com.pot.auth.domain.authorization.expression.*;
+import com.pot.auth.domain.authorization.expression.ComplexPermissionExpression;
+import com.pot.auth.domain.authorization.expression.CompositePermissionExpression;
+import com.pot.auth.domain.authorization.expression.PermissionExpression;
+import com.pot.auth.domain.authorization.expression.PermissionExpressionParser;
+import com.pot.auth.domain.authorization.expression.SimplePermissionExpression;
+import com.pot.auth.domain.authorization.expression.StandardPermissionEvaluationContext;
 import com.pot.auth.domain.shared.enums.Logical;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,38 +19,18 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * PermissionExpressionParser 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>简单权限识别：单一权限字符串解析为 SimplePermissionExpression</li>
- * <li>复杂表达式识别：含 AND/OR/NOT 的表达式解析为 ComplexPermissionExpression</li>
- * <li>SpEL表达式识别：含 hasPermission/# 的表达式解析为 SpelPermissionExpression</li>
- * <li>空字符串/null 时抛出 IllegalArgumentException</li>
- * <li>parseMultiple：单表达式直接返回，多表达式返回 CompositePermissionExpression</li>
- * <li>表达式评估正确性</li>
- * </ul>
- *
- * @author pot
- */
-@DisplayName("PermissionExpressionParser 单元测试")
-class PermissionExpressionParserTest {
+@DisplayName("DefaultPermissionExpressionParser")
+class DefaultPermissionExpressionParserTest {
 
     private PermissionExpressionParser parser;
 
     @BeforeEach
     void setUp() {
-        parser = new PermissionExpressionParser();
+        parser = new DefaultPermissionExpressionParser();
     }
 
-    // ================================================================
-    // parse - 简单权限
-    // ================================================================
-
     @Nested
-    @DisplayName("简单权限表达式解析")
+    @DisplayName("simple expressions")
     class SimplePermission {
 
         @ParameterizedTest(name = "表达式: {0}")
@@ -55,7 +40,7 @@ class PermissionExpressionParserTest {
                 "order:list",
                 "article:123:edit",
         })
-        @DisplayName("合法的简单权限表达式，解析为 SimplePermissionExpression")
+        @DisplayName("合法简单权限表达式解析为 SimplePermissionExpression")
         void whenSimplePermission_thenReturnSimpleExpression(String expr) {
             PermissionExpression expression = parser.parse(expr);
             assertThat(expression).isInstanceOf(SimplePermissionExpression.class);
@@ -63,7 +48,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("用户拥有该权限，evaluate 返回 true")
+        @DisplayName("用户拥有该权限时 evaluate 返回 true")
         void whenUserHasPermission_thenEvaluateReturnsTrue() {
             PermissionExpression expr = parser.parse("member:read");
             PermissionExpression.EvaluationContext ctx = StandardPermissionEvaluationContext
@@ -72,7 +57,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("用户不拥有该权限，evaluate 返回 false")
+        @DisplayName("用户缺少该权限时 evaluate 返回 false")
         void whenUserLacksPermission_thenEvaluateReturnsFalse() {
             PermissionExpression expr = parser.parse("admin:delete");
             PermissionExpression.EvaluationContext ctx = StandardPermissionEvaluationContext
@@ -81,30 +66,26 @@ class PermissionExpressionParserTest {
         }
     }
 
-    // ================================================================
-    // parse - 复杂表达式
-    // ================================================================
-
     @Nested
-    @DisplayName("复杂权限表达式解析")
+    @DisplayName("complex expressions")
     class ComplexPermission {
 
         @Test
-        @DisplayName("AND 表达式，解析为 ComplexPermissionExpression")
+        @DisplayName("AND 表达式解析为 ComplexPermissionExpression")
         void whenAndExpression_thenReturnComplexExpression() {
             PermissionExpression expr = parser.parse("user.read AND user.write");
             assertThat(expr).isInstanceOf(ComplexPermissionExpression.class);
         }
 
         @Test
-        @DisplayName("OR 表达式，解析为 ComplexPermissionExpression")
+        @DisplayName("OR 表达式解析为 ComplexPermissionExpression")
         void whenOrExpression_thenReturnComplexExpression() {
             PermissionExpression expr = parser.parse("member:read OR admin:read");
             assertThat(expr).isInstanceOf(ComplexPermissionExpression.class);
         }
 
         @Test
-        @DisplayName("AND 逻辑：两个权限都有时返回 true")
+        @DisplayName("AND 逻辑在权限齐全时返回 true")
         void whenAndBothPresent_thenReturnTrue() {
             PermissionExpression expr = parser.parse("member:read AND member:write");
             PermissionExpression.EvaluationContext ctx = StandardPermissionEvaluationContext
@@ -113,7 +94,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("AND 逻辑：缺少一个权限时返回 false")
+        @DisplayName("AND 逻辑缺少一个权限时返回 false")
         void whenAndOneMissing_thenReturnFalse() {
             PermissionExpression expr = parser.parse("member:read AND admin:delete");
             PermissionExpression.EvaluationContext ctx = StandardPermissionEvaluationContext
@@ -122,7 +103,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("OR 逻辑：只拥有其中一个权限时返回 true")
+        @DisplayName("OR 逻辑命中一个权限时返回 true")
         void whenOrOnePresent_thenReturnTrue() {
             PermissionExpression expr = parser.parse("member:read OR admin:delete");
             PermissionExpression.EvaluationContext ctx = StandardPermissionEvaluationContext
@@ -131,7 +112,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("OR 逻辑：两个权限都没有时返回 false")
+        @DisplayName("OR 逻辑都不命中时返回 false")
         void whenOrBothMissing_thenReturnFalse() {
             PermissionExpression expr = parser.parse("admin:read OR admin:write");
             PermissionExpression.EvaluationContext ctx = StandardPermissionEvaluationContext
@@ -140,12 +121,8 @@ class PermissionExpressionParserTest {
         }
     }
 
-    // ================================================================
-    // parse - SpEL表达式
-    // ================================================================
-
     @Nested
-    @DisplayName("SpEL 权限表达式解析")
+    @DisplayName("spel expressions")
     class SpelPermission {
 
         @ParameterizedTest(name = "SpEL表达式: {0}")
@@ -153,53 +130,45 @@ class PermissionExpressionParserTest {
                 "hasPermission('user', 'read')",
                 "hasRole('ADMIN')",
         })
-        @DisplayName("包含 hasPermission/hasRole 的表达式，解析为 SpelPermissionExpression")
+        @DisplayName("SpEL 表达式解析为基础设施层实现")
         void whenSpelExpression_thenReturnSpelExpression(String expr) {
             PermissionExpression result = parser.parse(expr);
             assertThat(result).isInstanceOf(SpelPermissionExpression.class);
         }
     }
 
-    // ================================================================
-    // parse - 异常
-    // ================================================================
-
     @Nested
-    @DisplayName("非法输入处理")
+    @DisplayName("invalid inputs")
     class InvalidInput {
 
         @Test
-        @DisplayName("null 表达式，抛出 IllegalArgumentException")
+        @DisplayName("null 表达式抛出 IllegalArgumentException")
         void whenNull_thenThrowIllegalArgumentException() {
             assertThatThrownBy(() -> parser.parse(null))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
-        @DisplayName("空白字符串，抛出 IllegalArgumentException")
+        @DisplayName("空白表达式抛出 IllegalArgumentException")
         void whenBlank_thenThrowIllegalArgumentException() {
             assertThatThrownBy(() -> parser.parse("   "))
                     .isInstanceOf(IllegalArgumentException.class);
         }
     }
 
-    // ================================================================
-    // parseMultiple
-    // ================================================================
-
     @Nested
     @DisplayName("parseMultiple()")
     class ParseMultiple {
 
         @Test
-        @DisplayName("单表达式数组，直接返回该表达式，不包装为Composite")
+        @DisplayName("单表达式数组直接返回该表达式")
         void whenSingleExpression_thenReturnDirectly() {
             PermissionExpression expr = parser.parseMultiple(new String[] { "member:read" }, Logical.AND);
             assertThat(expr).isInstanceOf(SimplePermissionExpression.class);
         }
 
         @Test
-        @DisplayName("多表达式 + AND 逻辑，返回 CompositePermissionExpression")
+        @DisplayName("多表达式 AND 逻辑返回 CompositePermissionExpression")
         void whenMultipleExpressionsAndLogic_thenReturnComposite() {
             PermissionExpression expr = parser.parseMultiple(
                     new String[] { "member:read", "member:write" }, Logical.AND);
@@ -207,7 +176,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("多表达式 AND 逻辑：全部权限满足时返回 true")
+        @DisplayName("多表达式 AND 逻辑全部满足时返回 true")
         void whenMultipleAndAllPresent_thenReturnTrue() {
             PermissionExpression expr = parser.parseMultiple(
                     new String[] { "member:read", "member:write" }, Logical.AND);
@@ -217,7 +186,7 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("多表达式 OR 逻辑：其中一个满足时返回 true")
+        @DisplayName("多表达式 OR 逻辑命中一个时返回 true")
         void whenMultipleOrOnePresent_thenReturnTrue() {
             PermissionExpression expr = parser.parseMultiple(
                     new String[] { "member:read", "admin:write" }, Logical.OR);
@@ -227,14 +196,14 @@ class PermissionExpressionParserTest {
         }
 
         @Test
-        @DisplayName("空数组，抛出 IllegalArgumentException")
+        @DisplayName("空数组抛出 IllegalArgumentException")
         void whenEmptyArray_thenThrowIllegalArgumentException() {
             assertThatThrownBy(() -> parser.parseMultiple(new String[] {}, Logical.AND))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
-        @DisplayName("null数组，抛出 IllegalArgumentException")
+        @DisplayName("null 数组抛出 IllegalArgumentException")
         void whenNullArray_thenThrowIllegalArgumentException() {
             assertThatThrownBy(() -> parser.parseMultiple(null, Logical.AND))
                     .isInstanceOf(IllegalArgumentException.class);
