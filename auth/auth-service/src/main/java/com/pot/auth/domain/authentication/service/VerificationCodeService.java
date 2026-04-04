@@ -9,7 +9,6 @@ import com.pot.auth.domain.shared.valueobject.Phone;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,20 +29,20 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class VerificationCodeService {
 
-    private static final String CODE_KEY_PREFIX = "auth:code:";
-    private static final String ATTEMPTS_KEY_PREFIX = "auth:code:attempts:";
-    private static final String SEND_LIMIT_KEY_PREFIX = "auth:code:send:";
     private final CachePort cachePort;
     private final NotificationPort notificationPort;
     private final DistributedLockPort distributedLockPort;
+    private final VerificationCodePolicy policy;
 
     public VerificationCodeService(
             CachePort cachePort,
             NotificationPort notificationPort,
-            DistributedLockPort distributedLockPort) {
+            DistributedLockPort distributedLockPort,
+            VerificationCodePolicy policy) {
         this.cachePort = cachePort;
         this.notificationPort = notificationPort;
         this.distributedLockPort = distributedLockPort;
+        this.policy = policy;
     }
 
     /**
@@ -55,41 +54,40 @@ public class VerificationCodeService {
     public boolean sendEmailVerificationCode(Email email) {
         log.info("[验证码] 发送邮件验证码: email={}", email.value());
 
-        // 1. 检查发送频率限制（1分钟内只能发送1次）
-        String sendLimitKey = SEND_LIMIT_KEY_PREFIX + email.value();
+        String recipient = email.value();
+        String sendLimitKey = policy.sendLimitKey(recipient);
         if (cachePort.exists(sendLimitKey)) {
             log.warn("[验证码] 发送过于频繁: email={}", email.value());
             throw new CodeSendTooFrequentException("验证码发送过于频繁，请稍后再试");
         }
 
-        // 2. 使用分布式锁防止并发
-        String lockKey = "lock:send:code:" + email.value();
-        return distributedLockPort.executeWithLock(lockKey, 3, 10, TimeUnit.SECONDS, () -> {
-            // 3. 生成验证码
-            VerificationCode code = VerificationCode.generate();
+        String lockKey = policy.lockKey(recipient);
+        return distributedLockPort.executeWithLock(
+                lockKey,
+                policy.lockWaitSeconds(),
+                policy.lockLeaseSeconds(),
+                TimeUnit.SECONDS,
+                () -> {
+                    VerificationCode code = VerificationCode.generate();
 
-            // 4. 存储验证码到缓存（5分钟有效）
-            String codeKey = CODE_KEY_PREFIX + email.value();
-            cachePort.set(codeKey, code.value(), Duration.ofSeconds(VerificationCode.TTL_SECONDS));
+                    String codeKey = policy.codeKey(recipient);
+                    cachePort.set(codeKey, code.value(), policy.codeTtl());
 
-            // 5. 初始化尝试次数
-            String attemptsKey = ATTEMPTS_KEY_PREFIX + email.value();
-            cachePort.set(attemptsKey, "0", Duration.ofSeconds(VerificationCode.TTL_SECONDS));
+                    String attemptsKey = policy.attemptsKey(recipient);
+                    cachePort.set(attemptsKey, "0", policy.codeTtl());
 
-            // 6. 设置发送频率限制（1分钟）
-            cachePort.set(sendLimitKey, "1", Duration.ofSeconds(60L));
+                    cachePort.set(sendLimitKey, "1", policy.sendCooldown());
 
-            // 7. 发送邮件
-            boolean sent = notificationPort.sendEmailVerificationCode(email.value(), code.value());
+                    boolean sent = notificationPort.sendEmailVerificationCode(email.value(), code.value());
 
-            if (sent) {
-                log.info("[验证码] 邮件验证码发送成功: email={}", email.value());
-            } else {
-                log.error("[验证码] 邮件验证码发送失败: email={}", email.value());
-            }
+                    if (sent) {
+                        log.info("[验证码] 邮件验证码发送成功: email={}", email.value());
+                    } else {
+                        log.error("[验证码] 邮件验证码发送失败: email={}", email.value());
+                    }
 
-            return sent;
-        });
+                    return sent;
+                });
     }
 
     /**
@@ -101,41 +99,40 @@ public class VerificationCodeService {
     public boolean sendSmsVerificationCode(Phone phoneNumber) {
         log.info("[验证码] 发送短信验证码: phone={}", phoneNumber.value());
 
-        // 1. 检查发送频率限制
-        String sendLimitKey = SEND_LIMIT_KEY_PREFIX + phoneNumber.value();
+        String recipient = phoneNumber.value();
+        String sendLimitKey = policy.sendLimitKey(recipient);
         if (cachePort.exists(sendLimitKey)) {
             log.warn("[验证码] 发送过于频繁: phone={}", phoneNumber.value());
             throw new CodeSendTooFrequentException("验证码发送过于频繁，请稍后再试");
         }
 
-        // 2. 使用分布式锁防止并发
-        String lockKey = "lock:send:code:" + phoneNumber.value();
-        return distributedLockPort.executeWithLock(lockKey, 3, 10, TimeUnit.SECONDS, () -> {
-            // 3. 生成验证码
-            VerificationCode code = VerificationCode.generate();
+        String lockKey = policy.lockKey(recipient);
+        return distributedLockPort.executeWithLock(
+                lockKey,
+                policy.lockWaitSeconds(),
+                policy.lockLeaseSeconds(),
+                TimeUnit.SECONDS,
+                () -> {
+                    VerificationCode code = VerificationCode.generate();
 
-            // 4. 存储验证码到缓存
-            String codeKey = CODE_KEY_PREFIX + phoneNumber.value();
-            cachePort.set(codeKey, code.value(), Duration.ofSeconds(VerificationCode.TTL_SECONDS));
+                    String codeKey = policy.codeKey(recipient);
+                    cachePort.set(codeKey, code.value(), policy.codeTtl());
 
-            // 5. 初始化尝试次数
-            String attemptsKey = ATTEMPTS_KEY_PREFIX + phoneNumber.value();
-            cachePort.set(attemptsKey, "0", Duration.ofSeconds(VerificationCode.TTL_SECONDS));
+                    String attemptsKey = policy.attemptsKey(recipient);
+                    cachePort.set(attemptsKey, "0", policy.codeTtl());
 
-            // 6. 设置发送频率限制
-            cachePort.set(sendLimitKey, "1", Duration.ofSeconds(60L));
+                    cachePort.set(sendLimitKey, "1", policy.sendCooldown());
 
-            // 7. 发送短信
-            boolean sent = notificationPort.sendSmsVerificationCode(phoneNumber.value(), code.value());
+                    boolean sent = notificationPort.sendSmsVerificationCode(phoneNumber.value(), code.value());
 
-            if (sent) {
-                log.info("[验证码] 短信验证码发送成功: phone={}", phoneNumber.value());
-            } else {
-                log.error("[验证码] 短信验证码发送失败: phone={}", phoneNumber.value());
-            }
+                    if (sent) {
+                        log.info("[验证码] 短信验证码发送成功: phone={}", phoneNumber.value());
+                    } else {
+                        log.error("[验证码] 短信验证码发送失败: phone={}", phoneNumber.value());
+                    }
 
-            return sent;
-        });
+                    return sent;
+                });
     }
 
     /**
@@ -148,8 +145,7 @@ public class VerificationCodeService {
     public boolean verifyCode(String recipient, String inputCode) {
         log.info("[验证码] 验证验证码: recipient={}", recipient);
 
-        // 1. 获取存储的验证码
-        String codeKey = CODE_KEY_PREFIX + recipient;
+        String codeKey = policy.codeKey(recipient);
         String storedCode = cachePort.get(codeKey, String.class).orElse(null);
 
         if (storedCode == null) {
@@ -157,33 +153,28 @@ public class VerificationCodeService {
             throw new CodeNotFoundException("验证码不存在或已过期");
         }
 
-        // 2. 检查尝试次数
-        String attemptsKey = ATTEMPTS_KEY_PREFIX + recipient;
+        String attemptsKey = policy.attemptsKey(recipient);
         String attemptsStr = cachePort.get(attemptsKey, String.class).orElse(null);
         int attempts = attemptsStr != null ? Integer.parseInt(attemptsStr) : 0;
 
-        if (attempts >= VerificationCode.getMaxAttempts()) {
+        if (attempts >= policy.maxAttempts()) {
             log.warn("[验证码] 验证次数超限: recipient={}, attempts={}", recipient, attempts);
-            // 删除验证码
             cachePort.delete(codeKey);
             cachePort.delete(attemptsKey);
             throw new CodeVerificationExceededException("验证次数超限，请重新获取验证码");
         }
 
-        // 3. 验证码校验
         VerificationCode code = new VerificationCode(storedCode);
         boolean isValid = code.matches(inputCode);
 
         if (isValid) {
             log.info("[验证码] 验证成功: recipient={}", recipient);
-            // 验证成功，删除验证码
             cachePort.delete(codeKey);
             cachePort.delete(attemptsKey);
             return true;
         } else {
             log.warn("[验证码] 验证失败: recipient={}, attempts={}", recipient, attempts + 1);
-            // 增加尝试次数
-            cachePort.set(attemptsKey, String.valueOf(attempts + 1), Duration.ofSeconds(VerificationCode.TTL_SECONDS));
+            cachePort.set(attemptsKey, String.valueOf(attempts + 1), policy.codeTtl());
             throw new CodeMismatchException("验证码错误");
         }
     }
@@ -199,8 +190,8 @@ public class VerificationCodeService {
      * 删除验证码
      */
     public void deleteCode(String recipient) {
-        String codeKey = CODE_KEY_PREFIX + recipient;
-        String attemptsKey = ATTEMPTS_KEY_PREFIX + recipient;
+        String codeKey = policy.codeKey(recipient);
+        String attemptsKey = policy.attemptsKey(recipient);
         cachePort.delete(codeKey);
         cachePort.delete(attemptsKey);
         log.info("[验证码] 已删除验证码: recipient={}", recipient);

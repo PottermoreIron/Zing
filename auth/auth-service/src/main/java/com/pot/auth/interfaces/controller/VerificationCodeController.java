@@ -41,8 +41,8 @@ public class VerificationCodeController {
      * <p>
      * POST /auth/code/email?email=xxx@example.com
      */
-    @Operation(summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，有效期 5 分钟，限 1 次/分钟")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
+    @Operation(summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:email:' + #email", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/email")
     public R<Void> sendEmailCode(
             @RequestParam @NotBlank(message = "邮箱不能为空") @ValidEmail(message = "邮箱格式不正确") String email) {
@@ -62,8 +62,8 @@ public class VerificationCodeController {
      * <p>
      * POST /auth/code/sms?phone=+8613800138000
      */
-    @Operation(summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，有效期 5 分钟，限 1 次/分钟")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
+    @Operation(summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:sms:' + #phone", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/sms")
     public R<Void> sendSmsCode(
             @RequestParam @NotBlank(message = "手机号不能为空") @ValidPhone(message = "手机号格式不正确") String phone) {

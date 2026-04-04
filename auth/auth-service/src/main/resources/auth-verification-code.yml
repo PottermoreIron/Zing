@@ -1,0 +1,11 @@
+auth:
+  verification-code:
+    code-key-prefix: "auth:code:"
+    attempts-key-prefix: "auth:code:attempts:"
+    send-limit-key-prefix: "auth:code:send:"
+    ttl-seconds: 300
+    max-attempts: 3
+    send-cooldown-seconds: 60
+    lock:
+      wait-seconds: 3
+      lease-seconds: 10

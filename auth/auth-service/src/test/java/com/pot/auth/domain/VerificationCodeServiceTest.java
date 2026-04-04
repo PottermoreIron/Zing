@@ -5,12 +5,12 @@ import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeMi
 import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeNotFoundException;
 import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeSendTooFrequentException;
 import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeVerificationExceededException;
+import com.pot.auth.domain.authentication.service.VerificationCodePolicy;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.DistributedLockPort;
 import com.pot.auth.domain.port.NotificationPort;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Phone;
-import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,6 +48,16 @@ import static org.mockito.Mockito.*;
 @DisplayName("VerificationCodeService 单元测试")
 class VerificationCodeServiceTest {
 
+    private static final VerificationCodePolicy POLICY = new VerificationCodePolicy(
+            "auth:code:",
+            "auth:code:attempts:",
+            "auth:code:send:",
+            300,
+            3,
+            60,
+            3,
+            10);
+
     @Mock
     private CachePort cachePort;
 
@@ -61,16 +71,15 @@ class VerificationCodeServiceTest {
 
     @BeforeEach
     void setUp() {
-        verificationCodeService = new VerificationCodeService(cachePort, notificationPort, distributedLockPort);
+        verificationCodeService = new VerificationCodeService(cachePort, notificationPort, distributedLockPort, POLICY);
 
         // 默认让分布式锁直接执行任务（穿透锁逻辑，专注业务测试）
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         org.mockito.stubbing.Stubber stubber = lenient().doAnswer(invocation -> {
             Supplier<?> task = invocation.getArgument(4);
             return task.get();
         });
         stubber.when(distributedLockPort).executeWithLock(
-                anyString(), anyLong(), anyLong(), any(), any(Supplier.class));
+                anyString(), anyLong(), anyLong(), any(), org.mockito.ArgumentMatchers.<Supplier<Object>>any());
     }
 
     // ================================================================
@@ -115,13 +124,13 @@ class VerificationCodeServiceTest {
             assertThat(result).isTrue();
 
             // 验证验证码写入缓存（5分钟TTL）
-            verify(cachePort).set(eq(codeKey), anyString(), eq(Duration.ofSeconds(VerificationCode.TTL_SECONDS)));
+            verify(cachePort).set(eq(codeKey), anyString(), eq(POLICY.codeTtl()));
 
             // 验证尝试次数初始化
-            verify(cachePort).set(eq(attemptsKey), eq("0"), any(Duration.class));
+            verify(cachePort).set(eq(attemptsKey), eq("0"), eq(POLICY.codeTtl()));
 
             // 验证频率限制KEY写入（1分钟TTL）
-            verify(cachePort).set(eq(sendLimitKey), eq("1"), eq(Duration.ofSeconds(60L)));
+            verify(cachePort).set(eq(sendLimitKey), eq("1"), eq(POLICY.sendCooldown()));
 
             // 验证通知接口被调用
             ArgumentCaptor<String> codeCaptor = ArgumentCaptor.forClass(String.class);
@@ -240,7 +249,7 @@ class VerificationCodeServiceTest {
             // given: 已尝试MAX_ATTEMPTS次
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class))
-                    .thenReturn(Optional.of(String.valueOf(VerificationCode.getMaxAttempts())));
+                    .thenReturn(Optional.of(String.valueOf(POLICY.maxAttempts())));
 
             // when & then
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))

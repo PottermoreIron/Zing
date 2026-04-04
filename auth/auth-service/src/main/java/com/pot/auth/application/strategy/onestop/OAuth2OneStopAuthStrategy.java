@@ -17,11 +17,13 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Password;
+import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
 import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.interfaces.dto.onestop.OAuth2AuthRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
@@ -37,14 +39,18 @@ public class OAuth2OneStopAuthStrategy
             JwtTokenService jwtTokenService,
             OAuth2Port oauth2Port,
             UserModulePortFactory userModulePortFactory,
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(), userDefaultsGenerator);
+        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
         this.oauth2Port = oauth2Port;
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain() {
-        return new ValidationChain<>();
+    private static ValidationChain<OneStopAuthContext> createValidationChain(
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
+        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
+        chain.addHandler(oneStopAuthenticationParameterValidator);
+        return chain;
     }
 
     @Override
@@ -73,19 +79,33 @@ public class OAuth2OneStopAuthStrategy
     }
 
     @Override
+    protected void beforeRegister(OneStopAuthContext context) {
+        OAuth2AuthRequest request = (OAuth2AuthRequest) context.request();
+        OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        if (StringUtils.hasText(oauth2UserInfo.email())
+                && userModulePort.existsByEmail(Email.of(oauth2UserInfo.email()))) {
+            throw new DomainException(AuthResultCode.EMAIL_ALREADY_EXISTS);
+        }
+    }
+
+    @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
         OAuth2AuthRequest request = (OAuth2AuthRequest) context.request();
         OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
-        String username = userDefaultsGenerator.generateUsernameFromEmail(oauth2UserInfo.email());
         String password = userDefaultsGenerator.generateRandomPassword();
         String avatarUrl = oauth2UserInfo.avatarUrl() != null
                 ? oauth2UserInfo.avatarUrl()
                 : userDefaultsGenerator.getDefaultAvatarUrl();
 
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        String username = StringUtils.hasText(oauth2UserInfo.email())
+                ? generateAvailableUsername(userModulePort,
+                        () -> userDefaultsGenerator.generateUsernameFromEmail(oauth2UserInfo.email()))
+                : generateAvailableUsername(userModulePort, userDefaultsGenerator::generateUsername);
         CreateUserCommand command = CreateUserCommand.builder()
                 .username(username)
-                .email(Email.of(oauth2UserInfo.email()))
+                .email(StringUtils.hasText(oauth2UserInfo.email()) ? Email.of(oauth2UserInfo.email()) : null)
                 .password(Password.of(password))
                 .nickname(oauth2UserInfo.nickname())
                 .avatarUrl(avatarUrl)

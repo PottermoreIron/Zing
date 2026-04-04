@@ -26,11 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("UserDefaultsGenerator 单元测试")
 class UserDefaultsGeneratorTest {
 
+    private static final String DEFAULT_AVATAR_URL = "https://cdn.example.com/avatars/default.png";
+
     private UserDefaultsGenerator generator;
 
     @BeforeEach
     void setUp() {
-        generator = new UserDefaultsGenerator();
+        generator = new UserDefaultsGenerator(DEFAULT_AVATAR_URL, "user_", 12, true, true, true, true);
     }
 
     // ================================================================
@@ -152,6 +154,6 @@ class UserDefaultsGeneratorTest {
     void whenGetDefaultAvatarUrl_thenReturnNonEmpty() {
         String url = generator.getDefaultAvatarUrl();
         assertThat(url).isNotBlank();
-        assertThat(url).startsWith("https://");
+        assertThat(url).isEqualTo(DEFAULT_AVATAR_URL);
     }
 }

@@ -2,7 +2,6 @@ package com.pot.auth.infrastructure.config;
 
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
-import com.pot.auth.domain.authorization.expression.PermissionExpressionParser;
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.DistributedLockPort;
@@ -13,6 +12,7 @@ import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
+import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
 import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,12 +56,14 @@ class DomainServiceConfigTest {
         void shouldCreateStatelessDomainHelpersThroughConfiguration() {
             AuthenticationParameterValidator authenticationValidator = config.authenticationParameterValidator();
             RegistrationParameterValidator registrationValidator = config.registrationParameterValidator();
-            PermissionExpressionParser permissionExpressionParser = config.permissionExpressionParser();
-            UserDefaultsGenerator userDefaultsGenerator = config.userDefaultsGenerator();
+            OneStopAuthenticationParameterValidator oneStopValidator = config.oneStopAuthenticationParameterValidator();
+
+            AuthDefaultsProperties authDefaultsProperties = new AuthDefaultsProperties();
+            UserDefaultsGenerator userDefaultsGenerator = config.userDefaultsGenerator(authDefaultsProperties);
 
             assertThat(authenticationValidator).isNotNull();
             assertThat(registrationValidator).isNotNull();
-            assertThat(permissionExpressionParser).isNotNull();
+            assertThat(oneStopValidator).isNotNull();
             assertThat(userDefaultsGenerator).isNotNull();
         }
 
@@ -72,7 +74,14 @@ class DomainServiceConfigTest {
             jwtProperties.setRefreshTokenTtl(7200L);
             jwtProperties.setRefreshTokenSlidingWindow(1800L);
 
-            PermissionDomainService permissionDomainService = config.permissionDomainService(cachePort, 3600L);
+            AuthPermissionProperties authPermissionProperties = new AuthPermissionProperties();
+            authPermissionProperties.getCache().setRedisTtl(3600L);
+            authPermissionProperties.getCache().setVersionEnabled(true);
+
+            AuthVerificationCodeProperties verificationCodeProperties = new AuthVerificationCodeProperties();
+
+            PermissionDomainService permissionDomainService = config.permissionDomainService(cachePort,
+                    authPermissionProperties);
             UserModulePortFactory userModulePortFactory = config.userModulePortFactory(List.of(userModulePort));
             JwtTokenService jwtTokenService = config.jwtTokenService(
                     tokenManagementPort,
@@ -80,11 +89,12 @@ class DomainServiceConfigTest {
                     userModulePortFactory,
                     permissionDomainService,
                     jwtProperties,
-                    true);
+                    authPermissionProperties);
             VerificationCodeService verificationCodeService = config.verificationCodeService(
                     cachePort,
                     notificationPort,
-                    distributedLockPort);
+                    distributedLockPort,
+                    verificationCodeProperties);
 
             assertThat(permissionDomainService).isNotNull();
             assertThat(jwtTokenService).isNotNull();

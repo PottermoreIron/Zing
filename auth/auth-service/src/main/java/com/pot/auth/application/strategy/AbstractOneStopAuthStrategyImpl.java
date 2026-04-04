@@ -3,13 +3,18 @@ package com.pot.auth.application.strategy;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.application.context.OneStopAuthContext;
+import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthType;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.domain.validation.handler.UserStatusValidator;
 import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.function.Supplier;
 
 /**
  * 一键认证策略抽象模板类
@@ -280,6 +285,16 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
      */
     protected void cleanupAfterAuthentication() {
         // 默认空实现，子类按需覆盖
+    }
+
+    protected String generateAvailableUsername(UserModulePort userModulePort, Supplier<String> candidateSupplier) {
+        for (int attempt = 0; attempt < 5; attempt++) {
+            String candidate = candidateSupplier.get();
+            if (!userModulePort.existsByUsername(candidate)) {
+                return candidate;
+            }
+        }
+        throw new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS);
     }
 
     public abstract AuthType getSupportedAuthType();

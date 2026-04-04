@@ -9,6 +9,7 @@ import com.pot.auth.domain.shared.exception.InvalidPhoneException;
 import com.pot.auth.domain.shared.exception.WeakPasswordException;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import com.pot.zing.framework.common.model.R;
+import com.pot.zing.framework.starter.authorization.exception.PermissionDeniedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -178,6 +179,16 @@ public class GlobalExceptionHandler {
         }
         log.warn("[异常] 领域异常: {}", e.getMessage());
         return R.fail(AuthResultCode.SYSTEM_ERROR, e.getMessage());
+    }
+
+    /**
+     * 处理权限拒绝异常
+     */
+    @ExceptionHandler(PermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public R<Void> handlePermissionDenied(PermissionDeniedException e) {
+        log.warn("[异常] 权限拒绝: {}", e.getMessage());
+        return R.fail(AuthResultCode.PERMISSION_DENIED, e.getMessage());
     }
 
     /**

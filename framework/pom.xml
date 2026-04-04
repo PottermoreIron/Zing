@@ -19,6 +19,7 @@
     </developers>
     <modules>
         <module>framework-common</module>
+        <module>framework-starter-authorization</module>
         <module>framework-starter-id</module>
         <module>framework-starter-redis</module>
         <module>framework-starter-ratelimit</module>

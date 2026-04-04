@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: auth-service
+  config:
+    import:
+      - optional:classpath:auth-verification-code.yml
 
   cloud:
     nacos:
@@ -43,7 +46,7 @@ pot:
   ratelimit:
     enabled: true
     # 使用Redis实现分布式限流
-    type: redis
+    provider: redis
 
 # Auth服务配置
 auth:
@@ -108,6 +111,8 @@ auth:
     cache:
       # Redis缓存过期时间（秒）
       redis-ttl: 3600
+      # 权限版本校验开关
+      version-enabled: true
       # 本地缓存过期时间（秒）
       local-ttl: 300
       # 本地缓存最大条目数

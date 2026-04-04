@@ -1,6 +1,7 @@
 package com.pot.auth.infrastructure.adapter.security;
 
 import com.pot.auth.domain.port.SecurityPort;
+import com.pot.zing.framework.starter.authorization.security.AuthorizationSecurityAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,7 +51,7 @@ import java.util.stream.Collectors;
  * @since 2025-12-14
  */
 @Component
-public class SpringSecurityPortAdapter implements SecurityPort {
+public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSecurityAccessor {
 
     @Override
     public String getCurrentUserId() {

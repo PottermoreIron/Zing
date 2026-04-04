@@ -30,16 +30,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserDefaultsGenerator {
 
     /**
-     * 默认头像URL（可通过配置文件覆盖）
-     */
-    private static final String DEFAULT_AVATAR_URL = "https://cdn.example.com/avatars/default.png";
-
-    /**
-     * 用户名前缀
-     */
-    private static final String USERNAME_PREFIX = "user_";
-
-    /**
      * 特殊字符集合
      */
     private static final String SPECIAL_CHARS = "!@#$%^&*";
@@ -64,6 +54,38 @@ public class UserDefaultsGenerator {
      */
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private final String avatarUrl;
+    private final String usernamePrefix;
+    private final int passwordLength;
+    private final boolean includeUppercase;
+    private final boolean includeLowercase;
+    private final boolean includeDigits;
+    private final boolean includeSpecial;
+
+    public UserDefaultsGenerator(
+            String avatarUrl,
+            String usernamePrefix,
+            int passwordLength,
+            boolean includeUppercase,
+            boolean includeLowercase,
+            boolean includeDigits,
+            boolean includeSpecial) {
+        this.avatarUrl = avatarUrl;
+        this.usernamePrefix = usernamePrefix;
+        this.passwordLength = passwordLength;
+        this.includeUppercase = includeUppercase;
+        this.includeLowercase = includeLowercase;
+        this.includeDigits = includeDigits;
+        this.includeSpecial = includeSpecial;
+
+        if (passwordLength < 8) {
+            throw new IllegalArgumentException("默认密码长度不能小于8位");
+        }
+        if (!includeUppercase && !includeLowercase && !includeDigits && !includeSpecial) {
+            throw new IllegalArgumentException("默认密码规则至少需要启用一种字符类型");
+        }
+    }
+
     /**
      * 基于手机号生成用户名
      *
@@ -78,7 +100,7 @@ public class UserDefaultsGenerator {
     public String generateUsernameFromPhone(String phone) {
         long timestamp = System.currentTimeMillis();
         String random = randomAlphanumeric(4).toLowerCase();
-        String username = USERNAME_PREFIX + timestamp + "_" + random;
+        String username = usernamePrefix + timestamp + "_" + random;
 
         log.debug("[用户默认值生成] 基于手机号生成用户名: phone={}, username={}", phone, username);
         return username;
@@ -115,7 +137,7 @@ public class UserDefaultsGenerator {
     public String generateUsername() {
         long timestamp = System.currentTimeMillis();
         String random = randomAlphanumeric(6).toLowerCase();
-        String username = USERNAME_PREFIX + timestamp + "_" + random;
+        String username = usernamePrefix + timestamp + "_" + random;
 
         log.debug("[用户默认值生成] 生成通用用户名: username={}", username);
         return username;
@@ -140,16 +162,31 @@ public class UserDefaultsGenerator {
      * @return 生成的随机密码
      */
     public String generateRandomPassword() {
-        // 生成各类字符
-        String uppercase = randomAlphabetic(2).toUpperCase();
-        String lowercase = randomAlphabetic(6).toLowerCase();
-        String digits = randomNumeric(3);
-        String special = String.valueOf(SPECIAL_CHARS.charAt(
-                ThreadLocalRandom.current().nextInt(SPECIAL_CHARS.length())));
+        List<Character> passwordChars = new ArrayList<>();
+        StringBuilder candidatePool = new StringBuilder();
 
-        // 组合并打乱顺序
-        String combined = uppercase + lowercase + digits + special;
-        String password = shuffleString(combined);
+        if (includeUppercase) {
+            passwordChars.add(randomAlphabetic(1).toUpperCase().charAt(0));
+            candidatePool.append(ALPHABETIC_CHARS.toUpperCase());
+        }
+        if (includeLowercase) {
+            passwordChars.add(randomAlphabetic(1).toLowerCase().charAt(0));
+            candidatePool.append(ALPHABETIC_CHARS);
+        }
+        if (includeDigits) {
+            passwordChars.add(randomNumeric(1).charAt(0));
+            candidatePool.append(NUMERIC_CHARS);
+        }
+        if (includeSpecial) {
+            passwordChars.add(SPECIAL_CHARS.charAt(ThreadLocalRandom.current().nextInt(SPECIAL_CHARS.length())));
+            candidatePool.append(SPECIAL_CHARS);
+        }
+
+        while (passwordChars.size() < passwordLength) {
+            passwordChars.add(candidatePool.charAt(RANDOM.nextInt(candidatePool.length())));
+        }
+
+        String password = shuffleCharacters(passwordChars);
 
         log.debug("[用户默认值生成] 生成随机密码: length={}", password.length());
         return password;
@@ -164,24 +201,20 @@ public class UserDefaultsGenerator {
      * @return 默认头像URL
      */
     public String getDefaultAvatarUrl() {
-        return DEFAULT_AVATAR_URL;
+        return avatarUrl;
     }
 
     /**
-     * 打乱字符串顺序
+     * 打乱字符顺序
      *
-     * @param input 输入字符串
+     * @param input 输入字符列表
      * @return 打乱后的字符串
      */
-    private String shuffleString(String input) {
-        List<Character> characters = new ArrayList<>();
-        for (char c : input.toCharArray()) {
-            characters.add(c);
-        }
-        Collections.shuffle(characters);
+    private String shuffleCharacters(List<Character> input) {
+        Collections.shuffle(input, RANDOM);
 
         StringBuilder result = new StringBuilder();
-        for (char c : characters) {
+        for (char c : input) {
             result.append(c);
         }
         return result.toString();

@@ -10,6 +10,7 @@ import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
+import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
 import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.interfaces.dto.onestop.UsernamePasswordAuthRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +26,17 @@ public class UsernamePasswordOneStopAuthStrategy
     public UsernamePasswordOneStopAuthStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(), userDefaultsGenerator);
+        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain() {
-        return new ValidationChain<>();
+    private static ValidationChain<OneStopAuthContext> createValidationChain(
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
+        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
+        chain.addHandler(oneStopAuthenticationParameterValidator);
+        return chain;
     }
 
     @Override

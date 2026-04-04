@@ -12,6 +12,9 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
@@ -31,6 +34,8 @@ import java.util.stream.Collectors;
 @Aspect
 @Slf4j
 public class RateLimitAspect {
+
+    private static final ExpressionParser SPEL_PARSER = new SpelExpressionParser();
 
     private final RateLimitManager rateLimitManager;
     private final List<RateLimitKeyProvider> keyProviders;
@@ -80,17 +85,58 @@ public class RateLimitAspect {
      * 生成限流key
      */
     private String generateRateLimitKey(ProceedingJoinPoint joinPoint, Method method, RateLimit rateLimit) {
-        // 基础key：优先使用注解中的key，否则使用方法签名
-        String baseKey = StringUtils.hasText(rateLimit.key())
-                ? rateLimit.key()
-                : generateMethodSignatureKey(joinPoint, method);
+        String baseKey = resolveBaseKey(joinPoint, method, rateLimit);
 
-        // 添加全局前缀
         baseKey = properties.getKeyPrefix() + hashKey(baseKey);
 
-        // 根据限流类型生成最终key
         RateLimitKeyProvider provider = findKeyProvider(rateLimit);
         return provider.generateKey(baseKey, joinPoint, rateLimit);
+    }
+
+    private String resolveBaseKey(ProceedingJoinPoint joinPoint, Method method, RateLimit rateLimit) {
+        if (!StringUtils.hasText(rateLimit.key())) {
+            return generateMethodSignatureKey(joinPoint, method);
+        }
+        if (!looksLikeSpelExpression(rateLimit.key())) {
+            return rateLimit.key().trim();
+        }
+        return evaluateKeyExpression(joinPoint, method, rateLimit.key());
+    }
+
+    private boolean looksLikeSpelExpression(String keyExpression) {
+        return keyExpression.contains("#") || keyExpression.contains("T(") || keyExpression.contains("@{")
+                || keyExpression.contains("@") || keyExpression.contains("[");
+    }
+
+    private String evaluateKeyExpression(ProceedingJoinPoint joinPoint, Method method, String keyExpression) {
+        try {
+            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+            String[] parameterNames = signature.getParameterNames();
+            Object[] args = joinPoint.getArgs();
+
+            StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+            evaluationContext.setVariable("args", args);
+            evaluationContext.setVariable("methodName", method.getName());
+            evaluationContext.setVariable("className", method.getDeclaringClass().getName());
+
+            for (int i = 0; i < args.length; i++) {
+                Object arg = args[i];
+                evaluationContext.setVariable("p" + i, arg);
+                evaluationContext.setVariable("a" + i, arg);
+                evaluationContext.setVariable("arg" + i, arg);
+                if (parameterNames != null && i < parameterNames.length && StringUtils.hasText(parameterNames[i])) {
+                    evaluationContext.setVariable(parameterNames[i], arg);
+                }
+            }
+
+            Object evaluated = SPEL_PARSER.parseExpression(keyExpression).getValue(evaluationContext);
+            if (evaluated == null || !StringUtils.hasText(evaluated.toString())) {
+                throw new IllegalStateException("限流SpEL表达式返回空值: " + keyExpression);
+            }
+            return evaluated.toString();
+        } catch (Exception e) {
+            throw new IllegalStateException("解析限流key表达式失败: " + keyExpression, e);
+        }
     }
 
     /**

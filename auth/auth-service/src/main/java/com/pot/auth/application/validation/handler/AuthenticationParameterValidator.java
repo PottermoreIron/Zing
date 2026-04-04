@@ -24,8 +24,6 @@ public class AuthenticationParameterValidator implements ValidationHandler<Authe
             case EMAIL_PASSWORD -> validateEmailPassword((EmailPasswordLoginRequest) request);
             case EMAIL_CODE -> validateEmailCode((EmailCodeLoginRequest) request);
             case PHONE_CODE -> validatePhoneCode((PhoneCodeLoginRequest) request);
-            case OAUTH2, WECHAT -> {
-            }
             default -> throw new DomainException("不支持的登录类型: " + request.loginType());
         }
     }

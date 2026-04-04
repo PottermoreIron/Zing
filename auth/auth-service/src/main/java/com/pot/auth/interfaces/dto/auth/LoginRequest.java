@@ -18,28 +18,24 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "loginType", visible = true)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = UsernamePasswordLoginRequest.class, name = "USERNAME_PASSWORD"),
-        @JsonSubTypes.Type(value = EmailPasswordLoginRequest.class, name = "EMAIL_PASSWORD"),
-        @JsonSubTypes.Type(value = EmailCodeLoginRequest.class, name = "EMAIL_CODE"),
-        @JsonSubTypes.Type(value = PhoneCodeLoginRequest.class, name = "PHONE_CODE"),
-        @JsonSubTypes.Type(value = OAuth2LoginRequest.class, name = "OAUTH2"),
-        @JsonSubTypes.Type(value = WeChatLoginRequest.class, name = "WECHAT")
+                @JsonSubTypes.Type(value = UsernamePasswordLoginRequest.class, name = "USERNAME_PASSWORD"),
+                @JsonSubTypes.Type(value = EmailPasswordLoginRequest.class, name = "EMAIL_PASSWORD"),
+                @JsonSubTypes.Type(value = EmailCodeLoginRequest.class, name = "EMAIL_CODE"),
+                @JsonSubTypes.Type(value = PhoneCodeLoginRequest.class, name = "PHONE_CODE")
 })
 public sealed interface LoginRequest permits
-        UsernamePasswordLoginRequest,
-        EmailPasswordLoginRequest,
-        EmailCodeLoginRequest,
-        PhoneCodeLoginRequest,
-        OAuth2LoginRequest,
-        WeChatLoginRequest {
+                UsernamePasswordLoginRequest,
+                EmailPasswordLoginRequest,
+                EmailCodeLoginRequest,
+                PhoneCodeLoginRequest {
 
-    /**
-     * 获取登录类型
-     */
-    LoginType loginType();
+        /**
+         * 获取登录类型
+         */
+        LoginType loginType();
 
-    /**
-     * 获取用户域
-     */
-    UserDomain userDomain();
+        /**
+         * 获取用户域
+         */
+        UserDomain userDomain();
 }

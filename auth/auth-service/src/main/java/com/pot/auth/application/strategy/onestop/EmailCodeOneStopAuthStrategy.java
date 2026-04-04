@@ -16,6 +16,7 @@ import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import com.pot.auth.application.strategy.AbstractOneStopAuthStrategyImpl;
+import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
 import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.interfaces.dto.onestop.EmailCodeAuthRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +39,18 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
             VerificationCodeService verificationCodeService,
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, new ValidationChain<>(), userDefaultsGenerator);
+        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
+    }
+
+    private static ValidationChain<OneStopAuthContext> createValidationChain(
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
+        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
+        chain.addHandler(oneStopAuthenticationParameterValidator);
+        return chain;
     }
 
     @Override
@@ -66,14 +75,26 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
     }
 
     @Override
+    protected void beforeRegister(OneStopAuthContext context) {
+        EmailCodeAuthRequest request = (EmailCodeAuthRequest) context.request();
+        UserModulePort port = userModulePortFactory.getPort(request.userDomain());
+        if (port.existsByEmail(Email.of(request.email()))) {
+            throw new DomainException(AuthResultCode.EMAIL_ALREADY_EXISTS);
+        }
+    }
+
+    @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
         EmailCodeAuthRequest request = (EmailCodeAuthRequest) context.request();
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
+        String username = generateAvailableUsername(
+                port,
+                () -> userDefaultsGenerator.generateUsernameFromEmail(request.email()));
 
         var userId = port.createUser(CreateUserCommand.builder()
                 .email(Email.of(request.email()))
                 .password(Password.of(userDefaultsGenerator.generateRandomPassword()))
-                .username(userDefaultsGenerator.generateUsernameFromEmail(request.email()))
+                .username(username)
                 .avatarUrl(userDefaultsGenerator.getDefaultAvatarUrl())
                 .build());
 

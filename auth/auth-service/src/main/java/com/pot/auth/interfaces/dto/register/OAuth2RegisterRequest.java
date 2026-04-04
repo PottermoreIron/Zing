@@ -10,28 +10,22 @@ import jakarta.validation.constraints.NotNull;
 /**
  * OAuth2注册请求
  *
- * <p>支持Google、GitHub、Facebook、Apple等OAuth2提供商
- * <p>注意：OAuth2的注册和登录是一体化的，使用AuthenticationStrategy处理
- * <p>此DTO主要用于类型完整性，实际使用OAuth2LoginRequest
+ * <p>
+ * 支持Google、GitHub、Facebook、Apple等OAuth2提供商
+ * <p>
+ * 注意：OAuth2的注册和登录是一体化的，实际由 OneStopAuthenticationController 编排处理
  *
  * @author pot
  * @since 2025-11-19
  */
 public record OAuth2RegisterRequest(
-        @NotNull(message = "注册类型不能为空")
-        @JsonProperty("registerType")
-        RegisterType registerType,
+                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
 
-        @NotNull(message = "OAuth2提供商不能为空")
-        OAuth2Provider provider,
+                @NotNull(message = "OAuth2提供商不能为空") OAuth2Provider provider,
 
-        @NotBlank(message = "授权码不能为空")
-        String code,
+                @NotBlank(message = "授权码不能为空") String code,
 
-        String state,
+                String state,
 
-        @JsonProperty("userDomain")
-        UserDomain userDomain
-) implements RegisterRequest {
+                @JsonProperty("userDomain") UserDomain userDomain) implements RegisterRequest {
 }
-

@@ -13,6 +13,7 @@ import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.Password;
+import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
 import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.domain.wechat.entity.WeChatUserInfo;
 import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
@@ -34,14 +35,18 @@ public class WeChatOneStopAuthStrategy
             JwtTokenService jwtTokenService,
             WeChatPort weChatPort,
             UserModulePortFactory userModulePortFactory,
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(), userDefaultsGenerator);
+        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
         this.weChatPort = weChatPort;
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain() {
-        return new ValidationChain<>();
+    private static ValidationChain<OneStopAuthContext> createValidationChain(
+            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
+        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
+        chain.addHandler(oneStopAuthenticationParameterValidator);
+        return chain;
     }
 
     @Override
@@ -70,13 +75,13 @@ public class WeChatOneStopAuthStrategy
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
         WeChatAuthRequest request = (WeChatAuthRequest) context.request();
         WeChatUserInfo weChatUserInfo = getOrFetchWeChatUserInfo(request);
-        String username = userDefaultsGenerator.generateUsername();
         String password = userDefaultsGenerator.generateRandomPassword();
         String avatarUrl = weChatUserInfo.getAvatar() != null
                 ? weChatUserInfo.getAvatar()
                 : userDefaultsGenerator.getDefaultAvatarUrl();
 
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        String username = generateAvailableUsername(userModulePort, userDefaultsGenerator::generateUsername);
         CreateUserCommand command = CreateUserCommand.builder()
                 .username(username)
                 .password(Password.of(password))
