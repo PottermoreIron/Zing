@@ -42,7 +42,7 @@ public interface UserModulePort {
     /**
      * 密码认证
      *
-    * @param identifier 用户标识（昵称/邮箱/手机号）
+     * @param identifier 用户标识（昵称/邮箱/手机号）
      * @param password   密码明文
      * @return 用户信息（如果认证成功）
      */
@@ -54,7 +54,7 @@ public interface UserModulePort {
     Optional<UserDTO> findById(UserId userId);
 
     /**
-    * 根据标识符获取用户（昵称/邮箱/手机号）
+     * 根据标识符获取用户（昵称/邮箱/手机号）
      */
     Optional<UserDTO> findByIdentifier(String identifier);
 

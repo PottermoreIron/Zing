@@ -3,13 +3,15 @@ package com.pot.auth.domain.port;
 /**
  * 通知端口接口（防腐层）
  *
- * <p>隔离触达服务的具体实现（邮件、短信、推送等）
+ * <p>
+ * 隔离触达服务的具体实现（邮件、短信、推送等）
  *
- * <p>设计原则：
+ * <p>
+ * 设计原则：
  * <ul>
- *   <li>领域层定义接口（Port）</li>
- *   <li>基础设施层实现适配器（TouchModuleAdapter）</li>
- *   <li>支持多种通知渠道（邮件、短信）</li>
+ * <li>领域层定义接口（Port）</li>
+ * <li>基础设施层实现适配器（TouchModuleAdapter）</li>
+ * <li>支持多种通知渠道（邮件、短信）</li>
  * </ul>
  *
  * @author pot
@@ -39,7 +41,7 @@ public interface NotificationPort {
      * 发送登录通知邮件
      *
      * @param email      邮箱地址
-    * @param nickname   显示名
+     * @param nickname   显示名
      * @param ipAddress  IP地址
      * @param deviceInfo 设备信息
      * @return 是否发送成功
@@ -50,11 +52,10 @@ public interface NotificationPort {
      * 发送异地登录告警
      *
      * @param email      邮箱地址
-    * @param nickname   显示名
+     * @param nickname   显示名
      * @param ipAddress  IP地址
      * @param deviceInfo 设备信息
      * @return 是否发送成功
      */
     boolean sendAbnormalLoginAlert(String email, String nickname, String ipAddress, String deviceInfo);
 }
-

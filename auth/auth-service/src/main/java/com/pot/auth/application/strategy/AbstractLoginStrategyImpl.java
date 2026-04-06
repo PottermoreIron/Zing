@@ -62,7 +62,7 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
             // 6. 登录后置钩子（由子类可选实现）
             afterLogin(user, result, context);
 
-                log.info("[登录策略] 登录成功: userId={}, nickname={}, type={}",
+            log.info("[登录策略] 登录成功: userId={}, nickname={}, type={}",
                     user.userId(), user.nickname(), request.loginType());
 
             return result;
@@ -93,7 +93,7 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
      * <p>
      * 根据登录方式的不同，查询用户的方式也不同：
      * <ul>
-    * <li>昵称登录：通过昵称查询</li>
+     * <li>昵称登录：通过昵称查询</li>
      * <li>邮箱登录：通过邮箱查询</li>
      * <li>手机号登录：通过手机号查询</li>
      * </ul>

@@ -61,12 +61,12 @@ public class LoginController {
      * <p>
      * 支持4种登录方式，通过loginType字段自动识别：
      * <ul>
-    * <li>USERNAME_PASSWORD - 昵称密码登录（保留历史类型名）</li>
+     * <li>USERNAME_PASSWORD - 昵称密码登录（保留历史类型名）</li>
      * <li>EMAIL_PASSWORD - 邮箱密码登录</li>
      * <li>EMAIL_CODE - 邮箱验证码登录</li>
      * <li>PHONE_CODE - 手机号验证码登录</li>
      * </ul>
-    * 请求示例（昵称密码）：
+     * 请求示例（昵称密码）：
      *
      * <pre>
      * POST /auth/api/v1/login

@@ -16,12 +16,12 @@ import jakarta.validation.constraints.NotNull;
  * @since 2025-11-18
  */
 public record UsernamePasswordLoginRequest(
-        @NotNull(message = "登录类型不能为空") @JsonProperty("loginType") LoginType loginType,
+                @NotNull(message = "登录类型不能为空") @JsonProperty("loginType") LoginType loginType,
 
-        @ValidUsername String nickname,
+                @ValidUsername String nickname,
 
-        @ValidPassword String password,
+                @ValidPassword String password,
 
-        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-        implements LoginRequest {
+                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+                implements LoginRequest {
 }

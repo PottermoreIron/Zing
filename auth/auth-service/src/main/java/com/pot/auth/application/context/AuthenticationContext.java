@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 public record AuthenticationContext(
-    @NonNull LoginCommand request,
+        @NonNull LoginCommand request,
         @NonNull IpAddress ipAddress,
         @NonNull DeviceInfo deviceInfo,
         String sessionId,

@@ -69,11 +69,11 @@ class DomainServiceConfigTest {
         @DisplayName("should create application validation chains through configuration")
         void shouldCreateApplicationValidationChainsThroughConfiguration() {
             ValidationChain<AuthenticationContext> authenticationValidationChain = applicationValidationConfig
-                .authenticationValidationChain(authenticationParameterValidator);
+                    .authenticationValidationChain(authenticationParameterValidator);
             ValidationChain<RegistrationContext> registrationValidationChain = applicationValidationConfig
-                .registrationValidationChain(registrationParameterValidator);
+                    .registrationValidationChain(registrationParameterValidator);
             ValidationChain<OneStopAuthContext> oneStopValidationChain = applicationValidationConfig
-                .oneStopAuthValidationChain(oneStopAuthenticationParameterValidator);
+                    .oneStopAuthValidationChain(oneStopAuthenticationParameterValidator);
 
             AuthDefaultsProperties authDefaultsProperties = new AuthDefaultsProperties();
             UserDefaultsGenerator userDefaultsGenerator = config.userDefaultsGenerator(authDefaultsProperties);

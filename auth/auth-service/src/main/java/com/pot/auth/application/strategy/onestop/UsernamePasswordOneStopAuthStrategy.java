@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class UsernamePasswordOneStopAuthStrategy
-    extends AbstractOneStopAuthStrategyImpl {
+        extends AbstractOneStopAuthStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
 

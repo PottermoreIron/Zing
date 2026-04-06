@@ -116,7 +116,7 @@ class LoginApplicationServiceTest {
     void whenUserAgentNull_thenUseDefaultValue() {
         // given
         LoginRequest request = usernamePasswordRequest();
-            LoginStrategy mockStrategy = mock(LoginStrategy.class);
+        LoginStrategy mockStrategy = mock(LoginStrategy.class);
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenReturn(authResult());
 

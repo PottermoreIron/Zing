@@ -30,7 +30,7 @@ public interface TokenManagementPort {
      *
      * @param userId      用户ID
      * @param userDomain  用户域
-         * @param nickname    显示名
+     * @param nickname    显示名
      * @param authorities 权限集合
      * @param metadata    【新增】权限缓存元数据（版本号+摘要）
      * @return Token对
@@ -38,7 +38,7 @@ public interface TokenManagementPort {
     TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
-             String nickname,
+            String nickname,
             Set<String> authorities,
             PermissionCacheMetadata metadata);
 

@@ -28,14 +28,14 @@ import lombok.Builder;
  */
 @Builder
 public record OAuth2UserInfo(
-        OAuth2Provider provider,
-        OAuth2OpenId openId,
-        String email,
-        Boolean emailVerified,
-        String nickname,
-        String avatarUrl,
-        String accessToken,
-        String refreshToken,
-        Long expiresIn,
-        String rawData) {
+                OAuth2Provider provider,
+                OAuth2OpenId openId,
+                String email,
+                Boolean emailVerified,
+                String nickname,
+                String avatarUrl,
+                String accessToken,
+                String refreshToken,
+                Long expiresIn,
+                String rawData) {
 }

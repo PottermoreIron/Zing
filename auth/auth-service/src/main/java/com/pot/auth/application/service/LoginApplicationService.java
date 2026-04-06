@@ -70,7 +70,7 @@ public class LoginApplicationService {
         // 传统登录（昵称/邮箱/手机号 + 密码/验证码）
         // 构建认证上下文
         AuthenticationContext context = AuthenticationContext.builder()
-            .request(toCommand(request))
+                .request(toCommand(request))
                 .ipAddress(IpAddress.of(ipAddress))
                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                 .sessionId(generateSessionId())

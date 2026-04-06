@@ -55,7 +55,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
             // 5. 生成Token并构建结果
             AuthenticationResult result = generateAuthenticationResult(user, context);
 
-                log.info("[注册策略] 注册成功: userId={}, nickname={}, type={}",
+            log.info("[注册策略] 注册成功: userId={}, nickname={}, type={}",
                     user.userId(), user.nickname(), request.registerType());
 
             return result;

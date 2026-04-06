@@ -8,13 +8,15 @@ import lombok.Builder;
 /**
  * 认证结果值对象
  *
- * <p>封装认证成功后的完整信息
- * <p><strong>设计决策：使用record</strong>
+ * <p>
+ * 封装认证成功后的完整信息
+ * <p>
+ * <strong>设计决策：使用record</strong>
  * <ul>
- *   <li>✅ 不可变 - 认证结果一旦创建就不应改变</li>
- *   <li>✅ 值语义 - 只关心内容，不关心身份</li>
- *   <li>✅ 无业务行为 - 纯数据载体</li>
- *   <li>✅ 自动生成equals/hashCode/toString</li>
+ * <li>✅ 不可变 - 认证结果一旦创建就不应改变</li>
+ * <li>✅ 值语义 - 只关心内容，不关心身份</li>
+ * <li>✅ 无业务行为 - 纯数据载体</li>
+ * <li>✅ 自动生成equals/hashCode/toString</li>
  * </ul>
  *
  * @author pot
@@ -22,16 +24,14 @@ import lombok.Builder;
  */
 @Builder
 public record AuthenticationResult(
-        UserId userId,
-        UserDomain userDomain,
-        String nickname,
-        String email,
-        String phone,
-        String accessToken,
-        String refreshToken,
-        Long accessTokenExpiresAt,
-        Long refreshTokenExpiresAt,
-        LoginContext loginContext
-) {
+                UserId userId,
+                UserDomain userDomain,
+                String nickname,
+                String email,
+                String phone,
+                String accessToken,
+                String refreshToken,
+                Long accessTokenExpiresAt,
+                Long refreshTokenExpiresAt,
+                LoginContext loginContext) {
 }
-

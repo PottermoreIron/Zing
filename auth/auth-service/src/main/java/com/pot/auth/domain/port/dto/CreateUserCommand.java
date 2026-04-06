@@ -24,37 +24,37 @@ import lombok.Builder;
  */
 @Builder
 public record CreateUserCommand(
-        // ========== 基础信息 ==========
-        // 历史桥接字段：当前仍用于对接用户模块的昵称创建链路。
-        String username,
-        Email email,
-        Phone phone,
-        Password password,
-        String avatarUrl,
-        String firstName,
-        String lastName,
-        String nickname,
-        boolean emailVerified,
+                // ========== 基础信息 ==========
+                // 历史桥接字段：当前仍用于对接用户模块的昵称创建链路。
+                String username,
+                Email email,
+                Phone phone,
+                Password password,
+                String avatarUrl,
+                String firstName,
+                String lastName,
+                String nickname,
+                boolean emailVerified,
 
-        // ========== OAuth2 绑定信息 ==========
-        /**
-         * OAuth2提供商（如：google、github、facebook）
-         */
-        String oauth2Provider,
+                // ========== OAuth2 绑定信息 ==========
+                /**
+                 * OAuth2提供商（如：google、github、facebook）
+                 */
+                String oauth2Provider,
 
-        /**
-         * OAuth2用户唯一标识（OpenID）
-         */
-        String oauth2OpenId,
+                /**
+                 * OAuth2用户唯一标识（OpenID）
+                 */
+                String oauth2OpenId,
 
-        // ========== 微信绑定信息 ==========
-        /**
-         * 微信 OpenID（在当前公众号/小程序下唯一）
-         */
-        String weChatOpenId,
+                // ========== 微信绑定信息 ==========
+                /**
+                 * 微信 OpenID（在当前公众号/小程序下唯一）
+                 */
+                String weChatOpenId,
 
-        /**
-         * 微信 UnionID（开放平台统一ID，可选）
-         */
-        String weChatUnionId) {
+                /**
+                 * 微信 UnionID（开放平台统一ID，可选）
+                 */
+                String weChatUnionId) {
 }

@@ -10,24 +10,25 @@ import java.util.Set;
 /**
  * 用户DTO（领域层）
  *
- * <p>这是领域层的DTO，与member-facade的DTO隔离
- * <p>由MemberModuleAdapter负责将facade的DTO转换成此DTO
+ * <p>
+ * 这是领域层的DTO，与member-facade的DTO隔离
+ * <p>
+ * 由MemberModuleAdapter负责将facade的DTO转换成此DTO
  *
  * @author pot
  * @since 2025-12-14
  */
 @Builder
 public record UserDTO(
-        UserId userId,          // 使用Long而不是UserId，简化转换
-        UserDomain userDomain,
-        String nickname,
-        String email,
-        String phone,        // 统一字段名为phone
-        String status,
-        Set<String> permissions,  // 添加权限集合
-        LocalDateTime emailVerifiedAt,
-        LocalDateTime phoneVerifiedAt,
-        LocalDateTime lastLoginAt,
-        String lastLoginIp
-) {
+                UserId userId, // 使用Long而不是UserId，简化转换
+                UserDomain userDomain,
+                String nickname,
+                String email,
+                String phone, // 统一字段名为phone
+                String status,
+                Set<String> permissions, // 添加权限集合
+                LocalDateTime emailVerifiedAt,
+                LocalDateTime phoneVerifiedAt,
+                LocalDateTime lastLoginAt,
+                String lastLoginIp) {
 }

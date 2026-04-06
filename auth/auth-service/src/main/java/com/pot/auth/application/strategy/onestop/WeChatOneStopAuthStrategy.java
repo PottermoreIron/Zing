@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = "auth.wechat.enabled", havingValue = "true")
 public class WeChatOneStopAuthStrategy
-    extends AbstractOneStopAuthStrategyImpl {
+        extends AbstractOneStopAuthStrategyImpl {
 
     private final WeChatPort weChatPort;
     private final UserModulePortFactory userModulePortFactory;
@@ -73,7 +73,7 @@ public class WeChatOneStopAuthStrategy
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         String generatedNickname = generateAvailableNickname(userModulePort, userDefaultsGenerator::generateNickname);
         CreateUserCommand command = CreateUserCommand.builder()
-            .username(generatedNickname)
+                .username(generatedNickname)
                 .password(Password.of(password))
                 .nickname(weChatUserInfo.getDisplayName())
                 .avatarUrl(avatarUrl)

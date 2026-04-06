@@ -78,12 +78,12 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
         String generatedNickname = generateAvailableNickname(
                 port,
-            () -> userDefaultsGenerator.generateNicknameFromEmail(request.email()));
+                () -> userDefaultsGenerator.generateNicknameFromEmail(request.email()));
 
         var userId = port.createUser(CreateUserCommand.builder()
                 .email(Email.of(request.email()))
                 .password(Password.of(userDefaultsGenerator.generateRandomPassword()))
-            .username(generatedNickname)
+                .username(generatedNickname)
                 .avatarUrl(userDefaultsGenerator.getDefaultAvatarUrl())
                 .build());
 

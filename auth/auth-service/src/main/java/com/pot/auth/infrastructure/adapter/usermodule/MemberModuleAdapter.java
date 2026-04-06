@@ -95,7 +95,7 @@ public class MemberModuleAdapter implements UserModulePort {
     }
 
     /**
-    * 根据标识符查找用户（支持昵称/邮箱/手机号）
+     * 根据标识符查找用户（支持昵称/邮箱/手机号）
      */
     private R<MemberDTO> findMemberByIdentifier(String identifier) {
         if (identifier.contains("@")) {

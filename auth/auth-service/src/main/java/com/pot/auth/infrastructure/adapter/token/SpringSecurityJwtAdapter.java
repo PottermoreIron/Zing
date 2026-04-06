@@ -119,7 +119,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                 accessTokenId,
                 userId,
                 userDomain,
-            nickname,
+                nickname,
                 authorities,
                 currentTime,
                 accessTokenExpiresAt,
@@ -167,7 +167,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
             TokenId tokenId = new TokenId(claims.getId());
             UserId userId = UserId.of(((Number) claims.get("userId")).longValue());
             UserDomain userDomain = UserDomain.valueOf((String) claims.get("userDomain"));
-                String nickname = Optional.ofNullable((String) claims.get("nickname"))
+            String nickname = Optional.ofNullable((String) claims.get("nickname"))
                     .orElse((String) claims.get("username"));
 
             @SuppressWarnings("unchecked")

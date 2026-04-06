@@ -20,7 +20,7 @@ public record JwtToken(
         TokenId tokenId, // JTI - Token唯一标识
         UserId userId, // 用户ID
         UserDomain userDomain, // 用户域
-    String nickname, // 显示名
+        String nickname, // 显示名
         Set<String> authorities, // 权限列表
         Long issuedAt, // 签发时间（Unix时间戳）
         Long expiresAt, // 过期时间（Unix时间戳）

@@ -87,10 +87,10 @@ public class UserDefaultsGenerator {
     }
 
     /**
-    * 基于手机号生成昵称
+     * 基于手机号生成昵称
      *
      * <p>
-    * 格式: user_{timestamp}_{random4}
+     * 格式: user_{timestamp}_{random4}
      * <p>
      * 示例: user_1735123456789_a1b2
      *

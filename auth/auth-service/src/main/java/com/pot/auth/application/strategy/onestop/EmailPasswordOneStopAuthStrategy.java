@@ -91,12 +91,12 @@ public class EmailPasswordOneStopAuthStrategy extends AbstractOneStopAuthStrateg
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
         String generatedNickname = generateAvailableNickname(
                 port,
-            () -> userDefaultsGenerator.generateNicknameFromEmail(request.email()));
+                () -> userDefaultsGenerator.generateNicknameFromEmail(request.email()));
 
         var userId = port.createUser(CreateUserCommand.builder()
                 .email(Email.of(request.email()))
                 .password(Password.of(password))
-            .username(generatedNickname)
+                .username(generatedNickname)
                 .avatarUrl(userDefaultsGenerator.getDefaultAvatarUrl())
                 .build());
 

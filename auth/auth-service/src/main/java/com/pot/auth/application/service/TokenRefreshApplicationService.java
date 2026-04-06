@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 /**
  * Token刷新应用服务
  *
- * <p>负责Token的刷新和验证
+ * <p>
+ * 负责Token的刷新和验证
  *
  * @author pot
  * @since 2025-11-10
@@ -40,14 +41,13 @@ public class TokenRefreshApplicationService {
         LoginResponse response = new LoginResponse(
                 accessToken.userId().value(),
                 accessToken.userDomain().name(),
-            accessToken.nickname(),
+                accessToken.nickname(),
                 null, // email不在AccessToken中
                 null, // phoneNumber不在AccessToken中
                 tokenPair.getAccessTokenString(),
                 tokenPair.getRefreshTokenString(),
                 accessToken.expiresAt(),
-                tokenPair.refreshToken().expiresAt()
-        );
+                tokenPair.refreshToken().expiresAt());
 
         log.info("[应用服务] Token刷新成功: userId={}", accessToken.userId());
         return response;
@@ -81,4 +81,3 @@ public class TokenRefreshApplicationService {
         log.info("[应用服务] 用户登出成功: userId={}", token.userId());
     }
 }
-

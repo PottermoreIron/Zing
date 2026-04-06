@@ -80,7 +80,7 @@ public class JwtTokenService {
      *
      * @param userId      用户ID
      * @param userDomain  用户域
-         * @param nickname    显示名
+     * @param nickname    显示名
      * @param permissions 权限集合
      * @return Token对
      */
@@ -90,7 +90,7 @@ public class JwtTokenService {
             String nickname,
             Set<String> permissions) {
         log.info("[Token] 生成Token对: userId={}, userDomain={}, nickname={}, permCount={}",
-            userId, userDomain, nickname, permissions.size());
+                userId, userDomain, nickname, permissions.size());
 
         try {
             // 【增强】1. 缓存权限到Redis（调用PermissionDomainService）
@@ -239,7 +239,7 @@ public class JwtTokenService {
         TokenPair newTokenPair = tokenManagementPort.generateTokenPair(
                 oldRefreshToken.userId(),
                 oldRefreshToken.userDomain(),
-            getNicknameFromCache(oldRefreshToken),
+                getNicknameFromCache(oldRefreshToken),
                 authorities,
                 metadata);
 

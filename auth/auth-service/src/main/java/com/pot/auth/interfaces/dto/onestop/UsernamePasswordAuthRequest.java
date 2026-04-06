@@ -16,12 +16,12 @@ import jakarta.validation.constraints.NotNull;
  * @since 2025-11-29
  */
 public record UsernamePasswordAuthRequest(
-        @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
+                @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
 
-        @ValidUsername String nickname,
+                @ValidUsername String nickname,
 
-        @ValidPassword String password,
+                @ValidPassword String password,
 
-        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-        implements OneStopAuthRequest {
+                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+                implements OneStopAuthRequest {
 }

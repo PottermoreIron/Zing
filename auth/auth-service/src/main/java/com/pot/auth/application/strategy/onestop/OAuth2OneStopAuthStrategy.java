@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 @Component
 @ConditionalOnProperty(name = "auth.oauth2.enabled", havingValue = "true")
 public class OAuth2OneStopAuthStrategy
-    extends AbstractOneStopAuthStrategyImpl {
+        extends AbstractOneStopAuthStrategyImpl {
 
     private final OAuth2Port oauth2Port;
     private final UserModulePortFactory userModulePortFactory;
@@ -91,10 +91,10 @@ public class OAuth2OneStopAuthStrategy
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         String generatedNickname = StringUtils.hasText(oauth2UserInfo.email())
                 ? generateAvailableNickname(userModulePort,
-                () -> userDefaultsGenerator.generateNicknameFromEmail(oauth2UserInfo.email()))
+                        () -> userDefaultsGenerator.generateNicknameFromEmail(oauth2UserInfo.email()))
                 : generateAvailableNickname(userModulePort, userDefaultsGenerator::generateNickname);
         CreateUserCommand command = CreateUserCommand.builder()
-            .username(generatedNickname)
+                .username(generatedNickname)
                 .email(StringUtils.hasText(oauth2UserInfo.email()) ? Email.of(oauth2UserInfo.email()) : null)
                 .password(Password.of(password))
                 .nickname(oauth2UserInfo.nickname())

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class PhoneCodeOneStopAuthStrategy
-    extends AbstractOneStopAuthStrategyImpl {
+        extends AbstractOneStopAuthStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -78,11 +78,11 @@ public class PhoneCodeOneStopAuthStrategy
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         String generatedNickname = generateAvailableNickname(
                 userModulePort,
-            () -> userDefaultsGenerator.generateNicknameFromPhone(request.phone()));
+                () -> userDefaultsGenerator.generateNicknameFromPhone(request.phone()));
         CreateUserCommand command = CreateUserCommand.builder()
                 .phone(Phone.of(request.phone()))
                 .password(Password.of(password))
-            .username(generatedNickname)
+                .username(generatedNickname)
                 .avatarUrl(avatarUrl)
                 .build();
 

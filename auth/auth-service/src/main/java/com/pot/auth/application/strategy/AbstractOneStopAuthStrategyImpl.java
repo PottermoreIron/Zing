@@ -138,9 +138,9 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
      * <p>
      * 根据不同的认证方式，查找用户的方式也不同：
      * <ul>
-    * <li>手机号认证：通过手机号查找</li>
-    * <li>邮箱认证：通过邮箱查找</li>
-    * <li>昵称认证：通过昵称查找</li>
+     * <li>手机号认证：通过手机号查找</li>
+     * <li>邮箱认证：通过邮箱查找</li>
+     * <li>昵称认证：通过昵称查找</li>
      * </ul>
      *
      * @param context 认证上下文
@@ -183,7 +183,7 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
      * <p>
      * 子类实现此方法时，应该：
      * <ul>
-    * <li>如果用户未提供昵称，使用 userDefaultsGenerator 生成</li>
+     * <li>如果用户未提供昵称，使用 userDefaultsGenerator 生成</li>
      * <li>如果用户未提供密码，使用 userDefaultsGenerator 生成</li>
      * <li>如果用户未提供头像，使用 userDefaultsGenerator 提供默认头像</li>
      * </ul>

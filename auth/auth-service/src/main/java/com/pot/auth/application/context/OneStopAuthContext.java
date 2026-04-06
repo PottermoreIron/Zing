@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 public record OneStopAuthContext(
-    @NonNull OneStopAuthCommand request,
+        @NonNull OneStopAuthCommand request,
         @NonNull IpAddress ipAddress,
         @NonNull DeviceInfo deviceInfo,
         String sessionId,

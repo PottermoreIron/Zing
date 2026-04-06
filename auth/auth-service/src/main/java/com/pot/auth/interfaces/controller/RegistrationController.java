@@ -44,7 +44,7 @@ public class RegistrationController {
      * <p>
      * 支持6种注册方式，通过registerType字段自动识别：
      * <ul>
-    * <li>USERNAME_PASSWORD - 昵称密码注册（保留历史类型名）</li>
+     * <li>USERNAME_PASSWORD - 昵称密码注册（保留历史类型名）</li>
      * <li>EMAIL_PASSWORD - 邮箱密码注册</li>
      * <li>EMAIL_CODE - 邮箱验证码注册</li>
      * <li>PHONE_CODE - 手机号验证码注册</li>

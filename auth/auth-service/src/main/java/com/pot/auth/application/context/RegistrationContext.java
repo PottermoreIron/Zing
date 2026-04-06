@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 public record RegistrationContext(
-    @NonNull RegisterCommand request,
+        @NonNull RegisterCommand request,
         @NonNull IpAddress ipAddress,
         @NonNull DeviceInfo deviceInfo,
         String invitationCode,

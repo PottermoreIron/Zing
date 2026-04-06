@@ -11,7 +11,7 @@ import java.lang.annotation.*;
  * @created: 2025/11/16 22:26
  * @description: 有效昵称验证
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = UsernameValidator.class)

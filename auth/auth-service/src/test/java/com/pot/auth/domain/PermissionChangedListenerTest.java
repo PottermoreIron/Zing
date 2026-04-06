@@ -83,12 +83,12 @@ class PermissionChangedListenerTest {
         void whenDomainServiceThrows_thenSwallowException() {
             doThrow(new RuntimeException("Redis unavailable"))
                     .when(permissionDomainService)
-                .invalidatePermissionCache(any(UserId.class), eq(UserDomain.MEMBER));
+                    .invalidatePermissionCache(any(UserId.class), eq(UserDomain.MEMBER));
 
             listener.consume(validEvent);
 
             verify(permissionDomainService)
-                .invalidatePermissionCache(any(UserId.class), eq(UserDomain.MEMBER));
+                    .invalidatePermissionCache(any(UserId.class), eq(UserDomain.MEMBER));
         }
     }
 
