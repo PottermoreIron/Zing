@@ -1,7 +1,9 @@
 package com.pot.auth.application.service;
 
 import com.pot.auth.application.dto.OneStopAuthResponse;
+import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
+import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.factory.OneStopAuthStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.application.context.OneStopAuthContext;
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Service;
 public class OneStopAuthenticationService {
 
         private final OneStopAuthStrategyFactory strategyFactory;
+        private final ValidationChain<OneStopAuthContext> oneStopAuthValidationChain;
 
         /**
          * 一键认证（自动处理注册/登录）
@@ -55,15 +58,15 @@ public class OneStopAuthenticationService {
 
                 // 1. 构建认证上下文
                 OneStopAuthContext context = OneStopAuthContext.builder()
-                                .request(request)
+                                .request(toCommand(request))
                                 .ipAddress(IpAddress.of(ipAddress))
                                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                                 .build();
 
+                oneStopAuthValidationChain.validate(context);
+
                 // 2. 获取策略并执行
-                @SuppressWarnings("unchecked")
-                OneStopAuthStrategy<OneStopAuthRequest> strategy = (OneStopAuthStrategy<OneStopAuthRequest>) strategyFactory
-                                .getStrategy(request.authType());
+                OneStopAuthStrategy strategy = strategyFactory.getStrategy(request.authType());
                 AuthenticationResult result = strategy.execute(context);
 
                 // 3. 转换为响应
@@ -73,5 +76,59 @@ public class OneStopAuthenticationService {
                                 result.userId(), request.authType());
 
                 return response;
+        }
+
+        private OneStopAuthCommand toCommand(OneStopAuthRequest request) {
+                return new OneStopAuthCommand() {
+                        @Override
+                        public com.pot.auth.domain.shared.enums.AuthType authType() {
+                                return request.authType();
+                        }
+
+                        @Override
+                        public com.pot.auth.domain.shared.valueobject.UserDomain userDomain() {
+                                return request.userDomain();
+                        }
+
+                        @Override
+                        public String nickname() {
+                                return request.nickname();
+                        }
+
+                        @Override
+                        public String email() {
+                                return request.email();
+                        }
+
+                        @Override
+                        public String phone() {
+                                return request.phone();
+                        }
+
+                        @Override
+                        public String password() {
+                                return request.password();
+                        }
+
+                        @Override
+                        public String verificationCode() {
+                                return request.verificationCode();
+                        }
+
+                        @Override
+                        public String code() {
+                                return request.code();
+                        }
+
+                        @Override
+                        public String state() {
+                                return request.state();
+                        }
+
+                        @Override
+                        public String oauth2ProviderCode() {
+                                return request.oauth2ProviderCode();
+                        }
+                };
         }
 }

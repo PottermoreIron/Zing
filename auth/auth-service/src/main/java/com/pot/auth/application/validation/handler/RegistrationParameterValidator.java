@@ -1,45 +1,43 @@
 package com.pot.auth.application.validation.handler;
 
+import com.pot.auth.application.command.RegisterCommand;
 import com.pot.auth.application.context.RegistrationContext;
+import com.pot.auth.application.validation.ValidationHandler;
 import com.pot.auth.domain.shared.exception.DomainException;
-import com.pot.auth.domain.validation.ValidationHandler;
-import com.pot.auth.interfaces.dto.register.EmailCodeRegisterRequest;
-import com.pot.auth.interfaces.dto.register.EmailPasswordRegisterRequest;
-import com.pot.auth.interfaces.dto.register.PhoneCodeRegisterRequest;
-import com.pot.auth.interfaces.dto.register.RegisterRequest;
-import com.pot.auth.interfaces.dto.register.UsernamePasswordRegisterRequest;
 import com.pot.zing.framework.common.util.ValidationUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class RegistrationParameterValidator implements ValidationHandler<RegistrationContext> {
 
     @Override
     public void validate(RegistrationContext context) {
-        RegisterRequest request = context.request();
+        RegisterCommand request = context.request();
         log.debug("[参数校验] 开始校验注册请求: type={}", request.registerType());
 
         switch (request.registerType()) {
-            case USERNAME_PASSWORD -> validateUsernamePassword((UsernamePasswordRegisterRequest) request);
-            case EMAIL_PASSWORD -> validateEmailPassword((EmailPasswordRegisterRequest) request);
-            case EMAIL_CODE -> validateEmailCode((EmailCodeRegisterRequest) request);
-            case PHONE_CODE -> validatePhoneCode((PhoneCodeRegisterRequest) request);
+            case USERNAME_PASSWORD -> validateNicknamePassword(request);
+            case EMAIL_PASSWORD -> validateEmailPassword(request);
+            case EMAIL_CODE -> validateEmailCode(request);
+            case PHONE_CODE -> validatePhoneCode(request);
             case OAUTH2, WECHAT -> {
             }
             default -> throw new DomainException("不支持的注册类型: " + request.registerType());
         }
     }
 
-    private void validateUsernamePassword(UsernamePasswordRegisterRequest request) {
-        if (!ValidationUtils.isValidNickname(request.username())) {
-            throw new DomainException("用户名不合法");
+    private void validateNicknamePassword(RegisterCommand request) {
+        if (!ValidationUtils.isValidNickname(request.nickname())) {
+            throw new DomainException("昵称不合法");
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
             throw new DomainException("密码不合法");
         }
     }
 
-    private void validateEmailPassword(EmailPasswordRegisterRequest request) {
+    private void validateEmailPassword(RegisterCommand request) {
         if (!ValidationUtils.isValidEmail(request.email())) {
             throw new DomainException("邮箱格式不正确");
         }
@@ -48,7 +46,7 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
         }
     }
 
-    private void validateEmailCode(EmailCodeRegisterRequest request) {
+    private void validateEmailCode(RegisterCommand request) {
         if (!ValidationUtils.isValidEmail(request.email())) {
             throw new DomainException("邮箱格式不正确");
         }
@@ -57,7 +55,7 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
         }
     }
 
-    private void validatePhoneCode(PhoneCodeRegisterRequest request) {
+    private void validatePhoneCode(RegisterCommand request) {
         if (!ValidationUtils.isValidPhone(request.phone())) {
             throw new DomainException("手机号格式不正确");
         }

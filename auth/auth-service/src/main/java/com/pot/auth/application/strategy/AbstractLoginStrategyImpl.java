@@ -5,9 +5,7 @@ import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.application.context.AuthenticationContext;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.LoginType;
-import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.domain.validation.handler.UserStatusValidator;
-import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,55 +24,46 @@ import lombok.extern.slf4j.Slf4j;
  * <li>返回响应</li>
  * </ol>
  *
- * @param <T> 具体的登录请求类型，必须继承自 LoginRequest
  * @author pot
  * @since 2025-11-29
  */
 @Slf4j
-public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implements LoginStrategy<T> {
+public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
 
     protected final JwtTokenService jwtTokenService;
-    protected final ValidationChain<AuthenticationContext> validationChain;
 
-    protected AbstractLoginStrategyImpl(
-            JwtTokenService jwtTokenService,
-            ValidationChain<AuthenticationContext> validationChain) {
+    protected AbstractLoginStrategyImpl(JwtTokenService jwtTokenService) {
         this.jwtTokenService = jwtTokenService;
-        this.validationChain = validationChain;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public final AuthenticationResult execute(AuthenticationContext context) {
-        T request = (T) context.request();
+        var request = context.request();
 
         log.info("[登录策略] 开始执行登录: type={}, userDomain={}, ip={}",
                 request.loginType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 责任链校验
-            validationChain.validate(context);
-
-            // 2. 凭证验证（由子类实现）
+            // 1. 凭证验证（由子类实现）
             validateCredential(context);
 
-            // 3. 获取用户信息（由子类实现）
+            // 2. 获取用户信息（由子类实现）
             UserDTO user = getUserInfo(context);
 
-            // 4. 用户状态验证（使用健壮的状态处理器）
+            // 3. 用户状态验证（使用健壮的状态处理器）
             UserStatusValidator.validate(user);
 
-            // 5. 登录前置钩子（由子类可选实现）
+            // 4. 登录前置钩子（由子类可选实现）
             beforeLogin(user, context);
 
-            // 6. 生成Token并构建结果
+            // 5. 生成Token并构建结果
             AuthenticationResult result = generateAuthenticationResult(user, context);
 
-            // 7. 登录后置钩子（由子类可选实现）
+            // 6. 登录后置钩子（由子类可选实现）
             afterLogin(user, result, context);
 
-            log.info("[登录策略] 登录成功: userId={}, username={}, type={}",
-                    user.userId(), user.username(), request.loginType());
+                log.info("[登录策略] 登录成功: userId={}, nickname={}, type={}",
+                    user.userId(), user.nickname(), request.loginType());
 
             return result;
 
@@ -104,7 +93,7 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
      * <p>
      * 根据登录方式的不同，查询用户的方式也不同：
      * <ul>
-     * <li>用户名登录：通过用户名查询</li>
+    * <li>昵称登录：通过昵称查询</li>
      * <li>邮箱登录：通过邮箱查询</li>
      * <li>手机号登录：通过手机号查询</li>
      * </ul>
@@ -142,13 +131,13 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
         var tokenPair = jwtTokenService.generateTokenPair(
                 user.userId(),
                 context.request().userDomain(),
-                user.username(),
+                user.nickname(),
                 user.permissions());
 
         return AuthenticationResult.builder()
                 .userId(user.userId())
                 .userDomain(context.request().userDomain())
-                .username(user.username())
+                .nickname(user.nickname())
                 .email(user.email())
                 .phone(user.phone())
                 .accessToken(tokenPair.accessToken().rawToken())
@@ -198,10 +187,5 @@ public abstract class AbstractLoginStrategyImpl<T extends LoginRequest> implemen
     /**
      * 获取策略支持的登录类型（由子类实现）
      */
-    protected abstract LoginType getSupportedLoginType();
-
-    @Override
-    public boolean supports(LoginType loginType) {
-        return getSupportedLoginType().equals(loginType);
-    }
+    public abstract LoginType getSupportedLoginType();
 }

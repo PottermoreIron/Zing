@@ -1,54 +1,49 @@
 package com.pot.auth.application.validation.handler;
 
+import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.application.context.OneStopAuthContext;
+import com.pot.auth.application.validation.ValidationHandler;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
-import com.pot.auth.domain.validation.ValidationHandler;
-import com.pot.auth.interfaces.dto.onestop.EmailCodeAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.EmailPasswordAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.OAuth2AuthRequest;
-import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.PhoneCodeAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.PhonePasswordAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.UsernamePasswordAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
 import com.pot.zing.framework.common.util.ValidationUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
  * 一键认证参数校验器。
  */
 @Slf4j
+@Component
 public class OneStopAuthenticationParameterValidator implements ValidationHandler<OneStopAuthContext> {
 
     @Override
     public void validate(OneStopAuthContext context) {
-        OneStopAuthRequest request = context.request();
+        OneStopAuthCommand request = context.request();
         log.debug("[参数校验] 开始校验一键认证请求: type={}", request.authType());
 
         switch (request.authType()) {
-            case USERNAME_PASSWORD -> validateUsernamePassword((UsernamePasswordAuthRequest) request);
-            case PHONE_PASSWORD -> validatePhonePassword((PhonePasswordAuthRequest) request);
-            case PHONE_CODE -> validatePhoneCode((PhoneCodeAuthRequest) request);
-            case EMAIL_PASSWORD -> validateEmailPassword((EmailPasswordAuthRequest) request);
-            case EMAIL_CODE -> validateEmailCode((EmailCodeAuthRequest) request);
-            case OAUTH2 -> validateOAuth2((OAuth2AuthRequest) request);
-            case WECHAT -> validateWeChat((WeChatAuthRequest) request);
+            case USERNAME_PASSWORD -> validateNicknamePassword(request);
+            case PHONE_PASSWORD -> validatePhonePassword(request);
+            case PHONE_CODE -> validatePhoneCode(request);
+            case EMAIL_PASSWORD -> validateEmailPassword(request);
+            case EMAIL_CODE -> validateEmailCode(request);
+            case OAUTH2 -> validateOAuth2(request);
+            case WECHAT -> validateWeChat(request);
             default -> throw new DomainException(AuthResultCode.UNSUPPORTED_AUTHENTICATION_TYPE);
         }
     }
 
-    private void validateUsernamePassword(UsernamePasswordAuthRequest request) {
-        if (!ValidationUtils.isValidNickname(request.username())) {
-            throw new DomainException("用户名不合法");
+    private void validateNicknamePassword(OneStopAuthCommand request) {
+        if (!ValidationUtils.isValidNickname(request.nickname())) {
+            throw new DomainException("昵称不合法");
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
             throw new DomainException("密码不合法");
         }
     }
 
-    private void validatePhonePassword(PhonePasswordAuthRequest request) {
+    private void validatePhonePassword(OneStopAuthCommand request) {
         if (!ValidationUtils.isValidPhone(request.phone())) {
             throw new DomainException(AuthResultCode.INVALID_PHONE);
         }
@@ -64,7 +59,7 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
         }
     }
 
-    private void validatePhoneCode(PhoneCodeAuthRequest request) {
+    private void validatePhoneCode(OneStopAuthCommand request) {
         if (!ValidationUtils.isValidPhone(request.phone())) {
             throw new DomainException(AuthResultCode.INVALID_PHONE);
         }
@@ -73,7 +68,7 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
         }
     }
 
-    private void validateEmailPassword(EmailPasswordAuthRequest request) {
+    private void validateEmailPassword(OneStopAuthCommand request) {
         if (!ValidationUtils.isValidEmail(request.email())) {
             throw new DomainException(AuthResultCode.INVALID_EMAIL);
         }
@@ -89,7 +84,7 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
         }
     }
 
-    private void validateEmailCode(EmailCodeAuthRequest request) {
+    private void validateEmailCode(OneStopAuthCommand request) {
         if (!ValidationUtils.isValidEmail(request.email())) {
             throw new DomainException(AuthResultCode.INVALID_EMAIL);
         }
@@ -98,13 +93,13 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
         }
     }
 
-    private void validateOAuth2(OAuth2AuthRequest request) {
-        if (request.provider() == null || !StringUtils.hasText(request.code())) {
+    private void validateOAuth2(OneStopAuthCommand request) {
+        if (!StringUtils.hasText(request.oauth2ProviderCode()) || !StringUtils.hasText(request.code())) {
             throw new DomainException(AuthResultCode.INVALID_PARAMETER);
         }
     }
 
-    private void validateWeChat(WeChatAuthRequest request) {
+    private void validateWeChat(OneStopAuthCommand request) {
         if (!StringUtils.hasText(request.code())) {
             throw new DomainException(AuthResultCode.INVALID_PARAMETER);
         }

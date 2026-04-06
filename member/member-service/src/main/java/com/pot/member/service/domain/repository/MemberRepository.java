@@ -2,6 +2,7 @@ package com.pot.member.service.domain.repository;
 
 import com.pot.member.service.domain.model.member.*;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,6 +58,11 @@ public interface MemberRepository {
      * 查找拥有指定角色的所有会员ID
      */
     Set<Long> findMemberIdsByRoleId(Long roleId);
+
+    /**
+     * 批量查询会员角色ID
+     */
+    Map<Long, Set<Long>> findRoleIdsByMemberIds(Set<Long> memberIds);
 
     /**
      * 删除会员（软删除）

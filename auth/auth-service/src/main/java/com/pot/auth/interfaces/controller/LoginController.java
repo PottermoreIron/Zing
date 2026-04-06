@@ -27,11 +27,9 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  *
  * <p>
  * 负责传统登录流程（要求用户已注册）
- *
- * <p>
  * 支持的登录方式：
  * <ul>
- * <li>用户名 + 密码</li>
+ * <li>昵称 + 密码</li>
  * <li>邮箱 + 密码</li>
  * <li>邮箱 + 验证码</li>
  * <li>手机号 + 验证码</li>
@@ -46,7 +44,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
-@Tag(name = "登录", description = "传统登录（用户名密码 / 邮箱密码 / 验证码）和 Token 刷新")
+@Tag(name = "登录", description = "传统登录（昵称密码 / 邮箱密码 / 验证码）和 Token 刷新")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -63,18 +61,18 @@ public class LoginController {
      * <p>
      * 支持4种登录方式，通过loginType字段自动识别：
      * <ul>
-     * <li>USERNAME_PASSWORD - 用户名密码登录</li>
+    * <li>USERNAME_PASSWORD - 昵称密码登录（保留历史类型名）</li>
      * <li>EMAIL_PASSWORD - 邮箱密码登录</li>
      * <li>EMAIL_CODE - 邮箱验证码登录</li>
      * <li>PHONE_CODE - 手机号验证码登录</li>
      * </ul>
-     * 请求示例（用户名密码）：
+    * 请求示例（昵称密码）：
      *
      * <pre>
      * POST /auth/api/v1/login
      * {
      *   "loginType": "USERNAME_PASSWORD",
-     *   "username": "john_doe",
+    *   "nickname": "john_doe",
      *   "password": "Password123!",
      *   "userDomain": "MEMBER"
      * }

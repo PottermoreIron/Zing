@@ -36,63 +36,63 @@ class UserDefaultsGeneratorTest {
     }
 
     // ================================================================
-    // generateUsernameFromPhone
+    // generateNicknameFromPhone
     // ================================================================
 
     @Test
-    @DisplayName("基于手机号生成用户名，以 user_ 前缀开头，且包含时间戳和随机部分")
+    @DisplayName("基于手机号生成昵称，以 user_ 前缀开头，且包含时间戳和随机部分")
     void whenGenerateFromPhone_thenFollowFormat() {
-        String username = generator.generateUsernameFromPhone("13800138000");
-        assertThat(username).startsWith("user_");
+        String nickname = generator.generateNicknameFromPhone("13800138000");
+        assertThat(nickname).startsWith("user_");
         // 格式: user_{timestamp}_{random4}
-        assertThat(username.split("_")).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(username).isLowerCase();
+        assertThat(nickname.split("_")).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(nickname).isLowerCase();
     }
 
     @RepeatedTest(5)
-    @DisplayName("多次基于手机号生成用户名，每次都不为空")
+    @DisplayName("多次基于手机号生成昵称，每次都不为空")
     void whenGenerateFromPhoneRepeated_thenAlwaysNotBlank() {
-        String username = generator.generateUsernameFromPhone("13912345678");
-        assertThat(username).isNotBlank();
+        String nickname = generator.generateNicknameFromPhone("13912345678");
+        assertThat(nickname).isNotBlank();
     }
 
     // ================================================================
-    // generateUsernameFromEmail
+    // generateNicknameFromEmail
     // ================================================================
 
     @Test
-    @DisplayName("基于邮箱生成用户名，包含邮箱前缀部分")
+    @DisplayName("基于邮箱生成昵称，包含邮箱前缀部分")
     void whenGenerateFromEmail_thenContainsEmailPrefix() {
-        String username = generator.generateUsernameFromEmail("johndoe@example.com");
-        assertThat(username).startsWith("johndoe_");
+        String nickname = generator.generateNicknameFromEmail("johndoe@example.com");
+        assertThat(nickname).startsWith("johndoe_");
     }
 
     @Test
-    @DisplayName("基于邮箱生成用户名，以下划线分隔后缀随机字符")
+    @DisplayName("基于邮箱生成昵称，以下划线分隔后缀随机字符")
     void whenGenerateFromEmail_thenHasRandomSuffix() {
-        String username = generator.generateUsernameFromEmail("test@example.com");
+        String nickname = generator.generateNicknameFromEmail("test@example.com");
         // 格式: {emailPrefix}_{random4}
-        String[] parts = username.split("_");
+        String[] parts = nickname.split("_");
         assertThat(parts).hasSizeGreaterThanOrEqualTo(2);
         // 随机后缀长度为4
         assertThat(parts[parts.length - 1]).hasSize(4);
     }
 
     // ================================================================
-    // generateUsername
+    // generateNickname
     // ================================================================
 
     @Test
-    @DisplayName("生成通用用户名，以 user_ 前缀开头")
-    void whenGenerateUsername_thenStartWithPrefix() {
-        String username = generator.generateUsername();
-        assertThat(username).startsWith("user_");
+    @DisplayName("生成通用昵称，以 user_ 前缀开头")
+    void whenGenerateNickname_thenStartWithPrefix() {
+        String nickname = generator.generateNickname();
+        assertThat(nickname).startsWith("user_");
     }
 
     @RepeatedTest(3)
-    @DisplayName("多次生成通用用户名，每次结果不为空")
-    void whenGenerateUsernameRepeated_thenNotBlank() {
-        assertThat(generator.generateUsername()).isNotBlank();
+    @DisplayName("多次生成通用昵称，每次结果不为空")
+    void whenGenerateNicknameRepeated_thenNotBlank() {
+        assertThat(generator.generateNickname()).isNotBlank();
     }
 
     // ================================================================

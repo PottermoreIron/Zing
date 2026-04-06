@@ -11,7 +11,7 @@ package com.pot.auth.application.dto;
 public record RegisterResponse(
         Long userId,
         String userDomain,
-        String username,
+        String nickname,
         String email,
         String phoneNumber,
         String accessToken,
@@ -27,7 +27,7 @@ public record RegisterResponse(
     public static RegisterResponse success(
             Long userId,
             String userDomain,
-            String username,
+            String nickname,
             String email,
             String phoneNumber,
             String accessToken,
@@ -38,7 +38,7 @@ public record RegisterResponse(
         return new RegisterResponse(
                 userId,
                 userDomain,
-                username,
+                nickname,
                 email,
                 phoneNumber,
                 accessToken,

@@ -1,6 +1,6 @@
 ---
 name: mybatis-mapper
-description: "MyBatis Mapper XML 与 PO 维护规范：新增表映射、修复 resultMap type 错误、添加自定义 SQL、维护 Mapper 接口。触发词：Mapper XML、resultMap、PO、persistence entity、MyBatis-Plus、@TableName、BaseMapper、mapper文件、xml映射。"
+description: "MyBatis Mapper XML 与 PO 维护规范：新增表映射、修复 resultMap type 错误、添加自定义 SQL、维护 Mapper 接口。Use when creating mapper XML, fixing resultMap issues, maintaining persistence entities, or updating BaseMapper contracts. 触发词：Mapper XML、resultMap、PO、persistence entity、MyBatis-Plus、@TableName、BaseMapper、mapper文件、xml映射、MyBatis、SQL。"
 argument-hint: "描述要操作的表或 Mapper（如：给 order 表创建 Mapper，修复 resultMap 报错）"
 ---
 

@@ -45,7 +45,7 @@ public class VerificationCodeController {
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:email:' + #email", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/email")
     public R<Void> sendEmailCode(
-            @RequestParam @NotBlank(message = "邮箱不能为空") @ValidEmail(message = "邮箱格式不正确") String email) {
+            @RequestParam("email") @NotBlank(message = "邮箱不能为空") @ValidEmail(message = "邮箱格式不正确") String email) {
         log.info("[接口] 发送邮件验证码: email={}", email);
 
         boolean sent = verificationCodeApplicationService.sendEmailCode(email);
@@ -66,7 +66,7 @@ public class VerificationCodeController {
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:sms:' + #phone", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/sms")
     public R<Void> sendSmsCode(
-            @RequestParam @NotBlank(message = "手机号不能为空") @ValidPhone(message = "手机号格式不正确") String phone) {
+            @RequestParam("phone") @NotBlank(message = "手机号不能为空") @ValidPhone(message = "手机号格式不正确") String phone) {
         log.info("[接口] 发送短信验证码: phone={}", phone);
 
         boolean sent = verificationCodeApplicationService.sendSmsCode(phone);

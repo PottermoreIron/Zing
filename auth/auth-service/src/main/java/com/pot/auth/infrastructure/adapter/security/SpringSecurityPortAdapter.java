@@ -71,7 +71,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             }
         }
 
-        // 降级：使用用户名作为userId
+        // 降级：使用认证名称作为 userId
         return authentication.getName();
     }
 
@@ -150,8 +150,9 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             return new HashMap<>(detailsMap);
         }
 
-        // 兜底：返回基础信息
+        // 兜底：返回基础信息，并保留 username/nickname 双键兼容
         Map<String, Object> basicDetails = new HashMap<>();
+        basicDetails.put("nickname", authentication.getName());
         basicDetails.put("username", authentication.getName());
         basicDetails.put("authenticated", authentication.isAuthenticated());
         return basicDetails;

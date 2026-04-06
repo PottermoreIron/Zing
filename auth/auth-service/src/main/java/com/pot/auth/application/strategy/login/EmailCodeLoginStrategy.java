@@ -9,9 +9,6 @@ import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.application.strategy.AbstractLoginStrategyImpl;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
-import com.pot.auth.interfaces.dto.auth.EmailCodeLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class EmailCodeLoginStrategy extends AbstractLoginStrategyImpl<EmailCodeLoginRequest> {
+public class EmailCodeLoginStrategy extends AbstractLoginStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -30,23 +27,15 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategyImpl<EmailCodeL
     public EmailCodeLoginStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService,
-            AuthenticationParameterValidator authenticationParameterValidator) {
-        super(jwtTokenService, buildValidationChain(authenticationParameterValidator));
+            VerificationCodeService verificationCodeService) {
+        super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<AuthenticationContext> buildValidationChain(
-            AuthenticationParameterValidator authenticationParameterValidator) {
-        ValidationChain<AuthenticationContext> chain = new ValidationChain<>();
-        chain.addHandler(authenticationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected void validateCredential(AuthenticationContext context) {
-        EmailCodeLoginRequest request = (EmailCodeLoginRequest) context.request();
+        var request = context.request();
         log.debug("[邮箱验证码登录] 验证凭证: email={}", request.email());
 
         if (!verificationCodeService.verifyCode(request.email(), request.verificationCode())) {
@@ -56,14 +45,14 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategyImpl<EmailCodeL
 
     @Override
     protected UserDTO getUserInfo(AuthenticationContext context) {
-        EmailCodeLoginRequest request = (EmailCodeLoginRequest) context.request();
+        var request = context.request();
         return userModulePortFactory.getPort(request.userDomain())
                 .findByEmail(request.email())
                 .orElseThrow(() -> new DomainException(AuthResultCode.USER_NOT_FOUND));
     }
 
     @Override
-    protected LoginType getSupportedLoginType() {
+    public LoginType getSupportedLoginType() {
         return LoginType.EMAIL_CODE;
     }
 }

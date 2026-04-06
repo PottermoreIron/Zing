@@ -66,7 +66,7 @@ class TokenRefreshApplicationServiceTest {
             assertThat(response).isNotNull();
             assertThat(response.userId()).isEqualTo(TestFixtures.USER_ID.value());
             assertThat(response.userDomain()).isEqualTo(TestFixtures.USER_DOMAIN.name());
-            assertThat(response.username()).isEqualTo(TestFixtures.USERNAME);
+            assertThat(response.nickname()).isEqualTo(TestFixtures.USERNAME);
             assertThat(response.accessToken()).isEqualTo(TestFixtures.FAKE_ACCESS_TOKEN);
             assertThat(response.refreshToken()).isEqualTo(TestFixtures.FAKE_REFRESH_TOKEN);
             // email 和 phone 在 refreshToken 场景下为 null

@@ -16,9 +16,6 @@ import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import com.pot.auth.application.strategy.AbstractOneStopAuthStrategyImpl;
-import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.interfaces.dto.onestop.EmailCodeAuthRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImpl<EmailCodeAuthRequest> {
+public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -39,23 +36,15 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
             VerificationCodeService verificationCodeService,
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
+        super(jwtTokenService, userDefaultsGenerator);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain(
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
-        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
-        chain.addHandler(oneStopAuthenticationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected UserDTO findUser(OneStopAuthContext context) {
-        EmailCodeAuthRequest request = (EmailCodeAuthRequest) context.request();
+        var request = context.request();
         return userModulePortFactory.getPort(request.userDomain())
                 .findByEmail(request.email())
                 .orElse(null);
@@ -63,7 +52,7 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
 
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
-        EmailCodeAuthRequest request = (EmailCodeAuthRequest) context.request();
+        var request = context.request();
         if (!verificationCodeService.verifyCode(request.email(), VerificationCode.of(request.verificationCode()))) {
             throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
         }
@@ -76,7 +65,7 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
 
     @Override
     protected void beforeRegister(OneStopAuthContext context) {
-        EmailCodeAuthRequest request = (EmailCodeAuthRequest) context.request();
+        var request = context.request();
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
         if (port.existsByEmail(Email.of(request.email()))) {
             throw new DomainException(AuthResultCode.EMAIL_ALREADY_EXISTS);
@@ -85,16 +74,16 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
 
     @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
-        EmailCodeAuthRequest request = (EmailCodeAuthRequest) context.request();
+        var request = context.request();
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
-        String username = generateAvailableUsername(
+        String generatedNickname = generateAvailableNickname(
                 port,
-                () -> userDefaultsGenerator.generateUsernameFromEmail(request.email()));
+            () -> userDefaultsGenerator.generateNicknameFromEmail(request.email()));
 
         var userId = port.createUser(CreateUserCommand.builder()
                 .email(Email.of(request.email()))
                 .password(Password.of(userDefaultsGenerator.generateRandomPassword()))
-                .username(username)
+            .username(generatedNickname)
                 .avatarUrl(userDefaultsGenerator.getDefaultAvatarUrl())
                 .build());
 
@@ -104,12 +93,12 @@ public class EmailCodeOneStopAuthStrategy extends AbstractOneStopAuthStrategyImp
 
     @Override
     protected void afterRegister(UserDTO user, OneStopAuthContext context) {
-        verificationCodeService.deleteCode(((EmailCodeAuthRequest) context.request()).email());
+        verificationCodeService.deleteCode(context.request().email());
     }
 
     @Override
     protected void afterLogin(UserDTO user, AuthenticationResult result, OneStopAuthContext context) {
-        verificationCodeService.deleteCode(((EmailCodeAuthRequest) context.request()).email());
+        verificationCodeService.deleteCode(context.request().email());
     }
 
     @Override

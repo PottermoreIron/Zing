@@ -20,7 +20,7 @@ import java.util.Set;
 public record UserDTO(
         UserId userId,          // 使用Long而不是UserId，简化转换
         UserDomain userDomain,
-        String username,
+        String nickname,
         String email,
         String phone,        // 统一字段名为phone
         String status,

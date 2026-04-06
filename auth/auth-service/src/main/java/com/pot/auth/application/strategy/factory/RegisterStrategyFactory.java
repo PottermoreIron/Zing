@@ -25,23 +25,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RegisterStrategyFactory {
 
-    private final Map<RegisterType, RegisterStrategy<?>> strategyMap = new ConcurrentHashMap<>();
+    private final Map<RegisterType, RegisterStrategy> strategyMap = new ConcurrentHashMap<>();
 
-    public RegisterStrategyFactory(List<RegisterStrategy<?>> strategies) {
+    public RegisterStrategyFactory(List<RegisterStrategy> strategies) {
         log.info("[注册策略工厂] 开始初始化，共有 {} 个策略", strategies.size());
-        for (RegisterStrategy<?> strategy : strategies) {
-            for (RegisterType registerType : RegisterType.values()) {
-                if (strategy.supports(registerType)) {
-                    strategyMap.put(registerType, strategy);
-                    log.info("[注册策略工厂] 注册策略: {} -> {}", registerType, strategy.getClass().getSimpleName());
-                }
-            }
+        for (RegisterStrategy strategy : strategies) {
+            RegisterType registerType = strategy.getSupportedRegisterType();
+            strategyMap.put(registerType, strategy);
+            log.info("[注册策略工厂] 注册策略: {} -> {}", registerType, strategy.getClass().getSimpleName());
         }
         log.info("[注册策略工厂] 初始化完成，已注册策略: {}", strategyMap.keySet());
     }
 
-    public RegisterStrategy<?> getStrategy(RegisterType registerType) {
-        RegisterStrategy<?> strategy = strategyMap.get(registerType);
+    public RegisterStrategy getStrategy(RegisterType registerType) {
+        RegisterStrategy strategy = strategyMap.get(registerType);
         if (strategy == null) {
             log.error("[注册策略工厂] 未找到注册策略: registerType={}", registerType);
             throw new DomainException(AuthResultCode.UNSUPPORTED_REGISTER_TYPE);

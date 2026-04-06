@@ -1,11 +1,12 @@
 package com.pot.auth.application.service;
 
 import com.pot.auth.application.dto.LoginResponse;
+import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.LoginStrategy;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.application.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.application.context.AuthenticationContext;
-import com.pot.auth.domain.shared.exception.DomainException;
+import com.pot.auth.application.command.LoginCommand;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
@@ -24,7 +25,7 @@ import java.util.UUID;
  * <p>
  * 支持的登录方式：
  * <ul>
- * <li>用户名 + 密码</li>
+ * <li>昵称 + 密码</li>
  * <li>邮箱 + 密码</li>
  * <li>邮箱 + 验证码</li>
  * <li>手机号 + 验证码</li>
@@ -46,6 +47,7 @@ import java.util.UUID;
 public class LoginApplicationService {
 
     private final LoginStrategyFactory loginStrategyFactory;
+    private final ValidationChain<AuthenticationContext> authenticationValidationChain;
 
     /**
      * 传统登录入口
@@ -60,31 +62,31 @@ public class LoginApplicationService {
      * @param ipAddress 客户端IP地址
      * @param userAgent 用户代理信息
      * @return 登录响应
-     * @throws DomainException 如果使用不支持的登录类型
      */
     public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
         log.info("[登录服务] 登录请求: loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
-        // 传统登录（用户名/邮箱/手机号 + 密码/验证码）
+        // 传统登录（昵称/邮箱/手机号 + 密码/验证码）
         // 构建认证上下文
         AuthenticationContext context = AuthenticationContext.builder()
-                .request(request)
+            .request(toCommand(request))
                 .ipAddress(IpAddress.of(ipAddress))
                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                 .sessionId(generateSessionId())
                 .build();
 
+        authenticationValidationChain.validate(context);
+
         // 获取策略并执行
-        LoginStrategy<?> strategy = loginStrategyFactory.getStrategy(request.loginType());
-        // 此处的类型转换是安全的，因为工厂根据loginType返回对应的策略
+        LoginStrategy strategy = loginStrategyFactory.getStrategy(request.loginType());
         AuthenticationResult result = strategy.execute(context);
 
         // 转换为应用层DTO
         LoginResponse response = new LoginResponse(
                 result.userId().value(),
                 result.userDomain().name(),
-                result.username(),
+                result.nickname(),
                 result.email(),
                 result.phone(),
                 result.accessToken(),
@@ -103,5 +105,44 @@ public class LoginApplicationService {
      */
     private String generateSessionId() {
         return UUID.randomUUID().toString();
+    }
+
+    private LoginCommand toCommand(LoginRequest request) {
+        return new LoginCommand() {
+            @Override
+            public com.pot.auth.domain.shared.enums.LoginType loginType() {
+                return request.loginType();
+            }
+
+            @Override
+            public com.pot.auth.domain.shared.valueobject.UserDomain userDomain() {
+                return request.userDomain();
+            }
+
+            @Override
+            public String nickname() {
+                return request.nickname();
+            }
+
+            @Override
+            public String email() {
+                return request.email();
+            }
+
+            @Override
+            public String phone() {
+                return request.phone();
+            }
+
+            @Override
+            public String password() {
+                return request.password();
+            }
+
+            @Override
+            public String verificationCode() {
+                return request.verificationCode();
+            }
+        };
     }
 }

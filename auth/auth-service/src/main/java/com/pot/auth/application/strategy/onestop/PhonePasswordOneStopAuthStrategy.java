@@ -15,9 +15,6 @@ import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.domain.shared.valueobject.Phone;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
-import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.interfaces.dto.onestop.PhonePasswordAuthRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -27,7 +24,7 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class PhonePasswordOneStopAuthStrategy
-        extends AbstractOneStopAuthStrategyImpl<PhonePasswordAuthRequest> {
+    extends AbstractOneStopAuthStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -36,30 +33,22 @@ public class PhonePasswordOneStopAuthStrategy
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
             VerificationCodeService verificationCodeService,
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
+        super(jwtTokenService, userDefaultsGenerator);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain(
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
-        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
-        chain.addHandler(oneStopAuthenticationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected UserDTO findUser(OneStopAuthContext context) {
-        PhonePasswordAuthRequest request = (PhonePasswordAuthRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         return userModulePort.findByPhone(request.phone()).orElse(null);
     }
 
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
-        PhonePasswordAuthRequest request = (PhonePasswordAuthRequest) context.request();
+        var request = context.request();
         if (!StringUtils.hasText(request.password())) {
             throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
         }
@@ -74,7 +63,7 @@ public class PhonePasswordOneStopAuthStrategy
 
     @Override
     protected void validateCredentialForRegister(OneStopAuthContext context) {
-        PhonePasswordAuthRequest request = (PhonePasswordAuthRequest) context.request();
+        var request = context.request();
         if (!StringUtils.hasText(request.verificationCode())) {
             throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
         }
@@ -89,7 +78,7 @@ public class PhonePasswordOneStopAuthStrategy
 
     @Override
     protected void beforeRegister(OneStopAuthContext context) {
-        PhonePasswordAuthRequest request = (PhonePasswordAuthRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         if (userModulePort.existsByPhone(Phone.of(request.phone()))) {
             throw new DomainException(AuthResultCode.PHONE_ALREADY_EXISTS);
@@ -98,20 +87,20 @@ public class PhonePasswordOneStopAuthStrategy
 
     @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
-        PhonePasswordAuthRequest request = (PhonePasswordAuthRequest) context.request();
+        var request = context.request();
         String password = StringUtils.hasText(request.password())
                 ? request.password()
                 : userDefaultsGenerator.generateRandomPassword();
         String avatarUrl = userDefaultsGenerator.getDefaultAvatarUrl();
 
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-        String username = generateAvailableUsername(
+        String generatedNickname = generateAvailableNickname(
                 userModulePort,
-                () -> userDefaultsGenerator.generateUsernameFromPhone(request.phone()));
+            () -> userDefaultsGenerator.generateNicknameFromPhone(request.phone()));
         CreateUserCommand command = CreateUserCommand.builder()
                 .phone(Phone.of(request.phone()))
                 .password(Password.of(password))
-                .username(username)
+            .username(generatedNickname)
                 .avatarUrl(avatarUrl)
                 .build();
 
@@ -122,7 +111,7 @@ public class PhonePasswordOneStopAuthStrategy
 
     @Override
     protected void afterRegister(UserDTO user, OneStopAuthContext context) {
-        PhonePasswordAuthRequest request = (PhonePasswordAuthRequest) context.request();
+        var request = context.request();
         if (StringUtils.hasText(request.verificationCode())) {
             verificationCodeService.deleteCode(request.phone());
         }

@@ -2,6 +2,7 @@ package com.pot.auth.interfaces.dto.onestop;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
@@ -14,7 +15,7 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
  * <p>
  * <strong>支持的认证类型：</strong>
  * <ul>
- * <li>USERNAME_PASSWORD - 用户名密码</li>
+ * <li>USERNAME_PASSWORD - 昵称密码（保留历史类型名）</li>
  * <li>PHONE_PASSWORD - 手机号密码</li>
  * <li>PHONE_CODE - 手机号验证码</li>
  * <li>EMAIL_PASSWORD - 邮箱密码</li>
@@ -36,14 +37,7 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
         @JsonSubTypes.Type(value = OAuth2AuthRequest.class, name = "OAUTH2"),
         @JsonSubTypes.Type(value = WeChatAuthRequest.class, name = "WECHAT")
 })
-public sealed interface OneStopAuthRequest permits
-        UsernamePasswordAuthRequest,
-        PhonePasswordAuthRequest,
-        PhoneCodeAuthRequest,
-        EmailPasswordAuthRequest,
-        EmailCodeAuthRequest,
-        OAuth2AuthRequest,
-        WeChatAuthRequest {
+public interface OneStopAuthRequest extends OneStopAuthCommand {
 
     /**
      * 获取认证类型
@@ -54,4 +48,12 @@ public sealed interface OneStopAuthRequest permits
      * 获取用户域
      */
     UserDomain userDomain();
+
+    @Override
+    default String oauth2ProviderCode() {
+        if (this instanceof OAuth2AuthRequest request) {
+            return request.provider().getCode();
+        }
+        return null;
+    }
 }

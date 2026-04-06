@@ -219,7 +219,6 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         return OAuth2UserInfo.builder()
                 .provider(OAuth2Provider.GOOGLE)
                 .openId(new OAuth2OpenId(json.path("sub").asText()))
-                .username(json.path("name").asText(null))
                 .email(json.path("email").asText(null))
                 .emailVerified(json.path("email_verified").asBoolean(false))
                 .nickname(json.path("name").asText(null))
@@ -249,7 +248,6 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         return OAuth2UserInfo.builder()
                 .provider(OAuth2Provider.GITHUB)
                 .openId(new OAuth2OpenId(String.valueOf(json.path("id").asLong())))
-                .username(json.path("login").asText(null))
                 .email(email)
                 .emailVerified(email != null) // GitHub 已验证邮箱
                 .nickname(json.path("name").asText(json.path("login").asText(null)))
@@ -275,7 +273,6 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         return OAuth2UserInfo.builder()
                 .provider(OAuth2Provider.FACEBOOK)
                 .openId(new OAuth2OpenId(json.path("id").asText()))
-                .username(json.path("name").asText(null))
                 .email(json.path("email").asText(null))
                 .emailVerified(json.has("email")) // 有邮箱则认为已验证
                 .nickname(json.path("name").asText(null))

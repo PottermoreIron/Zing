@@ -2,7 +2,6 @@ package com.pot.auth.application.strategy.factory;
 
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
 import com.pot.auth.domain.shared.enums.AuthType;
-import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +26,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class OneStopAuthStrategyFactory {
 
-    private final List<OneStopAuthStrategy<? extends OneStopAuthRequest>> strategies;
-    private final Map<AuthType, OneStopAuthStrategy<? extends OneStopAuthRequest>> strategyCache = new ConcurrentHashMap<>();
+    private final List<OneStopAuthStrategy> strategies;
+    private final Map<AuthType, OneStopAuthStrategy> strategyCache = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
         log.info("[一键认证策略工厂] 开始初始化...");
-        for (OneStopAuthStrategy<? extends OneStopAuthRequest> strategy : strategies) {
+        for (OneStopAuthStrategy strategy : strategies) {
             AuthType authType = strategy.getSupportedAuthType();
             strategyCache.put(authType, strategy);
             log.info("[一键认证策略工厂] 注册策略: authType={}, strategy={}", authType, strategy.getClass().getSimpleName());
@@ -41,8 +40,8 @@ public class OneStopAuthStrategyFactory {
         log.info("[一键认证策略工厂] 初始化完成，共注册 {} 个策略", strategyCache.size());
     }
 
-    public OneStopAuthStrategy<? extends OneStopAuthRequest> getStrategy(AuthType authType) {
-        OneStopAuthStrategy<? extends OneStopAuthRequest> strategy = strategyCache.get(authType);
+    public OneStopAuthStrategy getStrategy(AuthType authType) {
+        OneStopAuthStrategy strategy = strategyCache.get(authType);
         if (strategy == null) {
             log.error("[一键认证策略工厂] 未找到策略: authType={}", authType);
             throw new IllegalArgumentException("不支持的认证类型: " + authType);

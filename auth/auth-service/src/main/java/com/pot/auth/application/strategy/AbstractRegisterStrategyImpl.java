@@ -5,8 +5,6 @@ import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.RegisterType;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.interfaces.dto.register.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,46 +23,40 @@ import lombok.extern.slf4j.Slf4j;
  * <li>返回响应</li>
  * </ol>
  *
- * @param <T> 具体的注册请求类型，必须继承自 RegisterRequest
  * @author pot
  * @since 2025-11-29
  */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> implements RegisterStrategy<T> {
+public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
 
     protected final JwtTokenService jwtTokenService;
-    protected final ValidationChain<RegistrationContext> validationChain;
 
     @Override
-    @SuppressWarnings("unchecked")
     public final AuthenticationResult execute(RegistrationContext context) {
-        T request = (T) context.request();
+        var request = context.request();
 
         log.info("[注册策略] 开始执行注册: type={}, userDomain={}, ip={}",
                 request.registerType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 责任链校验
-            validationChain.validate(context);
-
-            // 2. 凭证验证（验证码等）
+            // 1. 凭证验证（验证码等）
             validateCredential(context);
 
-            // 3. 注册前置钩子（风控检查、邀请码验证等）
+            // 2. 注册前置钩子（风控检查、邀请码验证等）
             beforeRegister(context);
 
-            // 4. 创建用户
+            // 3. 创建用户
             UserDTO user = createUser(context);
 
-            // 5. 注册后置钩子（发送欢迎邮件、初始化用户数据等）
+            // 4. 注册后置钩子（发送欢迎邮件、初始化用户数据等）
             afterRegister(user, context);
 
-            // 6. 生成Token并构建结果
+            // 5. 生成Token并构建结果
             AuthenticationResult result = generateAuthenticationResult(user, context);
 
-            log.info("[注册策略] 注册成功: userId={}, username={}, type={}",
-                    user.userId(), user.username(), request.registerType());
+                log.info("[注册策略] 注册成功: userId={}, nickname={}, type={}",
+                    user.userId(), user.nickname(), request.registerType());
 
             return result;
 
@@ -142,13 +134,13 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
         var tokenPair = jwtTokenService.generateTokenPair(
                 user.userId(),
                 context.request().userDomain(),
-                user.username(),
+                user.nickname(),
                 user.permissions());
 
         return AuthenticationResult.builder()
                 .userId(user.userId())
                 .userDomain(context.request().userDomain())
-                .username(user.username())
+                .nickname(user.nickname())
                 .email(user.email())
                 .phone(user.phone())
                 .accessToken(tokenPair.accessToken().rawToken())
@@ -177,10 +169,5 @@ public abstract class AbstractRegisterStrategyImpl<T extends RegisterRequest> im
     /**
      * 获取策略支持的注册类型（由子类实现）
      */
-    protected abstract RegisterType getSupportedRegisterType();
-
-    @Override
-    public boolean supports(RegisterType registerType) {
-        return getSupportedRegisterType().equals(registerType);
-    }
+    public abstract RegisterType getSupportedRegisterType();
 }

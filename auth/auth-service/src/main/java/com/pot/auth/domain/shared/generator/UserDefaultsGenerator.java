@@ -12,13 +12,13 @@ import java.util.concurrent.ThreadLocalRandom;
  * 用户默认信息生成器
  *
  * <p>
- * 用于一键注册时生成默认的用户名、密码、头像等信息
+ * 用于一键注册时生成默认的昵称、密码、头像等信息
  *
  * <p>
  * 应用场景：
  * <ul>
- * <li>手机号验证码一键注册 - 生成用户名和密码</li>
- * <li>邮箱验证码一键注册 - 生成用户名和密码</li>
+ * <li>手机号验证码一键注册 - 生成昵称和密码</li>
+ * <li>邮箱验证码一键注册 - 生成昵称和密码</li>
  * <li>OAuth2一键注册 - 生成密码</li>
  * <li>所有注册方式 - 提供默认头像</li>
  * </ul>
@@ -55,7 +55,7 @@ public class UserDefaultsGenerator {
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final String avatarUrl;
-    private final String usernamePrefix;
+    private final String nicknamePrefix;
     private final int passwordLength;
     private final boolean includeUppercase;
     private final boolean includeLowercase;
@@ -64,14 +64,14 @@ public class UserDefaultsGenerator {
 
     public UserDefaultsGenerator(
             String avatarUrl,
-            String usernamePrefix,
+            String nicknamePrefix,
             int passwordLength,
             boolean includeUppercase,
             boolean includeLowercase,
             boolean includeDigits,
             boolean includeSpecial) {
         this.avatarUrl = avatarUrl;
-        this.usernamePrefix = usernamePrefix;
+        this.nicknamePrefix = nicknamePrefix;
         this.passwordLength = passwordLength;
         this.includeUppercase = includeUppercase;
         this.includeLowercase = includeLowercase;
@@ -87,27 +87,27 @@ public class UserDefaultsGenerator {
     }
 
     /**
-     * 基于手机号生成用户名
+    * 基于手机号生成昵称
      *
      * <p>
-     * 格式: user_{timestamp}_{random4}
+    * 格式: user_{timestamp}_{random4}
      * <p>
      * 示例: user_1735123456789_a1b2
      *
      * @param phone 手机号
-     * @return 生成的用户名
+     * @return 生成的昵称
      */
-    public String generateUsernameFromPhone(String phone) {
+    public String generateNicknameFromPhone(String phone) {
         long timestamp = System.currentTimeMillis();
         String random = randomAlphanumeric(4).toLowerCase();
-        String username = usernamePrefix + timestamp + "_" + random;
+        String nickname = nicknamePrefix + timestamp + "_" + random;
 
-        log.debug("[用户默认值生成] 基于手机号生成用户名: phone={}, username={}", phone, username);
-        return username;
+        log.debug("[用户默认值生成] 基于手机号生成昵称: phone={}, nickname={}", phone, nickname);
+        return nickname;
     }
 
     /**
-     * 基于邮箱生成用户名
+     * 基于邮箱生成昵称
      *
      * <p>
      * 格式: {emailPrefix}_{random4}
@@ -115,32 +115,32 @@ public class UserDefaultsGenerator {
      * 示例: john_a1b2
      *
      * @param email 邮箱地址
-     * @return 生成的用户名
+     * @return 生成的昵称
      */
-    public String generateUsernameFromEmail(String email) {
+    public String generateNicknameFromEmail(String email) {
         String prefix = email.substring(0, email.indexOf("@"));
         String random = randomAlphanumeric(4).toLowerCase();
-        String username = prefix + "_" + random;
+        String nickname = prefix + "_" + random;
 
-        log.debug("[用户默认值生成] 基于邮箱生成用户名: email={}, username={}", email, username);
-        return username;
+        log.debug("[用户默认值生成] 基于邮箱生成昵称: email={}, nickname={}", email, nickname);
+        return nickname;
     }
 
     /**
-     * 生成通用用户名
+     * 生成通用昵称
      *
      * <p>
      * 格式: user_{timestamp}_{random6}
      *
-     * @return 生成的用户名
+     * @return 生成的昵称
      */
-    public String generateUsername() {
+    public String generateNickname() {
         long timestamp = System.currentTimeMillis();
         String random = randomAlphanumeric(6).toLowerCase();
-        String username = usernamePrefix + timestamp + "_" + random;
+        String nickname = nicknamePrefix + timestamp + "_" + random;
 
-        log.debug("[用户默认值生成] 生成通用用户名: username={}", username);
-        return username;
+        log.debug("[用户默认值生成] 生成通用昵称: nickname={}", nickname);
+        return nickname;
     }
 
     /**

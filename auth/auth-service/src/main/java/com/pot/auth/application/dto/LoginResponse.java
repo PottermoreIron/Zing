@@ -9,7 +9,7 @@ package com.pot.auth.application.dto;
 public record LoginResponse(
         Long userId,
         String userDomain,
-        String username,
+        String nickname,
         String email,
         String phoneNumber,
         String accessToken,

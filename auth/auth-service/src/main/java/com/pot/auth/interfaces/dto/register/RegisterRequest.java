@@ -2,6 +2,7 @@ package com.pot.auth.interfaces.dto.register;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.pot.auth.application.command.RegisterCommand;
 import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
@@ -25,7 +26,7 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
         @JsonSubTypes.Type(value = OAuth2RegisterRequest.class, name = "OAUTH2"),
         @JsonSubTypes.Type(value = WeChatRegisterRequest.class, name = "WECHAT")
 })
-public sealed interface RegisterRequest permits
+public sealed interface RegisterRequest extends RegisterCommand permits
         UsernamePasswordRegisterRequest,
         EmailPasswordRegisterRequest,
         EmailCodeRegisterRequest,
@@ -42,4 +43,12 @@ public sealed interface RegisterRequest permits
      * 获取用户域
      */
     UserDomain userDomain();
+
+        @Override
+        default String oauth2ProviderCode() {
+                if (this instanceof OAuth2RegisterRequest request) {
+                        return request.provider().getCode();
+                }
+                return null;
+        }
 }

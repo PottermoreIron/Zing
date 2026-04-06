@@ -3,6 +3,7 @@ package com.pot.auth.application;
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.application.service.LoginApplicationService;
 import com.pot.auth.application.strategy.LoginStrategy;
+import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.application.context.AuthenticationContext;
@@ -56,10 +57,12 @@ class LoginApplicationServiceTest {
     @Mock
     private LoginStrategyFactory loginStrategyFactory;
 
+    @Mock
+    private ValidationChain<AuthenticationContext> authenticationValidationChain;
+
     @InjectMocks
     private LoginApplicationService loginApplicationService;
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("用户名密码登录：委托给策略，返回正确的LoginResponse")
     void whenUsernamePasswordLogin_thenDelegateToStrategyAndReturnResponse() {
@@ -67,8 +70,7 @@ class LoginApplicationServiceTest {
         LoginRequest request = usernamePasswordRequest();
         AuthenticationResult authResult = authResult();
 
-        LoginStrategy<LoginRequest> mockStrategy = mock(LoginStrategy.class);
-        // getStrategy() 返回 LoginStrategy<?>，使用 doReturn 规避泛型类型捕获限制
+        LoginStrategy mockStrategy = mock(LoginStrategy.class);
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(LoginType.USERNAME_PASSWORD);
         when(mockStrategy.execute(any(AuthenticationContext.class))).thenReturn(authResult);
 
@@ -78,7 +80,7 @@ class LoginApplicationServiceTest {
         // then: 响应字段正确映射
         assertThat(response.userId()).isEqualTo(USER_ID.value());
         assertThat(response.userDomain()).isEqualTo(USER_DOMAIN.name());
-        assertThat(response.username()).isEqualTo(USERNAME);
+        assertThat(response.nickname()).isEqualTo(USERNAME);
         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
 
@@ -86,18 +88,21 @@ class LoginApplicationServiceTest {
         ArgumentCaptor<AuthenticationContext> contextCaptor = ArgumentCaptor.forClass(AuthenticationContext.class);
         verify(mockStrategy).execute(contextCaptor.capture());
         AuthenticationContext capturedContext = contextCaptor.getValue();
-        assertThat(capturedContext.request()).isEqualTo(request);
+        assertThat(capturedContext.request().loginType()).isEqualTo(request.loginType());
+        assertThat(capturedContext.request().userDomain()).isEqualTo(request.userDomain());
+        assertThat(capturedContext.request().nickname()).isEqualTo(request.nickname());
+        assertThat(capturedContext.request().password()).isEqualTo(request.password());
         assertThat(capturedContext.ipAddress().value()).isEqualTo("127.0.0.1");
         assertThat(capturedContext.sessionId()).isNotBlank();
+        verify(authenticationValidationChain).validate(any(AuthenticationContext.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("策略抛出DomainException，异常向上传播")
     void whenStrategyThrowsDomainException_thenPropagateException() {
         // given
         LoginRequest request = usernamePasswordRequest();
-        LoginStrategy<LoginRequest> mockStrategy = mock(LoginStrategy.class);
+        LoginStrategy mockStrategy = mock(LoginStrategy.class);
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
@@ -106,13 +111,12 @@ class LoginApplicationServiceTest {
                 .isInstanceOf(DomainException.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出异常")
     void whenUserAgentNull_thenUseDefaultValue() {
         // given
         LoginRequest request = usernamePasswordRequest();
-        LoginStrategy<LoginRequest> mockStrategy = mock(LoginStrategy.class);
+            LoginStrategy mockStrategy = mock(LoginStrategy.class);
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenReturn(authResult());
 
@@ -134,7 +138,7 @@ class LoginApplicationServiceTest {
         return AuthenticationResult.builder()
                 .userId(USER_ID)
                 .userDomain(USER_DOMAIN)
-                .username(USERNAME)
+                .nickname(USERNAME)
                 .email(EMAIL)
                 .phone(PHONE)
                 .accessToken(ACCESS_TOKEN)

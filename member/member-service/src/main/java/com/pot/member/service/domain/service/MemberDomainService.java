@@ -39,10 +39,7 @@ public class MemberDomainService {
         String passwordHash = passwordEncoder.encode(rawPassword);
 
         // 创建会员
-        MemberAggregate member = MemberAggregate.create(nickname, email, passwordHash);
-
-        // 保存会员
-        return memberRepository.save(member);
+        return MemberAggregate.create(nickname, email, passwordHash);
     }
 
     /**
@@ -70,9 +67,6 @@ public class MemberDomainService {
 
         // 更新密码
         member.updatePassword(newPasswordHash);
-
-        // 保存
-        memberRepository.save(member);
     }
 
     /**
@@ -85,7 +79,6 @@ public class MemberDomainService {
         }
 
         member.updatePhoneNumber(phoneNumber);
-        memberRepository.save(member);
     }
 
     /**
@@ -98,6 +91,5 @@ public class MemberDomainService {
         }
 
         member.updateEmail(newEmail);
-        memberRepository.save(member);
     }
 }

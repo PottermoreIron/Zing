@@ -40,7 +40,7 @@ public class TokenRefreshApplicationService {
         LoginResponse response = new LoginResponse(
                 accessToken.userId().value(),
                 accessToken.userDomain().name(),
-                accessToken.username(),
+            accessToken.nickname(),
                 null, // email不在AccessToken中
                 null, // phoneNumber不在AccessToken中
                 tokenPair.getAccessTokenString(),

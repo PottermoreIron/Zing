@@ -31,8 +31,8 @@ public class MemberDTO implements Serializable {
     /** 会员唯一ID */
     private Long memberId;
 
-    /** 用户名（登录标识之一） */
-    private String username;
+    /** 昵称（显示名） */
+    private String nickname;
 
     /** 邮箱地址 */
     private String email;

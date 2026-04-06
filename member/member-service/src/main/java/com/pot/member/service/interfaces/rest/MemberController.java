@@ -7,6 +7,7 @@ import com.pot.member.service.application.dto.PermissionDTO;
 import com.pot.member.service.application.query.GetMemberPermissionsQuery;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.application.service.MemberApplicationService;
+import com.pot.member.service.application.service.MemberPermissionApplicationService;
 import com.pot.zing.framework.common.model.R;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import java.util.Set;
 public class MemberController {
 
     private final MemberApplicationService memberApplicationService;
+    private final MemberPermissionApplicationService memberPermissionApplicationService;
 
     /**
      * 获取会员信息
@@ -88,7 +90,7 @@ public class MemberController {
         GetMemberPermissionsQuery query = GetMemberPermissionsQuery.builder()
                 .memberId(memberId)
                 .build();
-        Set<PermissionDTO> permissions = memberApplicationService.getMemberPermissions(query);
+        Set<PermissionDTO> permissions = memberPermissionApplicationService.getMemberPermissions(query);
         return R.success(permissions);
     }
 

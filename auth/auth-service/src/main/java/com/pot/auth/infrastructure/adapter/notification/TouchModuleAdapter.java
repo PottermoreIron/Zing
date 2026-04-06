@@ -103,15 +103,16 @@ public class TouchModuleAdapter implements NotificationPort {
     // ================================================================
 
     @Override
-    public boolean sendLoginNotification(String email, String username, String ipAddress, String deviceInfo) {
-        log.info("[通知] 发送登录通知: email={}, username={}", email, username);
+    public boolean sendLoginNotification(String email, String nickname, String ipAddress, String deviceInfo) {
+        log.info("[通知] 发送登录通知: email={}, nickname={}", email, nickname);
         try {
             TouchRequest request = TouchRequest.builder()
                     .target(email)
                     .channelType(TouchChannelType.EMAIL)
                     .templateId(TEMPLATE_LOGIN_NOTIFY)
                     .params(Map.of(
-                            "username", username,
+                            "nickname", nickname,
+                            "username", nickname,
                             "ip", ipAddress,
                             "device", deviceInfo))
                     .bizType("AUTH_LOGIN_NOTIFY")
@@ -131,15 +132,16 @@ public class TouchModuleAdapter implements NotificationPort {
     }
 
     @Override
-    public boolean sendAbnormalLoginAlert(String email, String username, String ipAddress, String deviceInfo) {
-        log.warn("[通知] 发送异地登录告警: email={}, username={}, ip={}", email, username, ipAddress);
+    public boolean sendAbnormalLoginAlert(String email, String nickname, String ipAddress, String deviceInfo) {
+        log.warn("[通知] 发送异地登录告警: email={}, nickname={}, ip={}", email, nickname, ipAddress);
         try {
             TouchRequest request = TouchRequest.builder()
                     .target(email)
                     .channelType(TouchChannelType.EMAIL)
                     .templateId(TEMPLATE_ABNORMAL_LOGIN)
                     .params(Map.of(
-                            "username", username,
+                            "nickname", nickname,
+                            "username", nickname,
                             "ip", ipAddress,
                             "device", deviceInfo))
                     .bizType("AUTH_ABNORMAL_LOGIN")

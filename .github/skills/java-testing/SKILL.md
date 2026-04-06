@@ -1,6 +1,6 @@
 ---
 name: java-testing
-description: "Java 单元测试与集成测试规范：为领域模型、应用服务、基础设施层编写测试。使用 JUnit5、Mockito、AssertJ。触发词：单元测试、集成测试、Test、@Test、Mockito、mock、断言、assertThat、@Nested、@DisplayName、测试覆盖、测试用例。"
+description: "Java 单元测试与集成测试规范：为领域模型、应用服务、基础设施层编写测试。使用 JUnit5、Mockito、AssertJ。Use when writing unit tests, integration tests, mocks, or behavior assertions. 触发词：单元测试、集成测试、Test、@Test、Mockito、mock、断言、assertThat、@Nested、@DisplayName、测试覆盖、测试用例、unit test、integration test。"
 argument-hint: "描述要测试的类或场景（如：给 MemberAggregate 的 changePassword 方法写测试）"
 ---
 

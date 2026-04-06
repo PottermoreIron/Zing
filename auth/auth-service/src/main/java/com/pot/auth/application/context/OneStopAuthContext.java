@@ -1,8 +1,8 @@
 package com.pot.auth.application.context;
 
+import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
 import lombok.Builder;
 import lombok.NonNull;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 public record OneStopAuthContext(
-        @NonNull OneStopAuthRequest request,
+    @NonNull OneStopAuthCommand request,
         @NonNull IpAddress ipAddress,
         @NonNull DeviceInfo deviceInfo,
         String sessionId,
@@ -26,7 +26,7 @@ public record OneStopAuthContext(
     }
 
     public static OneStopAuthContext of(
-            OneStopAuthRequest request,
+            OneStopAuthCommand request,
             String ipAddress,
             String userAgent) {
         return OneStopAuthContext.builder()

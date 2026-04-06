@@ -28,7 +28,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
-@Tag(name = "注册", description = "用户注册，支持用户名密码 / 邮箱 / 手机号 / OAuth2 / 微信等多种方式")
+@Tag(name = "注册", description = "用户注册，支持昵称密码 / 邮箱 / 手机号 / OAuth2 / 微信等多种方式")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -44,7 +44,7 @@ public class RegistrationController {
      * <p>
      * 支持6种注册方式，通过registerType字段自动识别：
      * <ul>
-     * <li>USERNAME_PASSWORD - 用户名密码注册</li>
+    * <li>USERNAME_PASSWORD - 昵称密码注册（保留历史类型名）</li>
      * <li>EMAIL_PASSWORD - 邮箱密码注册</li>
      * <li>EMAIL_CODE - 邮箱验证码注册</li>
      * <li>PHONE_CODE - 手机号验证码注册</li>

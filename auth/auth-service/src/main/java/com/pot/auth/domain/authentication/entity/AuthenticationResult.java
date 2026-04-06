@@ -24,7 +24,7 @@ import lombok.Builder;
 public record AuthenticationResult(
         UserId userId,
         UserDomain userDomain,
-        String username,
+        String nickname,
         String email,
         String phone,
         String accessToken,

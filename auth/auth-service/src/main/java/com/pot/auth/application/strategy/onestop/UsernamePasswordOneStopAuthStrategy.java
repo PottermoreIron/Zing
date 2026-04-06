@@ -10,47 +10,36 @@ import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
-import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.interfaces.dto.onestop.UsernamePasswordAuthRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class UsernamePasswordOneStopAuthStrategy
-        extends AbstractOneStopAuthStrategyImpl<UsernamePasswordAuthRequest> {
+    extends AbstractOneStopAuthStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
 
     public UsernamePasswordOneStopAuthStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
+        super(jwtTokenService, userDefaultsGenerator);
         this.userModulePortFactory = userModulePortFactory;
-    }
-
-    private static ValidationChain<OneStopAuthContext> createValidationChain(
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
-        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
-        chain.addHandler(oneStopAuthenticationParameterValidator);
-        return chain;
     }
 
     @Override
     protected UserDTO findUser(OneStopAuthContext context) {
-        UsernamePasswordAuthRequest request = (UsernamePasswordAuthRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-        return userModulePort.findByIdentifier(request.username()).orElse(null);
+        return userModulePort.findByIdentifier(request.nickname()).orElse(null);
     }
 
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
-        UsernamePasswordAuthRequest request = (UsernamePasswordAuthRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-        var authResult = userModulePort.authenticateWithPassword(request.username(), request.password());
+        var authResult = userModulePort.authenticateWithPassword(request.nickname(), request.password());
         if (authResult.isEmpty()) {
             throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
         }

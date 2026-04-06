@@ -20,7 +20,7 @@ public record JwtToken(
         TokenId tokenId, // JTI - Token唯一标识
         UserId userId, // 用户ID
         UserDomain userDomain, // 用户域
-        String username, // 用户名
+    String nickname, // 显示名
         Set<String> authorities, // 权限列表
         Long issuedAt, // 签发时间（Unix时间戳）
         Long expiresAt, // 过期时间（Unix时间戳）
@@ -41,8 +41,8 @@ public record JwtToken(
         if (userDomain == null) {
             throw new IllegalArgumentException("UserDomain不能为空");
         }
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("用户名不能为空");
+        if (nickname == null || nickname.isBlank()) {
+            throw new IllegalArgumentException("昵称不能为空");
         }
         if (authorities == null) {
             authorities = Set.of();

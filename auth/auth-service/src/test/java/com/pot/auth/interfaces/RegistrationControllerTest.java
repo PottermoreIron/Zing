@@ -80,7 +80,7 @@ class RegistrationControllerTest {
             String requestBody = """
                     {
                       "registerType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }
@@ -104,7 +104,7 @@ class RegistrationControllerTest {
             String requestBody = """
                     {
                       "registerType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "weak",
                       "userDomain": "member"
                     }
@@ -122,7 +122,7 @@ class RegistrationControllerTest {
             String requestBody = """
                     {
                       "registerType": "UNKNOWN_TYPE",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }
@@ -144,7 +144,7 @@ class RegistrationControllerTest {
             String requestBody = """
                     {
                       "registerType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }

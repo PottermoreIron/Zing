@@ -9,9 +9,6 @@ import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.application.strategy.AbstractLoginStrategyImpl;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
-import com.pot.auth.interfaces.dto.auth.EmailPasswordLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +23,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailPasswordLoginRequest> {
+public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl {
 
     private static final String AUTHENTICATED_USER_KEY = "authenticatedUser";
 
@@ -34,17 +31,9 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailP
 
     public EmailPasswordLoginStrategy(
             JwtTokenService jwtTokenService,
-            UserModulePortFactory userModulePortFactory,
-            AuthenticationParameterValidator authenticationParameterValidator) {
-        super(jwtTokenService, buildValidationChain(authenticationParameterValidator));
+            UserModulePortFactory userModulePortFactory) {
+        super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
-    }
-
-    private static ValidationChain<AuthenticationContext> buildValidationChain(
-            AuthenticationParameterValidator authenticationParameterValidator) {
-        ValidationChain<AuthenticationContext> chain = new ValidationChain<>();
-        chain.addHandler(authenticationParameterValidator);
-        return chain;
     }
 
     /**
@@ -53,7 +42,7 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailP
      */
     @Override
     protected void validateCredential(AuthenticationContext context) {
-        EmailPasswordLoginRequest request = (EmailPasswordLoginRequest) context.request();
+        var request = context.request();
         log.debug("[邮箱密码登录] 验证凭证: email={}", request.email());
 
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
@@ -73,7 +62,7 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailP
         UserDTO user = (UserDTO) context.getExtraAttribute(AUTHENTICATED_USER_KEY);
         if (user == null) {
             // 防御性兜底：理论上不会到这里
-            EmailPasswordLoginRequest request = (EmailPasswordLoginRequest) context.request();
+            var request = context.request();
             user = userModulePortFactory.getPort(request.userDomain())
                     .findByEmail(request.email())
                     .orElseThrow(() -> new DomainException(AuthResultCode.USER_NOT_FOUND));
@@ -82,7 +71,7 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl<EmailP
     }
 
     @Override
-    protected LoginType getSupportedLoginType() {
+    public LoginType getSupportedLoginType() {
         return LoginType.EMAIL_PASSWORD;
     }
 }

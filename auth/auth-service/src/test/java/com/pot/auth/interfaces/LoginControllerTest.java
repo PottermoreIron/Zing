@@ -75,7 +75,7 @@ class LoginControllerTest {
             String requestBody = """
                     {
                       "loginType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }
@@ -90,7 +90,7 @@ class LoginControllerTest {
                     .andExpect(jsonPath("$.data.accessToken").value(TestFixtures.FAKE_ACCESS_TOKEN))
                     .andExpect(jsonPath("$.data.refreshToken").value(TestFixtures.FAKE_REFRESH_TOKEN))
                     .andExpect(jsonPath("$.data.userId").value(TestFixtures.USER_ID.value()))
-                    .andExpect(jsonPath("$.data.username").value(TestFixtures.USERNAME));
+                    .andExpect(jsonPath("$.data.nickname").value(TestFixtures.USERNAME));
         }
 
         @Test
@@ -119,7 +119,7 @@ class LoginControllerTest {
             String requestBody = """
                     {
                       "loginType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "weak",
                       "userDomain": "member"
                     }
@@ -141,7 +141,7 @@ class LoginControllerTest {
             String requestBody = """
                     {
                       "loginType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }

@@ -1,8 +1,8 @@
 package com.pot.auth.application.context;
 
+import com.pot.auth.application.command.LoginCommand;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import lombok.Builder;
 import lombok.NonNull;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 public record AuthenticationContext(
-        @NonNull LoginRequest request,
+    @NonNull LoginCommand request,
         @NonNull IpAddress ipAddress,
         @NonNull DeviceInfo deviceInfo,
         String sessionId,
@@ -26,7 +26,7 @@ public record AuthenticationContext(
     }
 
     public static AuthenticationContext of(
-            LoginRequest request,
+            LoginCommand request,
             String ipAddress,
             String userAgent) {
         return AuthenticationContext.builder()

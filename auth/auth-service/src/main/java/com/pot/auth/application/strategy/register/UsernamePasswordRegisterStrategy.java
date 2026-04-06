@@ -11,59 +11,48 @@ import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.application.strategy.AbstractRegisterStrategyImpl;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
-import com.pot.auth.interfaces.dto.register.UsernamePasswordRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 用户名密码注册策略
+ * 昵称密码注册策略
  *
  * @author pot
  */
 @Slf4j
 @Component
-public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyImpl<UsernamePasswordRegisterRequest> {
+public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
 
     public UsernamePasswordRegisterStrategy(
             JwtTokenService jwtTokenService,
-            UserModulePortFactory userModulePortFactory,
-            RegistrationParameterValidator registrationParameterValidator) {
-        super(jwtTokenService, buildValidationChain(registrationParameterValidator));
+            UserModulePortFactory userModulePortFactory) {
+        super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
-    }
-
-    private static ValidationChain<RegistrationContext> buildValidationChain(
-            RegistrationParameterValidator registrationParameterValidator) {
-        ValidationChain<RegistrationContext> chain = new ValidationChain<>();
-        chain.addHandler(registrationParameterValidator);
-        return chain;
     }
 
     @Override
     protected void validateCredential(RegistrationContext context) {
-        // 用户名密码注册无需额外凭证验证，密码强度已在 DTO 层校验
+        // 昵称密码注册无需额外凭证验证，密码强度已在 DTO 层校验
     }
 
     @Override
     protected void beforeRegister(RegistrationContext context) {
-        UsernamePasswordRegisterRequest request = (UsernamePasswordRegisterRequest) context.request();
+        var request = context.request();
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
-        if (port.existsByUsername(request.username())) {
+        if (port.existsByNickname(request.nickname())) {
             throw new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS);
         }
     }
 
     @Override
     protected UserDTO createUser(RegistrationContext context) {
-        UsernamePasswordRegisterRequest request = (UsernamePasswordRegisterRequest) context.request();
+        var request = context.request();
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
 
         var userId = port.createUser(CreateUserCommand.builder()
-                .username(request.username())
+                .username(request.nickname())
                 .password(Password.of(request.password()))
                 .build());
 
@@ -72,7 +61,7 @@ public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyIm
     }
 
     @Override
-    protected RegisterType getSupportedRegisterType() {
+    public RegisterType getSupportedRegisterType() {
         return RegisterType.USERNAME_PASSWORD;
     }
 }

@@ -14,15 +14,12 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
-import com.pot.auth.interfaces.dto.register.EmailPasswordRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl<EmailPasswordRegisterRequest> {
+public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -30,23 +27,15 @@ public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl<
     public EmailPasswordRegisterStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService,
-            RegistrationParameterValidator registrationParameterValidator) {
-        super(jwtTokenService, createValidationChain(registrationParameterValidator));
+            VerificationCodeService verificationCodeService) {
+        super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<RegistrationContext> createValidationChain(
-            RegistrationParameterValidator registrationParameterValidator) {
-        ValidationChain<RegistrationContext> chain = new ValidationChain<>();
-        chain.addHandler(registrationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected void validateCredential(RegistrationContext context) {
-        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+        var request = context.request();
         boolean codeValid = verificationCodeService.verifyCode(
                 request.email(),
                 VerificationCode.of(request.verificationCode()));
@@ -57,7 +46,7 @@ public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl<
 
     @Override
     protected void beforeRegister(RegistrationContext context) {
-        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         if (userModulePort.existsByEmail(Email.of(request.email()))) {
             throw new DomainException(AuthResultCode.EMAIL_ALREADY_EXISTS);
@@ -66,7 +55,7 @@ public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl<
 
     @Override
     protected UserDTO createUser(RegistrationContext context) {
-        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         CreateUserCommand createCommand = CreateUserCommand.builder()
                 .email(Email.of(request.email()))
@@ -79,12 +68,12 @@ public class EmailPasswordRegisterStrategy extends AbstractRegisterStrategyImpl<
 
     @Override
     protected void afterRegister(UserDTO user, RegistrationContext context) {
-        EmailPasswordRegisterRequest request = (EmailPasswordRegisterRequest) context.request();
+        var request = context.request();
         verificationCodeService.deleteCode(request.email());
     }
 
     @Override
-    protected RegisterType getSupportedRegisterType() {
+    public RegisterType getSupportedRegisterType() {
         return RegisterType.EMAIL_PASSWORD;
     }
 }

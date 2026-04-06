@@ -87,7 +87,7 @@ public class AdminModuleAdapter implements UserModulePort {
     }
 
     @Override
-    public boolean existsByUsername(String username) {
+    public boolean existsByNickname(String nickname) {
         return false;
     }
 

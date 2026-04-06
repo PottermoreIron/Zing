@@ -85,7 +85,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
     public TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
-            String username,
+            String nickname,
             Set<String> authorities,
             com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata metadata) {
         long currentTime = System.currentTimeMillis() / 1000;
@@ -99,7 +99,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                 .subject(userId.value().toString())
                 .claim("userId", userId.value())
                 .claim("userDomain", userDomain.name())
-                .claim("username", username)
+                .claim("nickname", nickname)
+                .claim("username", nickname)
                 .claim("authorities", authorities)
                 // 【新增】写入权限元数据
                 .claim("perm_version", metadata.version())
@@ -118,7 +119,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                 accessTokenId,
                 userId,
                 userDomain,
-                username,
+            nickname,
                 authorities,
                 currentTime,
                 accessTokenExpiresAt,
@@ -166,7 +167,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
             TokenId tokenId = new TokenId(claims.getId());
             UserId userId = UserId.of(((Number) claims.get("userId")).longValue());
             UserDomain userDomain = UserDomain.valueOf((String) claims.get("userDomain"));
-            String username = (String) claims.get("username");
+                String nickname = Optional.ofNullable((String) claims.get("nickname"))
+                    .orElse((String) claims.get("username"));
 
             @SuppressWarnings("unchecked")
             List<String> authList = (List<String>) claims.get("authorities");
@@ -180,7 +182,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                     tokenId,
                     userId,
                     userDomain,
-                    username,
+                    nickname,
                     authorities,
                     issuedAt,
                     expiresAt,

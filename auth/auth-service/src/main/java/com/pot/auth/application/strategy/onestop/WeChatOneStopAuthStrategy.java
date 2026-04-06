@@ -13,10 +13,8 @@ import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.Password;
-import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
-import com.pot.auth.domain.validation.ValidationChain;
+import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.domain.wechat.entity.WeChatUserInfo;
-import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -25,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = "auth.wechat.enabled", havingValue = "true")
 public class WeChatOneStopAuthStrategy
-        extends AbstractOneStopAuthStrategyImpl<WeChatAuthRequest> {
+    extends AbstractOneStopAuthStrategyImpl {
 
     private final WeChatPort weChatPort;
     private final UserModulePortFactory userModulePortFactory;
@@ -35,23 +33,15 @@ public class WeChatOneStopAuthStrategy
             JwtTokenService jwtTokenService,
             WeChatPort weChatPort,
             UserModulePortFactory userModulePortFactory,
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
+        super(jwtTokenService, userDefaultsGenerator);
         this.weChatPort = weChatPort;
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain(
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
-        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
-        chain.addHandler(oneStopAuthenticationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected UserDTO findUser(OneStopAuthContext context) {
-        WeChatAuthRequest request = (WeChatAuthRequest) context.request();
+        var request = context.request();
         try {
             WeChatUserInfo weChatUserInfo = getOrFetchWeChatUserInfo(request);
             UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
@@ -68,12 +58,12 @@ public class WeChatOneStopAuthStrategy
 
     @Override
     protected void validateCredentialForRegister(OneStopAuthContext context) {
-        getOrFetchWeChatUserInfo((WeChatAuthRequest) context.request());
+        getOrFetchWeChatUserInfo(context.request());
     }
 
     @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
-        WeChatAuthRequest request = (WeChatAuthRequest) context.request();
+        var request = context.request();
         WeChatUserInfo weChatUserInfo = getOrFetchWeChatUserInfo(request);
         String password = userDefaultsGenerator.generateRandomPassword();
         String avatarUrl = weChatUserInfo.getAvatar() != null
@@ -81,9 +71,9 @@ public class WeChatOneStopAuthStrategy
                 : userDefaultsGenerator.getDefaultAvatarUrl();
 
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-        String username = generateAvailableUsername(userModulePort, userDefaultsGenerator::generateUsername);
+        String generatedNickname = generateAvailableNickname(userModulePort, userDefaultsGenerator::generateNickname);
         CreateUserCommand command = CreateUserCommand.builder()
-                .username(username)
+            .username(generatedNickname)
                 .password(Password.of(password))
                 .nickname(weChatUserInfo.getDisplayName())
                 .avatarUrl(avatarUrl)
@@ -111,7 +101,7 @@ public class WeChatOneStopAuthStrategy
         USER_INFO_CACHE.remove();
     }
 
-    private WeChatUserInfo getOrFetchWeChatUserInfo(WeChatAuthRequest request) {
+    private WeChatUserInfo getOrFetchWeChatUserInfo(OneStopAuthCommand request) {
         WeChatUserInfo cached = USER_INFO_CACHE.get();
         if (cached != null) {
             return cached;

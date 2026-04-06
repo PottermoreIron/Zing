@@ -24,7 +24,7 @@ public class AuthDefaultsProperties {
     private String avatarUrl = "https://cdn.example.com/avatars/default.png";
 
     /**
-     * 用户名前缀
+     * 历史配置键，实际用于默认昵称前缀
      */
     private String usernamePrefix = "user_";
 

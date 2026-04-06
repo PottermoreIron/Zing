@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * @author: Pot
  * @created: 2025/11/16 22:26
- * @description: 用户名验证器
+ * @description: 昵称验证器
  */
 public class UsernameValidator implements ConstraintValidator<ValidUsername, String> {
 

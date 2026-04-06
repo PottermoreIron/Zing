@@ -15,7 +15,6 @@ import lombok.Builder;
  *
  * @param provider      OAuth2提供商
  * @param openId        OAuth2用户唯一标识（OpenID）
- * @param username      用户名
  * @param email         邮箱（可能为空）
  * @param emailVerified 邮箱是否已验证
  * @param nickname      昵称
@@ -31,7 +30,6 @@ import lombok.Builder;
 public record OAuth2UserInfo(
         OAuth2Provider provider,
         OAuth2OpenId openId,
-        String username,
         String email,
         Boolean emailVerified,
         String nickname,

@@ -1,5 +1,9 @@
 package com.pot.auth.infrastructure.config;
 
+import com.pot.auth.application.context.AuthenticationContext;
+import com.pot.auth.application.context.OneStopAuthContext;
+import com.pot.auth.application.context.RegistrationContext;
+import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
@@ -45,25 +49,38 @@ class DomainServiceConfigTest {
     @Mock
     private UserModulePort userModulePort;
 
+    @Mock
+    private AuthenticationParameterValidator authenticationParameterValidator;
+
+    @Mock
+    private RegistrationParameterValidator registrationParameterValidator;
+
+    @Mock
+    private OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator;
+
     private final DomainServiceConfig config = new DomainServiceConfig();
+    private final ApplicationValidationConfig applicationValidationConfig = new ApplicationValidationConfig();
 
     @Nested
     @DisplayName("domain bean assembly")
     class DomainBeanAssembly {
 
         @Test
-        @DisplayName("should create stateless domain helpers through configuration")
-        void shouldCreateStatelessDomainHelpersThroughConfiguration() {
-            AuthenticationParameterValidator authenticationValidator = config.authenticationParameterValidator();
-            RegistrationParameterValidator registrationValidator = config.registrationParameterValidator();
-            OneStopAuthenticationParameterValidator oneStopValidator = config.oneStopAuthenticationParameterValidator();
+        @DisplayName("should create application validation chains through configuration")
+        void shouldCreateApplicationValidationChainsThroughConfiguration() {
+            ValidationChain<AuthenticationContext> authenticationValidationChain = applicationValidationConfig
+                .authenticationValidationChain(authenticationParameterValidator);
+            ValidationChain<RegistrationContext> registrationValidationChain = applicationValidationConfig
+                .registrationValidationChain(registrationParameterValidator);
+            ValidationChain<OneStopAuthContext> oneStopValidationChain = applicationValidationConfig
+                .oneStopAuthValidationChain(oneStopAuthenticationParameterValidator);
 
             AuthDefaultsProperties authDefaultsProperties = new AuthDefaultsProperties();
             UserDefaultsGenerator userDefaultsGenerator = config.userDefaultsGenerator(authDefaultsProperties);
 
-            assertThat(authenticationValidator).isNotNull();
-            assertThat(registrationValidator).isNotNull();
-            assertThat(oneStopValidator).isNotNull();
+            assertThat(authenticationValidationChain).isNotNull();
+            assertThat(registrationValidationChain).isNotNull();
+            assertThat(oneStopValidationChain).isNotNull();
             assertThat(userDefaultsGenerator).isNotNull();
         }
 

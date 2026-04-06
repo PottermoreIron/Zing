@@ -9,6 +9,7 @@ import com.pot.member.facade.dto.request.CreateMemberRequest;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.application.service.MemberApplicationService;
+import com.pot.member.service.application.service.MemberPermissionApplicationService;
 import com.pot.zing.framework.common.model.R;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ import java.util.Set;
 public class InternalMemberController {
 
     private final MemberApplicationService memberApplicationService;
+    private final MemberPermissionApplicationService memberPermissionApplicationService;
 
     // ========== 用户查询 ==========
 
@@ -43,40 +45,40 @@ public class InternalMemberController {
     public R<MemberDTO> findById(@PathVariable Long memberId) {
         var internalDTO = memberApplicationService.getMember(
                 GetMemberQuery.builder().memberId(memberId).build());
-        return R.success(toFacadeDTO(internalDTO, memberId));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-email")
     public R<MemberDTO> findByEmail(@RequestParam String email) {
         var internalDTO = memberApplicationService.getMember(
                 GetMemberQuery.builder().email(email).build());
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-phone")
     public R<MemberDTO> findByPhone(@RequestParam String phone) {
         var internalDTO = memberApplicationService.getMember(
                 GetMemberQuery.builder().phoneNumber(phone).build());
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-nickname")
     public R<MemberDTO> findByNickname(@RequestParam String nickname) {
         var internalDTO = memberApplicationService.getMember(
                 GetMemberQuery.builder().nickname(nickname).build());
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-oauth2")
     public R<MemberDTO> findByOAuth2(@RequestParam String provider, @RequestParam String openId) {
         var internalDTO = memberApplicationService.findByOAuth2(provider, openId);
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-wechat")
     public R<MemberDTO> findByWeChat(@RequestParam String weChatOpenId) {
         var internalDTO = memberApplicationService.findByWeChat(weChatOpenId);
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     // ========== 唯一性检查 ==========
@@ -107,23 +109,23 @@ public class InternalMemberController {
                 .phoneNumber(request.getPhone())
                 .build();
         var internalDTO = memberApplicationService.register(command);
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     // ========== 认证 ==========
 
     @PostMapping("/auth/verify-password")
     public R<MemberDTO> authenticateWithPassword(@RequestParam String identifier,
-                                                 @RequestParam String password) {
+            @RequestParam String password) {
         var internalDTO = memberApplicationService.authenticateWithPassword(identifier, password);
-        return R.success(toFacadeDTO(internalDTO, null));
+        return R.success(toFacadeDTO(internalDTO));
     }
 
     // ========== 密码管理 ==========
 
     @PutMapping("/{memberId}/password")
     public R<Void> updatePassword(@PathVariable Long memberId,
-                                  @RequestParam String newPasswordHash) {
+            @RequestParam String newPasswordHash) {
         memberApplicationService.updatePasswordHash(memberId, newPasswordHash);
         return R.success(null);
     }
@@ -144,9 +146,9 @@ public class InternalMemberController {
 
     @PostMapping("/{memberId}/login-attempt")
     public R<Void> recordLoginAttempt(@PathVariable Long memberId,
-                                      @RequestParam boolean success,
-                                      @RequestParam String ip,
-                                      @RequestParam Long timestamp) {
+            @RequestParam boolean success,
+            @RequestParam String ip,
+            @RequestParam Long timestamp) {
         memberApplicationService.recordLoginAttempt(memberId, success, ip, timestamp);
         return R.success(null);
     }
@@ -155,17 +157,17 @@ public class InternalMemberController {
 
     @GetMapping("/{memberId}/permissions")
     public R<Set<String>> getPermissions(@PathVariable Long memberId) {
-        return R.success(memberApplicationService.getPermissionCodes(memberId));
+        return R.success(memberPermissionApplicationService.getPermissionCodes(memberId));
     }
 
     @GetMapping("/{memberId}/roles")
     public R<List<RoleDTO>> getRoles(@PathVariable Long memberId) {
-        return R.success(memberApplicationService.getMemberRoles(memberId));
+        return R.success(memberPermissionApplicationService.getMemberRoles(memberId));
     }
 
     @PostMapping("/permissions/batch")
     public R<Map<Long, Set<String>>> getPermissionsBatch(@RequestBody List<Long> memberIds) {
-        return R.success(memberApplicationService.getPermissionsBatch(memberIds));
+        return R.success(memberPermissionApplicationService.getPermissionsBatch(memberIds));
     }
 
     // ========== 设备管理 ==========
@@ -177,16 +179,16 @@ public class InternalMemberController {
 
     @PostMapping("/{memberId}/devices")
     public R<Void> recordDeviceLogin(@PathVariable Long memberId,
-                                     @RequestBody DeviceDTO device,
-                                     @RequestParam String ip,
-                                     @RequestParam String refreshToken) {
+            @RequestBody DeviceDTO device,
+            @RequestParam String ip,
+            @RequestParam String refreshToken) {
         memberApplicationService.recordDeviceLogin(memberId, device, ip, refreshToken);
         return R.success(null);
     }
 
     @DeleteMapping("/{memberId}/devices/{deviceId}")
     public R<Void> kickDevice(@PathVariable Long memberId,
-                              @PathVariable Long deviceId) {
+            @PathVariable Long deviceId) {
         memberApplicationService.kickDevice(memberId, deviceId);
         return R.success(null);
     }
@@ -195,7 +197,7 @@ public class InternalMemberController {
 
     @PostMapping("/{memberId}/oauth2")
     public R<Void> bindOAuth2(@PathVariable Long memberId,
-                              @RequestBody @Valid BindSocialAccountRequest request) {
+            @RequestBody @Valid BindSocialAccountRequest request) {
         memberApplicationService.bindOAuth2(memberId, request);
         return R.success(null);
     }
@@ -212,13 +214,13 @@ public class InternalMemberController {
     /**
      * 将应用层内部DTO转换为对外facade DTO
      */
-    private MemberDTO toFacadeDTO(com.pot.member.service.application.dto.MemberDTO internalDTO, Long memberIdHint) {
+    private MemberDTO toFacadeDTO(com.pot.member.service.application.dto.MemberDTO internalDTO) {
         if (internalDTO == null) {
             return null;
         }
         return MemberDTO.builder()
                 .memberId(internalDTO.getMemberId())
-                .username(internalDTO.getNickname())
+                .nickname(internalDTO.getNickname())
                 .email(internalDTO.getEmail())
                 .phone(internalDTO.getPhoneNumber())
                 .status(internalDTO.getStatus())

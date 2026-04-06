@@ -5,6 +5,7 @@ import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.service.OneStopAuthenticationService;
 import com.pot.auth.application.service.RegistrationApplicationService;
 import com.pot.auth.application.strategy.RegisterStrategy;
+import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.factory.RegisterStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.application.context.RegistrationContext;
@@ -62,6 +63,9 @@ class RegistrationApplicationServiceTest {
         private RegisterStrategyFactory registerStrategyFactory;
 
         @Mock
+        private ValidationChain<RegistrationContext> registrationValidationChain;
+
+        @Mock
         private OneStopAuthenticationService oneStopAuthenticationService;
 
         @InjectMocks
@@ -75,7 +79,6 @@ class RegistrationApplicationServiceTest {
         @DisplayName("传统注册（用户名密码）")
         class TraditionalRegister {
 
-                @SuppressWarnings("unchecked")
                 @Test
                 @DisplayName("用户名密码注册：委托给策略，返回RegisterResponse且字段正确")
                 void whenUsernamePasswordRegister_thenDelegateAndReturnResponse() {
@@ -87,7 +90,7 @@ class RegistrationApplicationServiceTest {
                                         USER_DOMAIN);
 
                         AuthenticationResult authResult = authResult();
-                        RegisterStrategy<UsernamePasswordRegisterRequest> mockStrategy = mock(RegisterStrategy.class);
+                        RegisterStrategy mockStrategy = mock(RegisterStrategy.class);
                         doReturn(mockStrategy).when(registerStrategyFactory)
                                         .getStrategy(RegisterType.USERNAME_PASSWORD);
                         when(mockStrategy.execute(any(RegistrationContext.class))).thenReturn(authResult);
@@ -99,16 +102,16 @@ class RegistrationApplicationServiceTest {
                         assertThat(response).isNotNull();
                         assertThat(response.userId()).isEqualTo(USER_ID.value());
                         assertThat(response.userDomain()).isEqualTo(USER_DOMAIN.name());
-                        assertThat(response.username()).isEqualTo(USERNAME);
+                        assertThat(response.nickname()).isEqualTo(USERNAME);
                         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
                         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
                         assertThat(response.message()).isEqualTo("注册成功");
 
                         verify(registerStrategyFactory).getStrategy(RegisterType.USERNAME_PASSWORD);
+                        verify(registrationValidationChain).validate(any(RegistrationContext.class));
                         verify(mockStrategy).execute(any(RegistrationContext.class));
                 }
 
-                @SuppressWarnings("unchecked")
                 @Test
                 @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出NPE")
                 void whenUserAgentNull_thenUseDefaultValue() {
@@ -119,7 +122,7 @@ class RegistrationApplicationServiceTest {
                                         PASSWORD,
                                         USER_DOMAIN);
 
-                        RegisterStrategy<UsernamePasswordRegisterRequest> mockStrategy = mock(RegisterStrategy.class);
+                        RegisterStrategy mockStrategy = mock(RegisterStrategy.class);
                         doReturn(mockStrategy).when(registerStrategyFactory).getStrategy(any());
                         when(mockStrategy.execute(any())).thenReturn(authResult());
 
@@ -128,7 +131,6 @@ class RegistrationApplicationServiceTest {
                         verify(mockStrategy).execute(any());
                 }
 
-                @SuppressWarnings("unchecked")
                 @Test
                 @DisplayName("策略抛出DomainException，异常向上传播")
                 void whenStrategyThrows_thenPropagateException() {
@@ -139,7 +141,7 @@ class RegistrationApplicationServiceTest {
                                         PASSWORD,
                                         USER_DOMAIN);
 
-                        RegisterStrategy<UsernamePasswordRegisterRequest> mockStrategy = mock(RegisterStrategy.class);
+                        RegisterStrategy mockStrategy = mock(RegisterStrategy.class);
                         doReturn(mockStrategy).when(registerStrategyFactory).getStrategy(any());
                         when(mockStrategy.execute(any()))
                                         .thenThrow(new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS));
@@ -173,7 +175,7 @@ class RegistrationApplicationServiceTest {
                         OneStopAuthResponse authResponse = OneStopAuthResponse.builder()
                                         .userId(USER_ID)
                                         .userDomain(USER_DOMAIN)
-                                        .username(USERNAME)
+                                        .nickname(USERNAME)
                                         .email(EMAIL)
                                         .phone(PHONE)
                                         .accessToken(ACCESS_TOKEN)
@@ -194,7 +196,7 @@ class RegistrationApplicationServiceTest {
                         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
 
                         verify(oneStopAuthenticationService).authenticate(any(), eq("127.0.0.1"), eq("UA"));
-                        verifyNoInteractions(registerStrategyFactory);
+                        verifyNoInteractions(registerStrategyFactory, registrationValidationChain);
                 }
         }
 
@@ -220,7 +222,7 @@ class RegistrationApplicationServiceTest {
                         OneStopAuthResponse authResponse = OneStopAuthResponse.builder()
                                         .userId(USER_ID)
                                         .userDomain(USER_DOMAIN)
-                                        .username(USERNAME)
+                                        .nickname(USERNAME)
                                         .email(null)
                                         .phone(PHONE)
                                         .accessToken(ACCESS_TOKEN)
@@ -241,7 +243,7 @@ class RegistrationApplicationServiceTest {
                         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
 
                         verify(oneStopAuthenticationService).authenticate(any(), eq("10.0.0.1"), eq("WeChat/8.0"));
-                        verifyNoInteractions(registerStrategyFactory);
+                        verifyNoInteractions(registerStrategyFactory, registrationValidationChain);
                 }
         }
 
@@ -250,7 +252,7 @@ class RegistrationApplicationServiceTest {
                 return AuthenticationResult.builder()
                                 .userId(USER_ID)
                                 .userDomain(USER_DOMAIN)
-                                .username(USERNAME)
+                                .nickname(USERNAME)
                                 .email(EMAIL)
                                 .phone(PHONE)
                                 .accessToken(ACCESS_TOKEN)

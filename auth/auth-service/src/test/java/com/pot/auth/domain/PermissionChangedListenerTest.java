@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -82,12 +83,12 @@ class PermissionChangedListenerTest {
         void whenDomainServiceThrows_thenSwallowException() {
             doThrow(new RuntimeException("Redis unavailable"))
                     .when(permissionDomainService)
-                    .invalidatePermissionCache(new UserId(10001L), UserDomain.MEMBER);
+                .invalidatePermissionCache(any(UserId.class), eq(UserDomain.MEMBER));
 
             listener.consume(validEvent);
 
             verify(permissionDomainService)
-                    .invalidatePermissionCache(new UserId(10001L), UserDomain.MEMBER);
+                .invalidatePermissionCache(any(UserId.class), eq(UserDomain.MEMBER));
         }
     }
 

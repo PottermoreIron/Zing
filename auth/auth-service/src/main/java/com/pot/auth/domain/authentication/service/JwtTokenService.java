@@ -80,17 +80,17 @@ public class JwtTokenService {
      *
      * @param userId      用户ID
      * @param userDomain  用户域
-     * @param username    用户名
+         * @param nickname    显示名
      * @param permissions 权限集合
      * @return Token对
      */
     public TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
-            String username,
+            String nickname,
             Set<String> permissions) {
-        log.info("[Token] 生成Token对: userId={}, userDomain={}, username={}, permCount={}",
-                userId, userDomain, username, permissions.size());
+        log.info("[Token] 生成Token对: userId={}, userDomain={}, nickname={}, permCount={}",
+            userId, userDomain, nickname, permissions.size());
 
         try {
             // 【增强】1. 缓存权限到Redis（调用PermissionDomainService）
@@ -106,7 +106,7 @@ public class JwtTokenService {
             TokenPair tokenPair = tokenManagementPort.generateTokenPair(
                     userId,
                     userDomain,
-                    username,
+                    nickname,
                     permissions,
                     metadata);
 
@@ -239,7 +239,7 @@ public class JwtTokenService {
         TokenPair newTokenPair = tokenManagementPort.generateTokenPair(
                 oldRefreshToken.userId(),
                 oldRefreshToken.userDomain(),
-                getUsernameFromCache(oldRefreshToken),
+            getNicknameFromCache(oldRefreshToken),
                 authorities,
                 metadata);
 
@@ -339,12 +339,12 @@ public class JwtTokenService {
     }
 
     /**
-     * 从用户模块获取用户名
+     * 从用户模块获取显示名
      */
-    private String getUsernameFromCache(RefreshToken refreshToken) {
+    private String getNicknameFromCache(RefreshToken refreshToken) {
         return userModulePortFactory.getPort(refreshToken.userDomain())
                 .findById(refreshToken.userId())
-                .map(user -> user.username())
+                .map(user -> user.nickname())
                 .orElse("unknown");
     }
 

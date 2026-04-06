@@ -14,7 +14,7 @@ import lombok.Builder;
  * <p>
  * 支持的创建方式：
  * <ul>
- * <li>普通注册：username + password + email/phone</li>
+ * <li>普通注册：legacy username bridge + password + email/phone</li>
  * <li>OAuth2注册：oauth2Provider + oauth2OpenId + email</li>
  * <li>微信注册：weChatOpenId + weChatUnionId + nickname</li>
  * </ul>
@@ -25,6 +25,7 @@ import lombok.Builder;
 @Builder
 public record CreateUserCommand(
         // ========== 基础信息 ==========
+        // 历史桥接字段：当前仍用于对接用户模块的昵称创建链路。
         String username,
         Email email,
         Phone phone,

@@ -1,8 +1,8 @@
 package com.pot.auth.application.context;
 
+import com.pot.auth.application.command.RegisterCommand;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.interfaces.dto.register.RegisterRequest;
 import lombok.Builder;
 import lombok.NonNull;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Builder
 public record RegistrationContext(
-        @NonNull RegisterRequest request,
+    @NonNull RegisterCommand request,
         @NonNull IpAddress ipAddress,
         @NonNull DeviceInfo deviceInfo,
         String invitationCode,
@@ -28,7 +28,7 @@ public record RegistrationContext(
     }
 
     public static RegistrationContext of(
-            RegisterRequest request,
+            RegisterCommand request,
             String ipAddress,
             String userAgent) {
         return RegistrationContext.builder()

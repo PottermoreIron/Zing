@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -127,6 +128,20 @@ public class MemberRepositoryImpl implements MemberRepository {
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    public Map<Long, Set<Long>> findRoleIdsByMemberIds(Set<Long> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Map.of();
+        }
+
+        LambdaQueryWrapper<MemberRole> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(MemberRole::getMemberId, memberIds);
+        return memberRoleMapper.selectList(wrapper).stream()
+                .collect(Collectors.groupingBy(
+                        MemberRole::getMemberId,
+                        Collectors.mapping(MemberRole::getRoleId, Collectors.toSet())));
+    }
+
     /**
      * 将实体转换为聚合根
      */
@@ -164,11 +179,7 @@ public class MemberRepositoryImpl implements MemberRepository {
      * 加载会员的角色ID集合
      */
     private Set<Long> loadRoleIds(Long memberId) {
-        LambdaQueryWrapper<MemberRole> q = new LambdaQueryWrapper<>();
-        q.eq(MemberRole::getMemberId, memberId);
-        return memberRoleMapper.selectList(q).stream()
-                .map(MemberRole::getRoleId)
-                .collect(Collectors.toSet());
+        return findRoleIdsByMemberIds(Set.of(memberId)).getOrDefault(memberId, Set.of());
     }
 
     /**

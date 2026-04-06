@@ -13,15 +13,12 @@ import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Phone;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
-import com.pot.auth.interfaces.dto.register.PhoneCodeRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class PhoneCodeRegisterStrategy extends AbstractRegisterStrategyImpl<PhoneCodeRegisterRequest> {
+public class PhoneCodeRegisterStrategy extends AbstractRegisterStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
@@ -29,23 +26,15 @@ public class PhoneCodeRegisterStrategy extends AbstractRegisterStrategyImpl<Phon
     public PhoneCodeRegisterStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService,
-            RegistrationParameterValidator registrationParameterValidator) {
-        super(jwtTokenService, createValidationChain(registrationParameterValidator));
+            VerificationCodeService verificationCodeService) {
+        super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
     }
 
-    private static ValidationChain<RegistrationContext> createValidationChain(
-            RegistrationParameterValidator registrationParameterValidator) {
-        ValidationChain<RegistrationContext> chain = new ValidationChain<>();
-        chain.addHandler(registrationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected void validateCredential(RegistrationContext context) {
-        PhoneCodeRegisterRequest request = (PhoneCodeRegisterRequest) context.request();
+        var request = context.request();
         boolean codeValid = verificationCodeService.verifyCode(
                 request.phone(),
                 VerificationCode.of(request.verificationCode()));
@@ -56,7 +45,7 @@ public class PhoneCodeRegisterStrategy extends AbstractRegisterStrategyImpl<Phon
 
     @Override
     protected void beforeRegister(RegistrationContext context) {
-        PhoneCodeRegisterRequest request = (PhoneCodeRegisterRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         if (userModulePort.existsByPhone(Phone.of(request.phone()))) {
             throw new DomainException(AuthResultCode.PHONE_ALREADY_EXISTS);
@@ -65,7 +54,7 @@ public class PhoneCodeRegisterStrategy extends AbstractRegisterStrategyImpl<Phon
 
     @Override
     protected UserDTO createUser(RegistrationContext context) {
-        PhoneCodeRegisterRequest request = (PhoneCodeRegisterRequest) context.request();
+        var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         CreateUserCommand createCommand = CreateUserCommand.builder()
                 .phone(Phone.of(request.phone()))
@@ -77,12 +66,12 @@ public class PhoneCodeRegisterStrategy extends AbstractRegisterStrategyImpl<Phon
 
     @Override
     protected void afterRegister(UserDTO user, RegistrationContext context) {
-        PhoneCodeRegisterRequest request = (PhoneCodeRegisterRequest) context.request();
+        var request = context.request();
         verificationCodeService.deleteCode(request.phone());
     }
 
     @Override
-    protected RegisterType getSupportedRegisterType() {
+    public RegisterType getSupportedRegisterType() {
         return RegisterType.PHONE_CODE;
     }
 }

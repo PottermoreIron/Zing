@@ -11,8 +11,12 @@ import com.pot.member.service.domain.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -138,16 +142,51 @@ public class PermissionDomainService {
                                 .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
                                 .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
 
-                // 获取会员的所有角色
-                List<RoleAggregate> roles = roleRepository.findByIds(member.getRoleIds());
+                Map<Long, Set<Long>> permissionIdsByRole = roleRepository
+                                .findPermissionIdsByRoleIds(member.getRoleIds());
 
-                // 收集所有权限ID
-                Set<Long> permissionIds = roles.stream()
-                                .flatMap(role -> role.getPermissionIds().stream())
+                Set<Long> permissionIds = permissionIdsByRole.values().stream()
+                                .flatMap(Set::stream)
                                 .collect(Collectors.toSet());
 
                 // 获取所有权限
                 return new HashSet<>(permissionRepository.findByIds(permissionIds));
+        }
+
+        /**
+         * 批量获取会员权限编码
+         */
+        public Map<Long, Set<String>> getMemberPermissionCodesBatch(List<Long> memberIds) {
+                if (memberIds == null || memberIds.isEmpty()) {
+                        return Map.of();
+                }
+
+                Set<Long> requestedMemberIds = new LinkedHashSet<>(memberIds);
+                Map<Long, Set<Long>> roleIdsByMember = memberRepository.findRoleIdsByMemberIds(requestedMemberIds);
+
+                Set<Long> allRoleIds = roleIdsByMember.values().stream()
+                                .flatMap(Set::stream)
+                                .collect(Collectors.toSet());
+                Map<Long, Set<Long>> permissionIdsByRole = roleRepository.findPermissionIdsByRoleIds(allRoleIds);
+
+                Set<Long> allPermissionIds = permissionIdsByRole.values().stream()
+                                .flatMap(Set::stream)
+                                .collect(Collectors.toSet());
+                Map<Long, String> permissionCodeById = permissionRepository.findByIds(allPermissionIds).stream()
+                                .collect(Collectors.toMap(
+                                                permission -> permission.getPermissionId().value(),
+                                                PermissionAggregate::getPermissionCode));
+
+                Map<Long, Set<String>> permissionCodesByMember = new LinkedHashMap<>();
+                for (Long memberId : requestedMemberIds) {
+                        Set<String> permissionCodes = roleIdsByMember.getOrDefault(memberId, Set.of()).stream()
+                                        .flatMap(roleId -> permissionIdsByRole.getOrDefault(roleId, Set.of()).stream())
+                                        .map(permissionCodeById::get)
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toSet());
+                        permissionCodesByMember.put(memberId, permissionCodes);
+                }
+                return permissionCodesByMember;
         }
 
         /**

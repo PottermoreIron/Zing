@@ -1,6 +1,6 @@
 ---
 name: ddd-java
-description: "DDD架构最佳实践：创建聚合根、值对象、仓储接口、应用服务、领域事件、出站端口。用于新增聚合、重构MVC代码为DDD、领域建模、添加业务行为。触发词：聚合、值对象、仓储、领域服务、应用服务、DDD、聚合根、领域事件、port、assembler。"
+description: "DDD 架构最佳实践：创建聚合根、值对象、仓储接口、应用服务、领域事件、出站端口。Use when modeling aggregates, value objects, repositories, application services, DDD refactoring, or domain behavior. 触发词：聚合、值对象、仓储、领域服务、应用服务、DDD、聚合根、领域事件、aggregate、value object、repository、application service、port、assembler。"
 argument-hint: "描述你要创建或重构的领域概念（如：创建 Order 聚合，给 Member 添加积分行为）"
 ---
 

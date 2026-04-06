@@ -66,7 +66,7 @@ class OneStopAuthenticationControllerTest {
             OneStopAuthResponse authResponse = OneStopAuthResponse.builder()
                     .userId(TestFixtures.USER_ID)
                     .userDomain(TestFixtures.USER_DOMAIN)
-                    .username(TestFixtures.USERNAME)
+                    .nickname(TestFixtures.USERNAME)
                     .email(TestFixtures.EMAIL)
                     .phone(TestFixtures.PHONE)
                     .accessToken(TestFixtures.FAKE_ACCESS_TOKEN)
@@ -80,7 +80,7 @@ class OneStopAuthenticationControllerTest {
             String requestBody = """
                     {
                       "authType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }
@@ -102,7 +102,7 @@ class OneStopAuthenticationControllerTest {
             String requestBody = """
                     {
                       "authType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "weak",
                       "userDomain": "member"
                     }
@@ -120,7 +120,7 @@ class OneStopAuthenticationControllerTest {
             String requestBody = """
                     {
                       "authType": "UNKNOWN_TYPE",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }
@@ -142,7 +142,7 @@ class OneStopAuthenticationControllerTest {
             String requestBody = """
                     {
                       "authType": "USERNAME_PASSWORD",
-                      "username": "test_user",
+                                                                                        "nickname": "test_user",
                       "password": "Password123!",
                       "userDomain": "member"
                     }
@@ -175,7 +175,7 @@ class OneStopAuthenticationControllerTest {
                     .thenReturn(OneStopAuthResponse.builder()
                             .userId(TestFixtures.USER_ID)
                             .userDomain(TestFixtures.USER_DOMAIN)
-                            .username(TestFixtures.USERNAME)
+                            .nickname(TestFixtures.USERNAME)
                             .accessToken(TestFixtures.FAKE_ACCESS_TOKEN)
                             .refreshToken(TestFixtures.FAKE_REFRESH_TOKEN)
                             .accessTokenExpiresAt(now + 3600)
@@ -216,7 +216,7 @@ class OneStopAuthenticationControllerTest {
                     .thenReturn(OneStopAuthResponse.builder()
                             .userId(TestFixtures.USER_ID)
                             .userDomain(TestFixtures.USER_DOMAIN)
-                            .username(TestFixtures.USERNAME)
+                            .nickname(TestFixtures.USERNAME)
                             .accessToken(TestFixtures.FAKE_ACCESS_TOKEN)
                             .refreshToken(TestFixtures.FAKE_REFRESH_TOKEN)
                             .accessTokenExpiresAt(now + 3600)

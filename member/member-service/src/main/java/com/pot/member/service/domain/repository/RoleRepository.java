@@ -4,6 +4,7 @@ import com.pot.member.service.domain.model.role.RoleAggregate;
 import com.pot.member.service.domain.model.role.RoleId;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,6 +40,11 @@ public interface RoleRepository {
      * 批量查找角色
      */
     List<RoleAggregate> findByIds(Set<Long> roleIds);
+
+    /**
+     * 批量查询角色权限ID
+     */
+    Map<Long, Set<Long>> findPermissionIdsByRoleIds(Set<Long> roleIds);
 
     /**
      * 查找所有角色

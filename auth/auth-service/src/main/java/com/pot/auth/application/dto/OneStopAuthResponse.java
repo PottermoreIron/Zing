@@ -18,7 +18,7 @@ import lombok.Builder;
 public record OneStopAuthResponse(
         UserId userId,
         UserDomain userDomain,
-        String username,
+        String nickname,
         String email,
         String phone,
         String accessToken,
@@ -33,7 +33,7 @@ public record OneStopAuthResponse(
         return OneStopAuthResponse.builder()
                 .userId(result.userId())
                 .userDomain(result.userDomain())
-                .username(result.username())
+                .nickname(result.nickname())
                 .email(result.email())
                 .phone(result.phone())
                 .accessToken(result.accessToken())

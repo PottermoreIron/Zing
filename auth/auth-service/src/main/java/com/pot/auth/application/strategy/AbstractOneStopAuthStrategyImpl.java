@@ -9,9 +9,7 @@ import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
-import com.pot.auth.domain.validation.ValidationChain;
 import com.pot.auth.domain.validation.handler.UserStatusValidator;
-import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Supplier;
@@ -37,50 +35,41 @@ import java.util.function.Supplier;
  * <li>OneStopAuthStrategy: 用户不存在则自动注册</li>
  * </ul>
  *
- * @param <T> 具体的认证请求类型，必须继承自 OneStopAuthRequest
  * @author pot
  * @since 2025-11-29
  */
 @Slf4j
-public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthRequest>
-        implements OneStopAuthStrategy<T> {
+public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStrategy {
 
     protected final JwtTokenService jwtTokenService;
-    protected final ValidationChain<OneStopAuthContext> validationChain;
     protected final UserDefaultsGenerator userDefaultsGenerator;
 
     protected AbstractOneStopAuthStrategyImpl(
             JwtTokenService jwtTokenService,
-            ValidationChain<OneStopAuthContext> validationChain,
             UserDefaultsGenerator userDefaultsGenerator) {
         this.jwtTokenService = jwtTokenService;
-        this.validationChain = validationChain;
         this.userDefaultsGenerator = userDefaultsGenerator;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public final AuthenticationResult execute(OneStopAuthContext context) {
-        T request = (T) context.request();
+        var request = context.request();
 
         log.info("[一键认证] 开始执行: authType={}, userDomain={}, ip={}",
                 request.authType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 责任链校验
-            validationChain.validate(context);
-
-            // 2. 查找用户
+            // 1. 查找用户
             UserDTO user = findUser(context);
 
             if (user != null) {
-                // 3a. 用户已存在 → 登录流程
+                // 2a. 用户已存在 → 登录流程
                 log.info("[一键认证] 用户已存在，执行登录: userId={}, authType={}",
                         user.userId(), request.authType());
 
                 return handleExistingUser(user, context);
             } else {
-                // 3b. 用户不存在 → 注册流程
+                // 2b. 用户不存在 → 注册流程
                 log.info("[一键认证] 用户不存在，执行注册: authType={}", request.authType());
 
                 return handleNewUser(context);
@@ -114,7 +103,7 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
         // 5. 登录后置钩子
         afterLogin(user, result, context);
 
-        log.info("[一键认证] 登录成功: userId={}, username={}", user.userId(), user.username());
+        log.info("[一键认证] 登录成功: userId={}, nickname={}", user.userId(), user.nickname());
         return result;
     }
 
@@ -137,7 +126,7 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
         // 5. 生成Token
         AuthenticationResult result = generateAuthenticationResult(user, context);
 
-        log.info("[一键认证] 注册并登录成功: userId={}, username={}", user.userId(), user.username());
+        log.info("[一键认证] 注册并登录成功: userId={}, nickname={}", user.userId(), user.nickname());
         return result;
     }
 
@@ -149,9 +138,9 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
      * <p>
      * 根据不同的认证方式，查找用户的方式也不同：
      * <ul>
-     * <li>手机号认证：通过手机号查找</li>
-     * <li>邮箱认证：通过邮箱查找</li>
-     * <li>用户名认证：通过用户名查找</li>
+    * <li>手机号认证：通过手机号查找</li>
+    * <li>邮箱认证：通过邮箱查找</li>
+    * <li>昵称认证：通过昵称查找</li>
      * </ul>
      *
      * @param context 认证上下文
@@ -194,7 +183,7 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
      * <p>
      * 子类实现此方法时，应该：
      * <ul>
-     * <li>如果用户未提供用户名，使用 userDefaultsGenerator 生成</li>
+    * <li>如果用户未提供昵称，使用 userDefaultsGenerator 生成</li>
      * <li>如果用户未提供密码，使用 userDefaultsGenerator 生成</li>
      * <li>如果用户未提供头像，使用 userDefaultsGenerator 提供默认头像</li>
      * </ul>
@@ -257,13 +246,13 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
         var tokenPair = jwtTokenService.generateTokenPair(
                 user.userId(),
                 context.request().userDomain(),
-                user.username(),
+                user.nickname(),
                 user.permissions());
 
         return AuthenticationResult.builder()
                 .userId(user.userId())
                 .userDomain(context.request().userDomain())
-                .username(user.username())
+                .nickname(user.nickname())
                 .email(user.email())
                 .phone(user.phone())
                 .accessToken(tokenPair.accessToken().rawToken())
@@ -287,10 +276,10 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
         // 默认空实现，子类按需覆盖
     }
 
-    protected String generateAvailableUsername(UserModulePort userModulePort, Supplier<String> candidateSupplier) {
+    protected String generateAvailableNickname(UserModulePort userModulePort, Supplier<String> candidateSupplier) {
         for (int attempt = 0; attempt < 5; attempt++) {
             String candidate = candidateSupplier.get();
-            if (!userModulePort.existsByUsername(candidate)) {
+            if (!userModulePort.existsByNickname(candidate)) {
                 return candidate;
             }
         }
@@ -299,8 +288,4 @@ public abstract class AbstractOneStopAuthStrategyImpl<T extends OneStopAuthReque
 
     public abstract AuthType getSupportedAuthType();
 
-    @Override
-    public boolean supports(AuthType authType) {
-        return getSupportedAuthType() == authType;
-    }
 }

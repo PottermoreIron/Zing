@@ -11,9 +11,6 @@ import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.TokenManagementPort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
-import com.pot.auth.application.validation.handler.AuthenticationParameterValidator;
-import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
-import com.pot.auth.application.validation.handler.RegistrationParameterValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,21 +32,6 @@ public class DomainServiceConfig {
     @Bean
     public UserModulePortFactory userModulePortFactory(List<UserModulePort> userModulePorts) {
         return new UserModulePortFactory(userModulePorts);
-    }
-
-    @Bean
-    public AuthenticationParameterValidator authenticationParameterValidator() {
-        return new AuthenticationParameterValidator();
-    }
-
-    @Bean
-    public RegistrationParameterValidator registrationParameterValidator() {
-        return new RegistrationParameterValidator();
-    }
-
-    @Bean
-    public OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator() {
-        return new OneStopAuthenticationParameterValidator();
     }
 
     @Bean

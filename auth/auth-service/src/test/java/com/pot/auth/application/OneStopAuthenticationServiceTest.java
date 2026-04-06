@@ -3,6 +3,7 @@ package com.pot.auth.application;
 import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.service.OneStopAuthenticationService;
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
+import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.factory.OneStopAuthStrategyFactory;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.application.context.OneStopAuthContext;
@@ -55,10 +56,12 @@ class OneStopAuthenticationServiceTest {
     @Mock
     private OneStopAuthStrategyFactory strategyFactory;
 
+    @Mock
+    private ValidationChain<OneStopAuthContext> oneStopAuthValidationChain;
+
     @InjectMocks
     private OneStopAuthenticationService service;
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("用户名密码认证：正确构建上下文，委托给策略，返回OneStopAuthResponse")
     void whenUsernamePasswordAuth_thenBuildContextAndReturnResponse() {
@@ -70,7 +73,7 @@ class OneStopAuthenticationServiceTest {
                 USER_DOMAIN);
 
         AuthenticationResult authResult = authResult();
-        OneStopAuthStrategy<UsernamePasswordAuthRequest> mockStrategy = mock(OneStopAuthStrategy.class);
+        OneStopAuthStrategy mockStrategy = mock(OneStopAuthStrategy.class);
         doReturn(mockStrategy).when(strategyFactory).getStrategy(AuthType.USERNAME_PASSWORD);
         when(mockStrategy.execute(any(OneStopAuthContext.class))).thenReturn(authResult);
 
@@ -81,7 +84,7 @@ class OneStopAuthenticationServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.userId()).isEqualTo(USER_ID);
         assertThat(response.userDomain()).isEqualTo(USER_DOMAIN);
-        assertThat(response.username()).isEqualTo(USERNAME);
+        assertThat(response.nickname()).isEqualTo(USERNAME);
         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
 
@@ -92,11 +95,14 @@ class OneStopAuthenticationServiceTest {
         ArgumentCaptor<OneStopAuthContext> contextCaptor = ArgumentCaptor.forClass(OneStopAuthContext.class);
         verify(mockStrategy).execute(contextCaptor.capture());
         OneStopAuthContext capturedCtx = contextCaptor.getValue();
-        assertThat(capturedCtx.request()).isEqualTo(request);
+        assertThat(capturedCtx.request().authType()).isEqualTo(request.authType());
+        assertThat(capturedCtx.request().userDomain()).isEqualTo(request.userDomain());
+        assertThat(capturedCtx.request().nickname()).isEqualTo(request.nickname());
+        assertThat(capturedCtx.request().password()).isEqualTo(request.password());
         assertThat(capturedCtx.ipAddress().value()).isEqualTo("192.168.1.1");
+        verify(oneStopAuthValidationChain).validate(any(OneStopAuthContext.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出NPE")
     void whenUserAgentNull_thenUseDefaultAndNotThrow() {
@@ -107,7 +113,7 @@ class OneStopAuthenticationServiceTest {
                 PASSWORD,
                 USER_DOMAIN);
 
-        OneStopAuthStrategy<UsernamePasswordAuthRequest> mockStrategy = mock(OneStopAuthStrategy.class);
+        OneStopAuthStrategy mockStrategy = mock(OneStopAuthStrategy.class);
         doReturn(mockStrategy).when(strategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenReturn(authResult());
 
@@ -117,7 +123,6 @@ class OneStopAuthenticationServiceTest {
         verify(mockStrategy).execute(any());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("策略抛出 DomainException，异常向上传播")
     void whenStrategyThrowsDomainException_thenPropagateException() {
@@ -128,7 +133,7 @@ class OneStopAuthenticationServiceTest {
                 PASSWORD,
                 USER_DOMAIN);
 
-        OneStopAuthStrategy<UsernamePasswordAuthRequest> mockStrategy = mock(OneStopAuthStrategy.class);
+        OneStopAuthStrategy mockStrategy = mock(OneStopAuthStrategy.class);
         doReturn(mockStrategy).when(strategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
@@ -142,7 +147,7 @@ class OneStopAuthenticationServiceTest {
         return AuthenticationResult.builder()
                 .userId(USER_ID)
                 .userDomain(USER_DOMAIN)
-                .username(USERNAME)
+                .nickname(USERNAME)
                 .email(EMAIL)
                 .phone(PHONE)
                 .accessToken(ACCESS_TOKEN)

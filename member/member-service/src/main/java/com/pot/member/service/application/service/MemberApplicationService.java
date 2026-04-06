@@ -2,29 +2,21 @@ package com.pot.member.service.application.service;
 
 import com.pot.member.facade.dto.DeviceDTO;
 import com.pot.member.facade.dto.MemberProfileDTO;
-import com.pot.member.facade.dto.RoleDTO;
 import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import com.pot.member.service.application.assembler.MemberAssembler;
-import com.pot.member.service.application.assembler.PermissionAssembler;
 import com.pot.member.service.application.command.ChangePasswordCommand;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.command.UpdateMemberProfileCommand;
 import com.pot.member.service.application.dto.MemberDTO;
-import com.pot.member.service.application.dto.PermissionDTO;
-import com.pot.member.service.application.query.GetMemberPermissionsQuery;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.domain.model.device.DeviceAggregate;
 import com.pot.member.service.domain.model.member.*;
-import com.pot.member.service.domain.model.permission.PermissionAggregate;
-import com.pot.member.service.domain.model.role.RoleAggregate;
 import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 import com.pot.member.service.domain.port.DomainEventPublisher;
 import com.pot.member.service.domain.repository.DeviceRepository;
 import com.pot.member.service.domain.repository.MemberRepository;
-import com.pot.member.service.domain.repository.RoleRepository;
 import com.pot.member.service.domain.repository.SocialConnectionRepository;
 import com.pot.member.service.domain.service.MemberDomainService;
-import com.pot.member.service.domain.service.PermissionDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -53,11 +44,8 @@ public class MemberApplicationService {
     private final MemberRepository memberRepository;
     private final SocialConnectionRepository socialConnectionRepository;
     private final DeviceRepository deviceRepository;
-    private final RoleRepository roleRepository;
     private final MemberDomainService memberDomainService;
-    private final PermissionDomainService permissionDomainService;
     private final MemberAssembler memberAssembler;
-    private final PermissionAssembler permissionAssembler;
     private final DomainEventPublisher eventPublisher;
 
     // ========== 注册 ==========
@@ -100,8 +88,8 @@ public class MemberApplicationService {
      */
     @Transactional
     public MemberDTO createFromOAuth2(String provider, String openId,
-                                      String email, String nickname, String avatarUrl,
-                                      String accessToken, String refreshToken, Long tokenExpiresAt) {
+            String email, String nickname, String avatarUrl,
+            String accessToken, String refreshToken, Long tokenExpiresAt) {
         log.info("OAuth2 创建会员: provider={}, openId={}", provider, openId);
 
         Email emailVo = email != null ? Email.of(email) : null;
@@ -110,8 +98,8 @@ public class MemberApplicationService {
         String nicknameStr = (nickname != null && !nickname.isBlank())
                 ? nickname
                 : (emailVo != null
-                ? emailVo.getValue().split("@")[0] + "_" + System.currentTimeMillis()
-                : provider + "_" + openId.substring(0, Math.min(8, openId.length())));
+                        ? emailVo.getValue().split("@")[0] + "_" + System.currentTimeMillis()
+                        : provider + "_" + openId.substring(0, Math.min(8, openId.length())));
         Nickname nicknameVo = Nickname.of(nicknameStr);
 
         MemberAggregate member = MemberAggregate.createFromOAuth2(nicknameVo, emailVo, avatarUrl);
@@ -173,7 +161,7 @@ public class MemberApplicationService {
     // ========== 认证 ==========
 
     /**
-     * 使用密码验证会员身份（identifier 可以是邮箱、手机号或用户名）
+     * 使用密码验证会员身份（identifier 可以是邮箱、手机号或昵称）
      */
     public MemberDTO authenticateWithPassword(String identifier, String rawPassword) {
         MemberAggregate member = resolveByIdentifier(identifier)
@@ -205,6 +193,7 @@ public class MemberApplicationService {
         log.info("修改密码: memberId={}", command.getMemberId());
         MemberAggregate member = requireMember(command.getMemberId());
         memberDomainService.changePassword(member, command.getOldPassword(), command.getNewPassword());
+        memberRepository.save(member);
     }
 
     @Transactional
@@ -291,39 +280,6 @@ public class MemberApplicationService {
                 .build();
     }
 
-    // ========== 权限查询 ==========
-
-    public Set<PermissionDTO> getMemberPermissions(GetMemberPermissionsQuery query) {
-        Set<PermissionAggregate> permissions = permissionDomainService.getMemberPermissions(query.getMemberId());
-        return permissionAssembler.toDTOSet(permissions);
-    }
-
-    public Set<String> getPermissionCodes(Long memberId) {
-        return permissionDomainService.getMemberPermissions(memberId).stream()
-                .map(PermissionAggregate::getPermissionCode)
-                .collect(Collectors.toSet());
-    }
-
-    public List<RoleDTO> getMemberRoles(Long memberId) {
-        MemberAggregate member = requireMember(memberId);
-        return roleRepository.findByIds(member.getRoleIds()).stream()
-                .map(this::toFacadeRoleDTO)
-                .collect(Collectors.toList());
-    }
-
-    public java.util.Map<Long, Set<String>> getPermissionsBatch(List<Long> memberIds) {
-        java.util.Map<Long, Set<String>> result = new java.util.HashMap<>();
-        for (Long memberId : memberIds) {
-            try {
-                result.put(memberId, getPermissionCodes(memberId));
-            } catch (Exception e) {
-                log.warn("获取会员{}权限失败: {}", memberId, e.getMessage());
-                result.put(memberId, java.util.Collections.emptySet());
-            }
-        }
-        return result;
-    }
-
     // ========== 设备管理 ==========
 
     @Transactional
@@ -396,15 +352,6 @@ public class MemberApplicationService {
 
     private void publishAndClearEvents(MemberAggregate member) {
         member.pullDomainEvents().forEach(eventPublisher::publish);
-    }
-
-    private RoleDTO toFacadeRoleDTO(RoleAggregate role) {
-        return com.pot.member.facade.dto.RoleDTO.builder()
-                .roleId(role.getRoleId() != null ? role.getRoleId().value() : null)
-                .roleCode(role.getRoleCode())
-                .roleName(role.getRoleName() != null ? role.getRoleName().getValue() : null)
-                .description(role.getDescription())
-                .build();
     }
 
     private DeviceDTO toFacadeDeviceDTO(DeviceAggregate d) {

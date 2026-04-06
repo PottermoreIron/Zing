@@ -10,7 +10,7 @@ import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 用户名密码认证请求
+ * 昵称密码认证请求
  *
  * @author pot
  * @since 2025-11-29
@@ -18,7 +18,7 @@ import jakarta.validation.constraints.NotNull;
 public record UsernamePasswordAuthRequest(
         @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
 
-        @ValidUsername String username,
+        @ValidUsername String nickname,
 
         @ValidPassword String password,
 

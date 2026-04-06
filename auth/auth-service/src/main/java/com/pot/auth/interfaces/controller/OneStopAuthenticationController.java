@@ -39,7 +39,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * <p>
  * 支持的认证方式：
  * <ul>
- * <li>用户名 + 密码</li>
+ * <li>昵称 + 密码</li>
  * <li>手机号 + 密码</li>
  * <li>手机号 + 验证码</li>
  * <li>邮箱 + 密码</li>
@@ -67,7 +67,7 @@ public class OneStopAuthenticationController {
          * <p>
          * 支持所有一键认证方式，通过 authType 字段自动识别：
          * <ul>
-         * <li>USERNAME_PASSWORD - 用户名密码认证</li>
+         * <li>USERNAME_PASSWORD - 昵称密码认证（保留历史类型名）</li>
          * <li>PHONE_PASSWORD - 手机号密码认证</li>
          * <li>PHONE_CODE - 手机号验证码认证</li>
          * <li>EMAIL_PASSWORD - 邮箱密码认证</li>

@@ -39,22 +39,22 @@ public interface NotificationPort {
      * 发送登录通知邮件
      *
      * @param email      邮箱地址
-     * @param username   用户名
+    * @param nickname   显示名
      * @param ipAddress  IP地址
      * @param deviceInfo 设备信息
      * @return 是否发送成功
      */
-    boolean sendLoginNotification(String email, String username, String ipAddress, String deviceInfo);
+    boolean sendLoginNotification(String email, String nickname, String ipAddress, String deviceInfo);
 
     /**
      * 发送异地登录告警
      *
      * @param email      邮箱地址
-     * @param username   用户名
+    * @param nickname   显示名
      * @param ipAddress  IP地址
      * @param deviceInfo 设备信息
      * @return 是否发送成功
      */
-    boolean sendAbnormalLoginAlert(String email, String username, String ipAddress, String deviceInfo);
+    boolean sendAbnormalLoginAlert(String email, String nickname, String ipAddress, String deviceInfo);
 }
 

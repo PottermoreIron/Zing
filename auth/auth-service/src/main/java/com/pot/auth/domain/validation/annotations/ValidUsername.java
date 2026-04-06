@@ -9,14 +9,14 @@ import java.lang.annotation.*;
 /**
  * @author: Pot
  * @created: 2025/11/16 22:26
- * @description: 有效用户名验证
+ * @description: 有效昵称验证
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = UsernameValidator.class)
 public @interface ValidUsername {
-    String message() default "Invalid username";
+    String message() default "Invalid nickname";
 
     Class<?>[] groups() default {};
 

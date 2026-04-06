@@ -2,6 +2,7 @@ package com.pot.member.service.application.service;
 
 import com.pot.member.service.application.assembler.MemberAssembler;
 import com.pot.member.service.application.assembler.PermissionAssembler;
+import com.pot.member.service.application.command.ChangePasswordCommand;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.dto.MemberDTO;
 import com.pot.member.service.domain.model.member.*;
@@ -122,7 +123,7 @@ class MemberApplicationServiceTest {
 
         @Test
         @DisplayName("昵称已存在 → 抛出 IllegalArgumentException")
-        void register_duplicateUsername_throws() {
+        void register_duplicateNickname_throws() {
             given(memberRepository.existsByNickname(any())).willReturn(true);
 
             assertThatThrownBy(() -> service.register(cmd))
@@ -144,6 +145,32 @@ class MemberApplicationServiceTest {
                     .hasMessageContaining("手机号");
 
             then(memberDomainService).shouldHaveNoInteractions();
+        }
+    }
+
+    // ========== changePassword() ==========
+
+    @Nested
+    @DisplayName("changePassword()")
+    class ChangePassword {
+
+        @Test
+        @DisplayName("修改密码成功：委托领域服务并保存聚合")
+        void changePassword_savesMemberAfterDomainChange() {
+            MemberAggregate member = persistedMember(1L);
+            ChangePasswordCommand command = ChangePasswordCommand.builder()
+                    .memberId(1L)
+                    .oldPassword("oldPassword")
+                    .newPassword("newPassword")
+                    .build();
+
+            given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));
+            given(memberRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
+
+            service.changePassword(command);
+
+            then(memberDomainService).should().changePassword(member, "oldPassword", "newPassword");
+            then(memberRepository).should().save(member);
         }
     }
 

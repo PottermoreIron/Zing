@@ -95,7 +95,7 @@ public class MemberModuleAdapter implements UserModulePort {
     }
 
     /**
-     * 根据标识符查找用户（支持用户名/邮箱/手机号）
+    * 根据标识符查找用户（支持昵称/邮箱/手机号）
      */
     private R<MemberDTO> findMemberByIdentifier(String identifier) {
         if (identifier.contains("@")) {
@@ -194,23 +194,23 @@ public class MemberModuleAdapter implements UserModulePort {
 
             // 3. 返回用户ID
             MemberDTO memberDTO = response.getData();
-            log.info("用户创建成功: memberId={}, nickname={}", memberDTO.getMemberId(), memberDTO.getUsername());
+            log.info("用户创建成功: memberId={}, nickname={}", memberDTO.getMemberId(), memberDTO.getNickname());
 
             return UserId.of(memberDTO.getMemberId());
 
         } catch (Exception e) {
-            log.error("创建用户失败: username={}", command.username(), e);
+            log.error("创建用户失败: nickname={}", command.username(), e);
             throw new UserCreationException("创建用户失败: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public boolean existsByUsername(String username) {
+    public boolean existsByNickname(String nickname) {
         try {
-            R<Boolean> response = memberServiceClient.existsByNickname(username);
+            R<Boolean> response = memberServiceClient.existsByNickname(nickname);
             return response != null && response.isSuccess() && Boolean.TRUE.equals(response.getData());
         } catch (Exception e) {
-            log.error("检查昵称是否存在失败: username={}", username, e);
+            log.error("检查昵称是否存在失败: nickname={}", nickname, e);
             return false;
         }
     }
@@ -417,7 +417,7 @@ public class MemberModuleAdapter implements UserModulePort {
         return UserDTO.builder()
                 .userId(UserId.of(memberDTO.getMemberId()))
                 .userDomain(UserDomain.MEMBER) // Member域
-                .username(memberDTO.getUsername())
+                .nickname(memberDTO.getNickname())
                 .email(memberDTO.getEmail())
                 .phone(memberDTO.getPhone())
                 .status(memberDTO.getStatus())

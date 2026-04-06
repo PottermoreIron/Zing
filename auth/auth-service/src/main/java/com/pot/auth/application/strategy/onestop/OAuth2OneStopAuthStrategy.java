@@ -17,9 +17,7 @@ import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Password;
-import com.pot.auth.application.validation.handler.OneStopAuthenticationParameterValidator;
-import com.pot.auth.domain.validation.ValidationChain;
-import com.pot.auth.interfaces.dto.onestop.OAuth2AuthRequest;
+import com.pot.auth.application.command.OneStopAuthCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -29,7 +27,7 @@ import org.springframework.util.StringUtils;
 @Component
 @ConditionalOnProperty(name = "auth.oauth2.enabled", havingValue = "true")
 public class OAuth2OneStopAuthStrategy
-        extends AbstractOneStopAuthStrategyImpl<OAuth2AuthRequest> {
+    extends AbstractOneStopAuthStrategyImpl {
 
     private final OAuth2Port oauth2Port;
     private final UserModulePortFactory userModulePortFactory;
@@ -39,28 +37,20 @@ public class OAuth2OneStopAuthStrategy
             JwtTokenService jwtTokenService,
             OAuth2Port oauth2Port,
             UserModulePortFactory userModulePortFactory,
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator,
             UserDefaultsGenerator userDefaultsGenerator) {
-        super(jwtTokenService, createValidationChain(oneStopAuthenticationParameterValidator), userDefaultsGenerator);
+        super(jwtTokenService, userDefaultsGenerator);
         this.oauth2Port = oauth2Port;
         this.userModulePortFactory = userModulePortFactory;
     }
 
-    private static ValidationChain<OneStopAuthContext> createValidationChain(
-            OneStopAuthenticationParameterValidator oneStopAuthenticationParameterValidator) {
-        ValidationChain<OneStopAuthContext> chain = new ValidationChain<>();
-        chain.addHandler(oneStopAuthenticationParameterValidator);
-        return chain;
-    }
-
     @Override
     protected UserDTO findUser(OneStopAuthContext context) {
-        OAuth2AuthRequest request = (OAuth2AuthRequest) context.request();
+        var request = context.request();
         try {
             OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
             UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
             return userModulePort.findUserByOAuth2(
-                    request.provider().getCode(),
+                    request.oauth2ProviderCode(),
                     oauth2UserInfo.openId().value()).orElse(null);
         } catch (Exception e) {
             throw new DomainException("获取OAuth2用户信息失败: " + e.getMessage(), e);
@@ -69,18 +59,18 @@ public class OAuth2OneStopAuthStrategy
 
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
-        OAuth2AuthRequest request = (OAuth2AuthRequest) context.request();
-        log.debug("[OAuth2认证] 用户已绑定，直接登录: userId={}, provider={}", user.userId(), request.provider());
+        var request = context.request();
+        log.debug("[OAuth2认证] 用户已绑定，直接登录: userId={}, provider={}", user.userId(), request.oauth2ProviderCode());
     }
 
     @Override
     protected void validateCredentialForRegister(OneStopAuthContext context) {
-        getOrFetchOAuth2UserInfo((OAuth2AuthRequest) context.request());
+        getOrFetchOAuth2UserInfo(context.request());
     }
 
     @Override
     protected void beforeRegister(OneStopAuthContext context) {
-        OAuth2AuthRequest request = (OAuth2AuthRequest) context.request();
+        var request = context.request();
         OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         if (StringUtils.hasText(oauth2UserInfo.email())
@@ -91,7 +81,7 @@ public class OAuth2OneStopAuthStrategy
 
     @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
-        OAuth2AuthRequest request = (OAuth2AuthRequest) context.request();
+        var request = context.request();
         OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
         String password = userDefaultsGenerator.generateRandomPassword();
         String avatarUrl = oauth2UserInfo.avatarUrl() != null
@@ -99,18 +89,18 @@ public class OAuth2OneStopAuthStrategy
                 : userDefaultsGenerator.getDefaultAvatarUrl();
 
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-        String username = StringUtils.hasText(oauth2UserInfo.email())
-                ? generateAvailableUsername(userModulePort,
-                        () -> userDefaultsGenerator.generateUsernameFromEmail(oauth2UserInfo.email()))
-                : generateAvailableUsername(userModulePort, userDefaultsGenerator::generateUsername);
+        String generatedNickname = StringUtils.hasText(oauth2UserInfo.email())
+                ? generateAvailableNickname(userModulePort,
+                () -> userDefaultsGenerator.generateNicknameFromEmail(oauth2UserInfo.email()))
+                : generateAvailableNickname(userModulePort, userDefaultsGenerator::generateNickname);
         CreateUserCommand command = CreateUserCommand.builder()
-                .username(username)
+            .username(generatedNickname)
                 .email(StringUtils.hasText(oauth2UserInfo.email()) ? Email.of(oauth2UserInfo.email()) : null)
                 .password(Password.of(password))
                 .nickname(oauth2UserInfo.nickname())
                 .avatarUrl(avatarUrl)
                 .emailVerified(oauth2UserInfo.emailVerified() != null && oauth2UserInfo.emailVerified())
-                .oauth2Provider(request.provider().getCode())
+                .oauth2Provider(request.oauth2ProviderCode())
                 .oauth2OpenId(oauth2UserInfo.openId().value())
                 .build();
 
@@ -134,12 +124,12 @@ public class OAuth2OneStopAuthStrategy
         USER_INFO_CACHE.remove();
     }
 
-    private OAuth2UserInfo getOrFetchOAuth2UserInfo(OAuth2AuthRequest request) {
+    private OAuth2UserInfo getOrFetchOAuth2UserInfo(OneStopAuthCommand request) {
         OAuth2UserInfo cached = USER_INFO_CACHE.get();
         if (cached != null) {
             return cached;
         }
-        OAuth2Provider provider = OAuth2Provider.fromCode(request.provider().getCode());
+        OAuth2Provider provider = OAuth2Provider.fromCode(request.oauth2ProviderCode());
         OAuth2AuthorizationCode code = OAuth2AuthorizationCode.of(request.code());
         OAuth2UserInfo oauth2UserInfo = oauth2Port.getUserInfo(provider, code, request.state());
         USER_INFO_CACHE.set(oauth2UserInfo);
