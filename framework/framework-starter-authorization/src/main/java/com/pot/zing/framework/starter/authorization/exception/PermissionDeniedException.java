@@ -1,7 +1,7 @@
 package com.pot.zing.framework.starter.authorization.exception;
 
 /**
- * 权限拒绝异常。
+ * Exception thrown when permission evaluation denies access.
  */
 public class PermissionDeniedException extends RuntimeException {
 

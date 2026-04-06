@@ -6,9 +6,7 @@ import com.pot.zing.framework.starter.ratelimit.enums.RateLimitPolicyEnum;
 import java.lang.annotation.*;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:10
- * @description: 自定义限流注解
+ * Declares a rate limit for a method.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,32 +14,32 @@ import java.lang.annotation.*;
 public @interface RateLimit {
 
     /**
-     * 限流key，支持SpEL表达式
+     * Base key. Supports SpEL expressions.
      */
     String key() default "";
 
     /**
-     * 限流速率（每秒允许的请求数）
+     * Allowed requests per second.
      */
     double rate() default 10.0;
 
     /**
-     * 限流类型
+     * Key strategy type.
      */
     RateLimitMethodEnum type() default RateLimitMethodEnum.FIXED;
 
     /**
-     * 限流策略
+     * Behavior when the rate limit is reached.
      */
     RateLimitPolicyEnum policy() default RateLimitPolicyEnum.REJECT;
 
     /**
-     * 等待超时时间（毫秒），仅在策略为WAIT时有效
+     * Wait timeout in milliseconds when using the wait policy.
      */
     long waitTimeout() default 1000L;
 
     /**
-     * 自定义错误消息
+     * Error message returned when the limit is exceeded.
      */
     String message() default "请求过于频繁，请稍后再试";
 }

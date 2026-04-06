@@ -11,14 +11,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 复杂权限表达式。
+ * Permission expression backed by infix logical operators.
  */
 @Slf4j
 @Getter
 @RequiredArgsConstructor
 public class ComplexPermissionExpression implements PermissionExpression {
 
-    private static final Pattern TOKEN_PATTERN = Pattern.compile("\\(|\\)|\\bAND\\b|\\bOR\\b|\\bNOT\\b|[a-z][a-z0-9:.#*]*");
+    private static final Pattern TOKEN_PATTERN = Pattern
+            .compile("\\(|\\)|\\bAND\\b|\\bOR\\b|\\bNOT\\b|[a-z][a-z0-9:.#*]*");
 
     private final String expression;
     private final PermissionExpressionParser parser;

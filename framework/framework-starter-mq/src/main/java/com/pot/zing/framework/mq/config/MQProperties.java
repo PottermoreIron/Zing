@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * MQ配置属性
+ * Message queue configuration properties.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -14,32 +14,32 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class MQProperties {
 
     /**
-     * MQ类型：rabbitmq 或 kafka
+     * Queue provider type.
      */
     private MQType type = MQType.RABBITMQ;
 
     /**
-     * Topic前缀（可选）
+     * Optional prefix for generated topics.
      */
     private String topicPrefix = "pot.events";
 
     /**
-     * 是否启用
+     * Enables the MQ starter.
      */
     private boolean enabled = true;
 
     /**
-     * RabbitMQ配置
+     * RabbitMQ-specific settings.
      */
     private RabbitMQConfig rabbitmq = new RabbitMQConfig();
 
     /**
-     * Kafka配置
+     * Kafka-specific settings.
      */
     private KafkaConfig kafka = new KafkaConfig();
 
     /**
-     * MQ类型枚举
+     * Supported queue providers.
      */
     public enum MQType {
         RABBITMQ,
@@ -47,59 +47,59 @@ public class MQProperties {
     }
 
     /**
-     * RabbitMQ配置
+     * RabbitMQ configuration.
      */
     @Data
     public static class RabbitMQConfig {
         /**
-         * 默认Exchange类型
+         * Default exchange type.
          */
         private String exchangeType = "topic";
 
         /**
-         * 是否启用发布确认
+         * Enables publisher confirms.
          */
         private boolean publisherConfirms = true;
 
         /**
-         * 是否启用发布返回
+         * Enables publisher returns.
          */
         private boolean publisherReturns = true;
 
         /**
-         * 消息TTL（毫秒），-1表示不设置
+         * Message TTL in milliseconds. Use -1 to leave it unset.
          */
-        private long messageTtl = 86400000; // 24小时
+        private long messageTtl = 86_400_000L;
 
         /**
-         * 死信Exchange
+         * Dead-letter exchange.
          */
         private String deadLetterExchange = "pot.dlx";
 
         /**
-         * 最大重试次数
+         * Maximum retry attempts.
          */
         private int maxRetryAttempts = 3;
     }
 
     /**
-     * Kafka配置
+     * Kafka configuration.
      */
     @Data
     public static class KafkaConfig {
         /**
-         * 默认分区数
+         * Default partition count.
          */
         private int defaultPartitions = 3;
 
         /**
-         * 默认副本数
+         * Default replication factor.
          */
         private short defaultReplicationFactor = 1;
 
         /**
-         * 消息保留时间（毫秒）
+         * Message retention in milliseconds.
          */
-        private long retentionMs = 604800000; // 7天
+        private long retentionMs = 604_800_000L;
     }
 }

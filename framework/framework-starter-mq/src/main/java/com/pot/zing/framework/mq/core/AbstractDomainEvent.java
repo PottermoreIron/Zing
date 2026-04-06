@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 领域事件抽象基类
+ * Base implementation for domain events.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -15,17 +15,17 @@ import java.util.UUID;
 public abstract class AbstractDomainEvent implements DomainEvent {
 
     /**
-     * 事件ID
+     * Event identifier.
      */
     private String eventId = UUID.randomUUID().toString();
 
     /**
-     * 事件发生时间
+     * Event timestamp.
      */
     private LocalDateTime occurredAt = LocalDateTime.now();
 
     /**
-     * 聚合根ID
+     * Aggregate identifier.
      */
     private String aggregateId;
 
@@ -43,28 +43,26 @@ public abstract class AbstractDomainEvent implements DomainEvent {
 
     @Override
     public String getTopic() {
-        // 默认实现：{domain}.events
         return getDomainName() + ".events";
     }
 
     @Override
     public String getRoutingKey() {
-        // 默认实现：{domain}.{event}.{version}
         return getDomainName() + "." + getEventName() + "." + getVersion();
     }
 
     /**
-     * 获取领域名称（子类实现）
+     * Returns the domain name segment.
      */
     protected abstract String getDomainName();
 
     /**
-     * 获取事件名称（子类实现）
+     * Returns the event name segment.
      */
     protected abstract String getEventName();
 
     /**
-     * 获取事件版本（默认v1）
+     * Returns the event version segment.
      */
     protected String getVersion() {
         return "v1";

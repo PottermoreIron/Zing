@@ -6,19 +6,17 @@ import com.pot.zing.framework.starter.touch.model.TouchRequest;
 import java.util.List;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 16:12
- * @description: 渠道选择策略
+ * Strategy for choosing primary and fallback touch channels.
  */
 public interface ChannelSelectionStrategy {
 
     /**
-     * 选择发送渠道
+     * Selects the primary channel.
      */
     TouchChannelType selectChannel(TouchRequest request);
 
     /**
-     * 选择降级渠道列表
+     * Selects fallback channels.
      */
     List<TouchChannelType> selectFallbackChannels(TouchRequest request);
 }

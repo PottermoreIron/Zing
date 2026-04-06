@@ -9,23 +9,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:28
- * @description: 触达渠道抽象
+ * Channel-specific touch delivery contract.
  */
 public interface TouchChannel {
+
     /**
-     * 渠道类型
+     * Returns the channel type.
      */
     TouchChannelType getChannelType();
 
     /**
-     * 发送消息
+     * Sends a request through this channel.
      */
     R<TouchResponse> send(TouchRequest request);
 
     /**
-     * 批量发送(默认实现为串行发送)
+     * Sends multiple requests. The default implementation is sequential.
      */
     default R<List<TouchResponse>> batchSend(List<TouchRequest> requests) {
         List<TouchResponse> responses = requests.stream()
@@ -37,16 +36,15 @@ public interface TouchChannel {
         return R.success(responses);
     }
 
-
     /**
-     * 渠道是否可用
+     * Returns whether the channel is currently available.
      */
     default boolean isAvailable() {
         return true;
     }
 
     /**
-     * 渠道优先级(数字越小优先级越高)
+     * Returns the channel priority. Lower values run first.
      */
     default int getPriority() {
         return 100;

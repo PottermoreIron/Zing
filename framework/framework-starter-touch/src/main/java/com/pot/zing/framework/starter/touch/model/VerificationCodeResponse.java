@@ -8,32 +8,31 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 16:49
- * @description: 验证码响应类
+ * Result payload for verification-code delivery.
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class VerificationCodeResponse {
+
     /**
-     * 消息ID
+     * Message identifier.
      */
     private String messageId;
 
     /**
-     * 验证码(测试环境返回,生产环境不返回)
+     * Verification code. This is typically omitted outside test environments.
      */
     private String code;
 
     /**
-     * 过期时间
+     * Expiration timestamp.
      */
     private LocalDateTime expireTime;
 
     /**
-     * 发送渠道
+     * Delivery channel.
      */
     private String channelType;
 }

@@ -7,42 +7,41 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 16:48
- * @description: 验证码请求
+ * Request payload for sending a verification code.
  */
 @Data
 @Builder
 public class VerificationCodeRequest {
+
     /**
-     * 接收目标(手机号/邮箱)
+     * Recipient target, such as phone or email.
      */
     private String target;
 
     /**
-     * 渠道类型
+     * Requested channel type.
      */
     private TouchChannelType channelType;
 
     /**
-     * 验证码长度,默认6位
+     * Verification code length.
      */
     @Builder.Default
     private Integer codeLength = 6;
 
     /**
-     * 验证码有效期(秒),默认300秒
+     * Verification code TTL in seconds.
      */
     @Builder.Default
     private Long expireSeconds = 300L;
 
     /**
-     * 业务类型(注册/登录/找回密码等)
+     * Business scenario, such as signup or login.
      */
     private String bizType;
 
     /**
-     * 额外参数
+     * Additional template parameters.
      */
     private Map<String, Object> extraParams;
 }

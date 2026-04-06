@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 /**
- * 组合权限表达式。
+ * Composite permission expression with a logical operator.
  */
 @Getter
 @RequiredArgsConstructor

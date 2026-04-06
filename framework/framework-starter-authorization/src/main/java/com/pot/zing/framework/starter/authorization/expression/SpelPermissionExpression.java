@@ -10,7 +10,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.util.Set;
 
 /**
- * 基于 SpEL 的权限表达式。
+ * Permission expression backed by SpEL.
  */
 @Slf4j
 @Getter
@@ -23,7 +23,8 @@ public class SpelPermissionExpression implements PermissionExpression {
     @Override
     public boolean evaluate(EvaluationContext context) {
         try {
-            StandardEvaluationContext spelContext = new StandardEvaluationContext(new PermissionExpressionRoot(context));
+            StandardEvaluationContext spelContext = new StandardEvaluationContext(
+                    new PermissionExpressionRoot(context));
             context.getMethodParameters().forEach(spelContext::setVariable);
             spelContext.setVariable("currentUserId", context.getCurrentUserId());
             spelContext.setVariable("userId", context.getCurrentUserId());

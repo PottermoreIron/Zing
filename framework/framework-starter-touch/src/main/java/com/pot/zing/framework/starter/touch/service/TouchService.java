@@ -7,24 +7,22 @@ import com.pot.zing.framework.starter.touch.model.TouchResponse;
 import java.util.List;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 19:56
- * @description: 触达服务接口
+ * Service for sending touch messages.
  */
 public interface TouchService {
 
     /**
-     * 发送消息
+     * Sends a message through the selected channel.
      */
     R<TouchResponse> send(TouchRequest request);
 
     /**
-     * 多渠道发送(带降级策略)
+     * Sends a message with fallback channels.
      */
     R<TouchResponse> sendWithFallback(TouchRequest request);
 
     /**
-     * 批量发送
+     * Sends multiple requests.
      */
     R<List<TouchResponse>> batchSend(List<TouchRequest> requests);
 }

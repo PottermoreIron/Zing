@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 邮箱验证码一键认证策略
+ * One-stop auth strategy for email verification codes.
  *
  * @author pot
  * @since 2025-11-29

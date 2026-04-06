@@ -32,12 +32,11 @@ public abstract class AbstractSmsChannelImpl extends AbstractTouchChannelImpl {
         return sendSms(
                 request.getTarget(),
                 request.getTemplateId(),
-                request.getParams()
-        );
+                request.getParams());
     }
 
     /**
-     * 子类实现具体的短信发送逻辑
+     * Sends the SMS through the concrete provider.
      */
     protected abstract String sendSms(String phone, String templateId, Map<String, Object> params);
 }

@@ -7,73 +7,71 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:03
- * @description: 自定义限流配置属性
+ * Configuration properties for the rate-limit starter.
  */
 @Data
 @ConfigurationProperties(prefix = "pot.ratelimit")
 public class RateLimitProperties {
 
     /**
-     * 是否启用限流
+     * Enables rate limiting.
      */
     private boolean enabled = true;
 
     /**
-     * 限流实现提供者：guava、redis
+     * Backing provider. Supported values are guava and redis.
      */
     private String provider = "guava";
 
     /**
-     * 全局key前缀
+     * Prefix applied to generated keys.
      */
     private String keyPrefix = "pot:ratelimit:";
 
     /**
-     * 全局速率因子（可用于统一调整所有限流速率）
+     * Multiplier applied to all configured rates.
      */
     private double globalRateFactor = 1.0;
 
     /**
-     * 缓存过期时间（小时）
+     * Expiration window in hours for cached limiters.
      */
     private int expireAfterAccess = 1;
 
     /**
-     * 是否启用IP限流
+     * Enables IP-based keys.
      */
     private boolean ipBasedEnabled = true;
 
     /**
-     * 是否启用用户限流
+     * Enables user-based keys.
      */
     private boolean userBasedEnabled = true;
 
     /**
-     * 特定key的速率覆盖配置
+     * Per-key rate overrides.
      */
     private Map<String, Double> rateOverrides = new HashMap<>();
 
     /**
-     * Redis配置（当provider为redis时生效）
+     * Redis-specific settings.
      */
     private RedisConfig redis = new RedisConfig();
 
     @Data
     public static class RedisConfig {
         /**
-         * 令牌桶容量系数（容量 = 速率 * 容量系数）
+         * Token bucket capacity multiplier.
          */
         private double capacityFactor = 2.0;
 
         /**
-         * 令牌key后缀
+         * Token count suffix.
          */
         private String tokensSuffix = ":tokens";
 
         /**
-         * 最后填充时间key后缀
+         * Last refill timestamp suffix.
          */
         private String lastRefillSuffix = ":last_refill";
     }

@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:27
- * @description: 触达渠道枚举
+ * Supported touch delivery channels.
  */
 @Getter
 @AllArgsConstructor

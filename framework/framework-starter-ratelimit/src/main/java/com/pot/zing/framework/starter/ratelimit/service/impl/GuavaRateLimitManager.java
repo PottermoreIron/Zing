@@ -10,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:05
- * @description: 自定义Guava限流管理器实现
+ * Guava-based implementation of the rate-limit manager.
  */
 @Slf4j
 public class GuavaRateLimitManager implements RateLimitManager {
@@ -34,10 +32,8 @@ public class GuavaRateLimitManager implements RateLimitManager {
     public boolean tryAcquire(String key, double rate, long timeout, TimeUnit timeUnit) {
         log.debug("Guava限流尝试获取令牌 - key: {}, rate: {}, timeout: {}", key, rate, timeout);
 
-        // 应用全局速率因子
         rate = rate * properties.getGlobalRateFactor();
 
-        // 检查速率覆盖配置
         Double overrideRate = properties.getRateOverrides().get(key);
         if (overrideRate != null) {
             rate = overrideRate;
@@ -47,7 +43,6 @@ public class GuavaRateLimitManager implements RateLimitManager {
             final double finalRate = rate;
             RateLimiter rateLimiter = rateLimiterCache.get(key, () -> RateLimiter.create(finalRate));
 
-            // 动态调整速率
             if (rateLimiter.getRate() != finalRate) {
                 rateLimiter.setRate(finalRate);
             }

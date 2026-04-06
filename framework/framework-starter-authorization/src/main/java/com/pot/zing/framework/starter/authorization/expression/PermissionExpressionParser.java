@@ -3,7 +3,7 @@ package com.pot.zing.framework.starter.authorization.expression;
 import com.pot.zing.framework.starter.authorization.enums.Logical;
 
 /**
- * 权限表达式解析器。
+ * Parses permission expressions.
  */
 public interface PermissionExpressionParser {
 

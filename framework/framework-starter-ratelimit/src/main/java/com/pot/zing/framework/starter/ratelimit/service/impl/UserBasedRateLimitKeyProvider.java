@@ -13,30 +13,28 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Optional;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:40
- * @description: 自定义用户限流key提供者
+ * Key provider that appends a user identifier.
  */
 @Slf4j
 public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
 
     /**
-     * 用户ID请求头名称
+     * User ID request header.
      */
     private static final String USER_ID_HEADER = "X-User-Id";
 
     /**
-     * 用户ID请求参数名称
+     * User ID request parameter.
      */
     private static final String USER_ID_PARAM = "userId";
 
     /**
-     * 默认用户标识(未登录用户)
+     * Fallback marker for anonymous users.
      */
     private static final String ANONYMOUS_USER = "anonymous";
 
     /**
-     * 键分隔符
+     * Key segment separator.
      */
     private static final String KEY_SEPARATOR = ":";
 
@@ -52,12 +50,8 @@ public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     /**
-     * 提取用户ID
-     * <p>
-     * 优先级: Header > Parameter > Anonymous
-     * </p>
-     *
-     * @return 用户ID,如果无法获取则返回匿名用户标识
+     * Extracts the user identifier using header, parameter, then anonymous
+     * fallback.
      */
     protected String extractUserId() {
         return Optional.ofNullable(getCurrentRequest())
@@ -70,14 +64,12 @@ public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     /**
-     * 获取当前HTTP请求
-     *
-     * @return HttpServletRequest,如果无法获取则返回null
+     * Returns the current HTTP request when available.
      */
     protected HttpServletRequest getCurrentRequest() {
         try {
-            ServletRequestAttributes attributes =
-                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
             return attributes != null ? attributes.getRequest() : null;
         } catch (Exception e) {
             log.warn("获取当前请求失败: {}", e.getMessage());
@@ -86,33 +78,24 @@ public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     /**
-     * 从请求中提取用户ID
-     *
-     * @param request HTTP请求
-     * @return 用户ID,如果未找到则返回null
+     * Extracts the user identifier from the current request.
      */
     protected String getUserIdFromRequest(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
 
-        // 优先从Header获取
         String userId = request.getHeader(USER_ID_HEADER);
         if (StringUtils.hasText(userId)) {
             return userId;
         }
 
-        // 其次从参数获取
         userId = request.getParameter(USER_ID_PARAM);
         return StringUtils.hasText(userId) ? userId : null;
     }
 
     /**
-     * 构建限流键
-     *
-     * @param baseKey 基础键
-     * @param userId  用户ID
-     * @return 完整的限流键
+     * Appends the user segment to the base key.
      */
     protected String buildRateLimitKey(String baseKey, String userId) {
         return baseKey + KEY_SEPARATOR + "user" + KEY_SEPARATOR + userId;

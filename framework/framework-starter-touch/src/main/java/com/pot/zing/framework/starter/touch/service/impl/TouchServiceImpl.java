@@ -20,9 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:37
- * @description: 触达服务
+ * Default touch service implementation.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,7 +33,6 @@ public class TouchServiceImpl implements TouchService {
 
     @PostConstruct
     void init() {
-        // 注册渠道并按优先级排序
         channels.stream()
                 .sorted(Comparator.comparingInt(TouchChannel::getPriority))
                 .forEach(channel -> channelMap.put(channel.getChannelType(), channel));
@@ -43,38 +40,26 @@ public class TouchServiceImpl implements TouchService {
         log.info("触达渠道初始化完成: {}", channelMap.keySet());
     }
 
-    /**
-     * 发送消息
-     */
     public R<TouchResponse> send(TouchRequest request) {
-        // 参数校验
         validateRequest(request);
 
-        // 选择渠道
         TouchChannelType channelType = request.getChannelType() != null
                 ? request.getChannelType()
                 : selectionStrategy.selectChannel(request);
 
-        // 获取渠道实现
         TouchChannel channel = getChannel(channelType);
 
-        // 检查渠道可用性
         if (!channel.isAvailable()) {
             log.warn("渠道不可用: {}", channelType);
             return R.fail("渠道暂不可用");
         }
 
-        // 发送消息
         return channel.send(request);
     }
 
-    /**
-     * 多渠道发送(带降级策略)
-     */
     public R<TouchResponse> sendWithFallback(TouchRequest request) {
         R<TouchResponse> result = send(request);
 
-        // 主渠道失败,尝试降级
         if (!result.isSuccess()) {
             List<TouchChannelType> fallbackChannels = selectionStrategy.selectFallbackChannels(request);
 
@@ -99,15 +84,11 @@ public class TouchServiceImpl implements TouchService {
         return result;
     }
 
-    /**
-     * 批量发送
-     */
     public R<List<TouchResponse>> batchSend(List<TouchRequest> requests) {
         if (requests == null || requests.isEmpty()) {
             return R.fail("请求列表不能为空");
         }
 
-        // 按渠道分组
         Map<TouchChannelType, List<TouchRequest>> groupedRequests = new ConcurrentHashMap<>();
         requests.forEach(req -> {
             TouchChannelType type = req.getChannelType() != null
@@ -116,7 +97,6 @@ public class TouchServiceImpl implements TouchService {
             groupedRequests.computeIfAbsent(type, k -> new java.util.ArrayList<>()).add(req);
         });
 
-        // 按渠道批量发送
         List<TouchResponse> allResponses = new java.util.ArrayList<>();
         groupedRequests.forEach((type, reqs) -> {
             TouchChannel channel = channelMap.get(type);

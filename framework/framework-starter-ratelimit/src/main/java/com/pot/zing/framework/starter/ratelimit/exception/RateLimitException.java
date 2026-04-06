@@ -3,9 +3,7 @@ package com.pot.zing.framework.starter.ratelimit.exception;
 import java.io.Serial;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:08
- * @description: 自定义限流异常
+ * Exception thrown when a rate limit is exceeded.
  */
 public class RateLimitException extends RuntimeException {
 

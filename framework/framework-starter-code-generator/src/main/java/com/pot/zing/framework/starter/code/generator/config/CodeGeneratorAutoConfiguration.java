@@ -11,9 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 21:36
- * @description: 代码生成器自动装配类
+ * Auto-configuration for the code generator starter.
  */
 @Slf4j
 @AutoConfiguration

@@ -11,7 +11,7 @@ import org.springframework.kafka.support.SendResult;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Kafka消息生产者实现
+ * Kafka-backed message producer.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -31,10 +31,8 @@ public class KafkaMessageProducer implements MessageProducer {
     @Override
     public void send(String topic, String routingKey, Object message) {
         try {
-            // 序列化消息
             String jsonMessage = objectMapper.writeValueAsString(message);
 
-            // 发送消息（routingKey作为partition key）
             if (routingKey != null && !routingKey.isEmpty()) {
                 kafkaTemplate.send(topic, routingKey, jsonMessage);
             } else {
@@ -53,10 +51,8 @@ public class KafkaMessageProducer implements MessageProducer {
     @Override
     public void sendWithConfirm(String topic, Object message, PublishCallback callback) {
         try {
-            // 序列化消息
             String jsonMessage = objectMapper.writeValueAsString(message);
 
-            // 发送消息并处理回调
             CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, jsonMessage);
 
             future.whenComplete((result, ex) -> {

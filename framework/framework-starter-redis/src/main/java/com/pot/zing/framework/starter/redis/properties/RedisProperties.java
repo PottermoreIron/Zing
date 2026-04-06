@@ -6,46 +6,44 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.time.Duration;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 20:41
- * @description: Redis属性配置
+ * Configuration properties for the Redis starter.
  */
 @Data
 @ConfigurationProperties(prefix = "pot.redis")
 public class RedisProperties {
 
     /**
-     * 是否启用Redis
+     * Enables the Redis starter.
      */
     private boolean enabled = true;
 
     /**
-     * 键前缀
+     * Global key prefix.
      */
     private String keyPrefix = "pot:";
 
     /**
-     * 键分隔符
+     * Key segment separator.
      */
     private String keySeparator = ":";
 
     /**
-     * 默认过期时间（秒）
+     * Default expiration time in seconds.
      */
     private Long defaultExpireTime = 3600L;
 
     /**
-     * 序列化配置
+     * Serialization settings.
      */
     private Serializer serializer = new Serializer();
 
     /**
-     * 分布式锁配置
+     * Distributed lock settings.
      */
     private Lock lock = new Lock();
 
     /**
-     * 缓存配置
+     * Cache settings.
      */
     private Cache cache = new Cache();
 
@@ -56,12 +54,12 @@ public class RedisProperties {
     @Data
     public static class Serializer {
         /**
-         * 序列化类型: JSON, JDK, PROTOSTUFF
+         * Serialization format.
          */
         private SerializerType type = SerializerType.JSON;
 
         /**
-         * 是否启用类型信息
+         * Enables polymorphic type metadata.
          */
         private boolean enableTyping = true;
     }
@@ -69,22 +67,22 @@ public class RedisProperties {
     @Data
     public static class Lock {
         /**
-         * 锁前缀
+         * Lock key prefix.
          */
         private String prefix = "lock:";
 
         /**
-         * 默认等待时间
+         * Default wait time.
          */
         private Duration waitTime = Duration.ofSeconds(3);
 
         /**
-         * 默认租约时间
+         * Default lease time.
          */
         private Duration leaseTime = Duration.ofSeconds(30);
 
         /**
-         * 看门狗超时时间
+         * Watchdog timeout.
          */
         private Duration watchdogTimeout = Duration.ofSeconds(30);
     }
@@ -92,17 +90,17 @@ public class RedisProperties {
     @Data
     public static class Cache {
         /**
-         * 缓存前缀
+         * Cache key prefix.
          */
         private String prefix = "cache:";
 
         /**
-         * 是否允许空值
+         * Allows caching null values.
          */
         private boolean allowNullValues = true;
 
         /**
-         * 缓存过期时间
+         * Cache TTL.
          */
         private Duration timeToLive = Duration.ofHours(1);
     }

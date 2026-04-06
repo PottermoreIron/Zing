@@ -1,7 +1,7 @@
 package com.pot.zing.framework.mq.core;
 
 /**
- * 发布确认回调接口
+ * Callback for publish confirmations.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -9,14 +9,12 @@ package com.pot.zing.framework.mq.core;
 public interface PublishCallback {
 
     /**
-     * 发布成功回调
+     * Invoked when the publish succeeds.
      */
     void onSuccess();
 
     /**
-     * 发布失败回调
-     *
-     * @param cause 失败原因
+     * Invoked when the publish fails.
      */
     void onFailure(Throwable cause);
 }

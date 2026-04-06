@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 16:12
- * @description: 默认渠道选择策略
+ * Default channel selection strategy.
  */
 @Slf4j
 @Component
@@ -20,7 +18,6 @@ public class DefaultChannelSelectionStrategy implements ChannelSelectionStrategy
 
     @Override
     public TouchChannelType selectChannel(TouchRequest request) {
-        // 使用请求中指定的渠道
         return request.getChannelType();
     }
 
@@ -28,7 +25,6 @@ public class DefaultChannelSelectionStrategy implements ChannelSelectionStrategy
     public List<TouchChannelType> selectFallbackChannels(TouchRequest request) {
         List<TouchChannelType> fallbacks = new ArrayList<>();
 
-        // 根据主渠道选择降级方案
         switch (request.getChannelType()) {
             case SMS:
                 fallbacks.add(TouchChannelType.EMAIL);

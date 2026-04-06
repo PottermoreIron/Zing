@@ -12,7 +12,7 @@ import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * RabbitMQ消息生产者实现
+ * RabbitMQ-backed message producer.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -32,17 +32,14 @@ public class RabbitMQMessageProducer implements MessageProducer {
     @Override
     public void send(String topic, String routingKey, Object message) {
         try {
-            // 序列化消息
             String jsonMessage = objectMapper.writeValueAsString(message);
 
-            // 构建消息
             Message amqpMessage = MessageBuilder
                     .withBody(jsonMessage.getBytes())
                     .setContentType(MessageProperties.CONTENT_TYPE_JSON)
                     .setContentEncoding("UTF-8")
                     .build();
 
-            // 发送消息
             rabbitTemplate.send(topic, routingKey, amqpMessage);
 
             log.debug("[RabbitMQ] 消息发送成功: exchange={}, routingKey={}, message={}",
@@ -57,17 +54,14 @@ public class RabbitMQMessageProducer implements MessageProducer {
     @Override
     public void sendWithConfirm(String topic, Object message, PublishCallback callback) {
         try {
-            // 序列化消息
             String jsonMessage = objectMapper.writeValueAsString(message);
 
-            // 构建消息
             Message amqpMessage = MessageBuilder
                     .withBody(jsonMessage.getBytes())
                     .setContentType(MessageProperties.CONTENT_TYPE_JSON)
                     .setContentEncoding("UTF-8")
                     .build();
 
-            // 创建关联数据
             CorrelationData correlationData = new CorrelationData();
             correlationData.getFuture().whenComplete((result, ex) -> {
                 if (ex != null) {
@@ -83,7 +77,6 @@ public class RabbitMQMessageProducer implements MessageProducer {
                 }
             });
 
-            // 发送消息
             rabbitTemplate.send(topic, "", amqpMessage, correlationData);
 
         } catch (Exception e) {

@@ -10,9 +10,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:06
- * @description: 自定义Ip限流Key提供者
+ * Key provider that appends the client IP address.
  */
 @Slf4j
 public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
@@ -48,11 +46,12 @@ public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     /**
-     * 获取客户端真实IP
+     * Resolves the best-effort client IP address.
      */
     private String getClientIp() {
         try {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
             if (attributes == null) {
                 return null;
             }
@@ -62,7 +61,7 @@ public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
             for (String header : IP_HEADER_CANDIDATES) {
                 String ip = request.getHeader(header);
                 if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-                    // 多次反向代理后会有多个IP值，第一个IP才是真实IP
+                    // X-Forwarded-For may contain multiple hops; the first value is the client IP.
                     int index = ip.indexOf(',');
                     return index != -1 ? ip.substring(0, index) : ip;
                 }

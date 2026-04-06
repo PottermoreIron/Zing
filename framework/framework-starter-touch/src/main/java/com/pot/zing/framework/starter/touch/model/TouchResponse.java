@@ -8,27 +8,26 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:36
- * @description: 触达结果
+ * Result payload for a touch send operation.
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TouchResponse {
+
     /**
-     * 消息ID
+     * Message identifier.
      */
     private String messageId;
 
     /**
-     * 发送时间
+     * Send timestamp.
      */
     private LocalDateTime sendTime;
 
     /**
-     * 渠道类型
+     * Channel type.
      */
     private String channelType;
 }

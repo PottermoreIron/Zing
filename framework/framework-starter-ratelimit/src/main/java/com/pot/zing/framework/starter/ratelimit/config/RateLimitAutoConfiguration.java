@@ -17,9 +17,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.List;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:07
- * @description: 自定义限流配置类
+ * Auto-configuration for rate limiting.
  */
 @Slf4j
 @AutoConfiguration
@@ -28,7 +26,7 @@ import java.util.List;
 public class RateLimitAutoConfiguration {
 
     /**
-     * Guava限流管理器
+     * Guava-backed rate-limit manager.
      */
     @Bean
     @ConditionalOnMissingBean(RateLimitManager.class)
@@ -39,7 +37,7 @@ public class RateLimitAutoConfiguration {
     }
 
     /**
-     * Redis限流管理器
+     * Redis-backed rate-limit manager.
      */
     @Bean
     @ConditionalOnMissingBean(RateLimitManager.class)
@@ -51,7 +49,7 @@ public class RateLimitAutoConfiguration {
     }
 
     /**
-     * 固定限流Key提供者
+     * Fixed key provider.
      */
     @Bean
     @ConditionalOnMissingBean(name = "potFixedRateLimitKeyProvider")
@@ -61,7 +59,7 @@ public class RateLimitAutoConfiguration {
     }
 
     /**
-     * IP限流Key提供者
+     * IP-based key provider.
      */
     @Bean
     @ConditionalOnMissingBean(name = "potIpBasedRateLimitKeyProvider")
@@ -72,7 +70,7 @@ public class RateLimitAutoConfiguration {
     }
 
     /**
-     * 用户限流Key提供者
+     * User-based key provider.
      */
     @Bean
     @ConditionalOnMissingBean(name = "potUserBasedRateLimitKeyProvider")
@@ -83,7 +81,7 @@ public class RateLimitAutoConfiguration {
     }
 
     /**
-     * 限流切面
+     * Rate-limit aspect.
      */
     @Bean
     @ConditionalOnBean(RateLimitManager.class)

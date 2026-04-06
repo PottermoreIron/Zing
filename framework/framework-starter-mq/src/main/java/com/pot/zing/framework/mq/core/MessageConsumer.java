@@ -1,35 +1,26 @@
 package com.pot.zing.framework.mq.core;
 
 /**
- * 消息消费者接口
+ * Transport-agnostic message consumer.
  *
- * <p>
- * 统一的消息消费抽象
- *
- * @param <T> 消息类型
+ * @param <T> consumed message type
  * @author Copilot
  * @since 2026-01-05
  */
 public interface MessageConsumer<T> {
 
     /**
-     * 处理消息
-     *
-     * @param message 消息内容
+     * Consumes a message payload.
      */
     void consume(T message);
-    
+
     /**
-     * 获取消息类型
-     *
-     * @return 消息类型的Class对象
+     * Returns the message payload type.
      */
     Class<T> getMessageType();
-    
+
     /**
-     * 获取队列名称
-     *
-     * @return 队列名称
+     * Returns the bound queue name.
      */
     String getQueue();
 }

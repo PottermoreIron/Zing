@@ -9,37 +9,36 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:27
- * @description: 触达请求
+ * Request payload for a touch message.
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TouchRequest {
+
     /**
-     * 接收目标(手机号/邮箱/用户ID)
+     * Recipient target, such as phone, email, or user ID.
      */
     private String target;
 
     /**
-     * 渠道类型
+     * Requested channel type.
      */
     private TouchChannelType channelType;
 
     /**
-     * 消息模板ID
+     * Template identifier.
      */
     private String templateId;
 
     /**
-     * 模板参数
+     * Template parameters.
      */
     private Map<String, Object> params;
 
     /**
-     * 业务类型(用于审计)
+     * Business type used for auditing.
      */
     private String bizType;
 }

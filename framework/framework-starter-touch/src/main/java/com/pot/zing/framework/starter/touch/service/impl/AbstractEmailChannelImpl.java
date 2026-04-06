@@ -25,25 +25,22 @@ public abstract class AbstractEmailChannelImpl extends AbstractTouchChannelImpl 
 
     @Override
     protected String doSend(TouchRequest request) {
-        // 构建邮件内容
         EmailContent content = buildEmailContent(request);
 
-        // 发送邮件
         return sendEmail(
                 request.getTarget(),
                 content.getSubject(),
                 content.getBody(),
-                content.isHtml()
-        );
+                content.isHtml());
     }
 
     /**
-     * 构建邮件内容(支持模板渲染)
+     * Builds email content, optionally using template rendering.
      */
     protected abstract EmailContent buildEmailContent(TouchRequest request);
 
     /**
-     * 子类实现具体的邮件发送逻辑
+     * Sends the rendered email through the concrete provider.
      */
     protected abstract String sendEmail(String email, String subject, String body, boolean isHtml);
 

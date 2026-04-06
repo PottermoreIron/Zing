@@ -13,9 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:04
- * @description: 自定义Redis限流管理器实现
+ * Redis-based implementation of the rate-limit manager.
  */
 @Slf4j
 public class RedisRateLimitManager implements RateLimitManager {
@@ -37,10 +35,8 @@ public class RedisRateLimitManager implements RateLimitManager {
     public boolean tryAcquire(String key, double rate, long timeout, TimeUnit timeUnit) {
         log.debug("Redis限流尝试获取令牌 - key: {}, rate: {}, timeout: {}", key, rate, timeout);
 
-        // 应用全局速率因子
         rate = rate * properties.getGlobalRateFactor();
 
-        // 检查速率覆盖配置
         Double overrideRate = properties.getRateOverrides().get(key);
         if (overrideRate != null) {
             rate = overrideRate;
@@ -54,13 +50,14 @@ public class RedisRateLimitManager implements RateLimitManager {
 
         try {
             if (timeout > 0) {
-                return tryAcquireWithTimeout(key, tokensKey, lastRefillKey, rate, capacity, now, ttl, timeout, timeUnit);
+                return tryAcquireWithTimeout(key, tokensKey, lastRefillKey, rate, capacity, now, ttl, timeout,
+                        timeUnit);
             } else {
                 return tryAcquireImmediately(key, tokensKey, lastRefillKey, rate, capacity, now, ttl);
             }
         } catch (Exception e) {
             log.error("Redis限流异常 - key: {}", key, e);
-            // 异常时放行，避免影响业务
+            // Fail open to avoid blocking business traffic on infrastructure errors.
             return true;
         }
     }
@@ -71,21 +68,21 @@ public class RedisRateLimitManager implements RateLimitManager {
     }
 
     /**
-     * 立即尝试获取令牌
+     * Attempts to acquire a token immediately.
      */
     private boolean tryAcquireImmediately(String key, String tokensKey, String lastRefillKey,
-                                          double rate, double capacity, long now, int ttl) {
+            double rate, double capacity, long now, int ttl) {
         List<String> keys = Arrays.asList(key, tokensKey, lastRefillKey);
         Long result = executeScript(keys, rate, capacity, now, 1, ttl);
         return result != null && result == 1;
     }
 
     /**
-     * 带超时的令牌获取
+     * Retries token acquisition until the timeout expires.
      */
     private boolean tryAcquireWithTimeout(String key, String tokensKey, String lastRefillKey,
-                                          double rate, double capacity, long now, int ttl,
-                                          long timeout, TimeUnit timeUnit) throws InterruptedException {
+            double rate, double capacity, long now, int ttl,
+            long timeout, TimeUnit timeUnit) throws InterruptedException {
         long endTime = System.nanoTime() + timeUnit.toNanos(timeout);
         List<String> keys = Arrays.asList(key, tokensKey, lastRefillKey);
 
@@ -95,7 +92,6 @@ public class RedisRateLimitManager implements RateLimitManager {
                 return true;
             }
 
-            // 短暂休眠后重试
             TimeUnit.MILLISECONDS.sleep(50);
         }
 
@@ -103,32 +99,30 @@ public class RedisRateLimitManager implements RateLimitManager {
     }
 
     /**
-     * 执行Lua脚本
+     * Executes the token bucket Lua script.
      */
     private Long executeScript(List<String> keys, double rate, double capacity,
-                               long now, int requested, int ttl) {
+            long now, int requested, int ttl) {
         try {
             return redisService.execute(
                     rateLimitScript,
                     keys,
-                    rate, capacity, now, requested, ttl
-            );
+                    rate, capacity, now, requested, ttl);
         } catch (Exception e) {
             log.error("执行限流Lua脚本失败 - keys: {}", keys, e);
-            // 脚本执行失败时放行，避免影响业务
+            // Fail open to avoid blocking business traffic on script errors.
             return 1L;
         }
     }
 
     /**
-     * 创建限流Lua脚本
+     * Loads the Lua script used by the token bucket.
      */
     private DefaultRedisScript<Long> createRateLimitScript() {
         DefaultRedisScript<Long> script = new DefaultRedisScript<>();
         try {
             script.setScriptSource(new ResourceScriptSource(
-                    new ClassPathResource(LUA_SCRIPT_PATH)
-            ));
+                    new ClassPathResource(LUA_SCRIPT_PATH)));
             script.setResultType(Long.class);
             log.info("限流Lua脚本加载成功: {}", LUA_SCRIPT_PATH);
         } catch (Exception e) {

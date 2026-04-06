@@ -1,9 +1,7 @@
 package com.pot.zing.framework.starter.touch.exception;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:44
- * @description: 触达异常
+ * Exception thrown for touch delivery failures.
  */
 public class TouchException extends RuntimeException {
 

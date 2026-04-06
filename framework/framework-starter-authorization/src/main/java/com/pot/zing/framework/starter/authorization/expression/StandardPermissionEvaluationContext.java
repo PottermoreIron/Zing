@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.Map;
 
 /**
- * 标准权限评估上下文。
+ * Default evaluation context used during permission checks.
  */
 @Getter
 @Builder

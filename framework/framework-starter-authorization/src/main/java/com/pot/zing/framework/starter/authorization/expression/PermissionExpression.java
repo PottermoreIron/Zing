@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 权限表达式接口。
+ * Contract for permission expressions.
  */
 public interface PermissionExpression {
 

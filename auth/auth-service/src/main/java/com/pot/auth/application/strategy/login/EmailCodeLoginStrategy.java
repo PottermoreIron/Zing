@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 邮箱验证码登录策略
+ * Login strategy for email verification codes.
  *
  * @author pot
  */

@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /**
- * MQ自动配置
+ * Auto-configuration for MQ infrastructure beans.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -31,7 +31,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 public class MQAutoConfiguration {
 
     /**
-     * RabbitMQ配置
+     * RabbitMQ-specific bean configuration.
      */
     @Configuration
     @ConditionalOnClass(RabbitTemplate.class)
@@ -43,7 +43,6 @@ public class MQAutoConfiguration {
         public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MQProperties mqProperties) {
             RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
 
-            // 配置发布确认
             if (mqProperties.getRabbitmq().isPublisherConfirms()) {
                 rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
                     if (ack) {
@@ -54,7 +53,6 @@ public class MQAutoConfiguration {
                 });
             }
 
-            // 配置发布返回
             if (mqProperties.getRabbitmq().isPublisherReturns()) {
                 rabbitTemplate.setMandatory(true);
                 rabbitTemplate.setReturnsCallback(returned -> {
@@ -80,7 +78,7 @@ public class MQAutoConfiguration {
     }
 
     /**
-     * Kafka配置
+     * Kafka-specific bean configuration.
      */
     @Configuration
     @ConditionalOnClass(KafkaTemplate.class)
@@ -97,7 +95,7 @@ public class MQAutoConfiguration {
     }
 
     /**
-     * 消息模板配置
+     * Shared message template.
      */
     @Bean
     @ConditionalOnMissingBean
@@ -108,7 +106,7 @@ public class MQAutoConfiguration {
     }
 
     /**
-     * ObjectMapper配置（如果不存在）
+     * Fallback object mapper.
      */
     @Bean
     @ConditionalOnMissingBean

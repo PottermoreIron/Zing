@@ -27,9 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:07
- * @description: 限流切面
+ * Aspect that enforces method-level rate limits.
  */
 @Aspect
 @Slf4j
@@ -66,10 +64,8 @@ public class RateLimitAspect {
             return joinPoint.proceed();
         }
 
-        // 生成限流key
         String rateLimitKey = generateRateLimitKey(joinPoint, method, rateLimit);
 
-        // 尝试获取令牌
         boolean acquired = tryAcquireToken(rateLimitKey, rateLimit);
 
         if (acquired) {
@@ -82,7 +78,7 @@ public class RateLimitAspect {
     }
 
     /**
-     * 生成限流key
+     * Builds the effective rate-limit key.
      */
     private String generateRateLimitKey(ProceedingJoinPoint joinPoint, Method method, RateLimit rateLimit) {
         String baseKey = resolveBaseKey(joinPoint, method, rateLimit);
@@ -140,7 +136,7 @@ public class RateLimitAspect {
     }
 
     /**
-     * 生成方法签名key
+     * Falls back to a signature-based key when no explicit key is configured.
      */
     private String generateMethodSignatureKey(ProceedingJoinPoint joinPoint, Method method) {
         String className = method.getDeclaringClass().getName();
@@ -153,14 +149,14 @@ public class RateLimitAspect {
     }
 
     /**
-     * key哈希处理
+     * Hashes the key to keep Redis and cache keys compact.
      */
     private String hashKey(String key) {
         return DigestUtils.md5DigestAsHex(key.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
-     * 查找对应的key提供者
+     * Resolves the matching key provider and falls back to the fixed provider.
      */
     private RateLimitKeyProvider findKeyProvider(RateLimit rateLimit) {
         return keyProviders.stream()
@@ -173,7 +169,7 @@ public class RateLimitAspect {
     }
 
     /**
-     * 尝试获取令牌
+     * Attempts to acquire a token according to the configured policy.
      */
     private boolean tryAcquireToken(String key, RateLimit rateLimit) {
         long timeout = rateLimit.policy() == RateLimitPolicyEnum.WAIT ? rateLimit.waitTimeout() : 0;

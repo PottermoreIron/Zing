@@ -18,14 +18,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RedisServiceImpl implements RedisService {
 
-    private static final String UNLOCK_SCRIPT =
-            "if redis.call('get', KEYS[1]) == ARGV[1] then " +
-                    "return redis.call('del', KEYS[1]) " +
-                    "else return 0 end";
+    private static final String UNLOCK_SCRIPT = "if redis.call('get', KEYS[1]) == ARGV[1] then " +
+            "return redis.call('del', KEYS[1]) " +
+            "else return 0 end";
     private static final ThreadLocal<String> LOCK_VALUE_HOLDER = new ThreadLocal<>();
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisProperties properties;
-
 
     @Override
     public Boolean set(String key, Object value) {
@@ -150,10 +148,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 获取剩余过期时间
-     *
-     * @param key 键名
-     * @return -2L表示不存在，-1L表示没有设置过期时间
+     * Returns the remaining TTL in seconds.
      */
     @Override
     public Long getExpire(String key) {
@@ -166,10 +161,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 获取剩余过期时间（返回Duration）
-     *
-     * @param key 键名
-     * @return null表示不存在或没有设置过期时间
+     * Returns the remaining TTL as a duration.
      */
     @Override
     public Duration getExpireDuration(String key) {
@@ -186,10 +178,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 持久化键（移除过期时间）
-     *
-     * @param key 键名
-     * @return true表示成功，false表示失败
+     * Removes the expiration time from a key.
      */
     @Override
     public Boolean persist(String key) {
@@ -235,7 +224,6 @@ public class RedisServiceImpl implements RedisService {
             return null;
         }
     }
-
 
     @Override
     public Boolean hSet(String key, String field, Object value) {
@@ -332,10 +320,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 获取Hash键的大小
-     *
-     * @param key 键名
-     * @return -1L表示失败
+     * Returns the hash entry count.
      */
     @Override
     public Long hSize(String key) {
@@ -346,7 +331,6 @@ public class RedisServiceImpl implements RedisService {
             return -1L;
         }
     }
-
 
     @Override
     public Long lPush(String key, Object... values) {
@@ -417,10 +401,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 获取List键的大小
-     *
-     * @param key 键名
-     * @return -1L表示失败
+     * Returns the list size.
      */
     @Override
     public Long lSize(String key) {
@@ -452,7 +433,6 @@ public class RedisServiceImpl implements RedisService {
             return 0L;
         }
     }
-
 
     @Override
     public Long sAdd(String key, Object... values) {
@@ -497,10 +477,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 获取Set键的大小
-     *
-     * @param key 键名
-     * @return -1L表示失败
+     * Returns the set size.
      */
     @Override
     public Long sSize(String key) {
@@ -535,7 +512,6 @@ public class RedisServiceImpl implements RedisService {
             return Collections.emptySet();
         }
     }
-
 
     @Override
     public Boolean zAdd(String key, Object value, double score) {
@@ -598,10 +574,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     /**
-     * 获取ZSet键的大小
-     *
-     * @param key 键名
-     * @return -1L表示失败
+     * Returns the sorted-set size.
      */
     @Override
     public Long zSize(String key) {
@@ -622,7 +595,6 @@ public class RedisServiceImpl implements RedisService {
             return 0L;
         }
     }
-
 
     @Override
     public boolean tryLock(String lockKey, Duration expireTime) {
@@ -685,7 +657,6 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public <T> T execute(RedisScript<T> script, List<String> keys, Object... args) {
         try {
-            // 构建完整的key
             List<String> fullKeys = keys.stream()
                     .map(this::buildKey)
                     .collect(Collectors.toList());
@@ -696,7 +667,6 @@ public class RedisServiceImpl implements RedisService {
             return null;
         }
     }
-
 
     @Override
     public <T> T getOrLoad(String key, Class<T> clazz, Supplier<T> loader) {
@@ -716,7 +686,6 @@ public class RedisServiceImpl implements RedisService {
         }
         return value;
     }
-
 
     @Override
     public Set<String> keys(String pattern) {

@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 手机验证码登录策略
+ * Login strategy for phone verification codes.
  *
  * @author pot
  */

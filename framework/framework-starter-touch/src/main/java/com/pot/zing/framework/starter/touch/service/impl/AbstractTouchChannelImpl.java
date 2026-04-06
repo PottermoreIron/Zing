@@ -10,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 16:07
- * @description: 抽象触达类实现
+ * Template base class for touch channels.
  */
 @Slf4j
 public abstract class AbstractTouchChannelImpl implements TouchChannel {
@@ -20,22 +18,16 @@ public abstract class AbstractTouchChannelImpl implements TouchChannel {
     @Override
     public R<TouchResponse> send(TouchRequest request) {
         try {
-            // 1. 前置校验
             preValidate(request);
 
-            // 2. 参数校验
             validateRequest(request);
 
-            // 3. 限流检查
             checkRateLimit(request);
 
-            // 4. 执行发送
             String messageId = doSend(request);
 
-            // 5. 构建响应
             TouchResponse response = buildResponse(messageId, request);
 
-            // 6. 后置处理
             postProcess(request, response);
 
             return R.success(response);
@@ -52,31 +44,29 @@ public abstract class AbstractTouchChannelImpl implements TouchChannel {
     }
 
     /**
-     * 前置校验(可选)
+     * Optional hook for preliminary validation.
      */
     protected void preValidate(TouchRequest request) {
-        // 子类可覆盖
     }
 
     /**
-     * 参数校验(必须实现)
+     * Validates the request.
      */
     protected abstract void validateRequest(TouchRequest request);
 
     /**
-     * 限流检查(可选)
+     * Optional hook for rate-limit checks.
      */
     protected void checkRateLimit(TouchRequest request) {
-        // 子类可实现限流逻辑
     }
 
     /**
-     * 执行发送(必须实现)
+     * Performs the actual send and returns a provider message ID.
      */
     protected abstract String doSend(TouchRequest request);
 
     /**
-     * 构建响应
+     * Builds the standard touch response.
      */
     protected TouchResponse buildResponse(String messageId, TouchRequest request) {
         return TouchResponse.builder()
@@ -87,9 +77,8 @@ public abstract class AbstractTouchChannelImpl implements TouchChannel {
     }
 
     /**
-     * 后置处理(可选)
+     * Optional hook for audit or monitoring side effects.
      */
     protected void postProcess(TouchRequest request, TouchResponse response) {
-        // 子类可实现审计日志、监控上报等
     }
 }

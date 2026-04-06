@@ -3,7 +3,7 @@ package com.pot.zing.framework.mq.core;
 import java.time.LocalDateTime;
 
 /**
- * 领域事件基类
+ * Contract for published domain events.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -11,35 +11,32 @@ import java.time.LocalDateTime;
 public interface DomainEvent {
 
     /**
-     * 获取事件ID
+     * Returns the event identifier.
      */
     String getEventId();
 
     /**
-     * 获取事件类型
+     * Returns the event type.
      */
     String getEventType();
 
     /**
-     * 获取Topic名称
-     * 格式: {domain}.{event}.{version}
-     * 例如: member.permission.changed.v1
+     * Returns the publish topic.
      */
     String getTopic();
 
     /**
-     * 获取路由键
-     * 格式: {domain}.{event}.{version}
+     * Returns the routing key.
      */
     String getRoutingKey();
 
     /**
-     * 获取事件发生时间
+     * Returns the event timestamp.
      */
     LocalDateTime getOccurredAt();
 
     /**
-     * 获取聚合根ID
+     * Returns the aggregate identifier.
      */
     String getAggregateId();
 }

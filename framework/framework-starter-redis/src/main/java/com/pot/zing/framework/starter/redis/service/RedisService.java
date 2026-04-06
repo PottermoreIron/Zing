@@ -11,110 +11,107 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 20:53
- * @description: 自定义Redis接口类
+ * High-level Redis operations facade.
  */
 public interface RedisService {
 
     /**
-     * 设置键值对
+     * Sets a value.
      */
     Boolean set(String key, Object value);
 
     /**
-     * 设置键值对，带过期时间
+     * Sets a value with a timeout.
      */
     Boolean set(String key, Object value, Duration timeout);
 
     /**
-     * 设置键值对，带过期时间
+     * Sets a value with a timeout.
      */
     Boolean set(String key, Object value, long timeout, TimeUnit unit);
 
     /**
-     * 设置键值对，如果键不存在
+     * Sets a value when the key is absent.
      */
     Boolean setIfAbsent(String key, Object value);
 
     /**
-     * 设置键值对，带过期时间，如果键不存在
+     * Sets a value with a timeout when the key is absent.
      */
     Boolean setIfAbsent(String key, Object value, Duration timeout);
 
     /**
-     * 设置键值对，带过期时间，如果键不存在
+     * Sets a value with a timeout when the key is absent.
      */
     Boolean setIfAbsent(String key, Object value, long timeout, TimeUnit unit);
 
     /**
-     * 获取值
+     * Gets a value.
      */
     <T> T get(String key, Class<T> clazz);
 
     /**
-     * 删除键
+     * Deletes a key.
      */
     Boolean delete(String key);
 
     /**
-     * 批量删除键
+     * Deletes multiple keys.
      */
     Long delete(Collection<String> keys);
 
     /**
-     * 检查键是否存在
+     * Checks whether a key exists.
      */
     Boolean exists(String key);
 
     /**
-     * 设置过期时间
+     * Sets the expiration time.
      */
     Boolean expire(String key, Duration timeout);
 
     /**
-     * 设置过期时间
+     * Sets the expiration time.
      */
     Boolean expire(String key, long timeout, TimeUnit unit);
 
     /**
-     * 获取剩余过期时间
+     * Returns the remaining TTL in seconds.
      */
     Long getExpire(String key);
 
     /**
-     * 获取剩余过期时间（返回Duration）
+     * Returns the remaining TTL as a duration.
      */
     Duration getExpireDuration(String key);
 
     /**
-     * 持久化键（移除过期时间）
+     * Removes the expiration time from a key.
      */
     Boolean persist(String key);
 
     /**
-     * 获取键的类型
+     * Returns the Redis type for the key.
      */
     String type(String key);
 
     /**
-     * 递增键的值
+     * Increments a numeric key by the supplied delta.
      */
     Long increment(String key, long delta);
 
     /**
-     * 递增键的值, 默认增量为1
+     * Increments a numeric key by one.
      */
     Long increment(String key);
 
     /**
-     * 递增键的值，支持浮点数
+     * Increments a numeric key by a floating-point delta.
      */
     Double increment(String key, double delta);
 
-
     /**
-     * 设置Hash键值对
+     * Sets a hash field.
      */
     Boolean hSet(String key, String field, Object value);
 
@@ -123,7 +120,7 @@ public interface RedisService {
     Boolean hSetIfAbsent(String key, String field, Object value);
 
     /**
-     * 获取Hash键的值
+     * Gets a hash field.
      */
 
     <T> T hGet(String key, String field, Class<T> clazz);
@@ -198,17 +195,14 @@ public interface RedisService {
 
     <T> T executeWithLock(String lockKey, Duration expireTime, Supplier<T> supplier);
 
-
     /**
-     * 执行Lua脚本
+     * Executes a Lua script.
      */
     <T> T execute(RedisScript<T> script, List<String> keys, Object... args);
-
 
     <T> T getOrLoad(String key, Class<T> clazz, Supplier<T> loader);
 
     <T> T getOrLoad(String key, Class<T> clazz, Duration timeout, Supplier<T> loader);
-
 
     Set<String> keys(String pattern);
 

@@ -5,33 +5,22 @@ import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:02
- * @description: 自定义限流Key提供者接口
+ * Strategy for building rate-limit keys.
  */
 public interface RateLimitKeyProvider {
 
     /**
-     * 生成限流key
-     *
-     * @param baseKey   基础key
-     * @param joinPoint 切点
-     * @param rateLimit 限流注解
-     * @return 最终的限流key
+     * Builds the final rate-limit key.
      */
     String generateKey(String baseKey, ProceedingJoinPoint joinPoint, RateLimit rateLimit);
 
     /**
-     * 获取支持的限流类型
-     *
-     * @return 限流类型
+     * Returns the supported key strategy type.
      */
     RateLimitMethodEnum getSupportedType();
 
     /**
-     * 获取优先级，数值越小优先级越高
-     *
-     * @return 优先级
+     * Returns the strategy order. Lower values run first.
      */
     default int getOrder() {
         return 0;

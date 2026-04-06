@@ -6,9 +6,7 @@ import com.pot.zing.framework.starter.ratelimit.service.RateLimitKeyProvider;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 22:05
- * @description: 自定义固定限流Key提供者
+ * Key provider that returns the base key unchanged.
  */
 public class FixedRateLimitKeyProvider implements RateLimitKeyProvider {
 
@@ -24,6 +22,6 @@ public class FixedRateLimitKeyProvider implements RateLimitKeyProvider {
 
     @Override
     public int getOrder() {
-        return Integer.MAX_VALUE; // 最低优先级
+        return Integer.MAX_VALUE; // Lowest priority fallback.
     }
 }

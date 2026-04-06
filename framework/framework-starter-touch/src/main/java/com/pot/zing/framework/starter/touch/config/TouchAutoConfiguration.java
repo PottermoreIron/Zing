@@ -15,9 +15,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.List;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 16:01
- * @description: 触达自动装配类
+ * Auto-configuration for touch delivery beans.
  */
 @Slf4j
 @AutoConfiguration

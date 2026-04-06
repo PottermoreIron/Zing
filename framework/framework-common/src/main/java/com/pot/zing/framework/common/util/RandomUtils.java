@@ -7,30 +7,24 @@ import java.security.SecureRandom;
 import java.util.UUID;
 
 /**
- * @author: Pot
- * @created: 2025/8/16 22:14
- * @description: 随机工具类
+ * Random value generation helpers.
  */
 public class RandomUtils {
-    /**
-     * 预定义字符池（线程安全）
-     */
+
     private static final String NUMBERS = "0123456789";
+
     /**
-     * 排除 l/o
+     * Excludes visually ambiguous l and o.
      */
     private static final String LOWER_LETTERS = "abcdefghijkmnpqrstuvwxyz";
+
     /**
-     * 排除 I/O
+     * Excludes visually ambiguous I and O.
      */
     private static final String UPPER_LETTERS = StringUtils.upperCase(LOWER_LETTERS);
-    /**
-     * 线程安全随机数
-     */
+
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    /**
-     * 预计算混合字符集（按需初始化）
-     */
+
     private static final String ALPHANUMERIC;
 
     private static final int CODE_DEFAULT_LENGTH = 6;
@@ -53,21 +47,21 @@ public class RandomUtils {
     }
 
     /**
-     * 生成随机验证码, 默认不包含字母
+     * Generates a numeric verification code.
      */
     public static String generateRandomCode(int length) {
         return generateRandomCode(length, false);
     }
 
     /**
-     * 生成默认长度（6位）随机数字验证码
+     * Generates a six-digit verification code.
      */
     public static String generateRandomCode() {
         return generateRandomCode(CODE_DEFAULT_LENGTH);
     }
 
     /**
-     * 生成随机字符串
+     * Generates a random alphanumeric string.
      */
     public static String generateRandomString(int length) {
         return RandomStringUtils.random(length, 0, 0, true, true, null, SECURE_RANDOM);
@@ -82,8 +76,6 @@ public class RandomUtils {
     }
 
     public static String generateRandomNickname() {
-        // 生成一个随机的昵称，长度为20
-        // 可以根据需要修改生成规则
         return "User_" + generateRandomString();
     }
 

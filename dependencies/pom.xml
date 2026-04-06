@@ -16,14 +16,14 @@
     </developers>
     <properties>
         <revision>0.0.1-SNAPSHOT</revision>
-        <!-- Java 版本 -->
+        <!-- Java version -->
         <java.version>21</java.version>
-        <!-- Spring Boot 版本 -->
+        <!-- Spring Boot version -->
         <spring-boot.version>3.4.2</spring-boot.version>
-        <!-- Spring Cloud 版本 -->
+        <!-- Spring Cloud version -->
         <spring-cloud.version>2024.0.2</spring-cloud.version>
         <spring-cloud-alibaba.version>2023.0.3.3</spring-cloud-alibaba.version>
-        <!-- data相关 -->
+        <!-- Data stack -->
         <mysql.version>9.2.0</mysql.version>
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <!-- apache -->
@@ -39,7 +39,7 @@
         <netty.version>4.2.3.Final</netty.version>
         <dotenv.version>3.0.0</dotenv.version>
         <flyway.version>10.21.0</flyway.version>
-        <!-- Maven 插件版本 -->
+        <!-- Maven plugin versions -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.0</maven-failsafe-plugin.version>
@@ -133,7 +133,7 @@
                 <groupId>com.sankuai.inf.leaf</groupId>
                 <version>${leaf.version}</version>
                 <exclusions>
-                    <!-- 排除不必要的依赖，避免冲突 -->
+                    <!-- Exclude unused dependencies to avoid conflicts. -->
                     <exclusion>
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
@@ -177,7 +177,7 @@
                 <version>${flyway.version}</version>
             </dependency>
 
-            <!-- 自定义starter -->
+            <!-- Custom starters -->
             <dependency>
                 <groupId>com.pot</groupId>
                 <artifactId>framework-starter-redis</artifactId>

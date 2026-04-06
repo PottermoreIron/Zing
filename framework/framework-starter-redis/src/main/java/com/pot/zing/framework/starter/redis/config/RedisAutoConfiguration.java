@@ -19,9 +19,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 20:44
- * @description: Redis自动配置类
+ * Auto-configuration for Redis template and service beans.
  */
 @Slf4j
 @AutoConfiguration(after = org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class)
@@ -32,21 +30,17 @@ public class RedisAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "potRedisTemplate")
     public RedisTemplate<String, Object> potRedisTemplate(RedisConnectionFactory connectionFactory,
-                                                          RedisProperties properties) {
+            RedisProperties properties) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // 字符串序列化器
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
 
-        // JSON序列化器
         Jackson2JsonRedisSerializer<Object> jsonSerializer = buildJsonSerializer(properties);
 
-        // 设置key和hashKey的序列化方式
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
 
-        // 设置value和hashValue的序列化方式
         template.setValueSerializer(jsonSerializer);
         template.setHashValueSerializer(jsonSerializer);
 
@@ -61,7 +55,7 @@ public class RedisAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public RedisService potRedisService(RedisTemplate<String, Object> potRedisTemplate,
-                                        RedisProperties properties) {
+            RedisProperties properties) {
         log.info("Pot RedisService initialized with key prefix: {}", properties.getKeyPrefix());
         return new RedisServiceImpl(potRedisTemplate, properties);
     }
@@ -73,11 +67,9 @@ public class RedisAutoConfiguration {
         if (properties.getSerializer().isEnableTyping()) {
             objectMapper.activateDefaultTyping(
                     LaissezFaireSubTypeValidator.instance,
-                    ObjectMapper.DefaultTyping.NON_FINAL
-            );
+                    ObjectMapper.DefaultTyping.NON_FINAL);
         }
 
-        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
-        return serializer;
+        return new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
     }
 }

@@ -15,9 +15,7 @@ import jakarta.annotation.PostConstruct;
 import java.util.Map;
 
 /**
- * 消息消费者注册器
- * 
- * 自动扫描所有MessageConsumer bean并注册到RabbitMQ监听器
+ * Registers discovered message consumers with RabbitMQ listeners.
  *
  * @author Copilot
  * @since 2026-01-06
@@ -61,12 +59,10 @@ public class MessageConsumerRegistry {
         String queueName = consumer.getQueue();
         Class<T> messageType = consumer.getMessageType();
 
-        // 创建消息监听容器
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.setQueueNames(queueName);
 
-        // 创建消息监听适配器
         MessageListenerAdapter adapter = new MessageListenerAdapter(new Object() {
             @SuppressWarnings("unused")
             public void handleMessage(String message) {

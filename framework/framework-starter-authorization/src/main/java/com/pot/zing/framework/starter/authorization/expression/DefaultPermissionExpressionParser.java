@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * 默认权限表达式解析器。
+ * Default parser for simple, composite, and SpEL permission expressions.
  */
 @Slf4j
 public class DefaultPermissionExpressionParser implements PermissionExpressionParser {

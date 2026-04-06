@@ -13,29 +13,21 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * @author: Pot
- * @created: 2025/2/22 16:48
- * @description: Bean工具类
+ * Bean copy and conversion helpers.
  */
 public class BeanUtils {
 
     /**
-     * BeanCopier缓存，提升性能
+     * Cached BeanCopier instances keyed by source and target type.
      */
     private static final Map<String, BeanCopier> BEAN_COPIER_CACHE = new ConcurrentHashMap<>();
 
-    /**
-     * 私有构造函数，防止实例化
-     */
     private BeanUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
-     * 复制属性（浅拷贝，忽略null值）
-     *
-     * @param source 源对象
-     * @param target 目标对象
+     * Performs a shallow property copy.
      */
     public static void copyProperties(Object source, Object target) {
         if (source == null || target == null) {
@@ -45,11 +37,7 @@ public class BeanUtils {
     }
 
     /**
-     * 复制属性（浅拷贝，可指定忽略的属性）
-     *
-     * @param source           源对象
-     * @param target           目标对象
-     * @param ignoreProperties 忽略的属性名
+     * Performs a shallow property copy while ignoring selected fields.
      */
     public static void copyProperties(Object source, Object target, String... ignoreProperties) {
         if (source == null || target == null) {
@@ -59,10 +47,7 @@ public class BeanUtils {
     }
 
     /**
-     * 复制属性（忽略null值）
-     *
-     * @param source 源对象
-     * @param target 目标对象
+     * Performs a shallow copy while skipping null-valued fields.
      */
     public static void copyPropertiesIgnoreNull(Object source, Object target) {
         if (source == null || target == null) {
@@ -72,10 +57,7 @@ public class BeanUtils {
     }
 
     /**
-     * 高性能属性复制（使用CGLIB，适合大批量操作）
-     *
-     * @param source 源对象
-     * @param target 目标对象
+     * Performs a shallow copy using a cached CGLIB BeanCopier.
      */
     public static void copyPropertiesFast(Object source, Object target) {
         if (source == null || target == null) {
@@ -88,12 +70,7 @@ public class BeanUtils {
     }
 
     /**
-     * 转换对象类型
-     *
-     * @param source      源对象
-     * @param targetClass 目标类型
-     * @param <T>         目标类型
-     * @return 目标对象
+     * Converts an object to the target type via shallow copy.
      */
     public static <T> T convert(Object source, Class<T> targetClass) {
         if (source == null) {
@@ -109,12 +86,7 @@ public class BeanUtils {
     }
 
     /**
-     * 转换对象类型（使用Supplier）
-     *
-     * @param source         源对象
-     * @param targetSupplier 目标对象供应商
-     * @param <T>            目标类型
-     * @return 目标对象
+     * Converts an object using a supplied target instance.
      */
     public static <T> T convert(Object source, Supplier<T> targetSupplier) {
         if (source == null) {
@@ -126,14 +98,7 @@ public class BeanUtils {
     }
 
     /**
-     * 转换对象类型（支持自定义回调）
-     *
-     * @param source         源对象
-     * @param targetSupplier 目标对象供应商
-     * @param callback       自定义回调
-     * @param <S>            源类型
-     * @param <T>            目标类型
-     * @return 目标对象
+     * Converts an object and applies a custom callback to the result.
      */
     public static <S, T> T convert(S source, Supplier<T> targetSupplier, BiConsumer<S, T> callback) {
         if (source == null) {
@@ -148,13 +113,7 @@ public class BeanUtils {
     }
 
     /**
-     * 批量转换列表
-     *
-     * @param sourceList  源列表
-     * @param targetClass 目标类型
-     * @param <S>         源类型
-     * @param <T>         目标类型
-     * @return 目标列表
+     * Converts a list using reflective target construction.
      */
     public static <S, T> List<T> convertList(List<S> sourceList, Class<T> targetClass) {
         if (org.springframework.util.CollectionUtils.isEmpty(sourceList)) {
@@ -166,13 +125,7 @@ public class BeanUtils {
     }
 
     /**
-     * 批量转换列表（使用Supplier）
-     *
-     * @param sourceList     源列表
-     * @param targetSupplier 目标对象供应商
-     * @param <S>            源类型
-     * @param <T>            目标类型
-     * @return 目标列表
+     * Converts a list using a supplied target instance factory.
      */
     public static <S, T> List<T> convertList(List<S> sourceList, Supplier<T> targetSupplier) {
         if (org.springframework.util.CollectionUtils.isEmpty(sourceList)) {
@@ -184,16 +137,10 @@ public class BeanUtils {
     }
 
     /**
-     * 批量转换列表（支持自定义回调）
-     *
-     * @param sourceList     源列表
-     * @param targetSupplier 目标对象供应商
-     * @param callback       自定义回调
-     * @param <S>            源类型
-     * @param <T>            目标类型
-     * @return 目标列表
+     * Converts a list and applies a custom callback per item.
      */
-    public static <S, T> List<T> convertList(List<S> sourceList, Supplier<T> targetSupplier, BiConsumer<S, T> callback) {
+    public static <S, T> List<T> convertList(List<S> sourceList, Supplier<T> targetSupplier,
+            BiConsumer<S, T> callback) {
         if (CollectionUtils.isEmpty(sourceList)) {
             return Collections.emptyList();
         }
@@ -203,22 +150,7 @@ public class BeanUtils {
     }
 
     /**
-     * 深拷贝转换对象类型(基于JSON序列化)
-     *
-     * <p>适用场景:
-     * <ul>
-     *   <li>需要深拷贝嵌套对象</li>
-     *   <li>处理复杂类型转换</li>
-     *   <li>避免引用共享问题</li>
-     * </ul>
-     *
-     * <p>性能考虑: JSON序列化开销较大,不适合高频调用场景
-     *
-     * @param source      源对象
-     * @param targetClass 目标类型
-     * @param <T>         目标类型
-     * @return 目标对象
-     * @throws IllegalArgumentException 转换失败时抛出
+     * Converts an object with JSON-based deep copy semantics.
      */
     public static <T> T convertDeep(Object source, Class<T> targetClass) {
         if (source == null) {
@@ -231,19 +163,12 @@ public class BeanUtils {
                     String.format("Failed to deep convert from %s to %s",
                             source.getClass().getSimpleName(),
                             targetClass.getSimpleName()),
-                    e
-            );
+                    e);
         }
     }
 
     /**
-     * 深拷贝批量转换列表
-     *
-     * @param sourceList  源列表
-     * @param targetClass 目标类型
-     * @param <S>         源类型
-     * @param <T>         目标类型
-     * @return 目标列表
+     * Converts a list with JSON-based deep copy semantics.
      */
     public static <S, T> List<T> convertListDeep(List<S> sourceList, Class<T> targetClass) {
         if (CollectionUtils.isEmpty(sourceList)) {
@@ -255,27 +180,16 @@ public class BeanUtils {
     }
 
     /**
-     * 混合转换策略(浅拷贝+深拷贝回调)
-     *
-     * <p>推荐使用场景: 大部分字段浅拷贝,少数复杂字段深拷贝
-     *
-     * @param source         源对象
-     * @param targetSupplier 目标对象供应商
-     * @param deepCopyFields 需要深拷贝的字段处理器
-     * @param <S>            源类型
-     * @param <T>            目标类型
-     * @return 目标对象
+     * Combines shallow copy with a custom deep-copy callback.
      */
     public static <S, T> T convertHybrid(S source, Supplier<T> targetSupplier,
-                                         BiConsumer<S, T> deepCopyFields) {
+            BiConsumer<S, T> deepCopyFields) {
         if (source == null) {
             return null;
         }
-        // 先执行浅拷贝
         T target = targetSupplier.get();
         copyProperties(source, target);
 
-        // 再处理需要深拷贝的字段
         if (deepCopyFields != null) {
             deepCopyFields.accept(source, target);
         }
@@ -283,20 +197,11 @@ public class BeanUtils {
     }
 
     /**
-     * 混合转换策略批量转换列表(浅拷贝+深拷贝回调)
-     *
-     * <p>推荐使用场景: 批量转换时,大部分字段浅拷贝,少数复杂字段深拷贝
-     *
-     * @param sourceList     源列表
-     * @param targetSupplier 目标对象供应商
-     * @param deepCopyFields 需要深拷贝的字段处理器
-     * @param <S>            源类型
-     * @param <T>            目标类型
-     * @return 目标列表
+     * Converts a list with shallow copy and a deep-copy callback.
      */
     public static <S, T> List<T> convertListHybrid(List<S> sourceList,
-                                                   Supplier<T> targetSupplier,
-                                                   BiConsumer<S, T> deepCopyFields) {
+            Supplier<T> targetSupplier,
+            BiConsumer<S, T> deepCopyFields) {
         if (CollectionUtils.isEmpty(sourceList)) {
             return Collections.emptyList();
         }
@@ -306,10 +211,7 @@ public class BeanUtils {
     }
 
     /**
-     * 获取对象中值为null的属性名
-     *
-     * @param source 源对象
-     * @return null属性名数组
+     * Returns property names whose values are null.
      */
     private static String[] getNullPropertyNames(Object source) {
         BeanWrapper wrapper = new BeanWrapperImpl(source);
@@ -325,27 +227,21 @@ public class BeanUtils {
     }
 
     /**
-     * 生成缓存key
-     *
-     * @param sourceClass 源类型
-     * @param targetClass 目标类型
-     * @return 缓存key
+     * Builds the BeanCopier cache key.
      */
     private static String generateKey(Class<?> sourceClass, Class<?> targetClass) {
         return sourceClass.getName() + "_" + targetClass.getName();
     }
 
     /**
-     * 清空BeanCopier缓存
+     * Clears the BeanCopier cache.
      */
     public static void clearCache() {
         BEAN_COPIER_CACHE.clear();
     }
 
     /**
-     * 获取缓存大小
-     *
-     * @return 缓存大小
+     * Returns the BeanCopier cache size.
      */
     public static int getCacheSize() {
         return BEAN_COPIER_CACHE.size();

@@ -4,46 +4,46 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 15:59
- * @description: 触达配置属性
+ * Configuration properties for the touch starter.
  */
 @Data
 @ConfigurationProperties(prefix = "pot.touch")
 public class TouchProperties {
+
     /**
-     * 是否启用触达功能
+     * Enables touch delivery features.
      */
     private boolean enabled = true;
+
     /**
-     *
+     * Runtime environment label.
      */
     private String env = "pre";
 
     /**
-     * 短信配置
+     * SMS settings.
      */
     private SmsConfig sms = new SmsConfig();
 
     /**
-     * 邮件配置
+     * Email settings.
      */
     private EmailConfig email = new EmailConfig();
 
     /**
-     * 限流配置
+     * Rate-limit settings.
      */
     private RateLimitConfig rateLimit = new RateLimitConfig();
 
     @Data
     public static class SmsConfig {
         /**
-         * 短信服务提供商: aliyun, tencent
+         * SMS provider, such as aliyun or tencent.
          */
         private String provider = "aliyun";
 
         /**
-         * 短信签名
+         * SMS sign name.
          */
         private String signName;
     }
@@ -51,12 +51,12 @@ public class TouchProperties {
     @Data
     public static class EmailConfig {
         /**
-         * 邮件服务提供商: spring, sendgrid, aliyun
+         * Email provider, such as spring, sendgrid, or aliyun.
          */
         private String provider = "spring";
 
         /**
-         * 发件人邮箱
+         * Sender email address.
          */
         private String from = "noreply@yoursite.com";
     }
@@ -64,12 +64,12 @@ public class TouchProperties {
     @Data
     public static class RateLimitConfig {
         /**
-         * 是否启用限流
+         * Enables rate limiting.
          */
         private boolean enabled = true;
 
         /**
-         * 每分钟最大发送次数
+         * Maximum sends per minute.
          */
         private int maxPerMinute = 5;
     }

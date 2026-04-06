@@ -6,9 +6,7 @@ import com.pot.zing.framework.starter.code.generator.util.CodeGenerator;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 21:31
- * @description: 默认代码生成器接口实现类
+ * Default implementation of the code generation service.
  */
 @RequiredArgsConstructor
 public class DefaultCodeGenerationService implements CodeGenerationService {
