@@ -13,13 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 邮箱密码登录策略
- *
- * <p>
- * 通过邮箱和密码进行登录，authenticateWithPassword 内部完成验证+查询，
- * 避免两次 RPC 调用。
- *
- * @author pot
+ * Login strategy for email and password credentials.
  */
 @Slf4j
 @Component
@@ -37,8 +31,7 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl {
     }
 
     /**
-     * 验证邮箱密码，并将已认证的 UserDTO 放入 context extraAttributes，
-     * 避免 getUserInfo() 再次发起 RPC。
+     * Caches the authenticated user to avoid a second user lookup.
      */
     @Override
     protected void validateCredential(AuthenticationContext context) {
@@ -49,19 +42,17 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl {
         UserDTO user = port.authenticateWithPassword(request.email(), request.password())
                 .orElseThrow(() -> new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
-        // 将已认证用户暂存到 context，供 getUserInfo() 直接取用
         context.withExtraAttribute(AUTHENTICATED_USER_KEY, user);
         log.debug("[邮箱密码登录] 凭证验证通过: email={}", request.email());
     }
 
     /**
-     * 直接从 context 取出已验证的 UserDTO，不重复发起 RPC。
+     * Reuses the cached authenticated user when available.
      */
     @Override
     protected UserDTO getUserInfo(AuthenticationContext context) {
         UserDTO user = (UserDTO) context.getExtraAttribute(AUTHENTICATED_USER_KEY);
         if (user == null) {
-            // 防御性兜底：理论上不会到这里
             var request = context.request();
             user = userModulePortFactory.getPort(request.userDomain())
                     .findByEmail(request.email())

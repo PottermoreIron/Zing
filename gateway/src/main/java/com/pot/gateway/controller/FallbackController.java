@@ -9,23 +9,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * 熔断降级 Fallback 控制器
- *
- * <p>
- * 当下游服务触发熔断（CircuitBreaker OPEN）时，
- * Gateway 会将请求 forward 到此控制器，返回统一的友好错误响应，
- * 避免长时间等待或 502 Bad Gateway。
- *
- * <p>
- * 路由配置示例：
- * 
- * <pre>
- * filters:
- *   - name: CircuitBreaker
- *     args:
- *       name: auth-service-cb
- *       fallbackUri: forward:/fallback
- * </pre>
+ * Returns a unified fallback response when a downstream circuit breaker opens.
  *
  * @author pot
  * @since 2026-03-09
@@ -36,12 +20,7 @@ import reactor.core.publisher.Mono;
 public class FallbackController {
 
     /**
-     * 统一降级响应
-     *
-     * <p>
-     * 通过 {@code ServerWebExchange} 可获取原始请求路径、
-     * 以及熔断器设置的异常信息（key: {@code circuitBreaker.failureReason}），
-     * 便于日志排查。
+     * Returns the standardized gateway fallback payload.
      */
     @RequestMapping
     public Mono<R<Void>> fallback(ServerWebExchange exchange) {

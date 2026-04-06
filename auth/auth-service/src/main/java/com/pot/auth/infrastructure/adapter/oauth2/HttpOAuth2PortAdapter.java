@@ -21,26 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 /**
- * OAuth2 HTTP 适配器
- *
- * <p>
- * 通过标准 OAuth2 授权码流程（Authorization Code Flow）向各提供商获取用户信息。
- * 使用 Spring 6 的 {@link RestClient}（同步、声明式 HTTP 客户端）发起请求。
- *
- * <p>
- * 支持的提供商：
- * <ul>
- * <li>Google — googleapis.com</li>
- * <li>GitHub — api.github.com</li>
- * <li>Facebook — graph.facebook.com</li>
- * <li>Apple — appleid.apple.com（id_token 解析）</li>
- * </ul>
- *
- * <p>
- * 启用条件：{@code auth.oauth2.enabled=true}
- *
- * @author pot
- * @since 2025-12-14
+ * OAuth2 adapter backed by Spring RestClient.
  */
 @Slf4j
 @Component
@@ -50,13 +31,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
 
     private final OAuth2ProviderProperties properties;
     private final ObjectMapper objectMapper;
-
-    // RestClient 是线程安全的，可注入或手动构建
     private final RestClient restClient = RestClient.create();
-
-    // ================================================================
-    // OAuth2Port 接口实现
-    // ================================================================
 
     @Override
     public String getAuthorizationUrl(OAuth2Provider provider, String state, String redirectUri) {
@@ -95,10 +70,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         validateConfig(provider, config);
 
         try {
-            // 1. 授权码换 Access Token
             String accessToken = exchangeCodeForToken(provider, config, code.value(), redirectUri);
-
-            // 2. Access Token 换用户信息
             return fetchUserInfo(provider, config, accessToken);
         } catch (DomainException e) {
             throw e;
@@ -141,12 +113,8 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         }
     }
 
-    // ================================================================
-    // 私有辅助方法
-    // ================================================================
-
     /**
-     * 授权码换 Access Token
+     * Exchanges an authorization code for an access token.
      */
     private String exchangeCodeForToken(
             OAuth2Provider provider,
@@ -163,7 +131,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
             form.add("redirect_uri", redirectUri);
         }
 
-        // GitHub 需要声明接受 JSON 响应
+        // GitHub returns form data by default unless JSON is explicitly requested.
         String responseBody = restClient.post()
                 .uri(config.getTokenUrl())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -189,7 +157,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * 根据提供商获取用户信息（统一映射为 {@link OAuth2UserInfo}）
+     * Loads user information and maps it to the common OAuth2 model.
      */
     private OAuth2UserInfo fetchUserInfo(
             OAuth2Provider provider,
@@ -205,7 +173,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * Google — 标准 OIDC userinfo 端点
+     * Loads user information from the Google OIDC userinfo endpoint.
      */
     private OAuth2UserInfo fetchGoogleUserInfo(ProviderConfig config, String accessToken) throws Exception {
         String body = restClient.get()
@@ -229,7 +197,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * GitHub — REST API v3 /user
+     * Loads user information from the GitHub user API.
      */
     private OAuth2UserInfo fetchGithubUserInfo(ProviderConfig config, String accessToken) throws Exception {
         String body = restClient.get()
@@ -242,14 +210,14 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
 
         JsonNode json = objectMapper.readTree(body);
 
-        // GitHub 的 email 可能为 null（用户设为私密）
+        // GitHub may omit the primary email when the user keeps it private.
         String email = json.path("email").isNull() ? null : json.path("email").asText(null);
 
         return OAuth2UserInfo.builder()
                 .provider(OAuth2Provider.GITHUB)
                 .openId(new OAuth2OpenId(String.valueOf(json.path("id").asLong())))
                 .email(email)
-                .emailVerified(email != null) // GitHub 已验证邮箱
+                .emailVerified(email != null)
                 .nickname(json.path("name").asText(json.path("login").asText(null)))
                 .avatarUrl(json.path("avatar_url").asText(null))
                 .accessToken(accessToken)
@@ -258,7 +226,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * Facebook — Graph API /me
+     * Loads user information from the Facebook Graph API.
      */
     private OAuth2UserInfo fetchFacebookUserInfo(ProviderConfig config, String accessToken) throws Exception {
         String body = restClient.get()
@@ -274,7 +242,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
                 .provider(OAuth2Provider.FACEBOOK)
                 .openId(new OAuth2OpenId(json.path("id").asText()))
                 .email(json.path("email").asText(null))
-                .emailVerified(json.has("email")) // 有邮箱则认为已验证
+                .emailVerified(json.has("email"))
                 .nickname(json.path("name").asText(null))
                 .avatarUrl(avatarUrl)
                 .accessToken(accessToken)
@@ -283,15 +251,11 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * Apple — id_token 中包含用户信息（sub = openId，email 通过 JWT payload 提取）
-     *
-     * <p>
-     * Apple 不提供独立的 userInfo 端点；用户信息（name 等）仅在首次授权时返回，
-     * 后续需缓存。此处解析 id_token JWT payload（Base64 解码即可，无需验签）。
+     * Loads Apple user information from the id_token payload.
      */
     private OAuth2UserInfo fetchAppleUserInfo(String idToken) throws Exception {
-        // Apple 的 access_token 响应中包含 id_token（JWT）
-        // 此处 accessToken 实际为 id_token
+        // Apple user details are carried in the id_token payload rather than a userinfo
+        // endpoint.
         String[] parts = idToken.split("\\.");
         if (parts.length < 2) {
             throw new DomainException("Apple id_token 格式无效");
@@ -312,7 +276,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * 获取提供商配置，不存在则抛出异常
+     * Returns the configured provider settings.
      */
     private ProviderConfig getConfig(OAuth2Provider provider) {
         ProviderConfig config = properties.getProvider(provider.getCode());
@@ -323,7 +287,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     }
 
     /**
-     * 校验提供商配置是否完整
+     * Ensures the provider configuration is complete.
      */
     private void validateConfig(OAuth2Provider provider, ProviderConfig config) {
         if (!config.isConfigured()) {

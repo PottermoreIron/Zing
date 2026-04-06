@@ -14,41 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Spring Security端口适配器
- *
- * <p>
- * 将Spring Security的认证信息适配为领域层的SecurityPort接口
- *
- * <p>
- * 设计模式：适配器模式（Adapter Pattern）
- * <ul>
- * <li>Target: SecurityPort接口</li>
- * <li>Adaptee: Spring Security的Authentication对象</li>
- * <li>Adapter: 本类负责转换</li>
- * </ul>
- *
- * <p>
- * 数据获取策略（多级降级）：
- * 
- * <pre>
- * 1. 优先从Authentication.getDetails()获取（推荐在登录时设置完整信息）
- * 2. 降级从GrantedAuthority获取（Spring Security标准方式）
- * 3. 兜底返回空集合（避免NPE）
- * </pre>
- *
- * <p>
- * 推荐用法：在UserDetailsService或登录成功处理器中设置Details：
- * 
- * <pre>{@code
- * Map<String, Object> details = new HashMap<>();
- * details.put("userId", user.getId());
- * details.put("permissions", user.getPermissions());
- * details.put("roles", user.getRoles());
- * authentication.setDetails(details);
- * }</pre>
- *
- * @author pot
- * @since 2025-12-14
+ * Adapts Spring Security authentication state to the domain security port.
  */
 @Component
 public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSecurityAccessor {
@@ -60,7 +26,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             return null;
         }
 
-        // 优先从details获取
+        // Prefer details when the login flow stored richer user context.
         Object details = authentication.getDetails();
         if (details instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -71,7 +37,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             }
         }
 
-        // 降级：使用认证名称作为 userId
+        // Fall back to the authentication name when no explicit userId is available.
         return authentication.getName();
     }
 
@@ -82,7 +48,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             return Collections.emptySet();
         }
 
-        // 优先从details获取
+        // Prefer permissions captured during authentication when available.
         Object details = authentication.getDetails();
         if (details instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -95,11 +61,11 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             }
         }
 
-        // 降级：从GrantedAuthority中提取permission（以PERM_开头）
+        // Fall back to authorities with the PERM_ prefix.
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .filter(authority -> authority.startsWith("PERM_"))
-                .map(authority -> authority.substring(5)) // 去掉PERM_前缀
+                .map(authority -> authority.substring(5))
                 .collect(Collectors.toSet());
     }
 
@@ -110,7 +76,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             return Collections.emptySet();
         }
 
-        // 优先从details获取
+        // Prefer roles captured during authentication when available.
         Object details = authentication.getDetails();
         if (details instanceof Map) {
             @SuppressWarnings("unchecked")
@@ -123,7 +89,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             }
         }
 
-        // 降级：从GrantedAuthority中提取role（以ROLE_开头）
+        // Fall back to authorities with the ROLE_ prefix.
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .filter(authority -> authority.startsWith("ROLE_"))
@@ -150,7 +116,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
             return new HashMap<>(detailsMap);
         }
 
-        // 兜底：返回基础信息，并保留 username/nickname 双键兼容
+        // Preserve both keys for legacy callers that still expect username.
         Map<String, Object> basicDetails = new HashMap<>();
         basicDetails.put("nickname", authentication.getName());
         basicDetails.put("username", authentication.getName());
@@ -164,12 +130,7 @@ public class SpringSecurityPortAdapter implements SecurityPort, AuthorizationSec
     }
 
     /**
-     * 获取当前Authentication对象
-     *
-     * <p>
-     * 从SecurityContextHolder中获取，线程安全
-     *
-     * @return Authentication对象，可能为null
+     * Returns the current Spring Security authentication.
      */
     private Authentication getAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();

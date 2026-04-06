@@ -35,9 +35,7 @@ class UserDefaultsGeneratorTest {
         generator = new UserDefaultsGenerator(DEFAULT_AVATAR_URL, "user_", 12, true, true, true, true);
     }
 
-    // ================================================================
     // generateNicknameFromPhone
-    // ================================================================
 
     @Test
     @DisplayName("基于手机号生成昵称，以 user_ 前缀开头，且包含时间戳和随机部分")
@@ -56,9 +54,7 @@ class UserDefaultsGeneratorTest {
         assertThat(nickname).isNotBlank();
     }
 
-    // ================================================================
     // generateNicknameFromEmail
-    // ================================================================
 
     @Test
     @DisplayName("基于邮箱生成昵称，包含邮箱前缀部分")
@@ -78,9 +74,7 @@ class UserDefaultsGeneratorTest {
         assertThat(parts[parts.length - 1]).hasSize(4);
     }
 
-    // ================================================================
     // generateNickname
-    // ================================================================
 
     @Test
     @DisplayName("生成通用昵称，以 user_ 前缀开头")
@@ -95,9 +89,7 @@ class UserDefaultsGeneratorTest {
         assertThat(generator.generateNickname()).isNotBlank();
     }
 
-    // ================================================================
     // generateRandomPassword
-    // ================================================================
 
     @Test
     @DisplayName("生成的随机密码长度为12位")
@@ -145,9 +137,7 @@ class UserDefaultsGeneratorTest {
         assertThat(p2).isNotBlank();
     }
 
-    // ================================================================
     // getDefaultAvatarUrl
-    // ================================================================
 
     @Test
     @DisplayName("getDefaultAvatarUrl() 返回非空的URL字符串")

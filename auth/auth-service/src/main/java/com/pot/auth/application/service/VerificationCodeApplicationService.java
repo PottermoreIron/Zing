@@ -8,12 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 验证码应用服务
- *
- * <p>负责验证码的发送和验证
- *
- * @author pot
- * @since 2025-11-10
+ * Application service for sending and verifying verification codes.
  */
 @Slf4j
 @Service
@@ -23,10 +18,7 @@ public class VerificationCodeApplicationService {
     private final VerificationCodeService verificationCodeService;
 
     /**
-     * 发送邮件验证码
-     *
-     * @param email 邮箱地址
-     * @return 是否发送成功
+     * Sends an email verification code.
      */
     public boolean sendEmailCode(String email) {
         log.info("[应用服务] 发送邮件验证码: email={}", email);
@@ -36,10 +28,7 @@ public class VerificationCodeApplicationService {
     }
 
     /**
-     * 发送短信验证码
-     *
-     * @param phoneNumber 手机号
-     * @return 是否发送成功
+     * Sends an SMS verification code.
      */
     public boolean sendSmsCode(String phoneNumber) {
         log.info("[应用服务] 发送短信验证码: phone={}", phoneNumber);
@@ -49,15 +38,10 @@ public class VerificationCodeApplicationService {
     }
 
     /**
-     * 验证验证码
-     *
-     * @param recipient 接收者（邮箱或手机号）
-     * @param code      验证码
-     * @return 是否验证成功
+     * Verifies a code for the given recipient.
      */
     public boolean verifyCode(String recipient, String code) {
         log.info("[应用服务] 验证验证码: recipient={}", recipient);
         return verificationCodeService.verifyCode(recipient, code);
     }
 }
-

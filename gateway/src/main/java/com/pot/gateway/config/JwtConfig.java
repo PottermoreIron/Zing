@@ -14,7 +14,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 /**
- * JWT配置
+ * Loads the RSA public key used to validate gateway JWTs.
  *
  * @author Copilot
  * @since 2026-01-05
@@ -28,18 +28,16 @@ public class JwtConfig {
     private final ResourceLoader resourceLoader;
 
     /**
-     * 加载RSA公钥
+     * Creates the public key bean from inline content or the configured resource.
      */
     @Bean
     public PublicKey jwtPublicKey() throws Exception {
         try {
-            // 优先使用配置的公钥字符串
             if (jwtProperties.getPublicKey() != null && !jwtProperties.getPublicKey().isEmpty()) {
                 log.info("[JWT配置] 从配置属性加载公钥");
                 return loadPublicKeyFromString(jwtProperties.getPublicKey());
             }
 
-            // 否则从文件加载
             String location = jwtProperties.getPublicKeyLocation();
             log.info("[JWT配置] 从文件加载公钥: {}", location);
 
@@ -58,11 +56,7 @@ public class JwtConfig {
         }
     }
 
-    /**
-     * 从字符串加载公钥
-     */
     private PublicKey loadPublicKeyFromString(String keyContent) throws Exception {
-        // 移除PEM头尾和换行符
         String publicKeyPEM = keyContent
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")

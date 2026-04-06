@@ -8,47 +8,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * OAuth2 提供商配置属性
- *
- * <p>
- * 每个提供商单独配置 clientId、clientSecret 及端点 URL，
- * 便于按需启用/禁用，无需改代码。
- *
- * <p>
- * 配置示例（application.yml）：
- * 
- * <pre>
- * auth:
- *   oauth2:
- *     enabled: true
- *     providers:
- *       google:
- *         client-id: your-client-id
- *         client-secret: your-client-secret
- *         token-url: https://oauth2.googleapis.com/token
- *         user-info-url: https://www.googleapis.com/oauth2/v3/userinfo
- *       github:
- *         client-id: your-client-id
- *         client-secret: your-client-secret
- *         token-url: https://github.com/login/oauth/access_token
- *         user-info-url: https://api.github.com/user
- * </pre>
- *
- * @author pot
- * @since 2025-12-14
+ * Configuration properties for OAuth2 providers.
  */
 @Data
 @Component
 @ConfigurationProperties(prefix = "auth.oauth2")
 public class OAuth2ProviderProperties {
 
-    /**
-     * 是否启用 OAuth2 功能（开关，默认关闭）
-     */
     private boolean enabled = false;
 
     /**
-     * 各提供商配置，key 为提供商 code（google/github/facebook/apple）
+     * Provider-specific settings keyed by provider code.
      */
     private Map<String, ProviderConfig> providers = defaultProviders();
 
@@ -80,17 +50,14 @@ public class OAuth2ProviderProperties {
     }
 
     /**
-     * 获取提供商配置
-     *
-     * @param providerCode 提供商 code（如 "google"）
-     * @return 配置，不存在则返回 null
+     * Returns the configuration for the given provider code.
      */
     public ProviderConfig getProvider(String providerCode) {
         return providers.get(providerCode.toLowerCase());
     }
 
     /**
-     * 单个 OAuth2 提供商的配置
+     * Configuration for a single OAuth2 provider.
      */
     @Data
     public static class ProviderConfig {
@@ -101,17 +68,17 @@ public class OAuth2ProviderProperties {
         /** OAuth2 Client Secret */
         private String clientSecret;
 
-        /** 换取 Access Token 的端点 */
+        /** Access-token endpoint. */
         private String tokenUrl;
 
-        /** 获取用户信息的端点 */
+        /** User-info endpoint. */
         private String userInfoUrl;
 
-        /** 刷新 Access Token 的端点（可选，默认与 tokenUrl 相同） */
+        /** Optional refresh-token endpoint. */
         private String refreshTokenUrl;
 
         /**
-         * 是否配置完整（clientId 和 clientSecret 都不为空）
+         * Indicates whether client credentials are present.
          */
         public boolean isConfigured() {
             return clientId != null && !clientId.isBlank()

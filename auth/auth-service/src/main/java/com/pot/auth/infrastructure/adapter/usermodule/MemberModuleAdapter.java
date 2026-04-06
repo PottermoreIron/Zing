@@ -22,39 +22,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 /**
- * Member域适配器（防腐层核心实现⭐⭐⭐）
- *
- * <p>
- * <strong>职责</strong>：
- * <ul>
- * <li>实现UserModulePort接口</li>
- * <li>调用MemberServiceClient（Feign）</li>
- * <li>将member-facade的DTO转换成auth领域层DTO（防腐）</li>
- * <li>处理member-service的异常并转换成领域异常</li>
- * </ul>
- *
- * <p>
- * <strong>防腐层价值</strong>：
- * <ul>
- * <li>✅ member-facade的DTO变更不影响auth领域层</li>
- * <li>✅ member-service的API变更只需修改此Adapter</li>
- * <li>✅ 可以轻松Mock此Adapter进行单元测试</li>
- * <li>✅ 符合依赖倒置原则（DIP）</li>
- * </ul>
- *
- * <p>
- * <strong>示例</strong>：
- *
- * <pre>
- * // 领域层使用
- * UserModulePort userPort = userModulePortFactory.getPort(UserDomain.MEMBER);
- * Optional&lt;UserDTO&gt; user = userPort.authenticateWithPassword("john", "password");
- *
- * // Adapter自动处理：
- * // 1. 调用MemberServiceClient
- * // 2. 将MemberDTO转换成领域层UserDTO
- * // 3. 处理异常
- * </pre>
+ * Anti-corruption adapter between auth and member-service contracts.
  *
  * @author pot
  * @since 2025-12-14
@@ -72,12 +40,9 @@ public class MemberModuleAdapter implements UserModulePort {
         return UserDomain.MEMBER;
     }
 
-    // ========== 用户认证 ==========
-
     @Override
     public Optional<UserDTO> authenticateWithPassword(String identifier, String password) {
         try {
-            // 直接调用member-service的密码认证接口（认证+查询一步完成）
             R<MemberDTO> response = memberServiceClient.authenticateWithPassword(identifier, password);
 
             if (response == null || !response.isSuccess() || response.getData() == null) {
@@ -85,7 +50,6 @@ public class MemberModuleAdapter implements UserModulePort {
                 return Optional.empty();
             }
 
-            // 3. 转换DTO
             return Optional.of(convertToUserDTO(response.getData()));
 
         } catch (Exception e) {
@@ -95,7 +59,7 @@ public class MemberModuleAdapter implements UserModulePort {
     }
 
     /**
-     * 根据标识符查找用户（支持昵称/邮箱/手机号）
+     * Resolves a member lookup endpoint from the identifier format.
      */
     private R<MemberDTO> findMemberByIdentifier(String identifier) {
         if (identifier.contains("@")) {
@@ -171,12 +135,9 @@ public class MemberModuleAdapter implements UserModulePort {
         }
     }
 
-    // ========== 用户创建 ==========
-
     @Override
     public UserId createUser(CreateUserCommand command) {
         try {
-            // 1. 构建member-facade的CreateMemberRequest
             CreateMemberRequest request = CreateMemberRequest.builder()
                     .nickname(command.username()) // member-facade使用nickname字段
                     .email(command.email() != null ? command.email().value() : null)
@@ -184,7 +145,6 @@ public class MemberModuleAdapter implements UserModulePort {
                     .password(command.password() != null ? command.password().value() : null)
                     .build();
 
-            // 2. 调用member-service创建用户
             R<MemberDTO> response = memberServiceClient.createMember(request);
 
             if (response == null || !response.isSuccess() || response.getData() == null) {
@@ -192,7 +152,6 @@ public class MemberModuleAdapter implements UserModulePort {
                 throw new UserCreationException(errorMsg);
             }
 
-            // 3. 返回用户ID
             MemberDTO memberDTO = response.getData();
             log.info("用户创建成功: memberId={}, nickname={}", memberDTO.getMemberId(), memberDTO.getNickname());
 
@@ -237,8 +196,6 @@ public class MemberModuleAdapter implements UserModulePort {
         }
     }
 
-    // ========== 密码管理 ==========
-
     @Override
     public void updatePassword(UserId userId, Password newPassword) {
         try {
@@ -249,8 +206,6 @@ public class MemberModuleAdapter implements UserModulePort {
             throw new RuntimeException("密码更新失败: " + e.getMessage(), e);
         }
     }
-
-    // ========== 账户管理 ==========
 
     @Override
     public void lockAccount(UserId userId) {
@@ -283,12 +238,10 @@ public class MemberModuleAdapter implements UserModulePort {
                     ip != null ? ip.value() : "unknown",
                     timestamp);
         } catch (Exception e) {
-            // 登录尝试记录不阻断主流程
+            // Login-attempt tracking is best-effort and must not block auth flows.
             log.warn("记录登录尝试失败（非关键操作）: userId={}, error={}", userId, e.getMessage());
         }
     }
-
-    // ========== 权限查询 ==========
 
     @Override
     public Set<String> getPermissions(UserId userId) {
@@ -343,8 +296,6 @@ public class MemberModuleAdapter implements UserModulePort {
         }
     }
 
-    // ========== 设备管理 ==========
-
     @Override
     public List<DeviceDTO> getDevices(UserId userId) {
         try {
@@ -366,7 +317,7 @@ public class MemberModuleAdapter implements UserModulePort {
 
     @Override
     public void recordDeviceLogin(UserId userId, DeviceDTO deviceInfo, IpAddress ip, String refreshToken) {
-        // TODO: 等member-service提供���备登录记录的内部API
+        // Member service does not expose an internal device-login recording API yet.
         log.debug("记录设备登录: userId={}, deviceId={}", userId, deviceInfo.deviceId());
     }
 
@@ -380,8 +331,6 @@ public class MemberModuleAdapter implements UserModulePort {
             throw new RuntimeException("踢出设备失败: " + e.getMessage(), e);
         }
     }
-
-    // ========== OAuth2绑定 ==========
 
     @Override
     public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
@@ -405,31 +354,26 @@ public class MemberModuleAdapter implements UserModulePort {
         }
     }
 
-    // ========== DTO转换（防腐层核心）==========
-
     /**
-     * 将member-facade的MemberDTO转换成auth领域层的UserDTO
-     *
-     * <p>
-     * 这是防腐层的核心：隔离member-facade的DTO变更
+     * Converts the member facade DTO into the auth-domain user DTO.
      */
     private UserDTO convertToUserDTO(MemberDTO memberDTO) {
         return UserDTO.builder()
                 .userId(UserId.of(memberDTO.getMemberId()))
-                .userDomain(UserDomain.MEMBER) // Member域
+                .userDomain(UserDomain.MEMBER)
                 .nickname(memberDTO.getNickname())
                 .email(memberDTO.getEmail())
                 .phone(memberDTO.getPhone())
                 .status(memberDTO.getStatus())
-                .emailVerifiedAt(null) // MemberDTO暂不包含验证时间
-                .phoneVerifiedAt(null) // MemberDTO暂不包含验证时间
+                .emailVerifiedAt(null)
+                .phoneVerifiedAt(null)
                 .lastLoginAt(convertToLocalDateTime(memberDTO.getGmtLastLoginAt()))
                 .lastLoginIp(null)
                 .build();
     }
 
     /**
-     * 将Unix时间戳（秒）转换为LocalDateTime
+     * Converts a Unix timestamp in seconds to a local date-time.
      */
     private LocalDateTime convertToLocalDateTime(Long timestamp) {
         if (timestamp == null || timestamp <= 0) {
@@ -440,14 +384,10 @@ public class MemberModuleAdapter implements UserModulePort {
                 ZoneId.systemDefault());
     }
 
-    // ========== 社交账号查询 ==========
-
     @Override
     public Optional<UserDTO> findUserByOAuth2(String provider, String openId) {
         try {
-            // TODO: 调用 member-service 的社交连接查询 API
-            // 目前 member-service 还没有提供根据 OAuth2 信息查询用户的 API
-            // 暂时返回空，等待 member-service 实现后再补充
+            // Member service does not expose OAuth2 social-connection lookup yet.
             log.debug("查询OAuth2绑定用户: provider={}, openId={}", provider, openId);
             return Optional.empty();
         } catch (Exception e) {
@@ -459,9 +399,7 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> findUserByWeChat(String weChatOpenId) {
         try {
-            // TODO: 调用 member-service 的社交连接查询 API
-            // 目前 member-service 还没有提供根据微信 OpenId 查询用户的 API
-            // 暂时返回空，等待 member-service 实现后再补充
+            // Member service does not expose WeChat social-connection lookup yet.
             log.debug("查询微信绑定用户: weChatOpenId={}", weChatOpenId);
             return Optional.empty();
         } catch (Exception e) {
@@ -469,8 +407,6 @@ public class MemberModuleAdapter implements UserModulePort {
             return Optional.empty();
         }
     }
-
-    // ========== 异常定义 ==========
 
     public static class UserCreationException extends RuntimeException {
         public UserCreationException(String message) {

@@ -23,7 +23,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AuthResultCode implements IResultCode {
 
-    // ========== 认证相关错误 AUTH_0001-AUTH_0099 ==========
 
     /**
      * 认证失败 - 用户名或密码错误
@@ -50,7 +49,6 @@ public enum AuthResultCode implements IResultCode {
      */
     PASSWORD_RETRY_LIMIT_EXCEEDED("AUTH_0005", "密码错误次数过多，账户已被锁定", false),
 
-    // ========== Token相关错误 AUTH_0100-AUTH_0199 ==========
 
     /**
      * Token已过期
@@ -82,7 +80,6 @@ public enum AuthResultCode implements IResultCode {
      */
     REFRESH_TOKEN_INVALID("AUTH_0105", "RefreshToken无效，请重新登录", false),
 
-    // ========== 验证码相关错误 A0200-A0299 ==========
 
     /**
      * 验证码发送过于频繁
@@ -119,7 +116,6 @@ public enum AuthResultCode implements IResultCode {
      */
     VERIFICATION_CODE_INVALID("AUTH_0206", "验证码无效或已过期", false),
 
-    // ========== 注册相关错误 AUTH_0300-AUTH_0399 ==========
 
     /**
      * 用户名已存在
@@ -176,7 +172,6 @@ public enum AuthResultCode implements IResultCode {
      */
     INVALID_LOGIN_REQUEST("AUTH_0310", "无效的登录请求", false),
 
-    // ========== 权限相关错误 AUTH_0400-AUTH_0499 ==========
 
     /**
      * 无权限
@@ -188,7 +183,6 @@ public enum AuthResultCode implements IResultCode {
      */
     ROLE_NOT_FOUND("AUTH_0401", "角色不存在", false),
 
-    // ========== 参数验证错误 AUTH_0500-AUTH_0599 ==========
 
     /**
      * 参数错误
@@ -200,7 +194,6 @@ public enum AuthResultCode implements IResultCode {
      */
     UNSUPPORTED_USER_DOMAIN("AUTH_0501", "不支持的用户域", false),
 
-    // ========== 系统错误 AUTH_0900-AUTH_0999 ==========
 
     /**
      * 系统异常

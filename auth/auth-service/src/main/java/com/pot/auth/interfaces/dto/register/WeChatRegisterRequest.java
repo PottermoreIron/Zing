@@ -7,22 +7,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 微信注册请求
- *
- * <p>
- * 处理微信授权登录
- * <p>
- * 注意：微信的注册和登录是一体化的，实际由 OneStopAuthenticationController 编排处理
- *
- * @author pot
- * @since 2025-11-19
+ * Register request used by legacy WeChat flows.
  */
 public record WeChatRegisterRequest(
-                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
 
-                @NotBlank(message = "微信授权码不能为空") String code,
+        @NotBlank(message = "微信授权码不能为空") String code,
 
-                String state,
+        String state,
 
-                @JsonProperty("userDomain") UserDomain userDomain) implements RegisterRequest {
+        @JsonProperty("userDomain") UserDomain userDomain) implements RegisterRequest {
 }

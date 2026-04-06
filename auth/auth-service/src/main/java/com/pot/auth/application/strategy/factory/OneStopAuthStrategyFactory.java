@@ -12,14 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 一键认证策略工厂
- *
- * <p>
- * 负责管理和分发一键认证策略实例。
- * 通过Spring自动注入所有 {@link OneStopAuthStrategy} 实现类。
- *
- * @author pot
- * @since 2025-11-29
+ * Resolves one-stop auth strategies by auth type.
  */
 @Slf4j
 @Component

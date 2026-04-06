@@ -7,9 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:48
- * @description: 密码验证器
+ * Bean Validation adapter for password values.
  */
 public class PasswordValidator implements ConstraintValidator<ValidPassword, String> {
 

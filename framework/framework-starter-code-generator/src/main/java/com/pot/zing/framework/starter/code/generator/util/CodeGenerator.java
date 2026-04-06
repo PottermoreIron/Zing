@@ -304,7 +304,6 @@ public final class CodeGenerator {
     @Accessors(chain = true, fluent = true)
     public static class GeneratorConfig {
 
-        // ========== 数据库连接配置 ==========
         /**
          * 数据库连接URL
          */
@@ -318,7 +317,6 @@ public final class CodeGenerator {
          */
         private String password;
 
-        // ========== 项目结构配置 ==========
         /**
          * 代码作者名称
          */
@@ -336,7 +334,6 @@ public final class CodeGenerator {
          */
         private String basePackage = "com.example";
 
-        // ========== 表相关配置 ==========
         /**
          * 表名前缀，生成实体类时会移除此前缀
          */
@@ -350,7 +347,6 @@ public final class CodeGenerator {
          */
         private List<String> excludeTable;
 
-        // ========== 代码生成选项 ==========
         /**
          * 是否启用Swagger注解
          */
@@ -372,7 +368,6 @@ public final class CodeGenerator {
          */
         private String logicDeleteColumn = "deleted";
 
-        // ========== 字段自动填充配置 ==========
         /**
          * 字段自动填充规则列表
          */

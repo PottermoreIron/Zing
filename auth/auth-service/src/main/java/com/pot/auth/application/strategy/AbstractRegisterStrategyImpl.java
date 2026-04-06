@@ -9,22 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 注册策略抽象模板类（重构版）
- *
- * <p>
- * 采用模板方法模式，定义统一的注册流程：
- * <ol>
- * <li>责任链校验（参数校验→业务规则校验→唯一性校验）</li>
- * <li>凭证验证（验证码等）</li>
- * <li>注册前置钩子（风控检查、邀请码验证等）</li>
- * <li>创建用户</li>
- * <li>注册后置钩子（发送欢迎邮件、初始化用户数据等）</li>
- * <li>生成Token并构建结果</li>
- * <li>返回响应</li>
- * </ol>
- *
- * @author pot
- * @since 2025-11-29
+ * Base template for register strategies.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -40,19 +25,10 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
                 request.registerType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 凭证验证（验证码等）
             validateCredential(context);
-
-            // 2. 注册前置钩子（风控检查、邀请码验证等）
             beforeRegister(context);
-
-            // 3. 创建用户
             UserDTO user = createUser(context);
-
-            // 4. 注册后置钩子（发送欢迎邮件、初始化用户数据等）
             afterRegister(user, context);
-
-            // 5. 生成Token并构建结果
             AuthenticationResult result = generateAuthenticationResult(user, context);
 
             log.info("[注册策略] 注册成功: userId={}, nickname={}, type={}",
@@ -67,66 +43,31 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
     }
 
     /**
-     * 凭证验证（由子类实现）
-     *
-     * <p>
-     * 验证注册凭证（验证码等）
-     *
-     * @param context 注册上下文
+     * Validates registration credentials.
      */
     protected abstract void validateCredential(RegistrationContext context);
 
     /**
-     * 创建用户（由子类实现）
-     *
-     * <p>
-     * 执行用户创建逻辑
-     *
-     * @param context 注册上下文
-     * @return 创建的用户信息
+     * Creates the user for the current registration flow.
      */
     protected abstract UserDTO createUser(RegistrationContext context);
 
     /**
-     * 注册前置钩子（由子类可选实现）
-     *
-     * <p>
-     * 可用于：
-     * <ul>
-     * <li>风控检查</li>
-     * <li>邀请码验证</li>
-     * <li>IP黑名单检查</li>
-     * </ul>
-     *
-     * @param context 注册上下文
+     * Hook invoked before user creation.
      */
     protected void beforeRegister(RegistrationContext context) {
-        // 默认实现为空，子类可选择性覆盖
         log.debug("[注册钩子] 注册前置处理");
     }
 
     /**
-     * 注册后置钩子（由子类可选实现）
-     *
-     * <p>
-     * 可用于：
-     * <ul>
-     * <li>发送欢迎邮件</li>
-     * <li>初始化用户数据</li>
-     * <li>发送注册事件</li>
-     * <li>赠送新人礼包</li>
-     * </ul>
-     *
-     * @param user    新创建的用户
-     * @param context 注册上下文
+     * Hook invoked after user creation.
      */
     protected void afterRegister(UserDTO user, RegistrationContext context) {
-        // 默认实现为空，子类可选择性覆盖
         log.debug("[注册钩子] 注册后置处理: userId={}", user.userId());
     }
 
     /**
-     * 生成认证结果（包含Token）
+     * Builds the authentication result with issued tokens.
      */
     protected AuthenticationResult generateAuthenticationResult(
             UserDTO user,
@@ -154,10 +95,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
     }
 
     /**
-     * 处理注册失败
-     *
-     * <p>
-     * 记录失败日志，子类可扩展以实现注册失败统计等功能
+     * Handles a failed register attempt.
      */
     protected void handleRegisterFailure(RegistrationContext context, Exception e) {
         log.error("[注册策略] 注册失败: type={}, ip={}, error={}",
@@ -167,7 +105,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
     }
 
     /**
-     * 获取策略支持的注册类型（由子类实现）
+     * Returns the register type supported by this strategy.
      */
     public abstract RegisterType getSupportedRegisterType();
 }

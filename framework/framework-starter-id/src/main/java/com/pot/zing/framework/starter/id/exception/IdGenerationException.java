@@ -1,9 +1,7 @@
 package com.pot.zing.framework.starter.id.exception;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 23:26
- * @description: 自定义分布式id生成器异常
+ * Raised when distributed ID generation fails.
  */
 public class IdGenerationException extends RuntimeException {
 

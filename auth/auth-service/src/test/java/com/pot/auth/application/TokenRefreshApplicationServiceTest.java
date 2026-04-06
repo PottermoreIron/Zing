@@ -43,9 +43,7 @@ class TokenRefreshApplicationServiceTest {
     @InjectMocks
     private TokenRefreshApplicationService service;
 
-    // ================================================================
     // refreshToken
-    // ================================================================
 
     @Nested
     @DisplayName("refreshToken()")
@@ -89,9 +87,7 @@ class TokenRefreshApplicationServiceTest {
         }
     }
 
-    // ================================================================
     // validateAccessToken
-    // ================================================================
 
     @Nested
     @DisplayName("validateAccessToken()")
@@ -126,9 +122,7 @@ class TokenRefreshApplicationServiceTest {
         }
     }
 
-    // ================================================================
     // logout
-    // ================================================================
 
     @Nested
     @DisplayName("logout()")

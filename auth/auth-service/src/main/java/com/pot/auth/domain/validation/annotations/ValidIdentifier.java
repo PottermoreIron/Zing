@@ -7,11 +7,9 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:57
- * @description: 有效标识符
+ * Validates generic login identifiers.
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = EmailValidator.class)

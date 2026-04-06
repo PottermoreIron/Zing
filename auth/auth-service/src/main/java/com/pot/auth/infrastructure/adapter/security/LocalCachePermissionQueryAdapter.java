@@ -14,17 +14,7 @@ import java.time.Duration;
 import java.util.Set;
 
 /**
- * 本地缓存权限查询适配器
- *
- * <p>
- * 适配 {@link PermissionQueryPort}，提供两级读取策略：
- * <ul>
- * <li>L1: Caffeine 本地缓存</li>
- * <li>L2: 通过 {@link PermissionDomainService} 读取 Redis 中的权限缓存</li>
- * </ul>
- *
- * <p>
- * 领域服务负责权限缓存的语义和降级策略，适配器仅负责本地缓存加速。
+ * Permission query adapter with a short-lived local cache.
  */
 @Slf4j
 @Component

@@ -7,25 +7,7 @@ import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
 /**
- * 一键认证请求基础接口
- *
- * <p>
- * 使用Jackson多态序列化，通过authType字段识别具体请求类型
- *
- * <p>
- * <strong>支持的认证类型：</strong>
- * <ul>
- * <li>USERNAME_PASSWORD - 昵称密码（保留历史类型名）</li>
- * <li>PHONE_PASSWORD - 手机号密码</li>
- * <li>PHONE_CODE - 手机号验证码</li>
- * <li>EMAIL_PASSWORD - 邮箱密码</li>
- * <li>EMAIL_CODE - 邮箱验证码</li>
- * <li>OAUTH2 - OAuth2</li>
- * <li>WECHAT - 微信</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-29
+ * Base contract for authenticate-or-register requests.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "authType", visible = true)
 @JsonSubTypes({
@@ -39,14 +21,8 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
 })
 public interface OneStopAuthRequest extends OneStopAuthCommand {
 
-        /**
-         * 获取认证类型
-         */
         AuthType authType();
 
-        /**
-         * 获取用户域
-         */
         UserDomain userDomain();
 
         @Override

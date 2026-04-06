@@ -6,13 +6,7 @@ import lombok.Builder;
 import java.util.regex.Pattern;
 
 /**
- * IP地址值对象 (Domain Primitive)
- *
- * <p>封装IP地址的验证和业务行为
- * <ul>
- *   <li>支持IPv4和IPv6</li>
- *   <li>提供异地登录检测</li>
- * </ul>
+ * Domain primitive for validated IPv4 and IPv6 addresses.
  *
  * @author pot
  * @since 2025-12-14
@@ -21,15 +15,13 @@ import java.util.regex.Pattern;
 public record IpAddress(String value) {
 
     private static final Pattern IPV4_PATTERN = Pattern.compile(
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-    );
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
 
     private static final Pattern IPV6_PATTERN = Pattern.compile(
-            "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"
-    );
+            "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$");
 
     /**
-     * 紧凑构造器 - 自动验证
+     * Compact constructor with automatic validation.
      */
     public IpAddress {
         if (value == null || value.isBlank()) {
@@ -46,49 +38,41 @@ public record IpAddress(String value) {
     }
 
     /**
-     * 从字符串创建IP地址值对象
+     * Creates an IP address value object from a raw string.
      */
     public static IpAddress of(String value) {
         return new IpAddress(value);
     }
 
     /**
-     * 验证是否是有效的IP地址
+     * Validates whether the input is a supported IP address.
      */
     private static boolean isValidIpAddress(String ip) {
         return IPV4_PATTERN.matcher(ip).matches()
                 || IPV6_PATTERN.matcher(ip).matches();
     }
 
-    /**
-     * 是否是IPv4
-     */
+    /** Returns whether the value is IPv4. */
     public boolean isIPv4() {
         return IPV4_PATTERN.matcher(value).matches();
     }
 
-    /**
-     * 是否是IPv6
-     */
+    /** Returns whether the value is IPv6. */
     public boolean isIPv6() {
         return IPV6_PATTERN.matcher(value).matches();
     }
 
     /**
-     * 获取IP地址的地域信息（简化版，实际需要IP库）
-     * 这里仅做示例，实际应使用专业的IP地址库
+     * Returns a coarse region label based on the current private/public heuristic.
      */
     public String getRegion() {
-        // TODO: 集成IP地址库获取真实地域
         if (isPrivateIP()) {
             return "内网";
         }
         return "未知地域";
     }
 
-    /**
-     * 判断是否是私有IP
-     */
+    /** Returns whether the address is in a private IPv4 range. */
     public boolean isPrivateIP() {
         if (!isIPv4()) {
             return false;
@@ -98,22 +82,18 @@ public record IpAddress(String value) {
         int firstOctet = Integer.parseInt(parts[0]);
         int secondOctet = Integer.parseInt(parts[1]);
 
-        // 10.0.0.0 - 10.255.255.255
         if (firstOctet == 10) {
             return true;
         }
 
-        // 172.16.0.0 - 172.31.255.255
         if (firstOctet == 172 && secondOctet >= 16 && secondOctet <= 31) {
             return true;
         }
 
-        // 192.168.0.0 - 192.168.255.255
         if (firstOctet == 192 && secondOctet == 168) {
             return true;
         }
 
-        // 127.0.0.0 - 127.255.255.255 (localhost)
         if (firstOctet == 127) {
             return true;
         }
@@ -122,21 +102,17 @@ public record IpAddress(String value) {
     }
 
     /**
-     * 判断是否与另一个IP在同一地域（简化版）
-     * 实际应使用IP地址库判断
+     * Compares two addresses with the current heuristic region check.
      */
     public boolean isSameRegion(IpAddress other) {
         if (this.equals(other)) {
             return true;
         }
 
-        // 如果都是私有IP，认为在同一地域
         if (this.isPrivateIP() && other.isPrivateIP()) {
             return true;
         }
 
-        // TODO: 实际应使用IP地址库判断地域
         return false;
     }
 }
-

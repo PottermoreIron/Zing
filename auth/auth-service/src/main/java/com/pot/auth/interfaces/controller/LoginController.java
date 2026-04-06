@@ -23,23 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
 
 /**
- * 登录控制器
- *
- * <p>
- * 负责传统登录流程（要求用户已注册）
- * 支持的登录方式：
- * <ul>
- * <li>昵称 + 密码</li>
- * <li>邮箱 + 密码</li>
- * <li>邮箱 + 验证码</li>
- * <li>手机号 + 验证码</li>
- * </ul>
- *
- * <p>
- * 注意：
- * <ul>
- * <li>如需一键认证（自动注册），请使用 {@link OneStopAuthenticationController}</li>
- * </ul>
+ * Handles traditional login and token refresh endpoints.
  *
  * @author pot
  * @since 2025-11-29
@@ -55,42 +39,6 @@ public class LoginController {
     private final LoginApplicationService loginApplicationService;
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
 
-    /**
-     * 传统登录入口
-     *
-     * <p>
-     * 支持4种登录方式，通过loginType字段自动识别：
-     * <ul>
-     * <li>USERNAME_PASSWORD - 昵称密码登录（保留历史类型名）</li>
-     * <li>EMAIL_PASSWORD - 邮箱密码登录</li>
-     * <li>EMAIL_CODE - 邮箱验证码登录</li>
-     * <li>PHONE_CODE - 手机号验证码登录</li>
-     * </ul>
-     * 请求示例（昵称密码）：
-     *
-     * <pre>
-     * POST /auth/api/v1/login
-     * {
-     *   "loginType": "USERNAME_PASSWORD",
-    *   "nickname": "john_doe",
-     *   "password": "Password123!",
-     *   "userDomain": "MEMBER"
-     * }
-     * </pre>
-     *
-     * <p>
-     * 请求示例（邮箱验证码）：
-     *
-     * <pre>
-     * POST /auth/api/v1/login
-     * {
-     *   "loginType": "EMAIL_CODE",
-     *   "email": "user@example.com",
-     *   "code": "123456",
-     *   "userDomain": "MEMBER"
-     * }
-     * </pre>
-     */
     @Operation(summary = "传统登录", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE 四种登录方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "登录请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/login")
@@ -98,29 +46,12 @@ public class LoginController {
         log.info("[登录] 传统登录请求: loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
-        // 执行登录
         LoginResponse response = loginApplicationService.login(request, getClientIp(httpRequest),
                 httpRequest.getHeader("User-Agent"));
 
         return R.success(response);
     }
 
-    /**
-     * 刷新Token
-     *
-     * <p>
-     * 使用 refreshToken 获取新的 accessToken
-     *
-     * <p>
-     * 请求示例：
-     *
-     * <pre>
-     * POST /auth/api/v1/refresh
-     * {
-     *   "refreshToken": "xxx"
-     * }
-     * </pre>
-     */
     @Operation(summary = "刷新 Token", description = "使用 refreshToken 换取新的 accessToken，refreshToken 在滑动窗口内自动续期")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 10.0, message = "Token刷新请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/refresh")

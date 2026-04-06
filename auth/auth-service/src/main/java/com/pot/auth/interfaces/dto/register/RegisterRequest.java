@@ -7,15 +7,7 @@ import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
 /**
- * 注册请求基础接口
- *
- * <p>
- * 使用Jackson多态序列化，通过registerType字段识别具体请求类型
- * <p>
- * 采用sealed interface限制所有可能的子类型，保证类型安全
- *
- * @author pot
- * @since 2025-11-18
+ * Base contract for register requests.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "registerType", visible = true)
 @JsonSubTypes({
@@ -34,14 +26,8 @@ public sealed interface RegisterRequest extends RegisterCommand permits
                 OAuth2RegisterRequest,
                 WeChatRegisterRequest {
 
-        /**
-         * 获取注册类型
-         */
         RegisterType registerType();
 
-        /**
-         * 获取用户域
-         */
         UserDomain userDomain();
 
         @Override

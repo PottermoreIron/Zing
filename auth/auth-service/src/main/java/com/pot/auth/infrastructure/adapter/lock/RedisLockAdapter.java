@@ -10,12 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- * Redis分布式锁适配器
- *
- * <p>实现DistributedLockPort接口，使用Redis实现分布式锁
- *
- * @author pot
- * @since 2025-11-10
+ * Distributed lock adapter backed by Redis.
  */
 @Slf4j
 @Component
@@ -30,13 +25,11 @@ public class RedisLockAdapter implements DistributedLockPort {
             long waitTime,
             long leaseTime,
             TimeUnit timeUnit,
-            Supplier<T> task
-    ) {
+            Supplier<T> task) {
         String fullLockKey = "lock:" + lockKey;
         boolean locked = false;
 
         try {
-            // 尝试获取锁
             locked = tryLock(fullLockKey, leaseTime, timeUnit);
 
             if (!locked) {
@@ -44,7 +37,6 @@ public class RedisLockAdapter implements DistributedLockPort {
                 return null;
             }
 
-            // 执行任务
             return task.get();
         } finally {
             if (locked) {
@@ -59,13 +51,11 @@ public class RedisLockAdapter implements DistributedLockPort {
             long waitTime,
             long leaseTime,
             TimeUnit timeUnit,
-            Runnable task
-    ) {
+            Runnable task) {
         String fullLockKey = "lock:" + lockKey;
         boolean locked = false;
 
         try {
-            // 尝试获取锁
             locked = tryLock(fullLockKey, leaseTime, timeUnit);
 
             if (!locked) {
@@ -73,7 +63,6 @@ public class RedisLockAdapter implements DistributedLockPort {
                 return false;
             }
 
-            // 执行任务
             task.run();
             return true;
         } finally {
@@ -104,4 +93,3 @@ public class RedisLockAdapter implements DistributedLockPort {
         }
     }
 }
-

@@ -7,9 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:58
- * @description: 标识符验证器
+ * Bean Validation adapter for generic login identifiers.
  */
 public class IdentifierValidator implements ConstraintValidator<ValidIdentifier, String> {
 

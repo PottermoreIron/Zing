@@ -24,7 +24,6 @@ import lombok.Builder;
  */
 @Builder
 public record CreateUserCommand(
-                // ========== 基础信息 ==========
                 // 历史桥接字段：当前仍用于对接用户模块的昵称创建链路。
                 String username,
                 Email email,
@@ -36,7 +35,6 @@ public record CreateUserCommand(
                 String nickname,
                 boolean emailVerified,
 
-                // ========== OAuth2 绑定信息 ==========
                 /**
                  * OAuth2提供商（如：google、github、facebook）
                  */
@@ -47,7 +45,6 @@ public record CreateUserCommand(
                  */
                 String oauth2OpenId,
 
-                // ========== 微信绑定信息 ==========
                 /**
                  * 微信 OpenID（在当前公众号/小程序下唯一）
                  */

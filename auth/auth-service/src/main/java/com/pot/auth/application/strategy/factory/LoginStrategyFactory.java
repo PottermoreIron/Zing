@@ -12,14 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 登录策略工厂
- *
- * <p>
- * 负责根据登录类型自动选择对应的登录策略。
- * 通过Spring自动注入所有 {@link LoginStrategy} 实现类，避免硬编码。
- *
- * @author pot
- * @since 2025-11-19
+ * Resolves login strategies by login type.
  */
 @Slf4j
 @Component

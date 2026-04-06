@@ -17,14 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * 领域服务 Spring Bean 装配配置
- *
- * <p>
- * 领域层的服务类不包含任何 Spring 注解，由此处统一装配成 Bean，
- * 并将基础设施配置值注入到领域服务中。
- *
- * @author pot
- * @since 2026-03-22
+ * Spring wiring for domain services that stay framework-free.
  */
 @Configuration
 public class DomainServiceConfig {

@@ -10,18 +10,15 @@ import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 昵称密码注册请求
- *
- * @author pot
- * @since 2025-11-18
+ * Register request for nickname and password.
  */
 public record UsernamePasswordRegisterRequest(
-                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
 
-                @ValidUsername String nickname,
+        @ValidUsername String nickname,
 
-                @ValidPassword String password,
+        @ValidPassword String password,
 
-                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-                implements RegisterRequest {
+        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+        implements RegisterRequest {
 }

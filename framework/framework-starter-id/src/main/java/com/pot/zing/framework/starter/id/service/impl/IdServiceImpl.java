@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 23:27
- * @description: 自定义分布式Id服务
+ * Default distributed ID service implementation.
  */
 @Service
 @RequiredArgsConstructor

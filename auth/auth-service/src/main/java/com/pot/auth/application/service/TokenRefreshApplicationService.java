@@ -9,13 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Token刷新应用服务
- *
- * <p>
- * 负责Token的刷新和验证
- *
- * @author pot
- * @since 2025-11-10
+ * Application service for token refresh and validation.
  */
 @Slf4j
 @Service
@@ -25,25 +19,20 @@ public class TokenRefreshApplicationService {
     private final JwtTokenService jwtTokenService;
 
     /**
-     * 刷新Token
-     *
-     * @param refreshTokenString RefreshToken字符串
-     * @return 新的Token对
+     * Refreshes an access token with a refresh token.
      */
     public LoginResponse refreshToken(String refreshTokenString) {
         log.info("[应用服务] 刷新Token");
 
-        // 1. 调用领域服务刷新Token
         TokenPair tokenPair = jwtTokenService.refreshToken(refreshTokenString);
 
-        // 2. 转换为应用层DTO
         JwtToken accessToken = tokenPair.accessToken();
         LoginResponse response = new LoginResponse(
                 accessToken.userId().value(),
                 accessToken.userDomain().name(),
                 accessToken.nickname(),
-                null, // email不在AccessToken中
-                null, // phoneNumber不在AccessToken中
+                null,
+                null,
                 tokenPair.getAccessTokenString(),
                 tokenPair.getRefreshTokenString(),
                 accessToken.expiresAt(),
@@ -54,10 +43,7 @@ public class TokenRefreshApplicationService {
     }
 
     /**
-     * 验证AccessToken
-     *
-     * @param accessTokenString AccessToken字符串
-     * @return JWT Token信息
+     * Validates an access token.
      */
     public JwtToken validateAccessToken(String accessTokenString) {
         log.debug("[应用服务] 验证AccessToken");
@@ -65,17 +51,12 @@ public class TokenRefreshApplicationService {
     }
 
     /**
-     * 登出（将Token加入黑名单）
-     *
-     * @param accessTokenString AccessToken字符串
+     * Revokes the current access token by blacklisting it.
      */
     public void logout(String accessTokenString) {
         log.info("[应用服务] 用户登出");
 
-        // 1. 验证Token
         JwtToken token = jwtTokenService.validateAccessToken(accessTokenString);
-
-        // 2. 加入黑名单
         jwtTokenService.addToBlacklist(token.tokenId(), token.getRemainingSeconds());
 
         log.info("[应用服务] 用户登出成功: userId={}", token.userId());

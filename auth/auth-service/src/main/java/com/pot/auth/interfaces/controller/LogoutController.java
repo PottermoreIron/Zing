@@ -17,37 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 登出控制器
- *
- * <p>
- * 提供 Token 吊销能力，确保已登出用户的 Token 无法再被使用。
- *
- * <p>
- * 流程：
- * <ol>
- * <li>从 {@code Authorization} 请求头提取 AccessToken</li>
- * <li>将 AccessToken 加入 Redis 黑名单（设置与剩余有效期一致的 TTL）</li>
- * <li>若请求体提供了 RefreshToken，同步从 Redis 中删除其缓存</li>
- * </ol>
- *
- * <p>
- * 接口设计：
- * <ul>
- * <li>幂等：重复登出同一 Token 不会报错</li>
- * <li>容错：Token 已过期/无效时依然返回成功（防止客户端错误处理阻碍登出）</li>
- * </ul>
- *
- * <p>
- * 请求示例：
- * 
- * <pre>
- * POST /auth/api/v1/logout
- * Authorization: Bearer &lt;accessToken&gt;
- *
- * {
- *   "refreshToken": "xxx"   // 可选
- * }
- * </pre>
+ * Revokes the current access token and an optional refresh token.
  *
  * @author pot
  * @since 2025-12-14
@@ -61,13 +31,6 @@ public class LogoutController {
 
     private final LogoutApplicationService logoutApplicationService;
 
-    /**
-     * 登出（吊销当前 Token）
-     *
-     * <p>
-     * 注意：网关会将 AccessToken 传递在 {@code Authorization: Bearer &lt;token&gt;} 头部，
-     * 本接口直接读取此头部，无需在请求体中重复传递。
-     */
     @Operation(summary = "登出", description = "将当前 AccessToken 加入黑名单，可选同步删除 RefreshToken")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/api/v1/logout")
@@ -81,7 +44,6 @@ public class LogoutController {
             return R.fail(AuthResultCode.TOKEN_INVALID);
         }
 
-        // 兼容 "Bearer <token>" 和裸 token 两种格式
         String accessToken = authorization.startsWith("Bearer ")
                 ? authorization.substring(7).trim()
                 : authorization.trim();

@@ -54,9 +54,7 @@ class LoginControllerTest {
         @MockitoBean
         private TokenRefreshApplicationService tokenRefreshApplicationService;
 
-        // ================================================================
         // POST /auth/api/v1/login - 登录
-        // ================================================================
 
         @Nested
         @DisplayName("POST /auth/api/v1/login")
@@ -181,9 +179,7 @@ class LoginControllerTest {
                 }
         }
 
-        // ================================================================
         // POST /auth/api/v1/refresh - 刷新Token
-        // ================================================================
 
         @Nested
         @DisplayName("POST /auth/api/v1/refresh")

@@ -7,11 +7,9 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:30
- * @description: 有效邮箱验证
+ * Validates email values.
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = EmailValidator.class)

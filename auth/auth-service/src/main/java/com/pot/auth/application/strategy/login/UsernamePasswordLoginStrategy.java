@@ -13,13 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 昵称密码登录策略
- *
- * <p>
- * 通过昵称和密码进行登录，authenticateWithPassword 内部完成验证+查询，
- * 避免两次 RPC 调用。
- *
- * @author pot
+ * Login strategy for nickname and password credentials.
  */
 @Slf4j
 @Component

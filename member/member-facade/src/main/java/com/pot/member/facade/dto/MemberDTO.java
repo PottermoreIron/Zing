@@ -10,11 +10,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * 会员数据传输对象（对外 RPC 契约）
- *
- * <p>
- * 用于跨服务传输会员核心信息，字段设计遵循最小化暴露原则。
- * Profile 扩展信息请使用 {@link MemberProfileDTO}。
+ * RPC DTO for core member data shared across services.
  *
  * @author Pot
  * @since 2026-03-18
@@ -28,33 +24,33 @@ public class MemberDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /** 会员唯一ID */
+    /** Stable member identifier. */
     private Long memberId;
 
-    /** 昵称（显示名） */
+    /** Member display nickname. */
     private String nickname;
 
-    /** 邮箱地址 */
+    /** Email address. */
     private String email;
 
-    /** 手机号 */
+    /** Phone number. */
     private String phone;
 
-    /** 头像 URL */
+    /** Avatar URL. */
     private String avatarUrl;
 
-    /** 账户状态：ACTIVE / LOCKED / DISABLED */
+    /** Account status such as ACTIVE, LOCKED, or DISABLED. */
     private String status;
 
-    /** 拥有的角色代码集合 */
+    /** Assigned role codes. */
     private Set<String> roleCodes;
 
-    /** 拥有的权限代码集合 */
+    /** Assigned permission codes. */
     private Set<String> permissionCodes;
 
-    /** 注册时间（毫秒时间戳） */
+    /** Registration timestamp in milliseconds since the epoch. */
     private Long gmtCreatedAt;
 
-    /** 最后登录时间（毫秒时间戳） */
+    /** Last login timestamp in milliseconds since the epoch. */
     private Long gmtLastLoginAt;
 }

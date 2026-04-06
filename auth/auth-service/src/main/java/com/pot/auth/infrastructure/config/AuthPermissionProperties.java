@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Auth 权限系统配置属性
+ * Configuration properties for auth permission caching.
  */
 @Data
 @Component

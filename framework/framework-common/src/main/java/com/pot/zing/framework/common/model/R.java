@@ -1,6 +1,5 @@
 package com.pot.zing.framework.common.model;
 
-
 import com.pot.zing.framework.common.enums.ResultCode;
 import com.pot.zing.framework.common.service.IResultCode;
 import lombok.AccessLevel;
@@ -9,9 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * @author: Pot
- * @created: 2025/3/16 22:34
- * @description: 结果类
+ * Generic API result wrapper.
  */
 @Getter
 @Builder
@@ -39,7 +36,7 @@ public class R<T> {
     }
 
     /**
-     * 静态工厂方法统一入口
+     * Creates a result from the given result code.
      */
     public static <T> R<T> of(IResultCode resultCode) {
         return new R<>(resultCode);
@@ -58,7 +55,7 @@ public class R<T> {
     }
 
     /**
-     * 快速成功/失败方法
+     * Convenience factory methods for common success and failure cases.
      */
     public static <T> R<T> success() {
         return of(ResultCode.SUCCESS);

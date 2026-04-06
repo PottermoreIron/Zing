@@ -31,9 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("领域值对象单元测试")
 class DomainValueObjectsTest {
 
-    // ================================================================
     // Email
-    // ================================================================
 
     @Nested
     @DisplayName("Email 值对象")
@@ -100,9 +98,7 @@ class DomainValueObjectsTest {
         }
     }
 
-    // ================================================================
     // Phone
-    // ================================================================
 
     @Nested
     @DisplayName("Phone 值对象")
@@ -168,9 +164,7 @@ class DomainValueObjectsTest {
         }
     }
 
-    // ================================================================
     // Password
-    // ================================================================
 
     @Nested
     @DisplayName("Password 值对象")
@@ -244,9 +238,7 @@ class DomainValueObjectsTest {
         }
     }
 
-    // ================================================================
     // IpAddress
-    // ================================================================
 
     @Nested
     @DisplayName("IpAddress 值对象")
@@ -280,9 +272,7 @@ class DomainValueObjectsTest {
         }
     }
 
-    // ================================================================
     // PermissionDigest
-    // ================================================================
 
     @Nested
     @DisplayName("PermissionDigest 值对象")

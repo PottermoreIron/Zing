@@ -58,9 +58,7 @@ class PermissionDomainServiceTest {
         permissionDomainService = new PermissionDomainService(cachePort, 3600L);
     }
 
-    // ================================================================
     // cachePermissionsWithMetadata
-    // ================================================================
 
     @Nested
     @DisplayName("cachePermissionsWithMetadata()")
@@ -104,9 +102,7 @@ class PermissionDomainServiceTest {
         }
     }
 
-    // ================================================================
     // incrementPermissionVersion
-    // ================================================================
 
     @Nested
     @DisplayName("incrementPermissionVersion(UserId, UserDomain)")
@@ -141,9 +137,7 @@ class PermissionDomainServiceTest {
         }
     }
 
-    // ================================================================
     // getCurrentPermissionVersion
-    // ================================================================
 
     @Nested
     @DisplayName("getCurrentPermissionVersion()")
@@ -192,9 +186,7 @@ class PermissionDomainServiceTest {
         }
     }
 
-    // ================================================================
     // getCachedPermissions
-    // ================================================================
 
     @Nested
     @DisplayName("getCachedPermissions()")
@@ -255,9 +247,7 @@ class PermissionDomainServiceTest {
         }
     }
 
-    // ================================================================
     // invalidatePermissionCache
-    // ================================================================
 
     @Nested
     @DisplayName("invalidatePermissionCache()")
@@ -284,9 +274,7 @@ class PermissionDomainServiceTest {
         }
     }
 
-    // ================================================================
     // verifyPermissionDigest
-    // ================================================================
 
     @Nested
     @DisplayName("verifyPermissionDigest()")

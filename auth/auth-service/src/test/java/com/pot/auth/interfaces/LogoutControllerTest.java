@@ -56,9 +56,7 @@ class LogoutControllerTest {
 
     private static final String LOGOUT_URL = "/auth/api/v1/logout";
 
-    // ================================================================
     // POST /auth/api/v1/logout
-    // ================================================================
 
     @Nested
     @DisplayName("POST /auth/api/v1/logout")

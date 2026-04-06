@@ -71,9 +71,7 @@ class RegistrationApplicationServiceTest {
         @InjectMocks
         private RegistrationApplicationService service;
 
-        // ================================================================
         // 传统注册
-        // ================================================================
 
         @Nested
         @DisplayName("传统注册（用户名密码）")
@@ -152,9 +150,7 @@ class RegistrationApplicationServiceTest {
                 }
         }
 
-        // ================================================================
         // OAuth2 注册
-        // ================================================================
 
         @Nested
         @DisplayName("OAuth2 注册（委托给 OneStopAuthenticationService）")
@@ -200,9 +196,7 @@ class RegistrationApplicationServiceTest {
                 }
         }
 
-        // ================================================================
         // WeChat 注册
-        // ================================================================
 
         @Nested
         @DisplayName("微信注册（委托给 OneStopAuthenticationService）")

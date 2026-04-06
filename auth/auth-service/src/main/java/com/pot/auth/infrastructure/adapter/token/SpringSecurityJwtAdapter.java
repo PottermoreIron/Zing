@@ -26,10 +26,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 /**
- * Spring Security JWT适配器
- *
- * <p>
- * 实现TokenManagementPort接口，使用JWT进行Token管理
+ * JWT-based implementation of the token-management port.
  *
  * @author pot
  * @since 2025-11-10
@@ -39,190 +36,183 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SpringSecurityJwtAdapter implements TokenManagementPort {
 
-    private final JwtProperties jwtProperties;
-    private final ResourceLoader resourceLoader;
+        private final JwtProperties jwtProperties;
+        private final ResourceLoader resourceLoader;
 
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+        private PrivateKey privateKey;
+        private PublicKey publicKey;
 
-    /**
-     * 初始化RSA密钥对
-     */
-    @PostConstruct
-    public void init() {
-        try {
-            // 加载私钥
-            Resource privateKeyResource = resourceLoader.getResource(jwtProperties.getPrivateKeyLocation());
-            byte[] privateKeyBytes = privateKeyResource.getInputStream().readAllBytes();
-            String privateKeyPEM = new String(privateKeyBytes)
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
-            byte[] privateKeyDecoded = Base64.getDecoder().decode(privateKeyPEM);
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyDecoded);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            this.privateKey = keyFactory.generatePrivate(privateKeySpec);
+        /**
+         * Loads the RSA key pair used for JWT signing and verification.
+         */
+        @PostConstruct
+        public void init() {
+                try {
+                        Resource privateKeyResource = resourceLoader.getResource(jwtProperties.getPrivateKeyLocation());
+                        byte[] privateKeyBytes = privateKeyResource.getInputStream().readAllBytes();
+                        String privateKeyPEM = new String(privateKeyBytes)
+                                        .replace("-----BEGIN PRIVATE KEY-----", "")
+                                        .replace("-----END PRIVATE KEY-----", "")
+                                        .replaceAll("\\s", "");
+                        byte[] privateKeyDecoded = Base64.getDecoder().decode(privateKeyPEM);
+                        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyDecoded);
+                        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                        this.privateKey = keyFactory.generatePrivate(privateKeySpec);
 
-            // 加载公钥
-            Resource publicKeyResource = resourceLoader.getResource(jwtProperties.getPublicKeyLocation());
-            byte[] publicKeyBytes = publicKeyResource.getInputStream().readAllBytes();
-            String publicKeyPEM = new String(publicKeyBytes)
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s", "");
-            byte[] publicKeyDecoded = Base64.getDecoder().decode(publicKeyPEM);
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyDecoded);
-            this.publicKey = keyFactory.generatePublic(publicKeySpec);
+                        Resource publicKeyResource = resourceLoader.getResource(jwtProperties.getPublicKeyLocation());
+                        byte[] publicKeyBytes = publicKeyResource.getInputStream().readAllBytes();
+                        String publicKeyPEM = new String(publicKeyBytes)
+                                        .replace("-----BEGIN PUBLIC KEY-----", "")
+                                        .replace("-----END PUBLIC KEY-----", "")
+                                        .replaceAll("\\s", "");
+                        byte[] publicKeyDecoded = Base64.getDecoder().decode(publicKeyPEM);
+                        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyDecoded);
+                        this.publicKey = keyFactory.generatePublic(publicKeySpec);
 
-            log.info("[JWT] RSA密钥对加载成功");
-        } catch (Exception e) {
-            log.error("[JWT] RSA密钥对加载失败", e);
-            throw new RuntimeException("RSA密钥对加载失败", e);
+                        log.info("[JWT] RSA密钥对加载成功");
+                } catch (Exception e) {
+                        log.error("[JWT] RSA密钥对加载失败", e);
+                        throw new RuntimeException("RSA密钥对加载失败", e);
+                }
         }
-    }
 
-    @Override
-    public TokenPair generateTokenPair(
-            UserId userId,
-            UserDomain userDomain,
-            String nickname,
-            Set<String> authorities,
-            com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata metadata) {
-        long currentTime = System.currentTimeMillis() / 1000;
+        @Override
+        public TokenPair generateTokenPair(
+                        UserId userId,
+                        UserDomain userDomain,
+                        String nickname,
+                        Set<String> authorities,
+                        com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata metadata) {
+                long currentTime = System.currentTimeMillis() / 1000;
 
-        // 生成AccessToken
-        TokenId accessTokenId = TokenId.generate();
-        long accessTokenExpiresAt = currentTime + jwtProperties.getAccessTokenTtl();
+                TokenId accessTokenId = TokenId.generate();
+                long accessTokenExpiresAt = currentTime + jwtProperties.getAccessTokenTtl();
 
-        String accessTokenString = Jwts.builder()
-                .id(accessTokenId.value())
-                .subject(userId.value().toString())
-                .claim("userId", userId.value())
-                .claim("userDomain", userDomain.name())
-                .claim("nickname", nickname)
-                .claim("username", nickname)
-                .claim("authorities", authorities)
-                // 【新增】写入权限元数据
-                .claim("perm_version", metadata.version())
-                .claim("perm_digest", metadata.digest())
-                .issuedAt(new Date(currentTime * 1000))
-                .expiration(new Date(accessTokenExpiresAt * 1000))
-                .signWith(privateKey)
-                .compact();
+                String accessTokenString = Jwts.builder()
+                                .id(accessTokenId.value())
+                                .subject(userId.value().toString())
+                                .claim("userId", userId.value())
+                                .claim("userDomain", userDomain.name())
+                                .claim("nickname", nickname)
+                                .claim("username", nickname)
+                                .claim("authorities", authorities)
+                                .claim("perm_version", metadata.version())
+                                .claim("perm_digest", metadata.digest())
+                                .issuedAt(new Date(currentTime * 1000))
+                                .expiration(new Date(accessTokenExpiresAt * 1000))
+                                .signWith(privateKey)
+                                .compact();
 
-        // 构建Claims Map
-        Map<String, Object> claimsMap = new java.util.HashMap<>();
-        claimsMap.put("perm_version", metadata.version());
-        claimsMap.put("perm_digest", metadata.digest());
+                Map<String, Object> claimsMap = new java.util.HashMap<>();
+                claimsMap.put("perm_version", metadata.version());
+                claimsMap.put("perm_digest", metadata.digest());
 
-        JwtToken accessToken = new JwtToken(
-                accessTokenId,
-                userId,
-                userDomain,
-                nickname,
-                authorities,
-                currentTime,
-                accessTokenExpiresAt,
-                accessTokenString,
-                claimsMap);
+                JwtToken accessToken = new JwtToken(
+                                accessTokenId,
+                                userId,
+                                userDomain,
+                                nickname,
+                                authorities,
+                                currentTime,
+                                accessTokenExpiresAt,
+                                accessTokenString,
+                                claimsMap);
 
-        // 生成RefreshToken
-        TokenId refreshTokenId = TokenId.generate();
-        long refreshTokenExpiresAt = currentTime + jwtProperties.getRefreshTokenTtl();
-        DeviceId deviceId = new DeviceId(1L); // TODO: 实际设备ID
+                TokenId refreshTokenId = TokenId.generate();
+                long refreshTokenExpiresAt = currentTime + jwtProperties.getRefreshTokenTtl();
+                DeviceId deviceId = new DeviceId(1L);
 
-        String refreshTokenString = Jwts.builder()
-                .id(refreshTokenId.value())
-                .subject(userId.value().toString())
-                .claim("userId", userId.value())
-                .claim("userDomain", userDomain.name())
-                .claim("deviceId", deviceId.value())
-                .claim("type", "refresh")
-                .issuedAt(new Date(currentTime * 1000))
-                .expiration(new Date(refreshTokenExpiresAt * 1000))
-                .signWith(privateKey)
-                .compact();
+                String refreshTokenString = Jwts.builder()
+                                .id(refreshTokenId.value())
+                                .subject(userId.value().toString())
+                                .claim("userId", userId.value())
+                                .claim("userDomain", userDomain.name())
+                                .claim("deviceId", deviceId.value())
+                                .claim("type", "refresh")
+                                .issuedAt(new Date(currentTime * 1000))
+                                .expiration(new Date(refreshTokenExpiresAt * 1000))
+                                .signWith(privateKey)
+                                .compact();
 
-        RefreshToken refreshToken = new RefreshToken(
-                refreshTokenId,
-                userId,
-                userDomain,
-                deviceId,
-                currentTime,
-                refreshTokenExpiresAt,
-                refreshTokenString);
+                RefreshToken refreshToken = new RefreshToken(
+                                refreshTokenId,
+                                userId,
+                                userDomain,
+                                deviceId,
+                                currentTime,
+                                refreshTokenExpiresAt,
+                                refreshTokenString);
 
-        return new TokenPair(accessToken, refreshToken);
-    }
-
-    @Override
-    public JwtToken parseAccessToken(String tokenString) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(publicKey)
-                    .build()
-                    .parseSignedClaims(tokenString)
-                    .getPayload();
-
-            TokenId tokenId = new TokenId(claims.getId());
-            UserId userId = UserId.of(((Number) claims.get("userId")).longValue());
-            UserDomain userDomain = UserDomain.valueOf((String) claims.get("userDomain"));
-            String nickname = Optional.ofNullable((String) claims.get("nickname"))
-                    .orElse((String) claims.get("username"));
-
-            @SuppressWarnings("unchecked")
-            List<String> authList = (List<String>) claims.get("authorities");
-            Set<String> authorities = authList != null ? new HashSet<>(authList) : Set.of();
-
-            long issuedAt = claims.getIssuedAt().getTime() / 1000;
-            long expiresAt = claims.getExpiration().getTime() / 1000;
-
-            // 【新增】传递完整的Claims Map
-            return new JwtToken(
-                    tokenId,
-                    userId,
-                    userDomain,
-                    nickname,
-                    authorities,
-                    issuedAt,
-                    expiresAt,
-                    tokenString,
-                    new HashMap<>(claims) // 完整的Claims Map
-            );
-        } catch (Exception e) {
-            log.error("[JWT] AccessToken解析失败", e);
-            throw new RuntimeException("Token解析失败", e);
+                return new TokenPair(accessToken, refreshToken);
         }
-    }
 
-    @Override
-    public RefreshToken parseRefreshToken(String tokenString) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(publicKey)
-                    .build()
-                    .parseSignedClaims(tokenString)
-                    .getPayload();
+        @Override
+        public JwtToken parseAccessToken(String tokenString) {
+                try {
+                        Claims claims = Jwts.parser()
+                                        .verifyWith(publicKey)
+                                        .build()
+                                        .parseSignedClaims(tokenString)
+                                        .getPayload();
 
-            TokenId tokenId = TokenId.of(claims.getId());
-            UserId userId = UserId.of(((Number) claims.get("userId")).longValue());
-            UserDomain userDomain = UserDomain.valueOf((String) claims.get("userDomain"));
-            DeviceId deviceId = DeviceId.of(((Number) claims.get("deviceId")).longValue());
+                        TokenId tokenId = new TokenId(claims.getId());
+                        UserId userId = UserId.of(((Number) claims.get("userId")).longValue());
+                        UserDomain userDomain = UserDomain.valueOf((String) claims.get("userDomain"));
+                        String nickname = Optional.ofNullable((String) claims.get("nickname"))
+                                        .orElse((String) claims.get("username"));
 
-            long issuedAt = claims.getIssuedAt().getTime() / 1000;
-            long expiresAt = claims.getExpiration().getTime() / 1000;
+                        @SuppressWarnings("unchecked")
+                        List<String> authList = (List<String>) claims.get("authorities");
+                        Set<String> authorities = authList != null ? new HashSet<>(authList) : Set.of();
 
-            return new RefreshToken(
-                    tokenId,
-                    userId,
-                    userDomain,
-                    deviceId,
-                    issuedAt,
-                    expiresAt,
-                    tokenString);
-        } catch (Exception e) {
-            log.error("[JWT] RefreshToken解析失败", e);
-            throw new RuntimeException("Token解析失败", e);
+                        long issuedAt = claims.getIssuedAt().getTime() / 1000;
+                        long expiresAt = claims.getExpiration().getTime() / 1000;
+
+                        // Preserve the full claims map for downstream consumers.
+                        return new JwtToken(
+                                        tokenId,
+                                        userId,
+                                        userDomain,
+                                        nickname,
+                                        authorities,
+                                        issuedAt,
+                                        expiresAt,
+                                        tokenString,
+                                        new HashMap<>(claims));
+                } catch (Exception e) {
+                        log.error("[JWT] AccessToken解析失败", e);
+                        throw new RuntimeException("Token解析失败", e);
+                }
         }
-    }
+
+        @Override
+        public RefreshToken parseRefreshToken(String tokenString) {
+                try {
+                        Claims claims = Jwts.parser()
+                                        .verifyWith(publicKey)
+                                        .build()
+                                        .parseSignedClaims(tokenString)
+                                        .getPayload();
+
+                        TokenId tokenId = TokenId.of(claims.getId());
+                        UserId userId = UserId.of(((Number) claims.get("userId")).longValue());
+                        UserDomain userDomain = UserDomain.valueOf((String) claims.get("userDomain"));
+                        DeviceId deviceId = DeviceId.of(((Number) claims.get("deviceId")).longValue());
+
+                        long issuedAt = claims.getIssuedAt().getTime() / 1000;
+                        long expiresAt = claims.getExpiration().getTime() / 1000;
+
+                        return new RefreshToken(
+                                        tokenId,
+                                        userId,
+                                        userDomain,
+                                        deviceId,
+                                        issuedAt,
+                                        expiresAt,
+                                        tokenString);
+                } catch (Exception e) {
+                        log.error("[JWT] RefreshToken解析失败", e);
+                        throw new RuntimeException("Token解析失败", e);
+                }
+        }
 }

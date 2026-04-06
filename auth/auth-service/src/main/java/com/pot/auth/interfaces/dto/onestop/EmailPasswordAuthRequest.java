@@ -9,20 +9,17 @@ import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 邮箱密码认证请求
- *
- * @author pot
- * @since 2025-11-29
+ * One-stop authentication request for email and password.
  */
 public record EmailPasswordAuthRequest(
-        @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
+                @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
 
-        @ValidEmail String email,
+                @ValidEmail String email,
 
-        String password,
+                String password,
 
-        String verificationCode,
+                String verificationCode,
 
-        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-        implements OneStopAuthRequest {
+                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+                implements OneStopAuthRequest {
 }

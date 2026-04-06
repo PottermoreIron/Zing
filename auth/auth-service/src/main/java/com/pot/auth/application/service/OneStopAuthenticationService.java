@@ -15,22 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 一键认证应用服务
- *
- * <p>
- * 提供一键认证（自动注册/登录）的业务逻辑
- *
- * <p>
- * <strong>职责：</strong>
- * <ul>
- * <li>构建认证上下文</li>
- * <li>选择合适的策略</li>
- * <li>执行认证流程</li>
- * <li>转换响应</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-29
+ * Application service for authenticate-or-register flows.
  */
 @Slf4j
 @Service
@@ -41,12 +26,7 @@ public class OneStopAuthenticationService {
         private final ValidationChain<OneStopAuthContext> oneStopAuthValidationChain;
 
         /**
-         * 一键认证（自动处理注册/登录）
-         *
-         * @param request   认证请求
-         * @param ipAddress IP地址
-         * @param userAgent User-Agent
-         * @return 认证响应
+         * Executes a one-stop authentication request.
          */
         public OneStopAuthResponse authenticate(
                         OneStopAuthRequest request,
@@ -56,7 +36,6 @@ public class OneStopAuthenticationService {
                 log.info("[一键认证服务] 开始处理认证请求: authType={}, userDomain={}",
                                 request.authType(), request.userDomain());
 
-                // 1. 构建认证上下文
                 OneStopAuthContext context = OneStopAuthContext.builder()
                                 .request(toCommand(request))
                                 .ipAddress(IpAddress.of(ipAddress))
@@ -65,11 +44,9 @@ public class OneStopAuthenticationService {
 
                 oneStopAuthValidationChain.validate(context);
 
-                // 2. 获取策略并执行
                 OneStopAuthStrategy strategy = strategyFactory.getStrategy(request.authType());
                 AuthenticationResult result = strategy.execute(context);
 
-                // 3. 转换为响应
                 OneStopAuthResponse response = OneStopAuthResponse.from(result);
 
                 log.info("[一键认证服务] 认证成功: userId={}, authType={}",

@@ -11,9 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 /**
- * @author: Pot
- * @created: 2025/10/19 20:59
- * @description: common自动配置类
+ * Auto-configuration for shared framework utilities.
  */
 @Slf4j
 @AutoConfiguration
@@ -25,9 +23,7 @@ public class CommonAutoConfiguration {
     }
 
     /**
-     * JWT工具类配置
-     * 只有在类路径中存在 JWT 相关类时才加载
-     * 可通过 jwt.enabled=false 禁用
+     * Registers JwtUtils when JWT support is enabled.
      */
     @Bean
     @ConditionalOnClass(name = "io.jsonwebtoken.Jwts")

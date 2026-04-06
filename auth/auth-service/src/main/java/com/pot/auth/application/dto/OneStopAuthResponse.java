@@ -6,13 +6,7 @@ import com.pot.auth.domain.shared.valueobject.UserId;
 import lombok.Builder;
 
 /**
- * 一键认证响应DTO
- *
- * <p>
- * 将领域层的 AuthenticationResult 转换为应用层响应
- *
- * @author pot
- * @since 2025-11-29
+ * Application response model for one-stop authentication flows.
  */
 @Builder
 public record OneStopAuthResponse(
@@ -27,7 +21,7 @@ public record OneStopAuthResponse(
         Long refreshTokenExpiresAt) {
 
     /**
-     * 从领域对象转换
+     * Maps a domain authentication result to the response model.
      */
     public static OneStopAuthResponse from(AuthenticationResult result) {
         return OneStopAuthResponse.builder()

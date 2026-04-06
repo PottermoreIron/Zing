@@ -62,7 +62,6 @@ class MemberApplicationServiceTest {
     @InjectMocks
     private MemberApplicationService service;
 
-    // ========== 测试夹具 ==========
 
     /**
      * 构造一个已持久化的会员聚合根（含 memberId）
@@ -82,7 +81,6 @@ class MemberApplicationServiceTest {
                 null);
     }
 
-    // ========== register() ==========
 
     @Nested
     @DisplayName("register()")
@@ -148,7 +146,6 @@ class MemberApplicationServiceTest {
         }
     }
 
-    // ========== changePassword() ==========
 
     @Nested
     @DisplayName("changePassword()")
@@ -174,7 +171,6 @@ class MemberApplicationServiceTest {
         }
     }
 
-    // ========== authenticateWithPassword() ==========
 
     @Nested
     @DisplayName("authenticateWithPassword()")
@@ -231,7 +227,6 @@ class MemberApplicationServiceTest {
         }
     }
 
-    // ========== lockMember() / unlockMember() ==========
 
     @Nested
     @DisplayName("lockMember() / unlockMember()")
@@ -273,7 +268,6 @@ class MemberApplicationServiceTest {
         }
     }
 
-    // ========== bindOAuth2() ==========
 
     @Nested
     @DisplayName("bindOAuth2()")
@@ -333,7 +327,6 @@ class MemberApplicationServiceTest {
         }
     }
 
-    // ========== recordDeviceLogin() ==========
 
     @Nested
     @DisplayName("recordDeviceLogin()")

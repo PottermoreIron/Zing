@@ -12,14 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 注册策略工厂
- *
- * <p>
- * 负责根据注册类型自动选择对应的注册策略。
- * 通过Spring自动注入所有 {@link RegisterStrategy} 实现类，避免硬编码。
- *
- * @author pot
- * @since 2025-11-19
+ * Resolves register strategies by register type.
  */
 @Slf4j
 @Component

@@ -12,19 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Redis缓存适配器（防腐层实现）
- *
- * <p>使用框架层的 RedisService 实现 CachePort 接口，提供工业级缓存能力
- * <p>优势：
- * <ul>
- *   <li>统一的 Redis 配置和管理</li>
- *   <li>自动的 key 前缀和命名空间隔离</li>
- *   <li>完善的错误处理和日志记录</li>
- *   <li>支持分布式锁、Lua脚本等高级特性</li>
- * </ul>
- *
- * @author pot
- * @since 2025-12-14
+ * Cache port adapter backed by the shared Redis service.
  */
 @Slf4j
 @Component
@@ -32,8 +20,6 @@ import java.util.stream.Collectors;
 public class RedisCacheAdapter implements CachePort {
 
     private final RedisService redisService;
-
-    // ========== 基本操作 ==========
 
     @Override
     public <T> void set(String key, T value, Duration ttl) {
@@ -84,8 +70,6 @@ public class RedisCacheAdapter implements CachePort {
         return Boolean.TRUE.equals(exists);
     }
 
-    // ========== 集合操作 ==========
-
     @Override
     public <T> void addToSet(String key, T value, Duration ttl) {
         String fullKey = buildAuthKey(key);
@@ -114,8 +98,6 @@ public class RedisCacheAdapter implements CachePort {
         Boolean isMember = redisService.sIsMember(fullKey, value);
         return Boolean.TRUE.equals(isMember);
     }
-
-    // ========== Hash操作 ==========
 
     @Override
     public <T> void setHash(String key, String field, T value, Duration ttl) {
@@ -157,8 +139,6 @@ public class RedisCacheAdapter implements CachePort {
         log.debug("Hash删除字段: key={}, field={}", fullKey, field);
     }
 
-    // ========== 计数器操作 ==========
-
     @Override
     public long increment(String key, long delta, Duration ttl) {
         String fullKey = buildAuthKey(key);
@@ -173,8 +153,6 @@ public class RedisCacheAdapter implements CachePort {
         Long result = redisService.increment(fullKey, -delta);
         return result != null ? result : 0;
     }
-
-    // ========== 高级操作 ==========
 
     @Override
     public <T> boolean setIfAbsent(String key, T value, Duration ttl) {
@@ -208,22 +186,15 @@ public class RedisCacheAdapter implements CachePort {
         }
     }
 
-    // ========== 工具方法 ==========
-
     /**
-     * 构建带有 auth 前缀的完整 key
-     * <p>最终格式：pot:auth:业务key（由 RedisService 自动添加 pot: 前缀）
-     *
-     * @param key 业务 key
-     * @return 完整的 Redis key
+     * Builds the auth-scoped cache key passed to the shared Redis service.
      */
     private String buildAuthKey(String key) {
         return CacheKeyConstants.buildKey(key);
     }
 
     /**
-     * 缓存异常
-     * <p>用于关键操作失败时的异常抛出，体现领域层防腐策略
+     * Raised when a critical cache write fails.
      */
     public static class CacheException extends RuntimeException {
         public CacheException(String message) {
@@ -235,4 +206,3 @@ public class RedisCacheAdapter implements CachePort {
         }
     }
 }
-

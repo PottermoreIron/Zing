@@ -11,44 +11,19 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * Touch模块适配器（通知服务）
- *
- * <p>
- * 实现 {@link NotificationPort} 接口，通过 {@code framework-starter-touch} 的
- * {@link TouchService} 进行消息路由，解耦业务逻辑与具体发送渠道。
- *
- * <p>
- * 渠道映射：
- * <ul>
- * <li>邮件验证码 → {@link TouchChannelType#EMAIL}，模板 {@code AUTH_EMAIL_CODE}</li>
- * <li>短信验证码 → {@link TouchChannelType#SMS}，模板 {@code AUTH_SMS_CODE}</li>
- * <li>登录通知 → {@link TouchChannelType#EMAIL}，模板 {@code AUTH_LOGIN_NOTIFY}</li>
- * <li>异地登录告警 → {@link TouchChannelType#EMAIL}，模板
- * {@code AUTH_ABNORMAL_LOGIN}</li>
- * </ul>
- *
- * @author pot
- * @since 2025-12-14
+ * Notification adapter backed by the touch starter.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class TouchModuleAdapter implements NotificationPort {
 
-    /** 邮件验证码模板 ID */
     private static final String TEMPLATE_EMAIL_CODE = "AUTH_EMAIL_CODE";
-    /** 短信验证码模板 ID */
     private static final String TEMPLATE_SMS_CODE = "AUTH_SMS_CODE";
-    /** 登录成功通知模板 ID */
     private static final String TEMPLATE_LOGIN_NOTIFY = "AUTH_LOGIN_NOTIFY";
-    /** 异地登录告警模板 ID */
     private static final String TEMPLATE_ABNORMAL_LOGIN = "AUTH_ABNORMAL_LOGIN";
 
     private final TouchService touchService;
-
-    // ================================================================
-    // 验证码发送
-    // ================================================================
 
     @Override
     public boolean sendEmailVerificationCode(String email, String code) {
@@ -98,10 +73,6 @@ public class TouchModuleAdapter implements NotificationPort {
         }
     }
 
-    // ================================================================
-    // 安全通知（降级发送，避免影响主流程）
-    // ================================================================
-
     @Override
     public boolean sendLoginNotification(String email, String nickname, String ipAddress, String deviceInfo) {
         log.info("[通知] 发送登录通知: email={}, nickname={}", email, nickname);
@@ -118,7 +89,7 @@ public class TouchModuleAdapter implements NotificationPort {
                     .bizType("AUTH_LOGIN_NOTIFY")
                     .build();
 
-            // 降级发送：网络抖动时不影响登录流程
+            // Delivery failures must not block the login flow.
             var response = touchService.sendWithFallback(request);
             boolean success = response != null && Boolean.TRUE.equals(response.isSuccess());
             if (!success) {
@@ -147,7 +118,7 @@ public class TouchModuleAdapter implements NotificationPort {
                     .bizType("AUTH_ABNORMAL_LOGIN")
                     .build();
 
-            // 异地登录告警优先级高，使用带降级策略的发送
+            // Abnormal login alerts should still use the fallback channel path.
             var response = touchService.sendWithFallback(request);
             boolean success = response != null && Boolean.TRUE.equals(response.isSuccess());
             if (!success) {

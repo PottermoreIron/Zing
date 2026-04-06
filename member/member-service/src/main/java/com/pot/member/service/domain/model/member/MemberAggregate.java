@@ -7,16 +7,23 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * 会员聚合根
- *
- * <p>
- * 职责边界：
- * <ul>
- * <li>维护认证相关核心状态（用户名、邮箱、手机、密码、账号状态）</li>
- * <li>维护角色关联</li>
- * <li>Profile 信息通过 {@link MemberProfile} 值对象持有</li>
- * <li>所有状态变更产生领域事件，由基础设施层发布</li>
- * </ul>
+ * Aggregate root for member identity, account state, profile data, and role
+ * assignments.
+ * package com.pot.member.service.domain.model.member;
+ * 
+ * import com.pot.member.service.domain.event.MemberDomainEvent;
+ * import lombok.Getter;
+ * 
+ * import java.time.LocalDateTime;
+ * import java.util.ArrayList;
+ * import java.util.Collections;
+ * import java.util.HashSet;
+ * import java.util.List;
+ * import java.util.Set;
+ * 
+ * /**
+ * Aggregate root for member identity, account state, profile data, and role
+ * assignments.
  *
  * @author Pot
  * @since 2026-03-18
@@ -24,9 +31,8 @@ import java.util.*;
 @Getter
 public class MemberAggregate {
 
-    /**
-     * 未发布的领域事件（事务提交后由基础设施发布）
-     */
+    // Events are buffered here and published after the persistence transaction
+    // commits.
     private final List<MemberDomainEvent> domainEvents = new ArrayList<>();
     private MemberId memberId;
     private Nickname nickname;
@@ -40,9 +46,6 @@ public class MemberAggregate {
     private LocalDateTime updatedAt;
     private LocalDateTime lastLoginAt;
 
-    /**
-     * 创建新会员（用于注册）
-     */
     public static MemberAggregate create(Nickname nickname, Email email, String passwordHash) {
         MemberAggregate member = new MemberAggregate();
         member.nickname = nickname;
@@ -56,11 +59,8 @@ public class MemberAggregate {
         return member;
     }
 
-    /**
-     * 通过 OAuth2 创建新会员
-     */
     public static MemberAggregate createFromOAuth2(Nickname nickname, Email email,
-                                                   String avatarUrl) {
+            String avatarUrl) {
         MemberAggregate member = new MemberAggregate();
         member.nickname = nickname;
         member.email = email;
@@ -75,9 +75,6 @@ public class MemberAggregate {
         return member;
     }
 
-    /**
-     * 重建会员（从数据库加载）
-     */
     public static MemberAggregate reconstitute(
             MemberId memberId,
             Nickname nickname,
@@ -105,14 +102,10 @@ public class MemberAggregate {
         return member;
     }
 
-    // ========== Profile 管理 ==========
-
     public void updateProfile(MemberProfile newProfile) {
         this.profile = newProfile;
         this.updatedAt = LocalDateTime.now();
     }
-
-    // ========== ID 分配（仅新建时调用一次） ==========
 
     public void assignMemberId(MemberId memberId) {
         if (this.memberId != null) {
@@ -120,8 +113,6 @@ public class MemberAggregate {
         }
         this.memberId = memberId;
     }
-
-    // ========== 账号字段更新 ==========
 
     public void updateNickname(Nickname nickname) {
         this.nickname = nickname;
@@ -145,8 +136,6 @@ public class MemberAggregate {
         this.passwordHash = newPasswordHash;
         this.updatedAt = LocalDateTime.now();
     }
-
-    // ========== 账号状态机 ==========
 
     public void lock() {
         if (this.status == MemberStatus.DISABLED) {
@@ -176,8 +165,6 @@ public class MemberAggregate {
         }
     }
 
-    // ========== 角色管理 ==========
-
     public void assignRole(Long roleId) {
         if (roleId == null || roleId <= 0) {
             throw new IllegalArgumentException("角色ID无效");
@@ -191,13 +178,9 @@ public class MemberAggregate {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // ========== 登录记录 ==========
-
     public void recordLogin() {
         this.lastLoginAt = LocalDateTime.now();
     }
-
-    // ========== 查询方法 ==========
 
     public boolean isAvailable() {
         return status.isActive();
@@ -207,14 +190,12 @@ public class MemberAggregate {
         return roleIds.contains(roleId);
     }
 
-    // ========== 领域事件管理 ==========
-
     public void registerEvent(MemberDomainEvent event) {
         this.domainEvents.add(event);
     }
 
     /**
-     * 取走所有未发布事件（取出即清空）
+     * Returns all pending domain events and clears the internal buffer.
      */
     public List<MemberDomainEvent> pullDomainEvents() {
         List<MemberDomainEvent> events = new ArrayList<>(this.domainEvents);

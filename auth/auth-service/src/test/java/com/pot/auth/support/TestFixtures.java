@@ -27,9 +27,7 @@ import java.util.Set;
  */
 public final class TestFixtures {
 
-    // ============================================================
     // 常量
-    // ============================================================
 
     public static final UserId USER_ID = UserId.of(10001L);
     public static final UserDomain USER_DOMAIN = UserDomain.MEMBER;
@@ -49,9 +47,7 @@ public final class TestFixtures {
         // 工具类，不允许实例化
     }
 
-    // ============================================================
     // UserDTO
-    // ============================================================
 
     /**
      * 创建标准的Member用户DTO
@@ -68,9 +64,7 @@ public final class TestFixtures {
                 .build();
     }
 
-    // ============================================================
     // JwtToken
-    // ============================================================
 
     /**
      * 创建未过期的AccessToken（1小时后过期）
@@ -106,9 +100,7 @@ public final class TestFixtures {
                 Map.of("perm_version", 1L));
     }
 
-    // ============================================================
     // RefreshToken
-    // ============================================================
 
     /**
      * 创建未过期的RefreshToken（30天后过期）
@@ -140,9 +132,7 @@ public final class TestFixtures {
                 FAKE_REFRESH_TOKEN);
     }
 
-    // ============================================================
     // TokenPair
-    // ============================================================
 
     /**
      * 创建有效的TokenPair
@@ -151,17 +141,13 @@ public final class TestFixtures {
         return new TokenPair(validAccessToken(), validRefreshToken());
     }
 
-    // ============================================================
     // PermissionCacheMetadata
-    // ============================================================
 
     public static PermissionCacheMetadata permCacheMetadata() {
         return PermissionCacheMetadata.empty(1L);
     }
 
-    // ============================================================
     // AuthenticationResult
-    // ============================================================
 
     public static AuthenticationResult authResult() {
         long now = System.currentTimeMillis() / 1000;
@@ -178,9 +164,7 @@ public final class TestFixtures {
                 .build();
     }
 
-    // ============================================================
     // LoginResponse
-    // ============================================================
 
     public static LoginResponse loginResponse() {
         long now = System.currentTimeMillis() / 1000;
@@ -196,9 +180,7 @@ public final class TestFixtures {
                 now + 2592000);
     }
 
-    // ============================================================
     // 请求对象
-    // ============================================================
 
     /**
      * 创建用户名密码登录请求

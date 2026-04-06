@@ -7,9 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:05
- * @description: 手机号验证器
+ * Bean Validation adapter for phone values.
  */
 public class PhoneValidator implements ConstraintValidator<ValidPhone, String> {
 

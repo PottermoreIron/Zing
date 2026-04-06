@@ -7,9 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:30
- * @description: 邮箱验证器
+ * Bean Validation adapter for email values.
  */
 public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
 

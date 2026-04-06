@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
 
 /**
- * 注册控制器
- * 提供用户注册相关的REST API
- * 支持6种注册方式的统一入口
+ * Handles registration endpoints for all supported auth flows.
  *
  * @author pot
  * @since 2025-11-29
@@ -38,27 +36,12 @@ public class RegistrationController {
 
     private final RegistrationApplicationService registrationApplicationService;
 
-    /**
-     * 统一注册入口
-     *
-     * <p>
-     * 支持6种注册方式，通过registerType字段自动识别：
-     * <ul>
-     * <li>USERNAME_PASSWORD - 昵称密码注册（保留历史类型名）</li>
-     * <li>EMAIL_PASSWORD - 邮箱密码注册</li>
-     * <li>EMAIL_CODE - 邮箱验证码注册</li>
-     * <li>PHONE_CODE - 手机号验证码注册</li>
-     * <li>OAUTH2 - OAuth2注册（Google, GitHub等）</li>
-     * <li>WECHAT - 微信注册</li>
-     * </ul>
-     */
     @Operation(summary = "注册", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT 六种注册方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "注册请求过于频繁，请稍后再试")
     @PostMapping("api/v1/register")
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         log.info("注册请求: registerType={}", request.registerType());
 
-        // 执行注册
         RegisterResponse response = registrationApplicationService.register(request, getClientIp(httpRequest),
                 httpRequest.getHeader("User-Agent"));
 

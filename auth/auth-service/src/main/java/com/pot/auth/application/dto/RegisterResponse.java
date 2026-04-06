@@ -1,13 +1,7 @@
 package com.pot.auth.application.dto;
 
 /**
- * 注册响应DTO
- *
- * <p>
- * 注册成功后自动登录，返回Token信息
- *
- * @author pot
- * @since 2025-11-10
+ * Application response model for register flows.
  */
 public record RegisterResponse(
                 Long userId,
@@ -22,7 +16,7 @@ public record RegisterResponse(
                 String message) {
 
         /**
-         * 成功响应
+         * Creates a successful register response.
          */
         public static RegisterResponse success(
                         Long userId,

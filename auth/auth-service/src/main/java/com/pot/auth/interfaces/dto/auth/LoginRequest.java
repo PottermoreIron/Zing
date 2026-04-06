@@ -7,15 +7,7 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
 /**
- * 登录请求基础接口
- *
- * <p>
- * 使用Jackson多态序列化，通过loginType字段识别具体请求类型
- * <p>
- * 采用sealed interface限制所有可能的子类型，保证类型安全
- *
- * @author pot
- * @since 2025-11-18
+ * Base contract for login requests.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "loginType", visible = true)
 @JsonSubTypes({
@@ -30,13 +22,7 @@ public sealed interface LoginRequest extends LoginCommand permits
                 EmailCodeLoginRequest,
                 PhoneCodeLoginRequest {
 
-        /**
-         * 获取登录类型
-         */
         LoginType loginType();
 
-        /**
-         * 获取用户域
-         */
         UserDomain userDomain();
 }

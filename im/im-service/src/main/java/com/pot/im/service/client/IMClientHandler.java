@@ -10,9 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * @author: Pot
- * @created: 2025/8/11 23:12
- * @description: 客户端消息处理器
+ * Handles inbound messages and connection lifecycle events for the sample IM
+ * client.
  */
 @Component
 @Slf4j
@@ -58,7 +57,6 @@ public class IMClientHandler extends SimpleChannelInboundHandler<ProtocolMessage
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if (evt instanceof IdleStateEvent event) {
             if (event.state() == IdleState.WRITER_IDLE) {
-                // 发送心跳
                 ProtocolMessage heartbeat = new ProtocolMessage(MessageType.HEARTBEAT, new byte[0]);
                 ctx.writeAndFlush(heartbeat);
                 log.debug("Sent heartbeat to server");
@@ -84,12 +82,12 @@ public class IMClientHandler extends SimpleChannelInboundHandler<ProtocolMessage
     private void handlePrivateMessage(ProtocolMessage msg) {
         String messageContent = new String(msg.getData());
         log.info("Received private message: {}", messageContent);
-        // TODO: 处理私聊消息
+        // Hook for application-specific private message handling.
     }
 
     private void handleGroupMessage(ProtocolMessage msg) {
         String messageContent = new String(msg.getData());
         log.info("Received group message: {}", messageContent);
-        // TODO: 处理群聊消息
+        // Hook for application-specific group message handling.
     }
 }

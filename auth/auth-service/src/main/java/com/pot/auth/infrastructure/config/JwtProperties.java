@@ -5,39 +5,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * JWT配置属性
- *
- * @author pot
- * @since 2025-11-10
+ * Configuration properties for JWT token issuance.
  */
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "auth.token.jwt")
 public class JwtProperties {
 
-    /**
-     * RSA私钥文件路径
-     */
     private String privateKeyLocation = "classpath:keys/jwt_private_key.pem";
 
-    /**
-     * RSA公钥文件路径
-     */
     private String publicKeyLocation = "classpath:keys/jwt_public_key.pem";
 
     /**
-     * AccessToken过期时间（秒）
+     * Access-token time to live in seconds.
      */
     private long accessTokenTtl = 3600; // 1小时
 
     /**
-     * RefreshToken过期时间（秒）
+     * Refresh-token time to live in seconds.
      */
     private long refreshTokenTtl = 2592000; // 30天
 
     /**
-     * RefreshToken滑动窗口（秒）
+     * Sliding refresh window in seconds.
      */
     private long refreshTokenSlidingWindow = 604800; // 7天
 }
-

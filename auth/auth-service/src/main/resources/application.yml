@@ -13,12 +13,13 @@ spring:
       discovery:
         server-addr: localhost:8848
         namespace: dev
-        group: DEFAULT_GROUP
-        # 本地开发时 Nacos 不可用，允许注册失败，不阻断启动
+        group:
+          DEFAULT_GROUP
+          # Allow startup to continue when Nacos is unavailable in local development.
         fail-fast: false
         register-enabled: ${NACOS_REGISTER_ENABLED:true}
 
-  # Redis配置
+        # Redis connection settings.
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -33,7 +34,7 @@ spring:
           max-wait: -1ms
       timeout: 3000ms
 
-  # RabbitMQ配置
+  # RabbitMQ connection settings.
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
@@ -41,48 +42,48 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
     virtual-host: ${RABBITMQ_VHOST:/}
 
-# 限流配置
+# Rate limiting settings.
 pot:
   ratelimit:
     enabled: true
-    # 使用Redis实现分布式限流
+    # Use Redis to enforce rate limits across service instances.
     provider: redis
 
-# Auth服务配置
+# Auth service settings.
 auth:
-  # 缓存类型：redis | local | composite
+  # Supported cache types: redis, local, or composite.
   cache:
     type: redis
 
-  # Token配置
+  # Token settings.
   token:
-    # Token提供者：spring-security | shiro
+    # Supported token providers: spring-security or shiro.
     provider: spring-security
-    # JWT配置
+    # JWT settings.
     jwt:
-      # RSA私钥文件路径
+      # Resource location of the RSA private key.
       private-key-location: classpath:keys/jwt_private_key.pem
-      # RSA公钥文件路径
+      # Resource location of the RSA public key.
       public-key-location: classpath:keys/jwt_public_key.pem
-      # AccessToken过期时间（秒）
+      # Access token lifetime in seconds.
       access-token-ttl: 3600
-      # RefreshToken过期时间（秒）
+      # Refresh token lifetime in seconds.
       refresh-token-ttl: 2592000
-      # RefreshToken滑动窗口（秒，7天内刷新会续期）
+      # Sliding refresh window in seconds.
       refresh-token-sliding-window: 604800
 
-  # 分布式锁配置
+  # Distributed lock settings.
   lock:
     type: redis
 
-  # 用户域配置
+  # User-domain toggles.
   user-domain:
     member:
       enabled: true
     admin:
       enabled: false
 
-  # OAuth2 第三方登录配置（按需启用，未配置 clientId/secret 则无法使用）
+  # Third-party OAuth2 login settings.
   oauth2:
     enabled: false
     providers:
@@ -99,48 +100,48 @@ auth:
         client-id: ${APPLE_CLIENT_ID:}
         client-secret: ${APPLE_CLIENT_SECRET:}
 
-  # 微信登录配置（按需启用）
+  # WeChat login settings.
   wechat:
     enabled: false
     app-id: ${WECHAT_APP_ID:}
     app-secret: ${WECHAT_APP_SECRET:}
 
-  # 权限系统配置
+  # Permission-system settings.
   permission:
-    # 权限缓存配置
+    # Permission cache settings.
     cache:
-      # Redis缓存过期时间（秒）
+      # Redis cache TTL in seconds.
       redis-ttl: 3600
-      # 权限版本校验开关
+      # Enable permission-version validation.
       version-enabled: true
-      # 本地缓存过期时间（秒）
+      # Local cache TTL in seconds.
       local-ttl: 300
-      # 本地缓存最大条目数
+      # Maximum number of local cache entries.
       local-max-size: 10000
-      # 布隆过滤器预期容量
+      # Expected Bloom filter capacity.
       bloom-capacity: 100000
-      # 布隆过滤器误判率
+      # Bloom filter false-positive rate.
       bloom-fpp: 0.01
 
-    # 消息队列配置
+    # Message queue settings.
     mq:
-      # 交换机名称
+      # Exchange name.
       exchange: auth.permission.exchange
-      # 队列名称
+      # Queue name.
       queue: auth.permission.changed
-      # 路由键
+      # Routing key.
       routing-key: permission.changed
-      # 是否启用MQ（生产环境应设为true，以实时同步权限变更）
+      # Enable MQ-based permission change propagation.
       enabled: true
 
-    # 权限表达式配置
+    # Permission expression settings.
     expression:
-      # 是否启用缓存
+      # Enable expression caching.
       cache-enabled: true
-      # 表达式缓存大小
+      # Maximum expression cache size.
       cache-size: 1000
 
-# SpringDoc OpenAPI 文档配置
+# SpringDoc OpenAPI settings.
 springdoc:
   api-docs:
     enabled: true
@@ -148,18 +149,18 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
-    # 默认展开所有接口
+    # Expand operations by default.
     doc-expansion: list
-    # 显示请求耗时
+    # Show request duration in the UI.
     display-request-duration: true
     tags-sorter: alpha
     operations-sorter: alpha
 
-# 日志配置
+# Logging configuration.
 logging:
   level:
     com.pot.auth: DEBUG
     org.springframework.security: DEBUG
   pattern:
-    # 包含 X-Trace-Id，与网关日志关联；MDC key 由 TraceIdGatewayFilter 写入
+    # Include X-Trace-Id so service logs can be correlated with gateway logs.
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{X-Trace-Id:-}] %logger{50} - %msg%n"

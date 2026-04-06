@@ -15,9 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 昵称密码注册策略
- *
- * @author pot
+ * Register strategy for nickname and password credentials.
  */
 @Slf4j
 @Component
@@ -34,7 +32,7 @@ public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyIm
 
     @Override
     protected void validateCredential(RegistrationContext context) {
-        // 昵称密码注册无需额外凭证验证，密码强度已在 DTO 层校验
+        // Password strength is validated at the DTO boundary for this flow.
     }
 
     @Override

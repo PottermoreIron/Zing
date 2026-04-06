@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("MemberAggregate")
 class MemberAggregateTest {
 
-    // ========== 工厂 ==========
 
     @Nested
     @DisplayName("create()")
@@ -62,7 +61,6 @@ class MemberAggregateTest {
         }
     }
 
-    // ========== 状态机 ==========
 
     @Nested
     @DisplayName("账号状态机")
@@ -125,7 +123,6 @@ class MemberAggregateTest {
         }
     }
 
-    // ========== 角色管理 ==========
 
     @Nested
     @DisplayName("角色管理")
@@ -179,7 +176,6 @@ class MemberAggregateTest {
         }
     }
 
-    // ========== Profile 更新 ==========
 
     @Nested
     @DisplayName("updateProfile()")
@@ -200,7 +196,6 @@ class MemberAggregateTest {
         }
     }
 
-    // ========== 密码更新 ==========
 
     @Nested
     @DisplayName("updatePassword()")
@@ -225,7 +220,6 @@ class MemberAggregateTest {
         }
     }
 
-    // ========== 领域事件 ==========
 
     @Nested
     @DisplayName("pullDomainEvents()")

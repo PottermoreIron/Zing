@@ -10,7 +10,7 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:000802}
 
-  # RabbitMQ配置
+  # RabbitMQ connection settings.
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
@@ -18,7 +18,7 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
     virtual-host: ${RABBITMQ_VHOST:/}
 
-  # Flyway数据库版本管理
+  # Flyway migration settings.
   flyway:
     enabled: true
     locations: classpath:db/migration
@@ -46,7 +46,7 @@ pot:
       rest-controller: true
       enabled: true
 
-# SpringDoc OpenAPI 文档配置
+# SpringDoc OpenAPI settings.
 springdoc:
   api-docs:
     enabled: true
@@ -59,7 +59,7 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
 
-# 日志配置
+# Logging configuration.
 logging:
   level:
     com.pot.member: DEBUG

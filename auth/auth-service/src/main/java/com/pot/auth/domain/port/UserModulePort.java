@@ -37,7 +37,6 @@ public interface UserModulePort {
      */
     UserDomain supportedDomain();
 
-    // ========== 用户认证 ==========
 
     /**
      * 密码认证
@@ -68,7 +67,6 @@ public interface UserModulePort {
      */
     Optional<UserDTO> findByPhone(String phone);
 
-    // ========== 用户创建 ==========
 
     /**
      * 创建用户
@@ -86,14 +84,12 @@ public interface UserModulePort {
 
     boolean existsByPhone(Phone phone);
 
-    // ========== 密码管理 ==========
 
     /**
      * 更新密码
      */
     void updatePassword(UserId userId, Password newPassword);
 
-    // ========== 账户管理 ==========
 
     /**
      * 锁定账户
@@ -110,7 +106,6 @@ public interface UserModulePort {
      */
     void recordLoginAttempt(UserId userId, boolean success, IpAddress ip, Long timestamp);
 
-    // ========== 权限查询 ==========
 
     /**
      * 查询用户权限代码集合
@@ -127,7 +122,6 @@ public interface UserModulePort {
      */
     Map<UserId, Set<String>> getPermissionsBatch(List<UserId> userIds);
 
-    // ========== 设备管理 ==========
 
     /**
      * 查询用户设备列表
@@ -144,7 +138,6 @@ public interface UserModulePort {
      */
     void kickDevice(UserId userId, DeviceId deviceId);
 
-    // ========== 社交账号绑定 ==========
 
     /**
      * 通过OAuth2信息查找用户

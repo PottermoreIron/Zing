@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 23:24
- * @description: 自定义Leaf分布式Id生成器实现
+ * Leaf-based distributed ID generator.
  */
 @Slf4j
 @RequiredArgsConstructor

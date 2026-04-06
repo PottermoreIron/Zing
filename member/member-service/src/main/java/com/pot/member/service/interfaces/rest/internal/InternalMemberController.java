@@ -14,7 +14,15 @@ import com.pot.zing.framework.common.model.R;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.ZoneOffset;
 import java.util.List;
@@ -22,10 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 会员内部 API 控制器（DDD 统一入口）
- *
- * <p>
- * 路径固定为 {@code /internal/member}，与 {@code InternalMemberFacade} Feign 客户端完全对应。
+ * Internal REST controller aligned with the member-service facade contract.
  *
  * @author Pot
  * @since 2026-03-18
@@ -38,8 +43,6 @@ public class InternalMemberController {
 
     private final MemberApplicationService memberApplicationService;
     private final MemberPermissionApplicationService memberPermissionApplicationService;
-
-    // ========== 用户查询 ==========
 
     @GetMapping("/{memberId}")
     public R<MemberDTO> findById(@PathVariable Long memberId) {
@@ -81,8 +84,6 @@ public class InternalMemberController {
         return R.success(toFacadeDTO(internalDTO));
     }
 
-    // ========== 唯一性检查 ==========
-
     @GetMapping("/exists/nickname")
     public R<Boolean> existsByNickname(@RequestParam String nickname) {
         return R.success(memberApplicationService.existsByNickname(nickname));
@@ -98,8 +99,6 @@ public class InternalMemberController {
         return R.success(memberApplicationService.existsByPhone(phone));
     }
 
-    // ========== 用户创建 ==========
-
     @PostMapping
     public R<MemberDTO> createMember(@RequestBody @Valid CreateMemberRequest request) {
         RegisterMemberCommand command = RegisterMemberCommand.builder()
@@ -112,8 +111,6 @@ public class InternalMemberController {
         return R.success(toFacadeDTO(internalDTO));
     }
 
-    // ========== 认证 ==========
-
     @PostMapping("/auth/verify-password")
     public R<MemberDTO> authenticateWithPassword(@RequestParam String identifier,
             @RequestParam String password) {
@@ -121,16 +118,12 @@ public class InternalMemberController {
         return R.success(toFacadeDTO(internalDTO));
     }
 
-    // ========== 密码管理 ==========
-
     @PutMapping("/{memberId}/password")
     public R<Void> updatePassword(@PathVariable Long memberId,
             @RequestParam String newPasswordHash) {
         memberApplicationService.updatePasswordHash(memberId, newPasswordHash);
         return R.success(null);
     }
-
-    // ========== 账户管理 ==========
 
     @PutMapping("/{memberId}/lock")
     public R<Void> lockAccount(@PathVariable Long memberId) {
@@ -153,8 +146,6 @@ public class InternalMemberController {
         return R.success(null);
     }
 
-    // ========== 权限查询 ==========
-
     @GetMapping("/{memberId}/permissions")
     public R<Set<String>> getPermissions(@PathVariable Long memberId) {
         return R.success(memberPermissionApplicationService.getPermissionCodes(memberId));
@@ -169,8 +160,6 @@ public class InternalMemberController {
     public R<Map<Long, Set<String>>> getPermissionsBatch(@RequestBody List<Long> memberIds) {
         return R.success(memberPermissionApplicationService.getPermissionsBatch(memberIds));
     }
-
-    // ========== 设备管理 ==========
 
     @GetMapping("/{memberId}/devices")
     public R<List<DeviceDTO>> getDevices(@PathVariable Long memberId) {
@@ -193,8 +182,6 @@ public class InternalMemberController {
         return R.success(null);
     }
 
-    // ========== OAuth2 / 社交账号绑定 ==========
-
     @PostMapping("/{memberId}/oauth2")
     public R<Void> bindOAuth2(@PathVariable Long memberId,
             @RequestBody @Valid BindSocialAccountRequest request) {
@@ -202,18 +189,11 @@ public class InternalMemberController {
         return R.success(null);
     }
 
-    // ========== Profile ==========
-
     @GetMapping("/{memberId}/profile")
     public R<MemberProfileDTO> getProfile(@PathVariable Long memberId) {
         return R.success(memberApplicationService.getProfile(memberId));
     }
 
-    // ========== 私有辅助 ==========
-
-    /**
-     * 将应用层内部DTO转换为对外facade DTO
-     */
     private MemberDTO toFacadeDTO(com.pot.member.service.application.dto.MemberDTO internalDTO) {
         if (internalDTO == null) {
             return null;

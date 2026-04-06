@@ -20,23 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 注册应用服务（重构版）
- *
- * <p>
- * 编排注册流程，根据注册类型自动选择对应的策略
- * <p>
- * 支持6种注册方式：
- * <ul>
- * <li>昵称密码注册</li>
- * <li>邮箱密码注册</li>
- * <li>手机号验证码注册</li>
- * <li>邮箱验证码注册</li>
- * <li>OAuth2注册（Google, GitHub等）- 通过 OneStopAuth 处理</li>
- * <li>微信注册 - 通过 OneStopAuth 处理</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-29
+ * Application service for registration flows.
  */
 @Slf4j
 @Service
@@ -48,15 +32,7 @@ public class RegistrationApplicationService {
         private final OneStopAuthenticationService oneStopAuthenticationService;
 
         /**
-         * 统一注册入口
-         *
-         * <p>
-         * 根据注册类型自动选择对应的策略执行注册
-         *
-         * @param request   注册请求（多态）
-         * @param ipAddress 客户端IP地址
-         * @param userAgent 用户代理信息
-         * @return 注册响应
+         * Executes a register request with the matching flow.
          */
         public RegisterResponse register(RegisterRequest request, String ipAddress, String userAgent) {
                 log.info("[应用服务] 注册请求: registerType={}, userDomain={}",
@@ -64,9 +40,7 @@ public class RegistrationApplicationService {
 
                 AuthenticationResult result;
 
-                // 判断是传统注册还是一体化认证（OAuth2/WeChat）
                 if (RegisterType.OAUTH2.equals(request.registerType())) {
-                        // OAuth2注册 → 使用 OneStopAuth 处理
                         OAuth2AuthRequest authRequest = new OAuth2AuthRequest(
                                         AuthType.OAUTH2,
                                         OAuth2AuthRequest.OAuth2Provider
@@ -78,7 +52,6 @@ public class RegistrationApplicationService {
                         OneStopAuthResponse authResponse = oneStopAuthenticationService.authenticate(
                                         authRequest, ipAddress, userAgent);
 
-                        // 转换为 RegisterResponse
                         return RegisterResponse.success(
                                         authResponse.userId().value(),
                                         authResponse.userDomain().name(),
@@ -91,7 +64,6 @@ public class RegistrationApplicationService {
                                         authResponse.refreshTokenExpiresAt());
 
                 } else if (RegisterType.WECHAT.equals(request.registerType())) {
-                        // 微信注册 → 使用 OneStopAuth 处理
                         WeChatAuthRequest authRequest = new WeChatAuthRequest(
                                         AuthType.WECHAT,
                                         request.code(),
@@ -101,7 +73,6 @@ public class RegistrationApplicationService {
                         OneStopAuthResponse authResponse = oneStopAuthenticationService.authenticate(
                                         authRequest, ipAddress, userAgent);
 
-                        // 转换为 RegisterResponse
                         return RegisterResponse.success(
                                         authResponse.userId().value(),
                                         authResponse.userDomain().name(),
@@ -114,8 +85,6 @@ public class RegistrationApplicationService {
                                         authResponse.refreshTokenExpiresAt());
 
                 } else {
-                        // 传统注册（昵称/手机/邮箱 + 密码/验证码）
-                        // 构建注册上下文
                         RegistrationContext context = RegistrationContext.builder()
                                         .request(toCommand(request))
                                         .ipAddress(IpAddress.of(ipAddress))
@@ -127,7 +96,6 @@ public class RegistrationApplicationService {
                         RegisterStrategy strategy = registerStrategyFactory.getStrategy(request.registerType());
                         result = strategy.execute(context);
 
-                        // 转换为应用层DTO
                         RegisterResponse response = RegisterResponse.success(
                                         result.userId().value(),
                                         result.userDomain().name(),

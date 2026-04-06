@@ -16,7 +16,6 @@ import java.util.function.Supplier;
  * @description: 自定义Redis接口类
  */
 public interface RedisService {
-    // ========== 基础操作 ==========
 
     /**
      * 设置键值对
@@ -113,7 +112,6 @@ public interface RedisService {
      */
     Double increment(String key, double delta);
 
-    // ========== Hash操作 ==========
 
     /**
      * 设置Hash键值对
@@ -142,7 +140,6 @@ public interface RedisService {
 
     Long hSize(String key);
 
-    // ========== List操作 ==========
     Long lPush(String key, Object... values);
 
     Long rPush(String key, Object... values);
@@ -161,7 +158,6 @@ public interface RedisService {
 
     Long lRemove(String key, long count, Object value);
 
-    // ========== Set操作 ==========
     Long sAdd(String key, Object... values);
 
     <T> Set<T> sMembers(String key, Class<T> clazz);
@@ -176,7 +172,6 @@ public interface RedisService {
 
     <T> Set<T> sUnion(String key, String otherKey, Class<T> clazz);
 
-    // ========= ZSet操作 ==========
     Boolean zAdd(String key, Object value, double score);
 
     Long zRemove(String key, Object... values);
@@ -193,7 +188,6 @@ public interface RedisService {
 
     Long zCount(String key, double min, double max);
 
-    // ========== 分布式锁 ==========
     boolean tryLock(String lockKey, Duration expireTime);
 
     boolean tryLock(String lockKey, String lockValue, Duration expireTime);
@@ -204,20 +198,17 @@ public interface RedisService {
 
     <T> T executeWithLock(String lockKey, Duration expireTime, Supplier<T> supplier);
 
-    // ========== 脚本操作 ==========
 
     /**
      * 执行Lua脚本
      */
     <T> T execute(RedisScript<T> script, List<String> keys, Object... args);
 
-    // ========== 缓存操作 ==========
 
     <T> T getOrLoad(String key, Class<T> clazz, Supplier<T> loader);
 
     <T> T getOrLoad(String key, Class<T> clazz, Duration timeout, Supplier<T> loader);
 
-    // ========== 工具方法 ==========
 
     Set<String> keys(String pattern);
 

@@ -7,9 +7,7 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:26
- * @description: 有效昵称验证
+ * Validates nickname values.
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)

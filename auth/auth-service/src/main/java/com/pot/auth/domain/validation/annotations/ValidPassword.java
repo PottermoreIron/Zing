@@ -7,11 +7,9 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:47
- * @description: 有效密码
+ * Validates password values.
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Constraint(validatedBy = PasswordValidator.class)

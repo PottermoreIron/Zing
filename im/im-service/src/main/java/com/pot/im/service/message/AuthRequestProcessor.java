@@ -5,20 +5,19 @@ import com.pot.im.service.protocol.serializer.ProtocolMessage;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * @author: Pot
- * @created: 2025/8/15 23:47
- * @description: 登录验证消息处理器
+ * Processes client authentication messages.
  */
 public class AuthRequestProcessor implements MessageProcessor {
 
     @Override
     public void process(ChannelHandlerContext ctx, ProtocolMessage message) throws ProcessingException {
-        // 处理登录验证逻辑
         byte[] data = message.getData();
         if (data == null || data.length == 0) {
             throw new ProcessingException("Authentication data is empty", null);
         }
-        // todo 验证处理
+
+        // Authentication verification is not wired yet, so requests are rejected by
+        // default.
         boolean isAuthenticated = false;
         ProtocolMessage response = new ProtocolMessage();
         response.getHeader().setMsgType(MessageType.AUTH_RESPONSE.getCode());
@@ -31,7 +30,7 @@ public class AuthRequestProcessor implements MessageProcessor {
         } else {
             response.setData("Authentication failed".getBytes());
             ctx.writeAndFlush(response);
-            ctx.close(); // 关闭连接
+            ctx.close();
         }
     }
 

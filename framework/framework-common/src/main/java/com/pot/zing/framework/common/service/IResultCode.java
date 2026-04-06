@@ -1,29 +1,21 @@
 package com.pot.zing.framework.common.service;
 
 /**
- * @author: Pot
- * @created: 2025/11/10 19:54
- * @description: 错误码接口
+ * Contract for framework result codes.
  */
 public interface IResultCode {
     /**
-     * 获取错误码
-     *
-     * @return 返回错误码
+     * Returns the code value.
      */
     String getCode();
 
     /**
-     * 获取错误信息
-     *
-     * @return 返回错误信息
+     * Returns the display message.
      */
     String getMsg();
 
     /**
-     * 是否成功
-     *
-     * @return 返回是否成功
+     * Indicates whether the code represents success.
      */
     boolean isSuccess();
 }

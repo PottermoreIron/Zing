@@ -7,9 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author: Pot
- * @created: 2025/11/16 22:26
- * @description: 昵称验证器
+ * Bean Validation adapter for nickname values.
  */
 public class UsernameValidator implements ConstraintValidator<ValidUsername, String> {
 

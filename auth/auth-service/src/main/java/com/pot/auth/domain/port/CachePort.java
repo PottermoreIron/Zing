@@ -21,7 +21,6 @@ import java.util.Set;
  */
 public interface CachePort {
 
-    // ========== 基本操作 ==========
 
     /**
      * 设置缓存
@@ -48,7 +47,6 @@ public interface CachePort {
      */
     boolean exists(String key);
 
-    // ========== 集合操作 ==========
 
     /**
      * 添加到集合
@@ -70,7 +68,6 @@ public interface CachePort {
      */
     <T> boolean isMemberOfSet(String key, T value);
 
-    // ========== Hash操作 ==========
 
     /**
      * 设置Hash字段
@@ -92,7 +89,6 @@ public interface CachePort {
      */
     void deleteHash(String key, String field);
 
-    // ========== 计数器操作 ==========
 
     /**
      * 递增
@@ -104,7 +100,6 @@ public interface CachePort {
      */
     long decrement(String key, long delta);
 
-    // ========== 高级操作 ==========
 
     /**
      * 如果不存在则设置

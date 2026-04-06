@@ -11,20 +11,17 @@ import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 邮箱密码注册请求
- *
- * @author pot
- * @since 2025-11-18
+ * Register request for email and password.
  */
 public record EmailPasswordRegisterRequest(
-        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
 
-        @ValidEmail String email,
+                @ValidEmail String email,
 
-        @ValidPassword String password,
+                @ValidPassword String password,
 
-        @ValidVerificationCode String verificationCode,
+                @ValidVerificationCode String verificationCode,
 
-        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-        implements RegisterRequest {
+                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+                implements RegisterRequest {
 }

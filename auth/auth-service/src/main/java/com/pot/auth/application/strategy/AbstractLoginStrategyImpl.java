@@ -9,23 +9,7 @@ import com.pot.auth.domain.validation.handler.UserStatusValidator;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 登录策略抽象模板类（重构版）
- *
- * <p>
- * 采用模板方法模式，定义统一的登录流程：
- * <ol>
- * <li>责任链校验（参数校验→业务规则校验→风控校验）</li>
- * <li>凭证验证（由子类实现）</li>
- * <li>获取用户信息（由子类实现）</li>
- * <li>用户状态验证</li>
- * <li>登录前置钩子（可选，供子类扩展）</li>
- * <li>生成Token并构建结果</li>
- * <li>登录后置钩子（可选，供子类扩展）</li>
- * <li>返回响应</li>
- * </ol>
- *
- * @author pot
- * @since 2025-11-29
+ * Base template for login strategies.
  */
 @Slf4j
 public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
@@ -44,22 +28,11 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
                 request.loginType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 凭证验证（由子类实现）
             validateCredential(context);
-
-            // 2. 获取用户信息（由子类实现）
             UserDTO user = getUserInfo(context);
-
-            // 3. 用户状态验证（使用健壮的状态处理器）
             UserStatusValidator.validate(user);
-
-            // 4. 登录前置钩子（由子类可选实现）
             beforeLogin(user, context);
-
-            // 5. 生成Token并构建结果
             AuthenticationResult result = generateAuthenticationResult(user, context);
-
-            // 6. 登录后置钩子（由子类可选实现）
             afterLogin(user, result, context);
 
             log.info("[登录策略] 登录成功: userId={}, nickname={}, type={}",
@@ -74,56 +47,24 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
     }
 
     /**
-     * 凭证验证（由子类实现）
-     *
-     * <p>
-     * 不同登录方式的凭证验证逻辑不同：
-     * <ul>
-     * <li>密码登录：验证密码哈希</li>
-     * <li>验证码登录：验证验证码</li>
-     * </ul>
-     *
-     * @param context 认证上下文
+     * Validates credentials for the current login type.
      */
     protected abstract void validateCredential(AuthenticationContext context);
 
     /**
-     * 获取用户信息（由子类实现）
-     *
-     * <p>
-     * 根据登录方式的不同，查询用户的方式也不同：
-     * <ul>
-     * <li>昵称登录：通过昵称查询</li>
-     * <li>邮箱登录：通过邮箱查询</li>
-     * <li>手机号登录：通过手机号查询</li>
-     * </ul>
-     *
-     * @param context 认证上下文
-     * @return 用户信息
+     * Loads the authenticated user.
      */
     protected abstract UserDTO getUserInfo(AuthenticationContext context);
 
     /**
-     * 登录前置钩子（由子类可选实现）
-     *
-     * <p>
-     * 可用于：
-     * <ul>
-     * <li>记录登录尝试</li>
-     * <li>更新最后登录时间</li>
-     * <li>清除之前的登录失败记录</li>
-     * </ul>
-     *
-     * @param user    用户信息
-     * @param context 认证上下文
+     * Hook invoked before token generation.
      */
     protected void beforeLogin(UserDTO user, AuthenticationContext context) {
-        // 默认实现为空，子类可选择性覆盖
         log.debug("[登录钩子] 登录前置处理: userId={}", user.userId());
     }
 
     /**
-     * 生成认证结果（包含Token）
+     * Builds the authentication result with issued tokens.
      */
     protected AuthenticationResult generateAuthenticationResult(
             UserDTO user,
@@ -151,31 +92,14 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
     }
 
     /**
-     * 登录后置钩子（由子类可选实现）
-     *
-     * <p>
-     * 可用于：
-     * <ul>
-     * <li>清理验证码</li>
-     * <li>发送登录通知</li>
-     * <li>记录登录日志</li>
-     * <li>触发登录事件</li>
-     * </ul>
-     *
-     * @param user    用户信息
-     * @param result  认证结果
-     * @param context 认证上下文
+     * Hook invoked after a successful login.
      */
     protected void afterLogin(UserDTO user, AuthenticationResult result, AuthenticationContext context) {
-        // 默认实现为空，子类可选择性覆盖
         log.debug("[登录钩子] 登录后置处理: userId={}", user.userId());
     }
 
     /**
-     * 处理登录失败
-     *
-     * <p>
-     * 记录失败日志，子类可扩展以实现登录失败次数限制等功能
+     * Handles a failed login attempt.
      */
     protected void handleLoginFailure(AuthenticationContext context, Exception e) {
         log.error("[登录策略] 登录失败: type={}, ip={}, error={}",
@@ -185,7 +109,7 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
     }
 
     /**
-     * 获取策略支持的登录类型（由子类实现）
+     * Returns the login type supported by this strategy.
      */
     public abstract LoginType getSupportedLoginType();
 }

@@ -4,9 +4,7 @@ import com.pot.zing.framework.common.enums.ResultCode;
 import lombok.Getter;
 
 /**
- * @author: Pot
- * @created: 2025/3/16 22:37
- * @description: 业务异常类
+ * Base exception for business failures.
  */
 @Getter
 public class BusinessException extends RuntimeException {

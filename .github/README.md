@@ -69,6 +69,7 @@
 | `instructions/api-openapi.instructions.md`  | REST 控制器、OpenAPI 契约、统一响应         | `REST`、`controller`、`OpenAPI`、`接口`、`控制器` |
 | `instructions/architecture.instructions.md` | DDD 分层、模块边界、assembler、port、facade | `DDD`、`aggregate`、`repository`、`聚合`、`仓储`  |
 | `instructions/coding.instructions.md`       | 仓库级编码优先级、命名、变更粒度            | `coding standard`、`规范`、`命名`、`重构`         |
+| `instructions/commenting.instructions.md`   | 注释策略、Javadoc、英文注释、失效注释治理   | `comment`、`Javadoc`、`注释`、`文档注释`          |
 | `instructions/java.instructions.md`         | Java 语言约束、异常、Optional、日志         | `Java`、`Optional`、`record`、`异常`、`日志`      |
 | `instructions/persistence.instructions.md`  | MyBatis、SQL、安全性、性能                  | `MyBatis`、`mapper XML`、`SQL`、`持久化`          |
 | `instructions/spring-boot.instructions.md`  | Spring Boot 组件、校验、事务、配置          | `@Service`、`@Transactional`、`配置`、`事务`      |

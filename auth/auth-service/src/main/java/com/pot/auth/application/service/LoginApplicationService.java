@@ -17,29 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * 登录应用服务
- *
- * <p>
- * 负责传统登录流程（要求用户已注册）
- *
- * <p>
- * 支持的登录方式：
- * <ul>
- * <li>昵称 + 密码</li>
- * <li>邮箱 + 密码</li>
- * <li>邮箱 + 验证码</li>
- * <li>手机号 + 验证码</li>
- * </ul>
- *
- * <p>
- * 注意：
- * <ul>
- * <li>如需一键认证（自动注册/登录，包括 OAuth2/WeChat），请使用
- * {@link OneStopAuthenticationService}</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-29
+ * Application service for traditional login flows.
  */
 @Slf4j
 @Service
@@ -50,25 +28,12 @@ public class LoginApplicationService {
     private final ValidationChain<AuthenticationContext> authenticationValidationChain;
 
     /**
-     * 传统登录入口
-     *
-     * <p>
-     * 根据登录类型自动选择对应的策略执行登录
-     *
-     * <p>
-     * 不支持第三方登录（OAuth2/WeChat），这些已迁移到 AuthenticationController
-     *
-     * @param request   登录请求（多态）
-     * @param ipAddress 客户端IP地址
-     * @param userAgent 用户代理信息
-     * @return 登录响应
+     * Executes a login request with the matching strategy.
      */
     public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
         log.info("[登录服务] 登录请求: loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
-        // 传统登录（昵称/邮箱/手机号 + 密码/验证码）
-        // 构建认证上下文
         AuthenticationContext context = AuthenticationContext.builder()
                 .request(toCommand(request))
                 .ipAddress(IpAddress.of(ipAddress))
@@ -78,11 +43,9 @@ public class LoginApplicationService {
 
         authenticationValidationChain.validate(context);
 
-        // 获取策略并执行
         LoginStrategy strategy = loginStrategyFactory.getStrategy(request.loginType());
         AuthenticationResult result = strategy.execute(context);
 
-        // 转换为应用层DTO
         LoginResponse response = new LoginResponse(
                 result.userId().value(),
                 result.userDomain().name(),
@@ -98,11 +61,6 @@ public class LoginApplicationService {
         return response;
     }
 
-    /**
-     * 生成会话ID
-     *
-     * @return 会话ID
-     */
     private String generateSessionId() {
         return UUID.randomUUID().toString();
     }

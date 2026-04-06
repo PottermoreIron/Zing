@@ -10,18 +10,15 @@ import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 手机号验证码注册请求
- *
- * @author pot
- * @since 2025-11-18
+ * Register request for phone and verification code.
  */
 public record PhoneCodeRegisterRequest(
-        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
 
-        @ValidPhone String phone,
+                @ValidPhone String phone,
 
-        @ValidVerificationCode String verificationCode,
+                @ValidVerificationCode String verificationCode,
 
-        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-        implements RegisterRequest {
+                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+                implements RegisterRequest {
 }

@@ -10,18 +10,15 @@ import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * 手机号验证码登录请求
- *
- * @author pot
- * @since 2025-11-18
+ * Login request for phone and verification code.
  */
 public record PhoneCodeLoginRequest(
-        @NotNull(message = "登录类型不能为空") @JsonProperty("loginType") LoginType loginType,
+                @NotNull(message = "登录类型不能为空") @JsonProperty("loginType") LoginType loginType,
 
-        @ValidPhone String phone,
+                @ValidPhone String phone,
 
-        @ValidVerificationCode String verificationCode,
+                @ValidVerificationCode String verificationCode,
 
-        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-        implements LoginRequest {
+                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+                implements LoginRequest {
 }

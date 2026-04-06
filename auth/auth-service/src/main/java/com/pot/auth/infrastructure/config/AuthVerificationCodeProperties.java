@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * 验证码业务策略配置属性
+ * Configuration properties for verification-code policies.
  */
 @Data
 @Component

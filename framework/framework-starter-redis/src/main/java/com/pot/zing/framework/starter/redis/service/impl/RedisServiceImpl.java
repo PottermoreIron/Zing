@@ -26,7 +26,6 @@ public class RedisServiceImpl implements RedisService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisProperties properties;
 
-    // ========== String 操作 ==========
 
     @Override
     public Boolean set(String key, Object value) {
@@ -237,7 +236,6 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
-    // ========== Hash 操作 ==========
 
     @Override
     public Boolean hSet(String key, String field, Object value) {
@@ -349,7 +347,6 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
-    // ========== List 操作 ==========
 
     @Override
     public Long lPush(String key, Object... values) {
@@ -456,7 +453,6 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
-    // ========== Set 操作 ==========
 
     @Override
     public Long sAdd(String key, Object... values) {
@@ -540,7 +536,6 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
-    // ========== ZSet 操作 ==========
 
     @Override
     public Boolean zAdd(String key, Object value, double score) {
@@ -628,7 +623,6 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
-    // ========== 分布式锁 ==========
 
     @Override
     public boolean tryLock(String lockKey, Duration expireTime) {
@@ -703,7 +697,6 @@ public class RedisServiceImpl implements RedisService {
         }
     }
 
-    // ========== 缓存操作 ==========
 
     @Override
     public <T> T getOrLoad(String key, Class<T> clazz, Supplier<T> loader) {
@@ -724,7 +717,6 @@ public class RedisServiceImpl implements RedisService {
         return value;
     }
 
-    // ========== 工具方法 ==========
 
     @Override
     public Set<String> keys(String pattern) {

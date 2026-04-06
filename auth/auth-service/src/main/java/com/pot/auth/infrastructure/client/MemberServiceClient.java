@@ -15,19 +15,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Member服务的Feign Client（防腐层设计）
- *
- * <p>
- * 调用 member-service 的 {@code /internal/member} 内部 API。
- * 只定义 auth-service 实际需要的方法。
- *
- * @author pot
- * @since 2026-03-22
+ * Feign client for auth-service calls to member-service internal APIs.
  */
 @FeignClient(name = "member-service", path = "/internal/member")
 public interface MemberServiceClient {
-
-        // ========== 用户查询 ==========
 
         @GetMapping("/{memberId}")
         R<MemberDTO> findById(@PathVariable("memberId") Long memberId);
@@ -48,8 +39,6 @@ public interface MemberServiceClient {
         @GetMapping("/by-wechat")
         R<MemberDTO> findByWeChat(@RequestParam("weChatOpenId") String weChatOpenId);
 
-        // ========== 唯一性检查 ==========
-
         @GetMapping("/exists/nickname")
         R<Boolean> existsByNickname(@RequestParam("nickname") String nickname);
 
@@ -59,24 +48,16 @@ public interface MemberServiceClient {
         @GetMapping("/exists/phone")
         R<Boolean> existsByPhone(@RequestParam("phone") String phone);
 
-        // ========== 用户创建 ==========
-
         @PostMapping
         R<MemberDTO> createMember(@RequestBody CreateMemberRequest request);
-
-        // ========== 认证 ==========
 
         @PostMapping("/auth/verify-password")
         R<MemberDTO> authenticateWithPassword(@RequestParam("identifier") String identifier,
                         @RequestParam("password") String password);
 
-        // ========== 密码管理 ==========
-
         @PutMapping("/{memberId}/password")
         R<Void> updatePassword(@PathVariable("memberId") Long memberId,
                         @RequestParam("newPasswordHash") String newPasswordHash);
-
-        // ========== 账户管理 ==========
 
         @PutMapping("/{memberId}/lock")
         R<Void> lockAccount(@PathVariable("memberId") Long memberId);
@@ -90,8 +71,6 @@ public interface MemberServiceClient {
                         @RequestParam("ip") String ip,
                         @RequestParam("timestamp") Long timestamp);
 
-        // ========== 权限查询 ==========
-
         @GetMapping("/{memberId}/permissions")
         R<Set<String>> getPermissions(@PathVariable("memberId") Long memberId);
 
@@ -100,8 +79,6 @@ public interface MemberServiceClient {
 
         @PostMapping("/permissions/batch")
         R<Map<Long, Set<String>>> getPermissionsBatch(@RequestBody List<Long> memberIds);
-
-        // ========== 设备管理 ==========
 
         @GetMapping("/{memberId}/devices")
         R<List<DeviceDTO>> getDevices(@PathVariable("memberId") Long memberId);
@@ -116,13 +93,9 @@ public interface MemberServiceClient {
         R<Void> kickDevice(@PathVariable("memberId") Long memberId,
                         @PathVariable("deviceId") Long deviceId);
 
-        // ========== OAuth2 ==========
-
         @PostMapping("/{memberId}/oauth2")
         R<Void> bindOAuth2(@PathVariable("memberId") Long memberId,
                         @RequestBody BindSocialAccountRequest request);
-
-        // ========== Profile ==========
 
         @GetMapping("/{memberId}/profile")
         R<MemberProfileDTO> getProfile(@PathVariable("memberId") Long memberId);

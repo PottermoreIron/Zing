@@ -56,9 +56,7 @@ import static org.mockito.Mockito.when;
 @DisplayName("VerificationCodeService 集成测试 (Redis)")
 class VerificationCodeServiceIT {
 
-    // ================================================================
     // Testcontainers - 共享Redis容器（同一JVM进程中复用）
-    // ================================================================
 
     @Container
     @SuppressWarnings("resource")
@@ -71,9 +69,7 @@ class VerificationCodeServiceIT {
         registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379));
     }
 
-    // ================================================================
     // 被测对象 & Mock依赖
-    // ================================================================
 
     @Autowired
     private VerificationCodeApplicationService verificationCodeApplicationService;
@@ -88,9 +84,7 @@ class VerificationCodeServiceIT {
     @MockitoBean
     private UserModulePort userModulePort;
 
-    // ================================================================
     // 清理Redis（保证测试隔离）
-    // ================================================================
 
     @AfterEach
     void cleanRedis() {
@@ -101,9 +95,7 @@ class VerificationCodeServiceIT {
         }
     }
 
-    // ================================================================
     // 邮件验证码完整流程
-    // ================================================================
 
     @Nested
     @DisplayName("邮件验证码 - 完整流程")

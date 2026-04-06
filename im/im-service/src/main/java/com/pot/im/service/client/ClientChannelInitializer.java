@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: Pot
- * @created: 2025/8/11 23:11
- * @description: 客户端channel初始化器
+ * Configures the Netty pipeline for the sample IM client.
  */
 @Component
 @RequiredArgsConstructor
@@ -28,18 +26,15 @@ public class ClientChannelInitializer extends ChannelInitializer<SocketChannel> 
     protected void initChannel(SocketChannel ch) {
         ChannelPipeline pipeline = ch.pipeline();
 
-        // 心跳检测
         pipeline.addLast(new IdleStateHandler(
                 config.getReaderIdleTime(),
                 config.getWriterIdleTime(),
                 0,
                 TimeUnit.SECONDS));
 
-        // 协议编解码器
         pipeline.addLast(new ProtocolDecoder());
         pipeline.addLast(new ProtocolEncoder());
 
-        // 客户端业务处理器
         pipeline.addLast(clientHandler);
     }
 }

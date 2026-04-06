@@ -7,62 +7,27 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 校验链
+ * Orchestrates validation handlers in order.
  *
- * <p>
- * 责任链模式的编排器，按顺序执行所有已注册的校验器
- * <p>
- * 采用快速失败策略：任一校验失败立即抛出异常
- *
- * <p>
- * 使用示例：
- *
- * <pre>{@code
- * ValidationChain<AuthenticationContext> chain = new ValidationChain<>();
- * chain.addHandler(new ParameterValidationHandler());
- * chain.addHandler(new RiskControlValidationHandler());
- * chain.validate(context); // 按顺序执行所有校验
- * }</pre>
- *
- * @param <T> 校验上下文类型
- * @author pot
- * @since 2025-11-29
+ * @param <T> validation context type
  */
 @Slf4j
 public class ValidationChain<T> {
 
     private final List<ValidationHandler<T>> handlers = new ArrayList<>();
 
-    /**
-     * 添加校验处理器
-     *
-     * @param handler 校验处理器
-     */
     public void addHandler(ValidationHandler<T> handler) {
         handlers.add(handler);
-        // 添加后立即排序，保证顺序正确
         handlers.sort(Comparator.comparingInt(ValidationHandler::getOrder));
     }
 
-    /**
-     * 批量添加校验处理器
-     *
-     * @param handlerList 校验处理器列表
-     */
     public void addHandlers(List<ValidationHandler<T>> handlerList) {
         handlers.addAll(handlerList);
         handlers.sort(Comparator.comparingInt(ValidationHandler::getOrder));
     }
 
     /**
-     * 执行校验链
-     *
-     * <p>
-     * 按照 order 顺序依次执行所有已启用的校验器
-     * <p>
-     * 快速失败：任一校验失败立即抛出异常
-     *
-     * @param context 校验上下文
+     * Runs all enabled handlers in order.
      */
     public void validate(T context) {
         if (handlers.isEmpty()) {
@@ -93,16 +58,10 @@ public class ValidationChain<T> {
         log.debug("[校验链] 所有校验通过");
     }
 
-    /**
-     * 获取已注册的校验器数量
-     */
     public int size() {
         return handlers.size();
     }
 
-    /**
-     * 清空所有校验器
-     */
     public void clear() {
         handlers.clear();
     }

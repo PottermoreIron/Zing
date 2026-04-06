@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pot.member.service.infrastructure.persistence.mapper.SocialConnectionsMapper">
 
-    <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.pot.member.service.infrastructure.persistence.entity.SocialConnection">
         <id column="id" property="id"/>
         <result column="gmt_created_at" property="gmtCreatedAt"/>
@@ -22,7 +21,6 @@
         <result column="extend_json" property="extendJson"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id
         , gmt_created_at, gmt_updated_at, gmt_deleted_at, member_id, provider, provider_member_id, provider_username,

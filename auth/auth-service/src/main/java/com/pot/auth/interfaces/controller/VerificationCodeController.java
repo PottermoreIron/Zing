@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 验证码控制器
- *
- * <p>
- * 提供验证码相关的REST API
+ * Handles verification-code delivery endpoints.
  *
  * @author pot
  * @since 2025-11-10
@@ -36,11 +33,6 @@ public class VerificationCodeController {
 
     private final VerificationCodeApplicationService verificationCodeApplicationService;
 
-    /**
-     * 发送邮件验证码
-     * <p>
-     * POST /auth/code/email?email=xxx@example.com
-     */
     @Operation(summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:email:' + #email", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/email")
@@ -57,11 +49,6 @@ public class VerificationCodeController {
         }
     }
 
-    /**
-     * 发送短信验证码
-     * <p>
-     * POST /auth/code/sms?phone=+8613800138000
-     */
     @Operation(summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:sms:' + #phone", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/sms")

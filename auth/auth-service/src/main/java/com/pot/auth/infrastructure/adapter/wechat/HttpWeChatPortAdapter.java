@@ -14,28 +14,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * 微信 OAuth2 适配器
- *
- * <p>
- * 通过微信官方 SNS API 实现授权码换 access_token、获取用户信息等功能，
- * 无需引入第三方 SDK，使用 Spring 6 {@link RestClient} 直接发起 HTTP 请求。
- *
- * <p>
- * 接口文档参考：
- * <ul>
- * <li>网页授权 Access
- * Token：{@code GET https://api.weixin.qq.com/sns/oauth2/access_token}</li>
- * <li>刷新 Access
- * Token：{@code GET https://api.weixin.qq.com/sns/oauth2/refresh_token}</li>
- * <li>获取用户基本信息：{@code GET https://api.weixin.qq.com/sns/userinfo}</li>
- * <li>检验 Access Token：{@code GET https://api.weixin.qq.com/sns/auth}</li>
- * </ul>
- *
- * <p>
- * 启用条件：{@code auth.wechat.enabled=true}
- *
- * @author pot
- * @since 2025-12-14
+ * WeChat SNS adapter backed by Spring RestClient.
  */
 @Slf4j
 @Component
@@ -48,10 +27,6 @@ public class HttpWeChatPortAdapter implements WeChatPort {
 
     private final RestClient restClient = RestClient.create();
 
-    // ================================================================
-    // WeChatPort 接口实现
-    // ================================================================
-
     @Override
     public WeChatUserInfo getUserInfo(String code, String state) {
         log.info("[微信] 授权码换取用户信息");
@@ -59,10 +34,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         validateProperties();
 
         try {
-            // Step 1：授权码换 access_token（同时返回 openId）
             WeChatTokenResponse tokenResponse = exchangeCodeForToken(code);
-
-            // Step 2：access_token + openId 换用户详细信息
             return fetchUserInfo(tokenResponse);
 
         } catch (DomainException e) {
@@ -109,8 +81,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
 
     @Override
     public boolean validateAccessToken(String accessToken) {
-        // 微信需要同时传 access_token 和 openid 才能验证，此处只做基础验证
-        // 如需完整验证，需要缓存 openId 与 accessToken 的映射
+        // Full validation needs the accessToken/openId pair, which is not cached here.
         if (accessToken == null || accessToken.isBlank()) {
             return false;
         }
@@ -118,12 +89,8 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         return true;
     }
 
-    // ================================================================
-    // 私有辅助方法
-    // ================================================================
-
     /**
-     * 授权码换 Access Token + OpenID
+     * Exchanges an authorization code for a token and openId.
      */
     private WeChatTokenResponse exchangeCodeForToken(String code) throws Exception {
         String url = UriComponentsBuilder.fromUriString(properties.getTokenUrl())
@@ -156,7 +123,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
     }
 
     /**
-     * 使用 Access Token + OpenID 获取用户详细信息
+     * Loads WeChat user details with the granted token.
      */
     private WeChatUserInfo fetchUserInfo(WeChatTokenResponse token) throws Exception {
         String url = UriComponentsBuilder.fromUriString(properties.getUserInfoUrl())
@@ -186,10 +153,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
     }
 
     /**
-     * 检查微信 API 错误响应
-     *
-     * <p>
-     * 微信接口错误时返回 {@code {"errcode": 40029, "errmsg": "invalid code"}}
+     * Raises a domain exception when WeChat returns an API error.
      */
     private void checkWeChatError(JsonNode json) {
         int errCode = json.path("errcode").asInt(0);
@@ -202,7 +166,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
     }
 
     /**
-     * 校验微信配置是否完整
+     * Ensures the WeChat client configuration is complete.
      */
     private void validateProperties() {
         if (!properties.isConfigured()) {
@@ -212,7 +176,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
     }
 
     /**
-     * 微信 Token 响应的内部数据传输对象
+     * Internal representation of a WeChat token response.
      */
     private record WeChatTokenResponse(
             String accessToken,

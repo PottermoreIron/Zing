@@ -19,9 +19,7 @@ import org.springframework.context.annotation.Bean;
 import javax.sql.DataSource;
 
 /**
- * @author: Pot
- * @created: 2025/10/18 23:25
- * @description: 自定义分布式Id生成自动装配类
+ * Auto-configuration for distributed ID generation.
  */
 @Slf4j
 @AutoConfiguration

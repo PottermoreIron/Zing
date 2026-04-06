@@ -15,28 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.function.Supplier;
 
 /**
- * 一键认证策略抽象模板类
- *
- * <p>
- * 采用模板方法模式，定义统一的一键认证流程：
- * <ol>
- * <li>责任链校验（参数校验→业务规则校验→风控校验）</li>
- * <li>查找用户</li>
- * <li>用户已存在 → 验证凭证 → 登录</li>
- * <li>用户不存在 → 验证凭证 → 注册 → 登录</li>
- * <li>生成Token并构建结果</li>
- * <li>返回响应</li>
- * </ol>
- *
- * <p>
- * <strong>与传统登录策略的区别：</strong>
- * <ul>
- * <li>LoginStrategy: 用户不存在直接失败</li>
- * <li>OneStopAuthStrategy: 用户不存在则自动注册</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-29
+ * Base template for authenticate-or-register flows.
  */
 @Slf4j
 public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStrategy {
@@ -59,17 +38,14 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
                 request.authType(), request.userDomain(), context.ipAddress().value());
 
         try {
-            // 1. 查找用户
             UserDTO user = findUser(context);
 
             if (user != null) {
-                // 2a. 用户已存在 → 登录流程
                 log.info("[一键认证] 用户已存在，执行登录: userId={}, authType={}",
                         user.userId(), request.authType());
 
                 return handleExistingUser(user, context);
             } else {
-                // 2b. 用户不存在 → 注册流程
                 log.info("[一键认证] 用户不存在，执行注册: authType={}", request.authType());
 
                 return handleNewUser(context);
@@ -79,28 +55,18 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
                     request.authType(), e.getMessage(), e);
             throw e;
         } finally {
-            // 请求结束后清理线程级资源（如ThreadLocal），防止内存泄漏
             cleanupAfterAuthentication();
         }
     }
 
     /**
-     * 处理已存在的用户（登录流程）
+     * Handles an existing user with a login flow.
      */
     private AuthenticationResult handleExistingUser(UserDTO user, OneStopAuthContext context) {
-        // 1. 登录时的凭证验证
         validateCredentialForLogin(context, user);
-
-        // 2. 用户状态验证
         UserStatusValidator.validate(user);
-
-        // 3. 登录前置钩子
         beforeLogin(user, context);
-
-        // 4. 生成Token
         AuthenticationResult result = generateAuthenticationResult(user, context);
-
-        // 5. 登录后置钩子
         afterLogin(user, result, context);
 
         log.info("[一键认证] 登录成功: userId={}, nickname={}", user.userId(), user.nickname());
@@ -108,137 +74,69 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
     }
 
     /**
-     * 处理新用户（注册流程）
+     * Handles a new user with a register-and-login flow.
      */
     private AuthenticationResult handleNewUser(OneStopAuthContext context) {
-        // 1. 注册时的凭证验证
         validateCredentialForRegister(context);
-
-        // 2. 注册前置钩子
         beforeRegister(context);
-
-        // 3. 创建用户（自动生成默认值）
         UserDTO user = createUserWithDefaults(context);
-
-        // 4. 注册后置钩子
         afterRegister(user, context);
-
-        // 5. 生成Token
         AuthenticationResult result = generateAuthenticationResult(user, context);
 
         log.info("[一键认证] 注册并登录成功: userId={}, nickname={}", user.userId(), user.nickname());
         return result;
     }
 
-    // ==================== 必须由子类实现的方法 ====================
-
     /**
-     * 查找用户
-     *
-     * <p>
-     * 根据不同的认证方式，查找用户的方式也不同：
-     * <ul>
-     * <li>手机号认证：通过手机号查找</li>
-     * <li>邮箱认证：通过邮箱查找</li>
-     * <li>昵称认证：通过昵称查找</li>
-     * </ul>
-     *
-     * @param context 认证上下文
-     * @return 用户信息，不存在则返回null
+     * Finds the user targeted by the authentication request.
      */
     protected abstract UserDTO findUser(OneStopAuthContext context);
 
     /**
-     * 登录时的凭证验证
-     *
-     * <p>
-     * 用于验证已存在用户的凭证：
-     * <ul>
-     * <li>密码认证：验证密码</li>
-     * <li>验证码认证：验证验证码（可选）</li>
-     * </ul>
-     *
-     * @param context 认证上下文
-     * @param user    用户信息
+     * Validates credentials for an existing user.
      */
     protected abstract void validateCredentialForLogin(OneStopAuthContext context, UserDTO user);
 
     /**
-     * 注册时的凭证验证
-     *
-     * <p>
-     * 用于验证新用户的凭证（通常是验证码）：
-     * <ul>
-     * <li>手机号注册：验证手机验证码</li>
-     * <li>邮箱注册：验证邮箱验证码</li>
-     * </ul>
-     *
-     * @param context 认证上下文
+     * Validates credentials before registration.
      */
     protected abstract void validateCredentialForRegister(OneStopAuthContext context);
 
     /**
-     * 创建用户（自动生成默认值）
-     *
-     * <p>
-     * 子类实现此方法时，应该：
-     * <ul>
-     * <li>如果用户未提供昵称，使用 userDefaultsGenerator 生成</li>
-     * <li>如果用户未提供密码，使用 userDefaultsGenerator 生成</li>
-     * <li>如果用户未提供头像，使用 userDefaultsGenerator 提供默认头像</li>
-     * </ul>
-     *
-     * @param context 认证上下文
-     * @return 新创建的用户信息
+     * Creates a user and fills in generated defaults where needed.
      */
     protected abstract UserDTO createUserWithDefaults(OneStopAuthContext context);
 
-    // ==================== 可选的钩子方法 ====================
-
     /**
-     * 登录前置钩子（由子类可选实现）
-     *
-     * @param user    用户信息
-     * @param context 认证上下文
+     * Hook invoked before login token generation.
      */
     protected void beforeLogin(UserDTO user, OneStopAuthContext context) {
         log.debug("[一键认证钩子] 登录前置处理: userId={}", user.userId());
     }
 
     /**
-     * 登录后置钩子（由子类可选实现）
-     *
-     * @param user    用户信息
-     * @param result  认证结果
-     * @param context 认证上下文
+     * Hook invoked after a successful login.
      */
     protected void afterLogin(UserDTO user, AuthenticationResult result, OneStopAuthContext context) {
         log.debug("[一键认证钩子] 登录后置处理: userId={}", user.userId());
     }
 
     /**
-     * 注册前置钩子（由子类可选实现）
-     *
-     * @param context 认证上下文
+     * Hook invoked before registration.
      */
     protected void beforeRegister(OneStopAuthContext context) {
         log.debug("[一键认证钩子] 注册前置处理");
     }
 
     /**
-     * 注册后置钩子（由子类可选实现）
-     *
-     * @param user    新创建的用户
-     * @param context 认证上下文
+     * Hook invoked after registration.
      */
     protected void afterRegister(UserDTO user, OneStopAuthContext context) {
         log.debug("[一键认证钩子] 注册后置处理: userId={}", user.userId());
     }
 
-    // ==================== 通用方法 ====================
-
     /**
-     * 生成认证结果（包含Token）
+     * Builds the authentication result with issued tokens.
      */
     protected AuthenticationResult generateAuthenticationResult(
             UserDTO user,
@@ -266,14 +164,9 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
     }
 
     /**
-     * 认证流程结束后的清理钩子
-     *
-     * <p>
-     * 在 {@code execute()} 的 finally 块中调用，子类可覆盖以释放线程级资源
-     * （例如：清理 ThreadLocal，避免内存泄漏）。
+     * Hook for releasing request-scoped resources after authentication.
      */
     protected void cleanupAfterAuthentication() {
-        // 默认空实现，子类按需覆盖
     }
 
     protected String generateAvailableNickname(UserModulePort userModulePort, Supplier<String> candidateSupplier) {

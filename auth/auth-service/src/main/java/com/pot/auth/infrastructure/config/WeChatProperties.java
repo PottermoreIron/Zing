@@ -5,60 +5,41 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * 微信公众号/开放平台 OAuth2 配置
- *
- * <p>
- * 配置示例（application.yml）：
- * 
- * <pre>
- * auth:
- *   wechat:
- *     enabled: true
- *     app-id: wx_your_app_id
- *     app-secret: your_app_secret
- * </pre>
- *
- * @author pot
- * @since 2025-12-14
+ * Configuration properties for WeChat login.
  */
 @Data
 @Component
 @ConfigurationProperties(prefix = "auth.wechat")
 public class WeChatProperties {
 
-    /** 是否启用微信登录（默认关闭） */
     private boolean enabled = false;
 
-    /** 微信公众号/开放平台 AppID */
     private String appId;
 
-    /** 微信公众号/开放平台 AppSecret */
     private String appSecret;
 
     /**
-     * 获取 Access Token 的端点（网页授权）
-     * <p>
-     * 默认使用微信官方端点，可替换为代理地址
+     * Endpoint used to exchange an authorization code for an access token.
      */
     private String tokenUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";
 
     /**
-     * 获取用户信息的端点
+     * Endpoint used to load the user profile.
      */
     private String userInfoUrl = "https://api.weixin.qq.com/sns/userinfo";
 
     /**
-     * 刷新 Access Token 的端点
+     * Endpoint used to refresh an access token.
      */
     private String refreshTokenUrl = "https://api.weixin.qq.com/sns/oauth2/refresh_token";
 
     /**
-     * 验证 Access Token 的端点
+     * Endpoint used to validate an access token.
      */
     private String authCheckUrl = "https://api.weixin.qq.com/sns/auth";
 
     /**
-     * 是否配置完整
+     * Indicates whether the required credentials are configured.
      */
     public boolean isConfigured() {
         return appId != null && !appId.isBlank()

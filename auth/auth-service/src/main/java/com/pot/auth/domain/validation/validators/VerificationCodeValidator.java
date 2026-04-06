@@ -6,9 +6,7 @@ import jakarta.validation.ConstraintValidator;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author: Pot
- * @created: 2025/11/29 23:45
- * @description: 验证码验证器
+ * Bean Validation adapter for verification codes.
  */
 public class VerificationCodeValidator implements ConstraintValidator<ValidVerificationCode, String> {
     private String pattern;

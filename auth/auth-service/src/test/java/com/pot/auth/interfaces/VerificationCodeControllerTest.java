@@ -52,9 +52,7 @@ class VerificationCodeControllerTest {
     @MockitoBean
     private VerificationCodeApplicationService verificationCodeApplicationService;
 
-    // ================================================================
     // POST /auth/code/email - 发送邮件验证码
-    // ================================================================
 
     @Nested
     @DisplayName("POST /auth/code/email")
@@ -123,9 +121,7 @@ class VerificationCodeControllerTest {
         }
     }
 
-    // ================================================================
     // POST /auth/code/sms - 发送短信验证码
-    // ================================================================
 
     @Nested
     @DisplayName("POST /auth/code/sms")

@@ -13,25 +13,15 @@ spring:
         group: DEFAULT_GROUP
 
     gateway:
-      # ----------------------------------------------------------------
-      # 全局默认过滤器（作用于所有路由）
-      # ----------------------------------------------------------------
+      # Remove headers that downstream services should not expose to clients.
       default-filters:
-        # 移除下游服务不应暴露给客户端的内部 Header
         - RemoveResponseHeader=X-Powered-By
         - RemoveResponseHeader=Server
 
-      # ----------------------------------------------------------------
-      # 服务路由规则
-      # 规则：网关以服务名作为路径前缀，下游服务保留自身路径结构。
-      #
-      # auth-service   : 无 StripPrefix（控制器已有 /auth 前缀）
-      # member-service : StripPrefix=1（剥离 /member，控制器无服务前缀）
-      # im-service     : StripPrefix=1（剥离 /im，控制器无服务前缀）
-      # admin-service  : StripPrefix=1（剥离 /admin，控制器无服务前缀）
-      # ----------------------------------------------------------------
+      # Route prefixes follow the service name. Auth keeps its controller prefix,
+      # while member, im, and admin strip one leading path segment.
       routes:
-        # ── Auth 认证服务 ──────────────────────────────────────────────
+        # Auth service keeps the /auth controller prefix.
         - id: auth-service
           uri: lb://auth-service
           predicates:
@@ -42,7 +32,7 @@ spring:
                 name: auth-service-cb
                 fallbackUri: forward:/fallback
 
-        # ── Member 会员服务 ────────────────────────────────────────────
+        # Member service strips /member before forwarding.
         - id: member-service
           uri: lb://member-service
           predicates:
@@ -54,7 +44,7 @@ spring:
                 name: member-service-cb
                 fallbackUri: forward:/fallback
 
-        # ── IM 即时通讯服务 ────────────────────────────────────────────
+        # IM service strips /im before forwarding.
         - id: im-service
           uri: lb://im-service
           predicates:
@@ -66,7 +56,7 @@ spring:
                 name: im-service-cb
                 fallbackUri: forward:/fallback
 
-        # ── Admin 管理后台服务 ─────────────────────────────────────────
+        # Admin service strips /admin before forwarding.
         - id: admin-service
           uri: lb://admin-service
           predicates:
@@ -78,7 +68,7 @@ spring:
                 name: admin-service-cb
                 fallbackUri: forward:/fallback
 
-  # Redis 配置
+  # Redis settings used by gateway authorization checks.
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -93,17 +83,13 @@ spring:
           max-wait: -1ms
       timeout: 3000ms
 
-# ----------------------------------------------------------------
-# JWT 配置
-# ----------------------------------------------------------------
+# JWT verification settings.
 gateway:
   jwt:
+    # Set gateway.jwt.public-key when the PEM content is injected directly.
     public-key-location: ${JWT_PUBLIC_KEY_PATH:classpath:keys/jwt_public_key.pem}
-    # public-key: ${JWT_PUBLIC_KEY:}   # 也可直接配置 Base64 公钥字符串
 
-  # ----------------------------------------------------------------
-  # 安全配置（白名单 & 内部路径）
-  # ----------------------------------------------------------------
+  # Route groups used by the authorization filter.
   security:
     white-list:
       - /auth/api/v1/login
@@ -117,35 +103,33 @@ gateway:
       - /internal/
       - /member/internal/
 
-# ----------------------------------------------------------------
-# Resilience4j 熔断器配置
-# ----------------------------------------------------------------
+# Circuit breaker settings for downstream services.
 resilience4j:
   circuitbreaker:
     configs:
-      # 所有服务共享的默认配置
+      # Shared defaults for all downstream services.
       default:
-        # 滑动窗口大小（最近 10 次请求）
+        # Sample size for the rolling window.
         sliding-window-size: 10
-        # 故障率阈值（50% 失败则开启熔断）
+        # Open the circuit when the failure rate reaches 50%.
         failure-rate-threshold: 50
-        # 慢调用时间阈值（超过 3s 视为慢调用）
+        # Calls slower than this threshold count as slow calls.
         slow-call-duration-threshold: 3s
-        # 慢调用比率阈值（50% 慢调用则开启熔断）
+        # Open the circuit when the slow-call rate reaches 50%.
         slow-call-rate-threshold: 50
-        # 半开状态允许的探测请求数
+        # Number of probe calls allowed while half-open.
         permitted-number-of-calls-in-half-open-state: 5
-        # 熔断器打开后等待时间（10s 后进入半开状态）
+        # Wait time before moving from open to half-open.
         wait-duration-in-open-state: 10s
-        # 自动从 OPEN → HALF_OPEN
+        # Transition from open to half-open without manual intervention.
         automatic-transition-from-open-to-half-open-enabled: true
-        # 忽略以下异常（不计入失败率）
+        # Ignore these exceptions when calculating the failure rate.
         ignore-exceptions:
           - org.springframework.web.server.ResponseStatusException
     instances:
       auth-service-cb:
         base-config: default
-        wait-duration-in-open-state: 5s # auth 服务恢复快，缩短等待
+        wait-duration-in-open-state: 5s # Auth usually recovers quickly, so shorten the open interval.
       member-service-cb:
         base-config: default
       im-service-cb:
@@ -153,9 +137,7 @@ resilience4j:
       admin-service-cb:
         base-config: default
 
-# ----------------------------------------------------------------
-# 日志配置
-# ----------------------------------------------------------------
+# Gateway logging configuration.
 logging:
   level:
     "[com.pot.gateway]": DEBUG

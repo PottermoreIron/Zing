@@ -10,7 +10,12 @@ import com.pot.member.service.application.command.UpdateMemberProfileCommand;
 import com.pot.member.service.application.dto.MemberDTO;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.domain.model.device.DeviceAggregate;
-import com.pot.member.service.domain.model.member.*;
+import com.pot.member.service.domain.model.member.Email;
+import com.pot.member.service.domain.model.member.MemberAggregate;
+import com.pot.member.service.domain.model.member.MemberId;
+import com.pot.member.service.domain.model.member.MemberProfile;
+import com.pot.member.service.domain.model.member.Nickname;
+import com.pot.member.service.domain.model.member.PhoneNumber;
 import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 import com.pot.member.service.domain.port.DomainEventPublisher;
 import com.pot.member.service.domain.repository.DeviceRepository;
@@ -28,10 +33,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * 会员应用服务
- *
- * <p>
- * 编排领域服务、仓储、端口完成用例，发布领域事件。
+ * Application service that orchestrates member use cases and publishes domain
+ * events.
  *
  * @author Pot
  * @since 2026-01-06
@@ -48,11 +51,6 @@ public class MemberApplicationService {
     private final MemberAssembler memberAssembler;
     private final DomainEventPublisher eventPublisher;
 
-    // ========== 注册 ==========
-
-    /**
-     * 注册新会员（密码登录）
-     */
     @Transactional
     public MemberDTO register(RegisterMemberCommand command) {
         log.info("注册新会员: {}", command.getEmail());
@@ -83,9 +81,6 @@ public class MemberApplicationService {
         return memberAssembler.toDTO(member);
     }
 
-    /**
-     * 通过 OAuth2 创建会员（首次授权登录时）
-     */
     @Transactional
     public MemberDTO createFromOAuth2(String provider, String openId,
             String email, String nickname, String avatarUrl,
@@ -93,8 +88,8 @@ public class MemberApplicationService {
         log.info("OAuth2 创建会员: provider={}, openId={}", provider, openId);
 
         Email emailVo = email != null ? Email.of(email) : null;
-        // prefer OAuth2-provided nickname; if missing, derive one from email or
-        // provider+openId
+        // Prefer the provider nickname when present; otherwise derive a stable
+        // fallback.
         String nicknameStr = (nickname != null && !nickname.isBlank())
                 ? nickname
                 : (emailVo != null
@@ -105,7 +100,6 @@ public class MemberApplicationService {
         MemberAggregate member = MemberAggregate.createFromOAuth2(nicknameVo, emailVo, avatarUrl);
         member = memberRepository.save(member);
 
-        // 绑定社交账号
         SocialConnectionAggregate social = SocialConnectionAggregate.create(
                 member.getMemberId().value(), provider, openId,
                 nicknameStr, email, accessToken, refreshToken, tokenExpiresAt, null, null);
@@ -115,8 +109,6 @@ public class MemberApplicationService {
         log.info("OAuth2 会员创建成功: memberId={}", member.getMemberId().value());
         return memberAssembler.toDTO(member);
     }
-
-    // ========== 查询 ==========
 
     public MemberDTO getMember(GetMemberQuery query) {
         MemberAggregate member = null;
@@ -158,11 +150,6 @@ public class MemberApplicationService {
         return memberRepository.existsByPhoneNumber(PhoneNumber.of(phone));
     }
 
-    // ========== 认证 ==========
-
-    /**
-     * 使用密码验证会员身份（identifier 可以是邮箱、手机号或昵称）
-     */
     public MemberDTO authenticateWithPassword(String identifier, String rawPassword) {
         MemberAggregate member = resolveByIdentifier(identifier)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
@@ -186,8 +173,6 @@ public class MemberApplicationService {
         return memberRepository.findByNickname(Nickname.of(identifier));
     }
 
-    // ========== 密码管理 ==========
-
     @Transactional
     public void changePassword(ChangePasswordCommand command) {
         log.info("修改密码: memberId={}", command.getMemberId());
@@ -202,8 +187,6 @@ public class MemberApplicationService {
         member.updatePassword(newPasswordHash);
         memberRepository.save(member);
     }
-
-    // ========== 账户管理 ==========
 
     @Transactional
     public void lockMember(Long memberId) {
@@ -231,8 +214,6 @@ public class MemberApplicationService {
         }
         log.debug("记录登录尝试: memberId={}, success={}, ip={}", memberId, success, ip);
     }
-
-    // ========== 资料管理 ==========
 
     @Transactional
     public MemberDTO updateProfile(UpdateMemberProfileCommand command) {
@@ -264,7 +245,7 @@ public class MemberApplicationService {
         if (profile == null) {
             return null;
         }
-        return com.pot.member.facade.dto.MemberProfileDTO.builder()
+        return MemberProfileDTO.builder()
                 .memberId(memberId)
                 .nickname(profile.getNickname())
                 .firstName(profile.getFirstName())
@@ -279,8 +260,6 @@ public class MemberApplicationService {
                 .locale(profile.getLocale())
                 .build();
     }
-
-    // ========== 设备管理 ==========
 
     @Transactional
     public void recordDeviceLogin(Long memberId, DeviceDTO deviceDTO, String ip, String refreshToken) {
@@ -319,8 +298,6 @@ public class MemberApplicationService {
         log.info("踢出设备: memberId={}, deviceId={}", memberId, deviceId);
     }
 
-    // ========== OAuth2 / 社交账号 ==========
-
     @Transactional
     public void bindOAuth2(Long memberId, BindSocialAccountRequest request) {
         requireMember(memberId);
@@ -343,8 +320,6 @@ public class MemberApplicationService {
         log.info("绑定社交账号: memberId={}, provider={}", memberId, request.getProvider());
     }
 
-    // ========== 私有辅助 ==========
-
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("会员不存在: " + memberId));
@@ -354,21 +329,21 @@ public class MemberApplicationService {
         member.pullDomainEvents().forEach(eventPublisher::publish);
     }
 
-    private DeviceDTO toFacadeDeviceDTO(DeviceAggregate d) {
+    private DeviceDTO toFacadeDeviceDTO(DeviceAggregate device) {
         return DeviceDTO.builder()
-                .deviceId(d.getId())
-                .memberId(d.getMemberId())
-                .deviceToken(d.getDeviceToken())
-                .deviceType(d.getDeviceType())
-                .deviceName(d.getDeviceName())
-                .osType(d.getOsType())
-                .osVersion(d.getOsVersion())
-                .appVersion(d.getAppVersion())
-                .lastLoginIp(d.getLastLoginIp())
-                .lastLoginAt(d.getLastLoginAt() != null
-                        ? d.getLastLoginAt().toEpochSecond(ZoneOffset.UTC) * 1000
+                .deviceId(device.getId())
+                .memberId(device.getMemberId())
+                .deviceToken(device.getDeviceToken())
+                .deviceType(device.getDeviceType())
+                .deviceName(device.getDeviceName())
+                .osType(device.getOsType())
+                .osVersion(device.getOsVersion())
+                .appVersion(device.getAppVersion())
+                .lastLoginIp(device.getLastLoginIp())
+                .lastLoginAt(device.getLastLoginAt() != null
+                        ? device.getLastLoginAt().toEpochSecond(ZoneOffset.UTC) * 1000
                         : null)
-                .refreshToken(d.getRefreshToken())
+                .refreshToken(device.getRefreshToken())
                 .build();
     }
 }

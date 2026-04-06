@@ -5,62 +5,31 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * 认证默认值配置属性
- *
- * <p>
- * 用于配置一键注册时的默认信息
- *
- * @author pot
- * @since 2025-11-29
+ * Default values used by one-stop registration flows.
  */
 @Data
 @Component
 @ConfigurationProperties(prefix = "auth.defaults")
 public class AuthDefaultsProperties {
 
-    /**
-     * 默认头像URL
-     */
     private String avatarUrl = "https://cdn.example.com/avatars/default.png";
 
     /**
-     * 历史配置键，实际用于默认昵称前缀
+     * Legacy property name kept for the generated nickname prefix.
      */
     private String usernamePrefix = "user_";
 
-    /**
-     * 密码配置
-     */
     private PasswordConfig password = new PasswordConfig();
 
     /**
-     * 密码配置
+     * Generated password defaults.
      */
     @Data
     public static class PasswordConfig {
-        /**
-         * 密码长度
-         */
         private int length = 12;
-
-        /**
-         * 是否包含大写字母
-         */
         private boolean includeUppercase = true;
-
-        /**
-         * 是否包含小写字母
-         */
         private boolean includeLowercase = true;
-
-        /**
-         * 是否包含数字
-         */
         private boolean includeDigits = true;
-
-        /**
-         * 是否包含特殊字符
-         */
         private boolean includeSpecial = true;
     }
 }
