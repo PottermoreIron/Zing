@@ -14,12 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * 角色应用服务
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,36 +23,24 @@ public class RoleApplicationService {
     private final PermissionDomainService permissionDomainService;
     private final RoleAssembler roleAssembler;
 
-    /**
-     * 获取角色信息
-     */
-    public RoleDTO getRole(Long roleId) {
+        public RoleDTO getRole(Long roleId) {
         RoleAggregate role = roleRepository.findById(RoleId.of(roleId))
                 .orElse(null);
         return roleAssembler.toDTO(role);
     }
 
-    /**
-     * 根据角色代码获取角色
-     */
-    public RoleDTO getRoleByCode(String roleCode) {
+        public RoleDTO getRoleByCode(String roleCode) {
         RoleAggregate role = roleRepository.findByCode(roleCode)
                 .orElse(null);
         return roleAssembler.toDTO(role);
     }
 
-    /**
-     * 获取会员的所有角色
-     */
-    public List<RoleDTO> getMemberRoles(Long memberId) {
+        public List<RoleDTO> getMemberRoles(Long memberId) {
         List<RoleAggregate> roles = roleRepository.findByMemberId(memberId);
         return roleAssembler.toDTOList(roles);
     }
 
-    /**
-     * 为会员分配角色
-     */
-    @Transactional
+        @Transactional
     public void assignRole(AssignRoleCommand command) {
         log.info("为会员分配角色: memberId={}, roleId={}", command.getMemberId(), command.getRoleId());
 
@@ -68,20 +50,14 @@ public class RoleApplicationService {
                 command.getOperator());
     }
 
-    /**
-     * 撤销会员的角色
-     */
-    @Transactional
+        @Transactional
     public void revokeRole(Long memberId, Long roleId, String operator) {
         log.info("撤销会员角色: memberId={}, roleId={}", memberId, roleId);
 
         permissionDomainService.revokeRoleFromMember(memberId, roleId, operator);
     }
 
-    /**
-     * 获取所有角色
-     */
-    public List<RoleDTO> getAllRoles() {
+        public List<RoleDTO> getAllRoles() {
         List<RoleAggregate> roles = roleRepository.findAll();
         return roleAssembler.toDTOList(roles);
     }

@@ -6,12 +6,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * 角色聚合根
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Getter
 public class RoleAggregate {
 
@@ -23,10 +17,7 @@ public class RoleAggregate {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    /**
-     * 创建新角色
-     */
-    public static RoleAggregate create(
+        public static RoleAggregate create(
             RoleName roleName,
             String roleCode,
             String description) {
@@ -40,10 +31,7 @@ public class RoleAggregate {
         return role;
     }
 
-    /**
-     * 重建角色（从数据库加载）
-     */
-    public static RoleAggregate reconstitute(
+        public static RoleAggregate reconstitute(
             RoleId roleId,
             RoleName roleName,
             String roleCode,
@@ -62,10 +50,7 @@ public class RoleAggregate {
         return role;
     }
 
-    /**
-     * 更新角色信息
-     */
-    public void update(RoleName roleName, String description) {
+        public void update(RoleName roleName, String description) {
         if (roleName != null) {
             this.roleName = roleName;
         }
@@ -73,10 +58,7 @@ public class RoleAggregate {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 添加权限
-     */
-    public void addPermission(Long permissionId) {
+        public void addPermission(Long permissionId) {
         if (permissionId == null || permissionId <= 0) {
             throw new IllegalArgumentException("权限ID无效");
         }
@@ -84,26 +66,17 @@ public class RoleAggregate {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 移除权限
-     */
-    public void removePermission(Long permissionId) {
+        public void removePermission(Long permissionId) {
         this.permissionIds.remove(permissionId);
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 批量设置权限
-     */
-    public void setPermissions(Set<Long> permissionIds) {
+        public void setPermissions(Set<Long> permissionIds) {
         this.permissionIds = new HashSet<>(permissionIds);
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 检查是否拥有某个权限
-     */
-    public boolean hasPermission(Long permissionId) {
+        public boolean hasPermission(Long permissionId) {
         return permissionIds.contains(permissionId);
     }
 }

@@ -19,12 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 角色仓储实现
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -39,16 +33,13 @@ public class RoleRepositoryImpl implements RoleRepository {
         Role entity = toEntity(aggregate);
 
         if (entity.getId() == null) {
-            // 新增
             roleMapper.insert(entity);
             log.debug("新增角色: {}", entity.getId());
         } else {
-            // 更新
             roleMapper.updateById(entity);
             log.debug("更新角色: {}", entity.getId());
         }
 
-        // 更新角色权限关联
         updateRolePermissions(entity.getId(), aggregate.getPermissionIds());
 
         return toAggregate(entity, aggregate.getPermissionIds());
@@ -87,7 +78,6 @@ public class RoleRepositoryImpl implements RoleRepository {
 
     @Override
     public List<RoleAggregate> findByMemberId(Long memberId) {
-        // 通过member_role关联表查询
         LambdaQueryWrapper<com.pot.member.service.infrastructure.persistence.entity.MemberRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(com.pot.member.service.infrastructure.persistence.entity.MemberRole::getMemberId, memberId);
         List<com.pot.member.service.infrastructure.persistence.entity.MemberRole> memberRoles = memberRoleMapper
@@ -147,26 +137,19 @@ public class RoleRepositoryImpl implements RoleRepository {
 
     @Override
     public void delete(RoleId roleId) {
-        // 删除角色权限关联
         LambdaQueryWrapper<RolePermission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RolePermission::getRoleId, roleId.value());
         rolePermissionMapper.delete(wrapper);
 
-        // 删除角色
         roleMapper.deleteById(roleId.value());
         log.debug("删除角色: {}", roleId.value());
     }
 
-    /**
-     * 更新角色权限关联
-     */
-    private void updateRolePermissions(Long roleId, Set<Long> permissionIds) {
-        // 先删除原有关联
+        private void updateRolePermissions(Long roleId, Set<Long> permissionIds) {
         LambdaQueryWrapper<RolePermission> deleteWrapper = new LambdaQueryWrapper<>();
         deleteWrapper.eq(RolePermission::getRoleId, roleId);
         rolePermissionMapper.delete(deleteWrapper);
 
-        // 插入新关联
         if (permissionIds != null && !permissionIds.isEmpty()) {
             for (Long permissionId : permissionIds) {
                 RolePermission rolePermission = new RolePermission();
@@ -177,10 +160,7 @@ public class RoleRepositoryImpl implements RoleRepository {
         }
     }
 
-    /**
-     * 将实体转换为聚合根
-     */
-    private RoleAggregate toAggregate(Role entity, Set<Long> permissionIds) {
+        private RoleAggregate toAggregate(Role entity, Set<Long> permissionIds) {
         return RoleAggregate.reconstitute(
                 RoleId.of(entity.getId()),
                 RoleName.of(entity.getRoleName()),
@@ -191,10 +171,7 @@ public class RoleRepositoryImpl implements RoleRepository {
                 entity.getGmtUpdatedAt());
     }
 
-    /**
-     * 将聚合根转换为实体
-     */
-    private Role toEntity(RoleAggregate aggregate) {
+        private Role toEntity(RoleAggregate aggregate) {
         Role entity = new Role();
         if (aggregate.getRoleId() != null) {
             entity.setId(aggregate.getRoleId().value());

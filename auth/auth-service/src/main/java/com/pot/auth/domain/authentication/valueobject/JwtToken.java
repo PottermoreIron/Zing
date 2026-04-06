@@ -7,15 +7,6 @@ import com.pot.auth.domain.shared.valueobject.UserId;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * JWT Token值对象
- *
- * <p>
- * 封装JWT Token的业务含义和验证规则
- *
- * @author pot
- * @since 2025-11-10
- */
 public record JwtToken(
         TokenId tokenId, // JTI - Token唯一标识
         UserId userId, // 用户ID
@@ -28,10 +19,7 @@ public record JwtToken(
         Map<String, Object> claimsMap // 【新增】完整的Claims Map，用于获取自定义字段
 ) {
 
-    /**
-     * 验证参数
-     */
-    public JwtToken {
+        public JwtToken {
         if (tokenId == null) {
             throw new IllegalArgumentException("TokenId不能为空");
         }
@@ -58,15 +46,7 @@ public record JwtToken(
         }
     }
 
-    /**
-     * 获取指定类型的Claim
-     *
-     * @param key   Claim的key
-     * @param clazz 值的类型
-     * @param <T>   泛型类型
-     * @return Claim的值，如果不存在则返回null
-     */
-    @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
     public <T> T getClaim(String key, Class<T> clazz) {
         Object value = claimsMap.get(key);
         if (value == null) {
@@ -74,7 +54,6 @@ public record JwtToken(
         }
 
         try {
-            // 数字类型的特殊处理
             if (clazz == Long.class && value instanceof Number) {
                 return (T) Long.valueOf(((Number) value).longValue());
             }
@@ -88,50 +67,32 @@ public record JwtToken(
         }
     }
 
-    /**
-     * 检查Token是否已过期
-     */
-    public boolean isExpired() {
+        public boolean isExpired() {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         return currentTimestamp >= expiresAt;
     }
 
-    /**
-     * 检查Token是否即将过期（剩余时间少于指定秒数）
-     */
-    public boolean isExpiringSoon(long thresholdSeconds) {
+        public boolean isExpiringSoon(long thresholdSeconds) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         long remainingSeconds = expiresAt - currentTimestamp;
         return remainingSeconds <= thresholdSeconds;
     }
 
-    /**
-     * 获取剩余有效时间（秒）
-     */
-    public long getRemainingSeconds() {
+        public long getRemainingSeconds() {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         long remaining = expiresAt - currentTimestamp;
         return Math.max(0, remaining);
     }
 
-    /**
-     * 检查是否拥有指定权限
-     */
-    public boolean hasAuthority(String authority) {
+        public boolean hasAuthority(String authority) {
         return authorities.contains(authority);
     }
 
-    /**
-     * 检查是否拥有任一权限
-     */
-    public boolean hasAnyAuthority(Set<String> requiredAuthorities) {
+        public boolean hasAnyAuthority(Set<String> requiredAuthorities) {
         return requiredAuthorities.stream().anyMatch(authorities::contains);
     }
 
-    /**
-     * 检查是否拥有所有权限
-     */
-    public boolean hasAllAuthorities(Set<String> requiredAuthorities) {
+        public boolean hasAllAuthorities(Set<String> requiredAuthorities) {
         return authorities.containsAll(requiredAuthorities);
     }
 }

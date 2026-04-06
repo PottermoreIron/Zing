@@ -11,21 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * 验证码领域服务
- *
- * <p>
- * 负责验证码的生命周期管理：
- * <ul>
- * <li>生成验证码</li>
- * <li>发送验证码（邮件/短信）</li>
- * <li>验证验证码</li>
- * <li>尝试次数限制</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-10
- */
 @Slf4j
 public class VerificationCodeService {
 
@@ -45,13 +30,7 @@ public class VerificationCodeService {
         this.policy = policy;
     }
 
-    /**
-     * 发送邮件验证码
-     *
-     * @param email 邮箱
-     * @return 是否发送成功
-     */
-    public boolean sendEmailVerificationCode(Email email) {
+        public boolean sendEmailVerificationCode(Email email) {
         log.info("[验证码] 发送邮件验证码: email={}", email.value());
 
         String recipient = email.value();
@@ -90,13 +69,7 @@ public class VerificationCodeService {
                 });
     }
 
-    /**
-     * 发送短信验证码
-     *
-     * @param phoneNumber 手机号
-     * @return 是否发送成功
-     */
-    public boolean sendSmsVerificationCode(Phone phoneNumber) {
+        public boolean sendSmsVerificationCode(Phone phoneNumber) {
         log.info("[验证码] 发送短信验证码: phone={}", phoneNumber.value());
 
         String recipient = phoneNumber.value();
@@ -135,14 +108,7 @@ public class VerificationCodeService {
                 });
     }
 
-    /**
-     * 验证验证码
-     *
-     * @param recipient 接收者（邮箱或手机号）
-     * @param inputCode 输入的验证码
-     * @return 是否验证成功
-     */
-    public boolean verifyCode(String recipient, String inputCode) {
+        public boolean verifyCode(String recipient, String inputCode) {
         log.info("[验证码] 验证验证码: recipient={}", recipient);
 
         String codeKey = policy.codeKey(recipient);
@@ -179,17 +145,11 @@ public class VerificationCodeService {
         }
     }
 
-    /**
-     * 验证验证码（VerificationCode对象版本）
-     */
-    public boolean verifyCode(String recipient, VerificationCode inputCode) {
+        public boolean verifyCode(String recipient, VerificationCode inputCode) {
         return verifyCode(recipient, inputCode.value());
     }
 
-    /**
-     * 删除验证码
-     */
-    public void deleteCode(String recipient) {
+        public void deleteCode(String recipient) {
         String codeKey = policy.codeKey(recipient);
         String attemptsKey = policy.attemptsKey(recipient);
         cachePort.delete(codeKey);
@@ -197,37 +157,25 @@ public class VerificationCodeService {
         log.info("[验证码] 已删除验证码: recipient={}", recipient);
     }
 
-    /**
-     * 验证码发送过于频繁异常
-     */
-    public static class CodeSendTooFrequentException extends DomainException {
+        public static class CodeSendTooFrequentException extends DomainException {
         public CodeSendTooFrequentException(String message) {
             super(message);
         }
     }
 
-    /**
-     * 验证码不存在异常
-     */
-    public static class CodeNotFoundException extends DomainException {
+        public static class CodeNotFoundException extends DomainException {
         public CodeNotFoundException(String message) {
             super(message);
         }
     }
 
-    /**
-     * 验证码错误异常
-     */
-    public static class CodeMismatchException extends DomainException {
+        public static class CodeMismatchException extends DomainException {
         public CodeMismatchException(String message) {
             super(message);
         }
     }
 
-    /**
-     * 验证次数超限异常
-     */
-    public static class CodeVerificationExceededException extends DomainException {
+        public static class CodeVerificationExceededException extends DomainException {
         public CodeVerificationExceededException(String message) {
             super(message);
         }

@@ -2,16 +2,6 @@ package com.pot.member.service.domain.model.member;
 
 import lombok.Value;
 
-/**
- * 昵称值对象
- *
- * <p>
- * 代表会员的显示名称（展示昵称）。真实姓名由 {@code firstName}/{@code lastName} 承接。
- * </p>
- *
- * @author Pot
- * @since 2026-03-21
- */
 @Value
 public class Nickname {
 

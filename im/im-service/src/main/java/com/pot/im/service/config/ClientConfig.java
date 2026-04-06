@@ -4,11 +4,6 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * @author: Pot
- * @created: 2025/8/11 23:10
- * @description: IM客户端配置
- */
 @Data
 @Component
 @ConfigurationProperties(prefix = "im.client")

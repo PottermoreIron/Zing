@@ -5,12 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 更新会员资料命令
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Data
 @Builder
 @NoArgsConstructor

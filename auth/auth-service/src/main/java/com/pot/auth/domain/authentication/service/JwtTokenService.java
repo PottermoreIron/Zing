@@ -19,25 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Duration;
 import java.util.Set;
 
-/**
- * JWT Token领域服务（增强版）
- *
- * <p>
- * 负责Token的生命周期管理：
- * <ul>
- * <li>生成Token对（AccessToken + RefreshToken）</li>
- * <li>【增强】生成时缓存用户权限到Redis（3级缓存）</li>
- * <li>【增强】维护权限版本号</li>
- * <li>【增强】计算权限摘要防篡改</li>
- * <li>验证Token有效性</li>
- * <li>【增强】验证权限版本号</li>
- * <li>刷新Token（滑动窗口续期）</li>
- * <li>黑名单管理</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-10
- */
 @Slf4j
 public class JwtTokenService {
 
@@ -66,25 +47,7 @@ public class JwtTokenService {
         this.permissionVersionEnabled = permissionVersionEnabled;
     }
 
-    /**
-     * 生成Token对（AccessToken + RefreshToken）
-     *
-     * <p>
-     * 【增强点】：
-     * <ol>
-     * <li>生成Token前，先缓存权限到Redis</li>
-     * <li>计算权限摘要（MD5）</li>
-     * <li>递增权限版本号</li>
-     * <li>将版本号和摘要写入Token Claims</li>
-     * </ol>
-     *
-     * @param userId      用户ID
-     * @param userDomain  用户域
-     * @param nickname    显示名
-     * @param permissions 权限集合
-     * @return Token对
-     */
-    public TokenPair generateTokenPair(
+        public TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
             String nickname,
@@ -93,7 +56,6 @@ public class JwtTokenService {
                 userId, userDomain, nickname, permissions.size());
 
         try {
-            // 【增强】1. 缓存权限到Redis（调用PermissionDomainService）
             PermissionCacheMetadata metadata = permissionDomainService.cachePermissionsWithMetadata(
                     userId,
                     userDomain,
@@ -102,7 +64,6 @@ public class JwtTokenService {
             log.debug("[Token] 权限已缓存: userId={}, version={}, digest={}",
                     userId, metadata.version(), metadata.digest());
 
-            // 2. 生成Token对（版本号和摘要会自动写入Token Claims）
             TokenPair tokenPair = tokenManagementPort.generateTokenPair(
                     userId,
                     userDomain,
@@ -110,7 +71,6 @@ public class JwtTokenService {
                     permissions,
                     metadata);
 
-            // 3. 存储RefreshToken到缓存
             storeRefreshToken(tokenPair.refreshToken());
 
             log.info("[Token] Token对生成成功: userId={}, accessTokenId={}, refreshTokenId={}",
@@ -124,31 +84,21 @@ public class JwtTokenService {
         }
     }
 
-    /**
-     * 验证AccessToken
-     *
-     * @param tokenString Token字符串
-     * @return JwtToken
-     */
-    public JwtToken validateAccessToken(String tokenString) {
+        public JwtToken validateAccessToken(String tokenString) {
         log.debug("[Token] 验证AccessToken");
 
-        // 1. 解析Token
         JwtToken token = tokenManagementPort.parseAccessToken(tokenString);
 
-        // 2. 检查是否过期
         if (token.isExpired()) {
             log.warn("[Token] AccessToken已过期: tokenId={}", token.tokenId());
             throw new TokenExpiredException("AccessToken已过期");
         }
 
-        // 3. 检查是否在黑名单
         if (isInBlacklist(token.tokenId())) {
             log.warn("[Token] AccessToken在黑名单中: tokenId={}", token.tokenId());
             throw new TokenInvalidException("Token已失效");
         }
 
-        // 【新增】4. 验证权限版本号
         if (permissionVersionEnabled) {
             validatePermissionVersion(token);
         }
@@ -157,32 +107,20 @@ public class JwtTokenService {
         return token;
     }
 
-    /**
-     * 验证Token中的权限版本号
-     *
-     * <p>
-     * 如果Token中的版本号小于当前版本号，说明权限已变更，Token失效
-     *
-     * @param token JWT Token
-     */
-    private void validatePermissionVersion(JwtToken token) {
+        private void validatePermissionVersion(JwtToken token) {
         try {
-            // 从Token Claims中获取权限版本号
             Long tokenPermVersion = token.getClaim("perm_version", Long.class);
             if (tokenPermVersion == null) {
-                // 兼容旧Token（没有版本号的Token）
                 log.debug("[权限验证] Token无版本号（旧Token），跳过验证: tokenId={}", token.tokenId());
                 return;
             }
 
-            // 获取当前权限版本号
             PermissionVersion currentVersion = permissionDomainService.getCurrentPermissionVersion(
                     token.userId(),
                     token.userDomain());
 
             PermissionVersion tokenVersion = new PermissionVersion(tokenPermVersion);
             if (tokenVersion.isOlderThan(currentVersion)) {
-                // 版本号不匹配，权限已变更
                 log.warn("[权限验证] Token权限版本过期: userId={}, tokenVersion={}, currentVersion={}",
                         token.userId(), tokenVersion, currentVersion);
                 throw new TokenInvalidException("权限已变更，请重新登录");
@@ -195,47 +133,34 @@ public class JwtTokenService {
             throw e;
         } catch (Exception e) {
             log.error("[权限验证] 版本验证失败（降级放行）: error={}", e.getMessage());
-            // 非致命错误，降级放行
         }
     }
 
-    /**
-     * 刷新Token（滑动窗口续期）
-     *
-     * @param refreshTokenString RefreshToken字符串
-     * @return 新的TokenPair
-     */
-    public TokenPair refreshToken(String refreshTokenString) {
+        public TokenPair refreshToken(String refreshTokenString) {
         log.info("[Token] 开始刷新Token");
 
-        // 1. 解析RefreshToken
         RefreshToken oldRefreshToken = tokenManagementPort.parseRefreshToken(refreshTokenString);
 
-        // 2. 检查是否过期
         if (oldRefreshToken.isExpired()) {
             log.warn("[Token] RefreshToken已过期: tokenId={}", oldRefreshToken.tokenId());
             throw new TokenExpiredException("RefreshToken已过期，请重新登录");
         }
 
-        // 3. 检查RefreshToken是否存在于缓存（验证是否被撤销）
         String cacheKey = "auth:refresh:" + oldRefreshToken.tokenId().value();
         if (!cachePort.exists(cacheKey)) {
             log.warn("[Token] RefreshToken不存在或已被撤销: tokenId={}", oldRefreshToken.tokenId());
             throw new TokenInvalidException("RefreshToken已失效，请重新登录");
         }
 
-        // 4. 获取用户权限（根据token携带的userDomain选择正确的适配器）
         Set<String> authorities = userModulePortFactory
                 .getPort(oldRefreshToken.userDomain())
                 .getPermissions(oldRefreshToken.userId());
 
-        // 5. 缓存权限（获取元数据）
         PermissionCacheMetadata metadata = permissionDomainService.cachePermissionsWithMetadata(
                 oldRefreshToken.userId(),
                 oldRefreshToken.userDomain(),
                 authorities);
 
-        // 6. 生成新的TokenPair
         TokenPair newTokenPair = tokenManagementPort.generateTokenPair(
                 oldRefreshToken.userId(),
                 oldRefreshToken.userDomain(),
@@ -243,17 +168,13 @@ public class JwtTokenService {
                 authorities,
                 metadata);
 
-        // 7. 删除旧的RefreshToken缓存
         cachePort.delete(cacheKey);
 
-        // 8. 如果在滑动窗口内，使用新的RefreshToken；否则复用旧的
         if (oldRefreshToken.isWithinSlidingWindow(refreshTokenSlidingWindow)) {
             log.info("[Token] RefreshToken在滑动窗口内，已续期: tokenId={}", oldRefreshToken.tokenId());
-            // 已经生成了新的RefreshToken，存储到缓存
             storeRefreshToken(newTokenPair.refreshToken());
         } else {
             log.info("[Token] RefreshToken不在滑动窗口内，复用旧Token: tokenId={}", oldRefreshToken.tokenId());
-            // 恢复旧的RefreshToken缓存
             storeRefreshToken(oldRefreshToken);
         }
 
@@ -261,36 +182,16 @@ public class JwtTokenService {
         return newTokenPair;
     }
 
-    /**
-     * 将Token加入黑名单（登出）
-     *
-     * @param tokenId          Token ID
-     * @param remainingSeconds Token剩余有效时间
-     */
-    public void addToBlacklist(TokenId tokenId, long remainingSeconds) {
+        public void addToBlacklist(TokenId tokenId, long remainingSeconds) {
         log.info("[Token] 将Token加入黑名单: tokenId={}, ttl={}s", tokenId, remainingSeconds);
 
         String blacklistKey = "auth:blacklist:" + tokenId.value();
         cachePort.set(blacklistKey, "1", Duration.ofSeconds(remainingSeconds));
     }
 
-    /**
-     * 登出：将 AccessToken 加入黑名单，并删除 RefreshToken 缓存
-     *
-     * <p>
-     * 设计原则：
-     * <ul>
-     * <li>解析失败不抛异常，以容忍已过期/已篡改的 Token（防止绕过登出）</li>
-     * <li>RefreshToken 可选，不提供时仅吊销 AccessToken</li>
-     * </ul>
-     *
-     * @param accessTokenStr  Access Token 字符串
-     * @param refreshTokenStr Refresh Token 字符串（可为 null）
-     */
-    public void logout(String accessTokenStr, String refreshTokenStr) {
+        public void logout(String accessTokenStr, String refreshTokenStr) {
         log.info("[Token] 执行登出");
 
-        // 1. 将 AccessToken 加入黑名单
         try {
             JwtToken token = tokenManagementPort.parseAccessToken(accessTokenStr);
             long remaining = token.getRemainingSeconds();
@@ -302,11 +203,9 @@ public class JwtTokenService {
                 log.debug("[Token] AccessToken 已自然过期，无需加入黑名单");
             }
         } catch (Exception e) {
-            // Token 无效/已过期时，解析失败属正常情况，记录警告即可
             log.warn("[Token] 登出时 AccessToken 解析失败（忽略）: {}", e.getMessage());
         }
 
-        // 2. 删除 RefreshToken 缓存（如已提供）
         if (refreshTokenStr != null && !refreshTokenStr.isBlank()) {
             try {
                 RefreshToken refreshToken = tokenManagementPort.parseRefreshToken(refreshTokenStr);
@@ -321,46 +220,31 @@ public class JwtTokenService {
         log.info("[Token] 登出完成");
     }
 
-    /**
-     * 检查Token是否在黑名单
-     */
-    private boolean isInBlacklist(TokenId tokenId) {
+        private boolean isInBlacklist(TokenId tokenId) {
         String blacklistKey = "auth:blacklist:" + tokenId.value();
         return cachePort.exists(blacklistKey);
     }
 
-    /**
-     * 存储RefreshToken到缓存
-     */
-    private void storeRefreshToken(RefreshToken refreshToken) {
+        private void storeRefreshToken(RefreshToken refreshToken) {
         String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
         long ttl = Math.min(refreshToken.getRemainingSeconds(), refreshTokenTtl);
         cachePort.set(cacheKey, refreshToken.rawToken(), Duration.ofSeconds(ttl));
     }
 
-    /**
-     * 从用户模块获取显示名
-     */
-    private String getNicknameFromCache(RefreshToken refreshToken) {
+        private String getNicknameFromCache(RefreshToken refreshToken) {
         return userModulePortFactory.getPort(refreshToken.userDomain())
                 .findById(refreshToken.userId())
                 .map(user -> user.nickname())
                 .orElse("unknown");
     }
 
-    /**
-     * Token过期异常
-     */
-    public static class TokenExpiredException extends DomainException {
+        public static class TokenExpiredException extends DomainException {
         public TokenExpiredException(String message) {
             super(message);
         }
     }
 
-    /**
-     * Token无效异常
-     */
-    public static class TokenInvalidException extends DomainException {
+        public static class TokenInvalidException extends DomainException {
         public TokenInvalidException(String message) {
             super(message);
         }

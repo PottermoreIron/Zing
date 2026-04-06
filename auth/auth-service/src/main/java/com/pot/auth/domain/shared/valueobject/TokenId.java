@@ -2,12 +2,6 @@ package com.pot.auth.domain.shared.valueobject;
 
 import java.util.UUID;
 
-/**
- * Token ID值对象
- *
- * @author pot
- * @since 2025-12-14
- */
 public record TokenId(String value) {
 
     public TokenId {
@@ -16,10 +10,7 @@ public record TokenId(String value) {
         }
     }
 
-    /**
-     * 生成新的TokenId (JTI - JWT ID)
-     */
-    public static TokenId generate() {
+        public static TokenId generate() {
         return new TokenId(UUID.randomUUID().toString());
     }
 

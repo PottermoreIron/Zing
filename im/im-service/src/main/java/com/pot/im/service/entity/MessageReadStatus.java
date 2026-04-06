@@ -12,14 +12,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * <p>
- * 消息已读状态表
- * </p>
- *
- * @author Pot
- * @since 2025-08-10 01:03:52
- */
 @Getter
 @Setter
 @ToString
@@ -29,33 +21,18 @@ public class MessageReadStatus implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键ID
-     */
-    @TableId(value = "id", type = IdType.AUTO)
+        @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 消息ID
-     */
-    @TableField("message_id")
+        @TableField("message_id")
     private Long messageId;
 
-    /**
-     * 用户ID
-     */
-    @TableField("user_id")
+        @TableField("user_id")
     private Long userId;
 
-    /**
-     * 已读时间
-     */
-    @TableField("read_at")
+        @TableField("read_at")
     private LocalDateTime readAt;
 
-    /**
-     * 业务扩展json
-     */
-    @TableField("extend_json")
+        @TableField("extend_json")
     private String extendJson;
 }

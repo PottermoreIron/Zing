@@ -4,15 +4,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-/**
- * 设备聚合根
- *
- * <p>
- * 记录会员登录的设备信息，支持设备管理（踢出、查询）。
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Getter
 public class DeviceAggregate {
 
@@ -33,10 +24,7 @@ public class DeviceAggregate {
     private DeviceAggregate() {
     }
 
-    /**
-     * 记录设备登录（新设备或更新已有设备）
-     */
-    public static DeviceAggregate create(Long memberId, String deviceToken,
+        public static DeviceAggregate create(Long memberId, String deviceToken,
                                          String deviceType, String deviceName,
                                          String osType, String osVersion,
                                          String appVersion, String lastLoginIp,
@@ -80,10 +68,7 @@ public class DeviceAggregate {
         return device;
     }
 
-    /**
-     * 更新登录信息（设备再次登录时调用）
-     */
-    public void updateLogin(String lastLoginIp, String refreshToken) {
+        public void updateLogin(String lastLoginIp, String refreshToken) {
         this.lastLoginIp = lastLoginIp;
         this.refreshToken = refreshToken;
         this.lastLoginAt = LocalDateTime.now();

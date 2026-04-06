@@ -7,12 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * 权限DTO
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Data
 @Builder
 @NoArgsConstructor

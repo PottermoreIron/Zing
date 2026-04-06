@@ -8,15 +8,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 
-/**
- * 会员个人资料 DTO（对外 RPC 契约）
- *
- * <p>
- * 将 profile 信息独立拆出，避免核心认证数据与 profile 数据耦合在一起。
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Data
 @Builder
 @AllArgsConstructor

@@ -18,12 +18,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 会员仓储实现
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -38,7 +32,6 @@ public class MemberRepositoryImpl implements MemberRepository {
         boolean isNew = (aggregate.getMemberId() == null);
 
         if (isNew) {
-            // 新增：预先分配 memberId
             aggregate.assignMemberId(MemberId.of(memberIdGenerator.nextId()));
         }
 
@@ -142,10 +135,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                         Collectors.mapping(MemberRole::getRoleId, Collectors.toSet())));
     }
 
-    /**
-     * 将实体转换为聚合根
-     */
-    private MemberAggregate toAggregate(Member entity) {
+        private MemberAggregate toAggregate(Member entity) {
         MemberProfile profile = MemberProfile.builder()
                 .nickname(entity.getNickname())
                 .firstName(entity.getFirstName())
@@ -175,17 +165,11 @@ public class MemberRepositoryImpl implements MemberRepository {
                 entity.getGmtLastLoginAt());
     }
 
-    /**
-     * 加载会员的角色ID集合
-     */
-    private Set<Long> loadRoleIds(Long memberId) {
+        private Set<Long> loadRoleIds(Long memberId) {
         return findRoleIdsByMemberIds(Set.of(memberId)).getOrDefault(memberId, Set.of());
     }
 
-    /**
-     * 将聚合根转换为实体
-     */
-    private Member toEntity(MemberAggregate aggregate) {
+        private Member toEntity(MemberAggregate aggregate) {
         Member entity = new Member();
         if (aggregate.getMemberId() != null) {
             // memberId is the business ID — set it so MyBatisPlus UPDATE can find the
@@ -203,7 +187,6 @@ public class MemberRepositoryImpl implements MemberRepository {
         entity.setGmtUpdatedAt(
                 aggregate.getUpdatedAt() != null ? aggregate.getUpdatedAt() : java.time.LocalDateTime.now());
 
-        // Profile 字段映射
         MemberProfile profile = aggregate.getProfile();
         if (profile != null) {
             entity.setFirstName(profile.getFirstName());
@@ -222,13 +205,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         return entity;
     }
 
-    /**
-     * 将数据库状态字符串映射到领域模型状态
-     * <p>
-     * DB ENUM: active | inactive | suspended | pending_verification
-     * </p>
-     */
-    private MemberStatus mapStatus(String status) {
+        private MemberStatus mapStatus(String status) {
         if (status == null) {
             return MemberStatus.ACTIVE;
         }
@@ -240,13 +217,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         };
     }
 
-    /**
-     * 将领域模型状态映射到数据库状态字符串
-     * <p>
-     * DB ENUM: active | inactive | suspended | pending_verification
-     * </p>
-     */
-    private String mapStatusToString(MemberStatus status) {
+        private String mapStatusToString(MemberStatus status) {
         return switch (status) {
             case ACTIVE -> "active";
             case DISABLED -> "inactive";

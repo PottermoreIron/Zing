@@ -2,11 +2,6 @@ package com.pot.im.service.protocol.serializer;
 
 import com.pot.zing.framework.common.util.JacksonUtils;
 
-/**
- * @author: Pot
- * @created: 2025/8/10 17:10
- * @description: 自定义报文Json序列化实现
- */
 public class JsonSerializer implements Serializer {
 
     @Override

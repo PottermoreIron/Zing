@@ -3,10 +3,13 @@ package com.pot.member.service.domain.event;
 import com.pot.zing.framework.mq.core.AbstractDomainEvent;
 
 /**
- * 会员领域事件基类
+ * Base class for member domain events.
  *
  * <p>
- * 所有 member-service 产生的领域事件都继承此类，统一路由到 {@code member.events} Exchange。
+ * All events emitted by member-service extend this type and are routed through
+ * the
+ * {@code member.events} exchange.
+ * </p>
  *
  * @author Pot
  * @since 2026-03-18

@@ -9,12 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 注册会员命令
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Data
 @Builder
 @NoArgsConstructor

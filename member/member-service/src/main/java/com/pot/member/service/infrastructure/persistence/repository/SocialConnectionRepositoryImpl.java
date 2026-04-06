@@ -15,12 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * 社交账号连接仓储实现
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Slf4j
 @Repository
 @RequiredArgsConstructor

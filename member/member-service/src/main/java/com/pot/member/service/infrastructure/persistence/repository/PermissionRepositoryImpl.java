@@ -17,12 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 权限仓储实现
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -36,11 +30,9 @@ public class PermissionRepositoryImpl implements PermissionRepository {
         Permission entity = toEntity(aggregate);
 
         if (entity.getId() == null) {
-            // 新增
             permissionMapper.insert(entity);
             log.debug("新增权限: {}", entity.getId());
         } else {
-            // 更新
             permissionMapper.updateById(entity);
             log.debug("更新权限: {}", entity.getId());
         }
@@ -71,7 +63,6 @@ public class PermissionRepositoryImpl implements PermissionRepository {
 
     @Override
     public List<PermissionAggregate> findByRoleId(Long roleId) {
-        // 通过role_permission关联表查询
         LambdaQueryWrapper<RolePermission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RolePermission::getRoleId, roleId);
         List<RolePermission> rolePermissions = rolePermissionMapper.selectList(wrapper);
@@ -111,20 +102,15 @@ public class PermissionRepositoryImpl implements PermissionRepository {
 
     @Override
     public void delete(PermissionId permissionId) {
-        // 删除角色权限关联
         LambdaQueryWrapper<RolePermission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RolePermission::getPermissionId, permissionId.value());
         rolePermissionMapper.delete(wrapper);
 
-        // 删除权限
         permissionMapper.deleteById(permissionId.value());
         log.debug("删除权限: {}", permissionId.value());
     }
 
-    /**
-     * 将实体转换为聚合根
-     */
-    private PermissionAggregate toAggregate(Permission entity) {
+        private PermissionAggregate toAggregate(Permission entity) {
         return PermissionAggregate.reconstitute(
                 PermissionId.of(entity.getId()),
                 entity.getPermissionCode(),
@@ -136,10 +122,7 @@ public class PermissionRepositoryImpl implements PermissionRepository {
                 entity.getGmtUpdatedAt());
     }
 
-    /**
-     * 将聚合根转换为实体
-     */
-    private Permission toEntity(PermissionAggregate aggregate) {
+        private Permission toEntity(PermissionAggregate aggregate) {
         Permission entity = new Permission();
         if (aggregate.getPermissionId() != null) {
             entity.setId(aggregate.getPermissionId().value());

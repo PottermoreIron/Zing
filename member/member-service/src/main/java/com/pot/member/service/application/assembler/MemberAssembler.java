@@ -4,19 +4,10 @@ import com.pot.member.service.application.dto.MemberDTO;
 import com.pot.member.service.domain.model.member.MemberAggregate;
 import org.springframework.stereotype.Component;
 
-/**
- * 会员装配器 - 负责聚合根与DTO之间的转换
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Component
 public class MemberAssembler {
 
-    /**
-     * 将聚合根转换为DTO
-     */
-    public MemberDTO toDTO(MemberAggregate aggregate) {
+        public MemberDTO toDTO(MemberAggregate aggregate) {
         if (aggregate == null) {
             return null;
         }

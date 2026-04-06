@@ -7,24 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-/**
- * Member 服务 OpenAPI 文档配置
- *
- * <p>
- * 覆盖 framework-common 中的基础 OpenAPI 配置，定制 member-service 专属文档信息。
- *
- * <p>
- * 访问地址：
- * <ul>
- * <li>Swagger UI：<a href=
- * "http://localhost:11000/swagger-ui/index.html">http://localhost:11000/swagger-ui/index.html</a></li>
- * <li>OpenAPI JSON：<a href=
- * "http://localhost:11000/v3/api-docs">http://localhost:11000/v3/api-docs</a></li>
- * </ul>
- *
- * @author Pot
- * @since 2026-03-15
- */
 @Configuration
 public class MemberOpenApiConfig {
 

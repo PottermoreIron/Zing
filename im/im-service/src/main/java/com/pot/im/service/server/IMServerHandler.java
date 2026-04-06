@@ -15,11 +15,6 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * @author: Pot
- * @created: 2025/8/10 23:20
- * @description: IM服务器核心处理器
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -104,7 +99,6 @@ public class IMServerHandler extends SimpleChannelInboundHandler<ProtocolMessage
                 ctx.channel().remoteAddress(),
                 e.getMessage());
 
-        // 根据错误类型决定是否关闭连接
         if (isRecoverableError(e)) {
             log.info("Recoverable error, keeping connection alive");
         } else {

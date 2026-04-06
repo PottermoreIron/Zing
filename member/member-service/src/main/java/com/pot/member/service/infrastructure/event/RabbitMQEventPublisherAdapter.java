@@ -7,16 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * RabbitMQ 领域事件发布适配器
- *
- * <p>
- * 实现领域层的 {@link DomainEventPublisher} 端口，
- * 通过 framework-starter-mq 的 {@link MessageProducer} 发布到 RabbitMQ。
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

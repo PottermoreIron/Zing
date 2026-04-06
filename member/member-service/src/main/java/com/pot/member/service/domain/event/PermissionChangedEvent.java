@@ -5,11 +5,13 @@ import lombok.Getter;
 import java.util.Set;
 
 /**
- * 权限变更领域事件
+ * Domain event emitted when member permissions change.
  *
  * <p>
- * 当用户权限发生变更时发布，用于通知 auth-service 刷新权限缓存。
- * 继承 {@link MemberDomainEvent}，统一路由至 {@code member.events} Exchange。
+ * The auth-service consumes this event to refresh permission caches. Like all
+ * member events,
+ * it is routed through the {@code member.events} exchange.
+ * </p>
  *
  * @author Pot
  * @since 2026-03-18
@@ -18,36 +20,36 @@ import java.util.Set;
 public class PermissionChangedEvent extends MemberDomainEvent {
 
     /**
-     * 受影响的会员ID集合
+     * Affected member IDs.
      */
     private final Set<Long> affectedMemberIds;
 
     /**
-     * 变更类型
+     * Change type.
      */
     private final ChangeType changeType;
 
     /**
-     * 变更的角色ID（角色变更时填充）
+     * Changed role ID, when the event is role-related.
      */
     private final Long roleId;
 
     /**
-     * 变更的权限ID（权限变更时填充）
+     * Changed permission ID, when the event is permission-related.
      */
     private final Long permissionId;
 
     /**
-     * 变更原因/操作人
+     * Change reason or operator identity.
      */
     private final String reason;
 
     public PermissionChangedEvent(String aggregateId,
-                                  Set<Long> affectedMemberIds,
-                                  ChangeType changeType,
-                                  Long roleId,
-                                  Long permissionId,
-                                  String reason) {
+            Set<Long> affectedMemberIds,
+            ChangeType changeType,
+            Long roleId,
+            Long permissionId,
+            String reason) {
         super(aggregateId);
         this.affectedMemberIds = affectedMemberIds;
         this.changeType = changeType;
@@ -62,29 +64,21 @@ public class PermissionChangedEvent extends MemberDomainEvent {
     }
 
     /**
-     * 权限变更类型
+     * Permission change types.
      */
     public enum ChangeType {
-        /**
-         * 会员角色分配/撤销
-         */
+        /** Member role assignment or revocation. */
         MEMBER_ROLE_ASSIGNED,
         MEMBER_ROLE_REVOKED,
 
-        /**
-         * 角色权限变更
-         */
+        /** Role permission changes. */
         ROLE_PERMISSION_ADDED,
         ROLE_PERMISSION_REMOVED,
 
-        /**
-         * 权限本身更新
-         */
+        /** Permission definition updates. */
         PERMISSION_UPDATED,
 
-        /**
-         * 角色更新
-         */
+        /** Role updates. */
         ROLE_UPDATED
     }
 }

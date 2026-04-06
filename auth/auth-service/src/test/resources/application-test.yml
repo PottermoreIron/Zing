@@ -1,19 +1,19 @@
 # ============================================================
-# 测试专用配置 (Profile: test)
-# 屏蔽所有外部基础设施依赖，保证测试在离线环境中可以运行
+# Test profile configuration
+# Disable external infrastructure so tests can run offline.
 # ============================================================
 
 spring:
   cloud:
-    # 禁用Nacos服务注册与发现，避免测试时连接Nacos Server
+    # Disable Nacos discovery to avoid external service registration during tests.
     nacos:
       discovery:
         enabled: false
-    # 禁用Feign客户端负载均衡（和Nacos联动）
+    # Disable Feign-side load balancing because it depends on service discovery.
     loadbalancer:
       enabled: false
 
-  # Redis连接配置（单元测试无需真实Redis；集成测试由Testcontainers动态覆盖）
+  # Keep a local Redis fallback; integration tests override these values through Testcontainers.
   data:
     redis:
       host: localhost
@@ -27,39 +27,39 @@ spring:
           min-idle: 0
 
 # ============================================================
-# 禁用限流（避免测试请求被限频）
+# Disable rate limiting for test requests.
 # ============================================================
 pot:
   ratelimit:
     enabled: false
-  # 禁用Touch框架（避免与auth域VerificationCodeService产生bean名称冲突）
+  # Disable the touch module to avoid bean-name conflicts with auth verification-code services.
   touch:
     enabled: false
-  # 禁用MQ框架（测试无需消息队列，避免缺少MessageProducer bean）
+  # Disable MQ infrastructure because tests do not need message producers.
   mq:
     enabled: false
 
 # ============================================================
-# Auth服务 - 测试级别配置
+# Auth-service test overrides
 # ============================================================
 auth:
   token:
     jwt:
-      # 使用主代码中已有的RSA密钥文件（单元测试中通过MockBean绕过，集成测试需要）
+      # Reuse the checked-in RSA keys; unit tests mock JWT ports and integration tests need real keys.
       private-key-location: classpath:keys/jwt_private_key.pem
       public-key-location: classpath:keys/jwt_public_key.pem
       access-token-ttl: 3600
       refresh-token-ttl: 2592000
       refresh-token-sliding-window: 604800
 
-  # 禁用member/admin适配器以避免Feign Client连接
+  # Disable member and admin adapters to avoid Feign client connections.
   user-domain:
     member:
       enabled: false
     admin:
       enabled: false
 
-  # 禁用权限变更消息推送（测试无MQ环境）
+  # Disable permission-change message publishing in the test environment.
   permission:
     mq:
       enabled: false
@@ -71,7 +71,7 @@ auth:
       bloom-fpp: 0.01
 
 # ============================================================
-# 简化日志（减少测试噪音）
+# Reduce test log noise
 # ============================================================
 logging:
   level:

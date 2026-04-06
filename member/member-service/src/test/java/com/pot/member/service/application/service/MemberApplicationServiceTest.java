@@ -33,9 +33,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-/**
- * {@link MemberApplicationService} 单元测试（基于 Mockito 的用例编排验证）
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MemberApplicationService")
 class MemberApplicationServiceTest {
@@ -63,10 +60,7 @@ class MemberApplicationServiceTest {
     private MemberApplicationService service;
 
 
-    /**
-     * 构造一个已持久化的会员聚合根（含 memberId）
-     */
-    private MemberAggregate persistedMember(Long id) {
+        private MemberAggregate persistedMember(Long id) {
         return MemberAggregate.reconstitute(
                 MemberId.of(id),
                 Nickname.of("user" + id),

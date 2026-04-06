@@ -5,14 +5,6 @@ import com.pot.auth.domain.shared.valueobject.TokenId;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
 
-/**
- * 刷新Token值对象
- *
- * <p>封装RefreshToken的业务含义和滑动窗口续期规则
- *
- * @author pot
- * @since 2025-11-10
- */
 public record RefreshToken(
         TokenId tokenId,              // JTI - Token唯一标识
         UserId userId,                // 用户ID
@@ -23,10 +15,7 @@ public record RefreshToken(
         String rawToken               // 原始Token字符串
 ) {
 
-    /**
-     * 验证参数
-     */
-    public RefreshToken {
+        public RefreshToken {
         if (tokenId == null) {
             throw new IllegalArgumentException("TokenId不能为空");
         }
@@ -47,42 +36,24 @@ public record RefreshToken(
         }
     }
 
-    /**
-     * 检查Token是否已过期
-     */
-    public boolean isExpired() {
+        public boolean isExpired() {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         return currentTimestamp >= expiresAt;
     }
 
-    /**
-     * 检查是否在滑动窗口内（最后7天）
-     *
-     * @param slidingWindowSeconds 滑动窗口时长（秒）
-     * @return 是否在滑动窗口内
-     */
-    public boolean isWithinSlidingWindow(long slidingWindowSeconds) {
+        public boolean isWithinSlidingWindow(long slidingWindowSeconds) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         long remainingSeconds = expiresAt - currentTimestamp;
         return remainingSeconds <= slidingWindowSeconds && remainingSeconds > 0;
     }
 
-    /**
-     * 获取剩余有效时间（秒）
-     */
-    public long getRemainingSeconds() {
+        public long getRemainingSeconds() {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         long remaining = expiresAt - currentTimestamp;
         return Math.max(0, remaining);
     }
 
-    /**
-     * 计算新的过期时间（用于滑动窗口续期）
-     *
-     * @param refreshTokenTtl RefreshToken总TTL（秒）
-     * @return 新的过期时间戳
-     */
-    public long calculateNewExpiresAt(long refreshTokenTtl) {
+        public long calculateNewExpiresAt(long refreshTokenTtl) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         return currentTimestamp + refreshTokenTtl;
     }

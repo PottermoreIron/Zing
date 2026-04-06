@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 /**
- * 会员控制器
- * <p>
- * 演示如何使用Spring Security的权限控制
- * </p>
+ * REST controller for member operations.
  *
  * @author Pot
  * @since 2025-01-24
@@ -35,7 +32,7 @@ public class MemberController {
     private final MemberPermissionApplicationService memberPermissionApplicationService;
 
     /**
-     * 获取会员信息
+     * Get member details.
      */
     @GetMapping("/{memberId}")
     public R<MemberDTO> getMember(@PathVariable Long memberId) {
@@ -47,7 +44,7 @@ public class MemberController {
     }
 
     /**
-     * 获取当前登录会员信息
+     * Get the current member.
      */
     @GetMapping("/me")
     public R<MemberDTO> getCurrentMember(@RequestAttribute("memberId") Long memberId) {
@@ -59,7 +56,7 @@ public class MemberController {
     }
 
     /**
-     * 更新会员资料
+     * Update the member profile.
      */
     @PutMapping("/{memberId}/profile")
     public R<MemberDTO> updateProfile(
@@ -71,7 +68,7 @@ public class MemberController {
     }
 
     /**
-     * 修改密码
+     * Change the member password.
      */
     @PutMapping("/{memberId}/password")
     public R<Void> changePassword(
@@ -83,7 +80,7 @@ public class MemberController {
     }
 
     /**
-     * 获取会员权限
+     * Get member permissions.
      */
     @GetMapping("/{memberId}/permissions")
     public R<Set<PermissionDTO>> getMemberPermissions(@PathVariable Long memberId) {
@@ -95,7 +92,7 @@ public class MemberController {
     }
 
     /**
-     * 锁定会员
+     * Lock a member.
      */
     @PostMapping("/{memberId}/lock")
     public R<Void> lockMember(@PathVariable Long memberId) {
@@ -104,7 +101,7 @@ public class MemberController {
     }
 
     /**
-     * 解锁会员
+     * Unlock a member.
      */
     @PostMapping("/{memberId}/unlock")
     public R<Void> unlockMember(@PathVariable Long memberId) {

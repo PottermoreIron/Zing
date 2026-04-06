@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 会员权限应用服务
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

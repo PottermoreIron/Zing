@@ -5,20 +5,6 @@ import lombok.Builder;
 
 import java.security.SecureRandom;
 
-/**
- * 验证码值对象
- *
- * <p>
- * 业务规则：
- * <ul>
- * <li>必须是6位数字</li>
- * <li>5分钟有效期</li>
- * <li>最多3次验证尝试</li>
- * </ul>
- *
- * @author pot
- * @since 2025-11-10
- */
 @Builder
 public record VerificationCode(String value) {
 
@@ -27,10 +13,7 @@ public record VerificationCode(String value) {
     private static final int CODE_LENGTH = 6;
     private static final int MAX_ATTEMPTS = 3;
 
-    /**
-     * 验证验证码格式
-     */
-    public VerificationCode {
+        public VerificationCode {
         if (value == null || value.isBlank()) {
             throw new InvalidVerificationCodeException("验证码不能为空");
         }
@@ -39,41 +22,26 @@ public record VerificationCode(String value) {
         }
     }
 
-    /**
-     * 静态工厂方法
-     */
-    public static VerificationCode of(String value) {
+        public static VerificationCode of(String value) {
         return new VerificationCode(value);
     }
 
-    /**
-     * 生成新的验证码
-     */
-    public static VerificationCode generate() {
+        public static VerificationCode generate() {
         int bound = (int) Math.pow(10, CODE_LENGTH);
         int code = RANDOM.nextInt(bound);
         String codeStr = String.format("%0" + CODE_LENGTH + "d", code);
         return new VerificationCode(codeStr);
     }
 
-    /**
-     * 获取最大尝试次数
-     */
-    public static int getMaxAttempts() {
+        public static int getMaxAttempts() {
         return MAX_ATTEMPTS;
     }
 
-    /**
-     * 验证码是否匹配
-     */
-    public boolean matches(String inputCode) {
+        public boolean matches(String inputCode) {
         return this.value.equals(inputCode);
     }
 
-    /**
-     * 无效验证码异常
-     */
-    public static class InvalidVerificationCodeException extends DomainException {
+        public static class InvalidVerificationCodeException extends DomainException {
         public InvalidVerificationCodeException(String message) {
             super(message);
         }

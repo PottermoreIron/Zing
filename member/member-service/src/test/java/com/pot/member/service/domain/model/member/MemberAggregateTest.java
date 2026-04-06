@@ -12,9 +12,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * {@link MemberAggregate} 单元测试
- */
 @DisplayName("MemberAggregate")
 class MemberAggregateTest {
 
@@ -230,7 +227,6 @@ class MemberAggregateTest {
         void pullDomainEvents_clearsAfterPull() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
 
-            // 用匿名子类注册一个占位事件
             member.registerEvent(new com.pot.member.service.domain.event.MemberDomainEvent("0") {
                 @Override
                 protected String getEventName() {
@@ -241,7 +237,6 @@ class MemberAggregateTest {
             List<com.pot.member.service.domain.event.MemberDomainEvent> events = member.pullDomainEvents();
             assertThat(events).hasSize(1);
 
-            // 再次拉取应为空
             assertThat(member.pullDomainEvents()).isEmpty();
         }
     }

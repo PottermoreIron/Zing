@@ -4,12 +4,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-/**
- * 权限聚合根
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Getter
 public class PermissionAggregate {
 
@@ -22,10 +16,7 @@ public class PermissionAggregate {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    /**
-     * 创建新权限
-     */
-    public static PermissionAggregate create(
+        public static PermissionAggregate create(
             String permissionCode,
             String permissionName,
             String resource,
@@ -42,10 +33,7 @@ public class PermissionAggregate {
         return permission;
     }
 
-    /**
-     * 重建权限（从数据库加载）
-     */
-    public static PermissionAggregate reconstitute(
+        public static PermissionAggregate reconstitute(
             PermissionId permissionId,
             String permissionCode,
             String permissionName,
@@ -66,10 +54,7 @@ public class PermissionAggregate {
         return permission;
     }
 
-    /**
-     * 更新权限信息
-     */
-    public void update(
+        public void update(
             String permissionName,
             String resource,
             String action,

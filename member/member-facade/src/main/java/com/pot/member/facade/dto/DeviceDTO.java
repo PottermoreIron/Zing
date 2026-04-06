@@ -8,12 +8,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 
-/**
- * 设备信息 DTO（对外 RPC 契约）
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Data
 @Builder
 @AllArgsConstructor

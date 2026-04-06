@@ -3,12 +3,6 @@ package com.pot.auth.domain.shared.exception;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import lombok.Getter;
 
-/**
- * 领域层基础异常
- *
- * @author pot
- * @since 2025-12-14
- */
 @Getter
 public class DomainException extends RuntimeException {
 

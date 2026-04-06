@@ -5,12 +5,6 @@ import com.pot.zing.framework.starter.id.service.IdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-/**
- * 会员ID生成器（基于 Snowflake 分布式ID）
- *
- * @author Pot
- * @since 2026-03-22
- */
 @Component
 @RequiredArgsConstructor
 public class MemberIdGeneratorAdapter implements MemberIdGenerator {

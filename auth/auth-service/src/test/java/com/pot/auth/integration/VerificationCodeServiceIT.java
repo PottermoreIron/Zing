@@ -139,7 +139,7 @@ class VerificationCodeServiceIT {
             Long ttl = redisTemplate.getExpire("auth:code:" + EMAIL);
             assertThat(ttl).isNotNull().isGreaterThan(0L).isLessThanOrEqualTo(VerificationCode.TTL_SECONDS);
 
-            // 发送限制key的TTL应在合理范围内（0-60秒）
+            // The send-cooldown key should keep a short TTL in Redis.
             Long sendLimitTtl = redisTemplate.getExpire("auth:code:send:" + EMAIL);
             assertThat(sendLimitTtl).isNotNull().isGreaterThan(0L).isLessThanOrEqualTo(60L);
         }

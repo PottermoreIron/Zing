@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 会员领域服务
+ * Domain service for member lifecycle operations.
  *
  * @author Pot
  * @since 2026-01-06
@@ -23,57 +23,50 @@ public class MemberDomainService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * 注册新会员
+     * Register a new member.
      */
     public MemberAggregate register(
             Nickname nickname,
             Email email,
             String rawPassword) {
 
-        // 检查邮箱是否已存在
         if (memberRepository.existsByEmail(email)) {
             throw new IllegalStateException("邮箱已被注册: " + email.getValue());
         }
 
-        // 加密密码
         String passwordHash = passwordEncoder.encode(rawPassword);
 
-        // 创建会员
         return MemberAggregate.create(nickname, email, passwordHash);
     }
 
     /**
-     * 验证密码
+     * Verify a member password.
      */
     public boolean verifyPassword(MemberAggregate member, String rawPassword) {
         return passwordEncoder.matches(rawPassword, member.getPasswordHash());
     }
 
     /**
-     * 更改密码
+     * Change a member password.
      */
     public void changePassword(
             MemberAggregate member,
             String oldRawPassword,
             String newRawPassword) {
 
-        // 验证旧密码
         if (!verifyPassword(member, oldRawPassword)) {
             throw new IllegalArgumentException("原密码不正确");
         }
 
-        // 加密新密码
         String newPasswordHash = passwordEncoder.encode(newRawPassword);
 
-        // 更新密码
         member.updatePassword(newPasswordHash);
     }
 
     /**
-     * 绑定手机号
+     * Bind a phone number to a member.
      */
     public void bindPhoneNumber(MemberAggregate member, PhoneNumber phoneNumber) {
-        // 检查手机号是否已被使用
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
             throw new IllegalStateException("手机号已被绑定: " + phoneNumber.getValue());
         }
@@ -82,10 +75,9 @@ public class MemberDomainService {
     }
 
     /**
-     * 更换邮箱
+     * Change the member email.
      */
     public void changeEmail(MemberAggregate member, Email newEmail) {
-        // 检查新邮箱是否已被使用
         if (memberRepository.existsByEmail(newEmail)) {
             throw new IllegalStateException("邮箱已被使用: " + newEmail.getValue());
         }

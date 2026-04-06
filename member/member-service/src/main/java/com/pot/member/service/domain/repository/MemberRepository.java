@@ -6,66 +6,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * 会员仓储接口
- *
- * @author Pot
- * @since 2026-01-06
- */
 public interface MemberRepository {
 
-    /**
-     * 保存会员
-     */
-    MemberAggregate save(MemberAggregate member);
+        MemberAggregate save(MemberAggregate member);
 
-    /**
-     * 根据ID查找会员
-     */
-    Optional<MemberAggregate> findById(MemberId memberId);
+        Optional<MemberAggregate> findById(MemberId memberId);
 
-    /**
-     * 根据邮箱查找会员
-     */
-    Optional<MemberAggregate> findByEmail(Email email);
+        Optional<MemberAggregate> findByEmail(Email email);
 
-    /**
-     * 根据手机号查找会员
-     */
-    Optional<MemberAggregate> findByPhoneNumber(PhoneNumber phoneNumber);
+        Optional<MemberAggregate> findByPhoneNumber(PhoneNumber phoneNumber);
 
-    /**
-     * 根据昵称查找会员
-     */
-    Optional<MemberAggregate> findByNickname(Nickname nickname);
+        Optional<MemberAggregate> findByNickname(Nickname nickname);
 
-    /**
-     * 检查邮箱是否存在
-     */
-    boolean existsByEmail(Email email);
+        boolean existsByEmail(Email email);
 
-    /**
-     * 检查手机号是否存在
-     */
-    boolean existsByPhoneNumber(PhoneNumber phoneNumber);
+        boolean existsByPhoneNumber(PhoneNumber phoneNumber);
 
-    /**
-     * 检查昵称是否存在
-     */
-    boolean existsByNickname(Nickname nickname);
+        boolean existsByNickname(Nickname nickname);
 
-    /**
-     * 查找拥有指定角色的所有会员ID
-     */
-    Set<Long> findMemberIdsByRoleId(Long roleId);
+        Set<Long> findMemberIdsByRoleId(Long roleId);
 
-    /**
-     * 批量查询会员角色ID
-     */
-    Map<Long, Set<Long>> findRoleIdsByMemberIds(Set<Long> memberIds);
+        Map<Long, Set<Long>> findRoleIdsByMemberIds(Set<Long> memberIds);
 
-    /**
-     * 删除会员（软删除）
-     */
-    void delete(MemberId memberId);
+        void delete(MemberId memberId);
 }

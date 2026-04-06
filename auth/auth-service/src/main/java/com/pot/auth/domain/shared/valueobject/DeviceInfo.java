@@ -1,13 +1,5 @@
 package com.pot.auth.domain.shared.valueobject;
 
-/**
- * 设备信息值对象
- *
- * <p>包含设备的详细信息，用于设备管理和安全审计
- *
- * @author pot
- * @since 2025-11-10
- */
 public record DeviceInfo(
         String deviceType,    // MOBILE, DESKTOP, TABLET, UNKNOWN
         String osName,        // iOS, Android, Windows, macOS, Linux
@@ -17,14 +9,10 @@ public record DeviceInfo(
         String userAgent      // 完整的User-Agent
 ) {
 
-    /**
-     * 验证参数
-     */
-    public DeviceInfo {
+        public DeviceInfo {
         if (userAgent == null || userAgent.isBlank()) {
             throw new IllegalArgumentException("User-Agent不能为空");
         }
-        // 如果解析字段为空，设置默认值
         deviceType = deviceType != null ? deviceType : "UNKNOWN";
         osName = osName != null ? osName : "Unknown";
         osVersion = osVersion != null ? osVersion : "Unknown";
@@ -32,15 +20,11 @@ public record DeviceInfo(
         browserVersion = browserVersion != null ? browserVersion : "Unknown";
     }
 
-    /**
-     * 从User-Agent创建（简化版本，实际应使用专业库解析）
-     */
-    public static DeviceInfo fromUserAgent(String userAgent) {
+        public static DeviceInfo fromUserAgent(String userAgent) {
         if (userAgent == null || userAgent.isBlank()) {
             userAgent = "Unknown";
         }
 
-        // 简单解析（生产环境应使用 ua-parser 等专业库）
         String deviceType = detectDeviceType(userAgent);
         String osName = detectOsName(userAgent);
         String browserName = detectBrowserName(userAgent);
@@ -48,10 +32,7 @@ public record DeviceInfo(
         return new DeviceInfo(deviceType, osName, "Unknown", browserName, "Unknown", userAgent);
     }
 
-    /**
-     * 检测设备类型
-     */
-    private static String detectDeviceType(String ua) {
+        private static String detectDeviceType(String ua) {
         String uaLower = ua.toLowerCase();
         if (uaLower.contains("mobile") || uaLower.contains("android")) {
             return "MOBILE";
@@ -63,10 +44,7 @@ public record DeviceInfo(
         return "UNKNOWN";
     }
 
-    /**
-     * 检测操作系统
-     */
-    private static String detectOsName(String ua) {
+        private static String detectOsName(String ua) {
         String uaLower = ua.toLowerCase();
         if (uaLower.contains("android")) return "Android";
         if (uaLower.contains("iphone") || uaLower.contains("ipad")) return "iOS";
@@ -76,10 +54,7 @@ public record DeviceInfo(
         return "Unknown";
     }
 
-    /**
-     * 检测浏览器
-     */
-    private static String detectBrowserName(String ua) {
+        private static String detectBrowserName(String ua) {
         String uaLower = ua.toLowerCase();
         if (uaLower.contains("edg")) return "Edge";
         if (uaLower.contains("chrome")) return "Chrome";
@@ -88,17 +63,11 @@ public record DeviceInfo(
         return "Unknown";
     }
 
-    /**
-     * 是否为移动设备
-     */
-    public boolean isMobile() {
+        public boolean isMobile() {
         return "MOBILE".equals(deviceType);
     }
 
-    /**
-     * 是否为桌面设备
-     */
-    public boolean isDesktop() {
+        public boolean isDesktop() {
         return "DESKTOP".equals(deviceType);
     }
 }

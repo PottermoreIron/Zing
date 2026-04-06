@@ -22,11 +22,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author: Pot
- * @created: 2025/8/11 23:07
- * @description: IM客户端
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -40,10 +35,7 @@ public class IMClient {
     private Channel channel;
     private ScheduledExecutorService scheduledExecutor;
 
-    /**
-     * 连接服务器
-     */
-    public CompletableFuture<Boolean> connect() {
+        public CompletableFuture<Boolean> connect() {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 initializeResources();
@@ -69,10 +61,7 @@ public class IMClient {
         });
     }
 
-    /**
-     * 断开连接
-     */
-    public CompletableFuture<Void> disconnect() {
+        public CompletableFuture<Void> disconnect() {
         return CompletableFuture.runAsync(() -> {
             connected.set(false);
             closeChannel();
@@ -81,10 +70,7 @@ public class IMClient {
         });
     }
 
-    /**
-     * 发送消息
-     */
-    public CompletableFuture<Boolean> sendMessage(ProtocolMessage message) {
+        public CompletableFuture<Boolean> sendMessage(ProtocolMessage message) {
         if (!isConnected()) {
             return CompletableFuture.completedFuture(false);
         }
@@ -100,36 +86,24 @@ public class IMClient {
         });
     }
 
-    /**
-     * 发送认证请求
-     */
-    public CompletableFuture<Boolean> authenticate(String userId, String token) {
+        public CompletableFuture<Boolean> authenticate(String userId, String token) {
         String authData = userId + ":" + token;
         ProtocolMessage authMessage = new ProtocolMessage(MessageType.AUTH_REQUEST, authData.getBytes());
         return sendMessage(authMessage);
     }
 
-    /**
-     * 发送心跳
-     */
-    public CompletableFuture<Boolean> sendHeartbeat() {
+        public CompletableFuture<Boolean> sendHeartbeat() {
         ProtocolMessage heartbeat = new ProtocolMessage(MessageType.HEARTBEAT, new byte[0]);
         return sendMessage(heartbeat);
     }
 
-    /**
-     * 发送私聊消息
-     */
-    public CompletableFuture<Boolean> sendPrivateMessage(String targetUserId, String content) {
+        public CompletableFuture<Boolean> sendPrivateMessage(String targetUserId, String content) {
         String messageData = targetUserId + ":" + content;
         ProtocolMessage message = new ProtocolMessage(MessageType.PRIVATE_MESSAGE, messageData.getBytes());
         return sendMessage(message);
     }
 
-    /**
-     * 自动重连
-     */
-    public void enableAutoReconnect() {
+        public void enableAutoReconnect() {
         if (scheduledExecutor == null) {
             scheduledExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
                 Thread t = new Thread(r, "IMClient-Reconnect");
@@ -142,10 +116,7 @@ public class IMClient {
                 config.getReconnectDelayMs(), config.getReconnectDelayMs(), TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * 检查连接状态
-     */
-    public boolean isConnected() {
+        public boolean isConnected() {
         return connected.get() && channel != null && channel.isActive();
     }
 

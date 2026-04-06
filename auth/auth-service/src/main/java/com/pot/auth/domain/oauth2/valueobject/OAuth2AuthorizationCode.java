@@ -1,11 +1,5 @@
 package com.pot.auth.domain.oauth2.valueobject;
 
-/**
- * OAuth2授权码值对象
- *
- * @author pot
- * @since 2025-11-10
- */
 public record OAuth2AuthorizationCode(String value) {
 
     public OAuth2AuthorizationCode {

@@ -1,26 +1,11 @@
 package com.pot.member.service.domain.model.member;
 
-/**
- * 会员状态枚举
- *
- * @author Pot
- * @since 2026-01-06
- */
 public enum MemberStatus {
-    /**
-     * 正常
-     */
-    ACTIVE(0, "正常"),
+        ACTIVE(0, "正常"),
 
-    /**
-     * 禁用
-     */
-    DISABLED(1, "禁用"),
+        DISABLED(1, "禁用"),
 
-    /**
-     * 锁定
-     */
-    LOCKED(2, "锁定");
+        LOCKED(2, "锁定");
 
     private final int code;
     private final String description;

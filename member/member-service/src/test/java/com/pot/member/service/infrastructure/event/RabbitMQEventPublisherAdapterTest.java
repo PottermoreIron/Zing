@@ -13,9 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
-/**
- * {@link RabbitMQEventPublisherAdapter} 单元测试
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RabbitMQEventPublisherAdapter")
 class RabbitMQEventPublisherAdapterTest {
@@ -26,10 +23,7 @@ class RabbitMQEventPublisherAdapterTest {
     @InjectMocks
     private RabbitMQEventPublisherAdapter adapter;
 
-    /**
-     * 构造一个简单的具体领域事件用于测试
-     */
-    private MemberDomainEvent testEvent(String aggregateId) {
+        private MemberDomainEvent testEvent(String aggregateId) {
         return new MemberDomainEvent(aggregateId) {
             @Override
             protected String getEventName() {

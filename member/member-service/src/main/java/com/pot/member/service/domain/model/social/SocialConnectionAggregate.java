@@ -4,16 +4,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-/**
- * 社交账号连接聚合根
- *
- * <p>
- * 每条记录代表一个会员与一个第三方 OAuth2 平台的绑定关系。
- * 该聚合根是 member 聚合的关联聚合，通过 memberId 引用（跨聚合只引用 ID）。
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Getter
 public class SocialConnectionAggregate {
 
@@ -36,10 +26,7 @@ public class SocialConnectionAggregate {
     private SocialConnectionAggregate() {
     }
 
-    /**
-     * 创建新社交连接
-     */
-    public static SocialConnectionAggregate create(Long memberId,
+        public static SocialConnectionAggregate create(Long memberId,
                                                    String provider,
                                                    String providerMemberId,
                                                    String providerUsername,
@@ -66,10 +53,7 @@ public class SocialConnectionAggregate {
         return conn;
     }
 
-    /**
-     * 重建（从数据库）
-     */
-    public static SocialConnectionAggregate reconstitute(Long id, Long memberId, String provider,
+        public static SocialConnectionAggregate reconstitute(Long id, Long memberId, String provider,
                                                          String providerMemberId, String providerUsername,
                                                          String providerEmail, String accessToken,
                                                          String refreshToken, Long tokenExpiresAt,
@@ -95,10 +79,7 @@ public class SocialConnectionAggregate {
         return conn;
     }
 
-    /**
-     * 更新 token
-     */
-    public void updateTokens(String accessToken, String refreshToken, Long tokenExpiresAt) {
+        public void updateTokens(String accessToken, String refreshToken, Long tokenExpiresAt) {
         this.accessToken = accessToken;
         if (refreshToken != null && !refreshToken.isBlank()) {
             this.refreshToken = refreshToken;
@@ -109,10 +90,7 @@ public class SocialConnectionAggregate {
         this.updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * 软删除（解绑）
-     */
-    public void deactivate() {
+        public void deactivate() {
         this.active = false;
         this.deletedAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();

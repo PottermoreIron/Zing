@@ -15,11 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author: Pot
- * @created: 2025/8/10 23:00
- * @description: IM服务器核心启动类
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -3,11 +3,13 @@ package com.pot.member.service.domain.port;
 import com.pot.member.service.domain.event.MemberDomainEvent;
 
 /**
- * 领域事件发布 Port（出站端口）
+ * Outbound port for publishing domain events.
  *
  * <p>
- * 领域层通过此接口发布事件，不依赖任何 MQ 实现。
- * 基础设施层提供 {@code RabbitMQEventPublisherAdapter} 实现。
+ * The domain layer depends on this abstraction instead of a concrete MQ
+ * implementation.
+ * Infrastructure provides the concrete adapter.
+ * </p>
  *
  * @author Pot
  * @since 2026-03-18
@@ -15,7 +17,7 @@ import com.pot.member.service.domain.event.MemberDomainEvent;
 public interface DomainEventPublisher {
 
     /**
-     * 发布单个领域事件
+     * Publish a domain event.
      */
     void publish(MemberDomainEvent event);
 }

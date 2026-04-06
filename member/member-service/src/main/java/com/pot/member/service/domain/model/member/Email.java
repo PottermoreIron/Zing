@@ -2,12 +2,6 @@ package com.pot.member.service.domain.model.member;
 
 import lombok.Value;
 
-/**
- * 邮箱值对象
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Value
 public class Email {
     String value;

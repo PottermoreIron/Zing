@@ -2,9 +2,6 @@ package com.pot.auth.domain.authentication.service;
 
 import java.time.Duration;
 
-/**
- * 验证码策略对象，承载发送与校验相关的业务参数。
- */
 public record VerificationCodePolicy(
         String codeKeyPrefix,
         String attemptsKeyPrefix,

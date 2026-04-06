@@ -8,12 +8,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-/**
- * 会员DTO（应用层内部使用）
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Data
 @Builder
 @NoArgsConstructor

@@ -6,9 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * {@link MemberProfile} 单元测试
- */
 @DisplayName("MemberProfile")
 class MemberProfileTest {
 
@@ -95,11 +92,8 @@ class MemberProfileTest {
 
             MemberProfile updated = original.withNickname("新昵称");
 
-            // 新实例应有新昵称
             assertThat(updated.getNickname()).isEqualTo("新昵称");
-            // 其余字段应从原实例复制
             assertThat(updated.getCity()).isEqualTo("北京");
-            // 原实例不变
             assertThat(original.getNickname()).isEqualTo("原昵称");
         }
 

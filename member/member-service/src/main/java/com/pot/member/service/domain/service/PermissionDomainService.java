@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 权限领域服务
+ * Domain service for permission and role assignment flows.
  *
  * @author Pot
  * @since 2026-01-06
@@ -36,7 +36,7 @@ public class PermissionDomainService {
         private final DomainEventPublisher eventPublisher;
 
         /**
-         * 为会员分配角色
+         * Assign a role to a member.
          */
         public void assignRoleToMember(Long memberId, Long roleId, String operator) {
                 MemberAggregate member = memberRepository
@@ -49,7 +49,6 @@ public class PermissionDomainService {
                 member.assignRole(roleId);
                 memberRepository.save(member);
 
-                // 发布权限变更事件
                 eventPublisher.publish(new PermissionChangedEvent(
                                 String.valueOf(memberId),
                                 Set.of(memberId),
@@ -60,7 +59,7 @@ public class PermissionDomainService {
         }
 
         /**
-         * 撤销会员的角色
+         * Revoke a role from a member.
          */
         public void revokeRoleFromMember(Long memberId, Long roleId, String operator) {
                 MemberAggregate member = memberRepository
@@ -70,7 +69,6 @@ public class PermissionDomainService {
                 member.revokeRole(roleId);
                 memberRepository.save(member);
 
-                // 发布权限变更事件
                 eventPublisher.publish(new PermissionChangedEvent(
                                 String.valueOf(memberId),
                                 Set.of(memberId),
@@ -81,7 +79,7 @@ public class PermissionDomainService {
         }
 
         /**
-         * 为角色添加权限
+         * Add a permission to a role.
          */
         public void addPermissionToRole(Long roleId, Long permissionId, String operator) {
                 RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
@@ -94,10 +92,8 @@ public class PermissionDomainService {
                 role.addPermission(permissionId);
                 roleRepository.save(role);
 
-                // 查找所有拥有该角色的会员
                 Set<Long> affectedMemberIds = findMemberIdsByRoleId(roleId);
 
-                // 发布权限变更事件
                 if (!affectedMemberIds.isEmpty()) {
                         eventPublisher.publish(new PermissionChangedEvent(
                                         String.valueOf(roleId),
@@ -110,7 +106,7 @@ public class PermissionDomainService {
         }
 
         /**
-         * 从角色移除权限
+         * Remove a permission from a role.
          */
         public void removePermissionFromRole(Long roleId, Long permissionId, String operator) {
                 RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
@@ -119,10 +115,8 @@ public class PermissionDomainService {
                 role.removePermission(permissionId);
                 roleRepository.save(role);
 
-                // 查找所有拥有该角色的会员
                 Set<Long> affectedMemberIds = findMemberIdsByRoleId(roleId);
 
-                // 发布权限变更事件
                 if (!affectedMemberIds.isEmpty()) {
                         eventPublisher.publish(new PermissionChangedEvent(
                                         String.valueOf(roleId),
@@ -135,7 +129,7 @@ public class PermissionDomainService {
         }
 
         /**
-         * 获取会员的所有权限
+         * Get all permissions granted to a member.
          */
         public Set<PermissionAggregate> getMemberPermissions(Long memberId) {
                 MemberAggregate member = memberRepository
@@ -149,12 +143,11 @@ public class PermissionDomainService {
                                 .flatMap(Set::stream)
                                 .collect(Collectors.toSet());
 
-                // 获取所有权限
                 return new HashSet<>(permissionRepository.findByIds(permissionIds));
         }
 
         /**
-         * 批量获取会员权限编码
+         * Batch load permission codes by member ID.
          */
         public Map<Long, Set<String>> getMemberPermissionCodesBatch(List<Long> memberIds) {
                 if (memberIds == null || memberIds.isEmpty()) {
@@ -190,7 +183,7 @@ public class PermissionDomainService {
         }
 
         /**
-         * 查找拥有指定角色的所有会员ID
+         * Find all member IDs that currently hold the given role.
          */
         private Set<Long> findMemberIdsByRoleId(Long roleId) {
                 return memberRepository.findMemberIdsByRoleId(roleId);

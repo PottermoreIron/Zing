@@ -2,11 +2,6 @@ package com.pot.im.service.protocol.serializer;
 
 import lombok.Data;
 
-/**
- * @author: Pot
- * @created: 2025/8/10 22:44
- * @description: 自定义消息
- */
 
 @Data
 public class ProtocolMessage {

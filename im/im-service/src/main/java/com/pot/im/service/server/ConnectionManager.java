@@ -14,11 +14,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-/**
- * @author: Pot
- * @created: 2025/8/10 23:10
- * @description: 连接管理器 - 管理所有客户端连接
- */
 @Component
 @Slf4j
 public class ConnectionManager {
@@ -28,10 +23,7 @@ public class ConnectionManager {
     private final ConcurrentMap<ChannelId, String> channelUsers = new ConcurrentHashMap<>();
     private final AtomicLong connectionCount = new AtomicLong(0);
 
-    /**
-     * 添加连接
-     */
-    public void addConnection(Channel channel) {
+        public void addConnection(Channel channel) {
         Objects.requireNonNull(channel, "Channel cannot be null");
 
         if (channels.putIfAbsent(channel.id(), channel) == null) {
@@ -40,10 +32,7 @@ public class ConnectionManager {
         }
     }
 
-    /**
-     * 移除连接并清理关联数据
-     */
-    public void removeConnection(ChannelId channelId) {
+        public void removeConnection(ChannelId channelId) {
         Channel channel = channels.remove(channelId);
         if (channel != null) {
             cleanupUserMapping(channelId);
@@ -52,14 +41,10 @@ public class ConnectionManager {
         }
     }
 
-    /**
-     * 绑定用户到连接
-     */
-    public void bindUser(String userId, Channel channel) {
+        public void bindUser(String userId, Channel channel) {
         Objects.requireNonNull(userId, "UserId cannot be null");
         Objects.requireNonNull(channel, "Channel cannot be null");
 
-        // 处理用户重复登录
         handleUserReconnection(userId, channel);
 
         userChannels.put(userId, channel);
@@ -68,67 +53,43 @@ public class ConnectionManager {
         log.info("User bound: {} -> {}", userId, channel.id());
     }
 
-    /**
-     * 获取用户连接
-     */
-    public Channel getUserChannel(String userId) {
+        public Channel getUserChannel(String userId) {
         return Optional.ofNullable(userChannels.get(userId))
                 .filter(Channel::isActive)
                 .orElse(null);
     }
 
-    /**
-     * 获取连接对应用户
-     */
-    public String getChannelUser(ChannelId channelId) {
+        public String getChannelUser(ChannelId channelId) {
         return channelUsers.get(channelId);
     }
 
-    /**
-     * 检查用户在线状态
-     */
-    public boolean isUserOnline(String userId) {
+        public boolean isUserOnline(String userId) {
         return getUserChannel(userId) != null;
     }
 
-    /**
-     * 获取在线用户集合
-     */
-    public Set<String> getOnlineUsers() {
+        public Set<String> getOnlineUsers() {
         return Set.copyOf(userChannels.keySet());
     }
 
-    /**
-     * 获取连接统计信息
-     */
-    public ConnectionStats getStats() {
+        public ConnectionStats getStats() {
         return ConnectionStats.builder()
                 .totalConnections(connectionCount.get())
                 .authenticatedUsers(userChannels.size())
                 .build();
     }
 
-    /**
-     * 广播消息给所有在线用户
-     */
-    public void broadcast(Object message) {
+        public void broadcast(Object message) {
         broadcast(message, null);
     }
 
-    /**
-     * 条件广播
-     */
-    public void broadcast(Object message, Consumer<String> userFilter) {
+        public void broadcast(Object message, Consumer<String> userFilter) {
         userChannels.entrySet().parallelStream()
                 .filter(entry -> entry.getValue().isActive())
                 .filter(entry -> userFilter == null || filterUser(entry.getKey(), userFilter))
                 .forEach(entry -> entry.getValue().writeAndFlush(message));
     }
 
-    /**
-     * 发送消息给指定用户
-     */
-    public boolean sendToUser(String userId, Object message) {
+        public boolean sendToUser(String userId, Object message) {
         return Optional.ofNullable(getUserChannel(userId))
                 .map(channel -> {
                     channel.writeAndFlush(message);

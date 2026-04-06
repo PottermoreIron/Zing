@@ -7,12 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 修改密码命令
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Data
 @Builder
 @NoArgsConstructor

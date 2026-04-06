@@ -13,15 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * 设备仓储实现
- *
- * <p>
- * 映射 {@link DeviceAggregate} 与 {@link Device}（MyBatisPlus DO）之间的转换。
- *
- * @author Pot
- * @since 2026-03-18
- */
 @Slf4j
 @Repository
 @RequiredArgsConstructor

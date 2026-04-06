@@ -1,11 +1,13 @@
 package com.pot.member.service.domain.port;
 
 /**
- * 密码加密 Port（出站端口）
+ * Outbound port for password hashing and verification.
  *
  * <p>
- * 领域层通过此接口进行密码的加密与校验，不依赖 Spring Security。
- * 基础设施层提供 {@code BCryptPasswordEncoderAdapter} 实现。
+ * The domain layer uses this abstraction to stay decoupled from Spring Security
+ * or any other
+ * concrete hashing library.
+ * </p>
  *
  * @author Pot
  * @since 2026-03-18
@@ -13,12 +15,12 @@ package com.pot.member.service.domain.port;
 public interface PasswordEncoder {
 
     /**
-     * 将明文密码编码为哈希值
+     * Encode a raw password.
      */
     String encode(String rawPassword);
 
     /**
-     * 校验明文密码与哈希值是否匹配
+     * Check whether a raw password matches its encoded value.
      */
     boolean matches(String rawPassword, String encodedPassword);
 }

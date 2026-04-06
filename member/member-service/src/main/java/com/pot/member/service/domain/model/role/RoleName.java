@@ -2,12 +2,6 @@ package com.pot.member.service.domain.model.role;
 
 import lombok.Value;
 
-/**
- * 角色名称值对象
- *
- * @author Pot
- * @since 2026-01-06
- */
 @Value
 public class RoleName {
     String value;
