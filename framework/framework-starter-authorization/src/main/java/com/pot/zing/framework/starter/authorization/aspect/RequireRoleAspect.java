@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * 角色检查切面。
+ * Aspect that enforces role requirements.
  */
 @Slf4j
 @Aspect

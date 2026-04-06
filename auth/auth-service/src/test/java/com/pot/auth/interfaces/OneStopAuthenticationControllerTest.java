@@ -25,12 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * OneStopAuthenticationController 切片测试（@WebMvcTest）
- *
- * <p>
- * 仅加载Web层Bean，所有应用服务均使用MockBean替代。
- *
- * @author pot
+ * Web slice tests for OneStopAuthenticationController.
  */
 @WebMvcTest(controllers = OneStopAuthenticationController.class)
 @Import(GlobalExceptionHandler.class)
@@ -49,8 +44,6 @@ class OneStopAuthenticationControllerTest {
         private OneStopAuthenticationService oneStopAuthenticationService;
 
         private static final String AUTH_URL = "/auth/api/v1/authenticate";
-
-        // 用户名密码认证
 
         @Nested
         @DisplayName("用户名密码一键认证")
@@ -157,8 +150,6 @@ class OneStopAuthenticationControllerTest {
                 }
         }
 
-        // 手机验证码认证
-
         @Nested
         @DisplayName("手机验证码一键认证")
         class PhoneCodeAuth {
@@ -195,8 +186,6 @@ class OneStopAuthenticationControllerTest {
                                         .andExpect(jsonPath("$.success").value(true));
                 }
         }
-
-        // 邮箱验证码认证
 
         @Nested
         @DisplayName("邮箱验证码一键认证")

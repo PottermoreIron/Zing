@@ -23,18 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * VerificationCodeController 切片测试（@WebMvcTest）
- *
- * <p>
- * 验证：
- * <ul>
- * <li>合法email/phone请求返回200成功</li>
- * <li>参数格式不合法返回400</li>
- * <li>发送频率限制异常映射为AUTH_0200错误码</li>
- * <li>参数缺失返回400</li>
- * </ul>
- *
- * @author pot
+ * Web slice tests for VerificationCodeController.
  */
 @WebMvcTest(controllers = VerificationCodeController.class)
 @Import(GlobalExceptionHandler.class)
@@ -51,8 +40,6 @@ class VerificationCodeControllerTest {
 
     @MockitoBean
     private VerificationCodeApplicationService verificationCodeApplicationService;
-
-    // POST /auth/code/email - 发送邮件验证码
 
     @Nested
     @DisplayName("POST /auth/code/email")
@@ -98,7 +85,6 @@ class VerificationCodeControllerTest {
         @Test
         @DisplayName("发送频率限制触发，返回400并携带AUTH_0200错误码")
         void whenCodeSendTooFrequent_thenReturn400WithCode0200() throws Exception {
-            // given: 触发频率限制
             when(verificationCodeApplicationService.sendEmailCode(anyString()))
                     .thenThrow(new CodeSendTooFrequentException("发送过于频繁"));
 
@@ -120,8 +106,6 @@ class VerificationCodeControllerTest {
                     .andExpect(jsonPath("$.success").value(false));
         }
     }
-
-    // POST /auth/code/sms - 发送短信验证码
 
     @Nested
     @DisplayName("POST /auth/code/sms")

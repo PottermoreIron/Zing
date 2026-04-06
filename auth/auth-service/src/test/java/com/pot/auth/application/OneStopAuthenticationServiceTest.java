@@ -27,18 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * OneStopAuthenticationService 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>正确构建 OneStopAuthContext 并委托给 OneStopAuthStrategyFactory</li>
- * <li>将 AuthenticationResult 映射为 OneStopAuthResponse</li>
- * <li>userAgent 为 null 时使用默认值 "Unknown"</li>
- * <li>策略抛出异常时向上传播</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for OneStopAuthenticationService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OneStopAuthenticationService 单元测试")
@@ -80,7 +69,6 @@ class OneStopAuthenticationServiceTest {
         // when
         OneStopAuthResponse response = service.authenticate(request, "192.168.1.1", "Chrome/120.0");
 
-        // then: 响应字段正确映射
         assertThat(response).isNotNull();
         assertThat(response.userId()).isEqualTo(USER_ID);
         assertThat(response.userDomain()).isEqualTo(USER_DOMAIN);
@@ -88,10 +76,8 @@ class OneStopAuthenticationServiceTest {
         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
 
-        // then: 正确的AuthType传入Factory
         verify(strategyFactory).getStrategy(AuthType.USERNAME_PASSWORD);
 
-        // then: 上下文携带了正确的IP
         ArgumentCaptor<OneStopAuthContext> contextCaptor = ArgumentCaptor.forClass(OneStopAuthContext.class);
         verify(mockStrategy).execute(contextCaptor.capture());
         OneStopAuthContext capturedCtx = contextCaptor.getValue();

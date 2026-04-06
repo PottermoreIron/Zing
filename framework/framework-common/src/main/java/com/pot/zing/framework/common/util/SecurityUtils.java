@@ -8,9 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 /**
- * @author: Pot
- * @created: 2025/3/31 23:46
- * @description: 安全工具类
+ * Hashing and security-related helpers.
  */
 @Slf4j
 public class SecurityUtils {

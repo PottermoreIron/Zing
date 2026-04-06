@@ -21,12 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * 领域值对象单元测试
- *
- * <p>
- * 覆盖：Email、Phone、Password、IpAddress、PermissionDigest
- *
- * @author pot
+ * Unit tests for auth domain value objects.
  */
 @DisplayName("领域值对象单元测试")
 class DomainValueObjectsTest {

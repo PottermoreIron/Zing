@@ -9,19 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * UserDefaultsGenerator 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>基于手机号生成的用户名格式正确</li>
- * <li>基于邮箱生成的用户名包含邮箱前缀</li>
- * <li>通用用户名以 "user_" 前缀开头</li>
- * <li>生成的随机密码满足强度规则（12位、含大小写数字特殊字符）</li>
- * <li>多次调用生成不同的用户名（随机性）</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for UserDefaultsGenerator.
  */
 @DisplayName("UserDefaultsGenerator 单元测试")
 class UserDefaultsGeneratorTest {
@@ -42,7 +30,6 @@ class UserDefaultsGeneratorTest {
     void whenGenerateFromPhone_thenFollowFormat() {
         String nickname = generator.generateNicknameFromPhone("13800138000");
         assertThat(nickname).startsWith("user_");
-        // 格式: user_{timestamp}_{random4}
         assertThat(nickname.split("_")).hasSizeGreaterThanOrEqualTo(2);
         assertThat(nickname).isLowerCase();
     }
@@ -67,10 +54,8 @@ class UserDefaultsGeneratorTest {
     @DisplayName("基于邮箱生成昵称，以下划线分隔后缀随机字符")
     void whenGenerateFromEmail_thenHasRandomSuffix() {
         String nickname = generator.generateNicknameFromEmail("test@example.com");
-        // 格式: {emailPrefix}_{random4}
         String[] parts = nickname.split("_");
         assertThat(parts).hasSizeGreaterThanOrEqualTo(2);
-        // 随机后缀长度为4
         assertThat(parts[parts.length - 1]).hasSize(4);
     }
 
@@ -131,8 +116,7 @@ class UserDefaultsGeneratorTest {
     void whenGeneratePasswordMultipleTimes_thenRandom() {
         String p1 = generator.generateRandomPassword();
         String p2 = generator.generateRandomPassword();
-        // 有小概率相同，但通常应该不同
-        // 不做严格断言，仅验证格式
+        // Random collisions are possible, so this test only checks the basic contract.
         assertThat(p1).isNotBlank();
         assertThat(p2).isNotBlank();
     }

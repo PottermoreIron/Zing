@@ -21,17 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 /**
- * TokenRefreshApplicationService 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>refreshToken：委托给JwtTokenService，并将TokenPair映射为LoginResponse</li>
- * <li>validateAccessToken：直接委托并返回JwtToken</li>
- * <li>logout：先验证AccessToken，再调用addToBlacklist</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for TokenRefreshApplicationService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("TokenRefreshApplicationService 单元测试")
@@ -67,7 +57,7 @@ class TokenRefreshApplicationServiceTest {
             assertThat(response.nickname()).isEqualTo(TestFixtures.USERNAME);
             assertThat(response.accessToken()).isEqualTo(TestFixtures.FAKE_ACCESS_TOKEN);
             assertThat(response.refreshToken()).isEqualTo(TestFixtures.FAKE_REFRESH_TOKEN);
-            // email 和 phone 在 refreshToken 场景下为 null
+            // Refresh-token responses do not carry email or phone fields.
             assertThat(response.email()).isNull();
             assertThat(response.phoneNumber()).isNull();
 
@@ -139,7 +129,7 @@ class TokenRefreshApplicationServiceTest {
             // when
             service.logout(TestFixtures.FAKE_ACCESS_TOKEN);
 
-            // then: 验证顺序 - 先validateAccessToken，再addToBlacklist
+            // The service must validate the token before blacklisting it.
             verify(jwtTokenService).validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN);
             verify(jwtTokenService).addToBlacklist(
                     eq(accessToken.tokenId()),

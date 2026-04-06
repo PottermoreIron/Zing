@@ -1,7 +1,7 @@
 package com.pot.zing.framework.starter.authorization.enums;
 
 /**
- * 逻辑关系枚举。
+ * Logical operators for authorization annotations.
  */
 public enum Logical {
     AND,

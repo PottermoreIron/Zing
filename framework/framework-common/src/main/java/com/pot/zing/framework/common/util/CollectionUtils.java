@@ -9,18 +9,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * @author: Pot
- * @created: 2025/2/22 16:46
- * @description: 集合工具类 refer: <a href="https://github.com/YunaiV/ruoyi-vue-pro">...</a>
+ * Collection helpers inspired by ruoyi-vue-pro.
  */
 public class CollectionUtils {
 
-    // 空集合快速判断
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
     }
 
-    // 通用转换方法（最终实现）
     private static <T, K, V, M extends Map<K, V>> M convertMap(
             Collection<T> source,
             Function<? super T, ? extends K> keyMapper,
@@ -36,11 +32,9 @@ public class CollectionUtils {
                 keyMapper,
                 valueMapper,
                 mergeFunction,
-                mapFactory
-        ));
+                mapFactory));
     }
 
-    // 基础转换（仅Key提取）
     public static <T, K> Map<K, T> toMap(Collection<T> source, Function<T, K> keyMapper) {
         return toMap(source, keyMapper, () -> new HashMap<>());
     }
@@ -55,11 +49,9 @@ public class CollectionUtils {
                 keyMapper,
                 Function.identity(),
                 (existing, replacement) -> existing,
-                mapFactory
-        );
+                mapFactory);
     }
 
-    // 完整参数转换
     public static <T, K, V> Map<K, V> toMap(
             Collection<T> source,
             Function<T, K> keyMapper,
@@ -79,11 +71,9 @@ public class CollectionUtils {
                 keyMapper,
                 valueMapper,
                 (existing, replacement) -> existing,
-                mapFactory
-        );
+                mapFactory);
     }
 
-    // 带合并策略的转换
     public static <T, K, V> Map<K, V> toMapWithMerge(
             Collection<T> source,
             Function<T, K> keyMapper,
@@ -105,7 +95,6 @@ public class CollectionUtils {
                 keyMapper,
                 valueMapper,
                 mergeFunction,
-                mapFactory
-        );
+                mapFactory);
     }
 }

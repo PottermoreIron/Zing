@@ -33,18 +33,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * RegistrationApplicationService 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>传统注册（用户名密码、手机验证码等）→ RegisterStrategyFactory</li>
- * <li>OAuth2 注册 → 委托给 OneStopAuthenticationService</li>
- * <li>WeChat 注册 → 委托给 OneStopAuthenticationService</li>
- * <li>策略异常向上传播</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for RegistrationApplicationService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RegistrationApplicationService 单元测试")
@@ -70,8 +59,6 @@ class RegistrationApplicationServiceTest {
 
         @InjectMocks
         private RegistrationApplicationService service;
-
-        // 传统注册
 
         @Nested
         @DisplayName("传统注册（用户名密码）")
@@ -124,7 +111,6 @@ class RegistrationApplicationServiceTest {
                         doReturn(mockStrategy).when(registerStrategyFactory).getStrategy(any());
                         when(mockStrategy.execute(any())).thenReturn(authResult());
 
-                        // when & then: 不应抛出NPE
                         service.register(request, "127.0.0.1", null);
                         verify(mockStrategy).execute(any());
                 }
@@ -149,8 +135,6 @@ class RegistrationApplicationServiceTest {
                                         .isInstanceOf(DomainException.class);
                 }
         }
-
-        // OAuth2 注册
 
         @Nested
         @DisplayName("OAuth2 注册（委托给 OneStopAuthenticationService）")
@@ -195,8 +179,6 @@ class RegistrationApplicationServiceTest {
                         verifyNoInteractions(registerStrategyFactory, registrationValidationChain);
                 }
         }
-
-        // WeChat 注册
 
         @Nested
         @DisplayName("微信注册（委托给 OneStopAuthenticationService）")

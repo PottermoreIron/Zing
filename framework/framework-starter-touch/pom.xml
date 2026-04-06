@@ -18,20 +18,20 @@
         </developer>
     </developers>
     <dependencies>
-        <!-- 依赖 common 模块 -->
+        <!-- Shared common module -->
         <dependency>
             <groupId>com.pot</groupId>
             <artifactId>framework-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        <!-- Redis Starter (必需依赖) -->
+        <!-- Required Redis starter -->
         <dependency>
             <groupId>com.pot</groupId>
             <artifactId>framework-starter-redis</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <!-- Rate Limit Starter (必需依赖) -->
+        <!-- Required rate-limit starter -->
         <dependency>
             <groupId>com.pot</groupId>
             <artifactId>framework-starter-ratelimit</artifactId>
@@ -41,7 +41,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-        <!-- Configuration Processor (生成配置元数据) -->
+        <!-- Configuration processor for metadata generation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>

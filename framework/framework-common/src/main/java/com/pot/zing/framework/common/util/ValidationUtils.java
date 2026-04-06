@@ -5,9 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Pattern;
 
 /**
- * @author: Pot
- * @created: 2025/2/22 16:48
- * @description: 验证工具类
+ * Validation helpers backed by regular expressions.
  */
 public class ValidationUtils {
     public final static String PHONE_REGEX = "(?:0|86|\\+86)?1[3-9]\\d{9}$";

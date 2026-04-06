@@ -16,35 +16,23 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 /**
- * Jackson JSON工具类
- *
- * <p>提供线程安全的JSON序列化和反序列化功能，支持：
- * <ul>
- *   <li>对象与JSON字符串互转</li>
- *   <li>对象与字节数组互转</li>
- *   <li>复杂类型转换</li>
- *   <li>流式处理</li>
- * </ul>
- *
- * @author: Pot
- * @created: 2025/3/16 22:41
- * @description: Jackson工具类
+ * Thread-safe Jackson serialization helpers.
  */
 @Slf4j
 public final class JacksonUtils {
 
     /**
-     * 默认日期格式
+     * Default date format.
      */
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * 默认时区
+     * Default time zone.
      */
     private static final String DEFAULT_TIMEZONE = "GMT+8";
 
     /**
-     * 线程安全的ObjectMapper实例
+     * Shared thread-safe ObjectMapper.
      */
     private static final ObjectMapper MAPPER;
 
@@ -52,33 +40,26 @@ public final class JacksonUtils {
         MAPPER = createDefaultObjectMapper();
     }
 
-    /**
-     * 私有构造函数，防止实例化
-     */
     private JacksonUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
 
     /**
-     * 创建默认配置的ObjectMapper
+     * Creates the default ObjectMapper configuration.
      */
     private static ObjectMapper createDefaultObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
-        // 注册Java8时间模块
         mapper.registerModule(new JavaTimeModule());
 
-        // 反序列化配置
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
         mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
 
-        // 序列化配置
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        // 日期格式配置
         SimpleDateFormat dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(DEFAULT_TIMEZONE));
         mapper.setDateFormat(dateFormat);
@@ -87,20 +68,14 @@ public final class JacksonUtils {
     }
 
     /**
-     * 获取ObjectMapper实例
-     *
-     * @return ObjectMapper实例
+     * Returns the shared ObjectMapper instance.
      */
     public static ObjectMapper getMapper() {
         return MAPPER;
     }
 
     /**
-     * 对象转JSON字符串
-     *
-     * @param obj 待转换对象
-     * @return JSON字符串
-     * @throws JsonSerializationException 序列化异常
+     * Serializes an object to JSON.
      */
     public static String toJson(Object obj) {
         if (obj == null) {
@@ -116,11 +91,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 对象转字节数组
-     *
-     * @param obj 待转换对象
-     * @return 字节数组
-     * @throws JsonSerializationException 序列化异常
+     * Serializes an object to bytes.
      */
     public static byte[] toBytes(Object obj) {
         if (obj == null) {
@@ -136,13 +107,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * JSON字符串转对象
-     *
-     * @param json  JSON字符串
-     * @param clazz 目标类型
-     * @param <T>   泛型类型
-     * @return 反序列化对象
-     * @throws JsonDeserializationException 反序列化异常
+     * Deserializes JSON into an object.
      */
     public static <T> T toObject(String json, Class<T> clazz) {
         if (json == null || json.trim().isEmpty()) {
@@ -158,13 +123,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * JSON字符串转复杂类型对象
-     *
-     * @param json          JSON字符串
-     * @param typeReference 类型引用
-     * @param <T>           泛型类型
-     * @return 反序列化对象
-     * @throws JsonDeserializationException 反序列化异常
+     * Deserializes JSON into a complex type.
      */
     public static <T> T toObject(String json, TypeReference<T> typeReference) {
         if (json == null || json.trim().isEmpty()) {
@@ -180,13 +139,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 字节数组转对象
-     *
-     * @param data  字节数组
-     * @param clazz 目标类型
-     * @param <T>   泛型类型
-     * @return 反序列化对象
-     * @throws JsonDeserializationException 反序列化异常
+     * Deserializes bytes into an object.
      */
     public static <T> T toObject(byte[] data, Class<T> clazz) {
         if (data == null || data.length == 0) {
@@ -202,13 +155,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 字节数组转复杂类型对象
-     *
-     * @param data          字节数组
-     * @param typeReference 类型引用
-     * @param <T>           泛型类型
-     * @return 反序列化对象
-     * @throws JsonDeserializationException 反序列化异常
+     * Deserializes bytes into a complex type.
      */
     public static <T> T toObject(byte[] data, TypeReference<T> typeReference) {
         if (data == null || data.length == 0) {
@@ -224,13 +171,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 输入流转对象
-     *
-     * @param inputStream 输入流
-     * @param clazz       目标类型
-     * @param <T>         泛型类型
-     * @return 反序列化对象
-     * @throws JsonDeserializationException 反序列化异常
+     * Deserializes an input stream into an object.
      */
     public static <T> T toObject(InputStream inputStream, Class<T> clazz) {
         if (inputStream == null) {
@@ -246,11 +187,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 解析JSON为JsonNode
-     *
-     * @param json JSON字符串
-     * @return JsonNode对象
-     * @throws JsonDeserializationException 解析异常
+     * Parses JSON into a JsonNode tree.
      */
     public static JsonNode parseTree(String json) {
         if (json == null || json.trim().isEmpty()) {
@@ -266,12 +203,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 对象深拷贝
-     *
-     * @param obj   源对象
-     * @param clazz 目标类型
-     * @param <T>   泛型类型
-     * @return 拷贝对象
+     * Creates a deep copy by serializing and deserializing the object.
      */
     public static <T> T deepCopy(Object obj, Class<T> clazz) {
         if (obj == null) {
@@ -288,10 +220,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * 验证JSON格式是否有效
-     *
-     * @param json JSON字符串
-     * @return 是否有效
+     * Returns whether the JSON text is valid.
      */
     public static boolean isValidJson(String json) {
         if (json == null || json.trim().isEmpty()) {
@@ -307,7 +236,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * JSON序列化异常
+     * JSON serialization failure.
      */
     public static class JsonSerializationException extends RuntimeException {
         public JsonSerializationException(String message, Throwable cause) {
@@ -316,7 +245,7 @@ public final class JacksonUtils {
     }
 
     /**
-     * JSON反序列化异常
+     * JSON deserialization failure.
      */
     public static class JsonDeserializationException extends RuntimeException {
         public JsonDeserializationException(String message, Throwable cause) {

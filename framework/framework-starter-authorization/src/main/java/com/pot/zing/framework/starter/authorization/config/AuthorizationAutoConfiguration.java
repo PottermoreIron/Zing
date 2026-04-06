@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
 /**
- * 授权自动配置。
+ * Auto-configuration for authorization components.
  */
 @AutoConfiguration
 @ConditionalOnClass(AuthorizationSecurityAccessor.class)

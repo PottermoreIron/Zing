@@ -13,12 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 
 /**
- * LogoutApplicationService 单元测试
- *
- * <p>
- * 验证应用层登出编排：正确委托给JwtTokenService
- *
- * @author pot
+ * Unit tests for LogoutApplicationService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LogoutApplicationService 单元测试")
@@ -36,7 +31,6 @@ class LogoutApplicationServiceTest {
         // when
         logoutApplicationService.logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
 
-        // then: 完整委托，参数正确传递
         verify(jwtTokenService).logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
     }
 

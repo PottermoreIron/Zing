@@ -18,16 +18,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 测试数据工厂（Object Mother模式）
- *
- * <p>
- * 提供常用测试对象的静态工厂方法，统一管理测试数据，避免重复代码。
- *
- * @author pot
+ * Shared test fixtures for auth-service tests.
  */
 public final class TestFixtures {
-
-    // 常量
 
     public static final UserId USER_ID = UserId.of(10001L);
     public static final UserDomain USER_DOMAIN = UserDomain.MEMBER;
@@ -44,14 +37,8 @@ public final class TestFixtures {
     public static final TokenId REFRESH_TOKEN_ID = TokenId.of("ref-test-id-001");
 
     private TestFixtures() {
-        // 工具类，不允许实例化
     }
 
-    // UserDTO
-
-    /**
-     * 创建标准的Member用户DTO
-     */
     public static UserDTO memberUserDTO() {
         return UserDTO.builder()
                 .userId(USER_ID)
@@ -64,11 +51,6 @@ public final class TestFixtures {
                 .build();
     }
 
-    // JwtToken
-
-    /**
-     * 创建未过期的AccessToken（1小时后过期）
-     */
     public static JwtToken validAccessToken() {
         long now = System.currentTimeMillis() / 1000;
         return new JwtToken(
@@ -83,9 +65,6 @@ public final class TestFixtures {
                 Map.of("perm_version", 1L));
     }
 
-    /**
-     * 创建已过期的AccessToken
-     */
     public static JwtToken expiredAccessToken() {
         long now = System.currentTimeMillis() / 1000;
         return new JwtToken(
@@ -95,16 +74,11 @@ public final class TestFixtures {
                 USERNAME,
                 PERMISSIONS,
                 now - 7200,
-                now - 3600, // 1小时前已过期
+                now - 3600,
                 FAKE_ACCESS_TOKEN,
                 Map.of("perm_version", 1L));
     }
 
-    // RefreshToken
-
-    /**
-     * 创建未过期的RefreshToken（30天后过期）
-     */
     public static RefreshToken validRefreshToken() {
         long now = System.currentTimeMillis() / 1000;
         return new RefreshToken(
@@ -117,9 +91,6 @@ public final class TestFixtures {
                 FAKE_REFRESH_TOKEN);
     }
 
-    /**
-     * 创建已过期的RefreshToken
-     */
     public static RefreshToken expiredRefreshToken() {
         long now = System.currentTimeMillis() / 1000;
         return new RefreshToken(
@@ -128,26 +99,17 @@ public final class TestFixtures {
                 USER_DOMAIN,
                 DeviceId.of(1L),
                 now - 2592000,
-                now - 86400, // 1天前已过期
+                now - 86400,
                 FAKE_REFRESH_TOKEN);
     }
 
-    // TokenPair
-
-    /**
-     * 创建有效的TokenPair
-     */
     public static TokenPair validTokenPair() {
         return new TokenPair(validAccessToken(), validRefreshToken());
     }
 
-    // PermissionCacheMetadata
-
     public static PermissionCacheMetadata permCacheMetadata() {
         return PermissionCacheMetadata.empty(1L);
     }
-
-    // AuthenticationResult
 
     public static AuthenticationResult authResult() {
         long now = System.currentTimeMillis() / 1000;
@@ -164,8 +126,6 @@ public final class TestFixtures {
                 .build();
     }
 
-    // LoginResponse
-
     public static LoginResponse loginResponse() {
         long now = System.currentTimeMillis() / 1000;
         return new LoginResponse(
@@ -180,11 +140,6 @@ public final class TestFixtures {
                 now + 2592000);
     }
 
-    // 请求对象
-
-    /**
-     * 创建用户名密码登录请求
-     */
     public static UsernamePasswordLoginRequest usernamePasswordRequest() {
         return new UsernamePasswordLoginRequest(
                 LoginType.USERNAME_PASSWORD,

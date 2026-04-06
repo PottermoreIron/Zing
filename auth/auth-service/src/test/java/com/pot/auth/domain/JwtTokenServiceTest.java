@@ -29,18 +29,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * JwtTokenService 单元测试
- *
- * <p>
- * 覆盖Token生命周期全流程：
- * <ul>
- * <li>generateTokenPair - 权限缓存 + Token生成 + RefreshToken存储</li>
- * <li>validateAccessToken - 过期检测 / 黑名单检测 / 权限版本校验</li>
- * <li>logout - 黑名单写入 + RefreshToken删除（幂等容错）</li>
- * <li>addToBlacklist - 黑名单写入TTL</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for JwtTokenService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("JwtTokenService 单元测试")
@@ -104,10 +93,7 @@ class JwtTokenServiceTest {
                     TestFixtures.USERNAME,
                     TestFixtures.PERMISSIONS);
 
-            // then
             assertThat(result).isEqualTo(expected);
-
-            // 验证RefreshToken写入缓存
             String expectedRefreshKey = "auth:refresh:" + TestFixtures.REFRESH_TOKEN_ID.value();
             verify(cachePort).set(eq(expectedRefreshKey), eq(TestFixtures.FAKE_REFRESH_TOKEN), any(Duration.class));
         }
@@ -121,7 +107,6 @@ class JwtTokenServiceTest {
             when(tokenManagementPort.generateTokenPair(any(), any(), any(), any(), any()))
                     .thenThrow(new RuntimeException("JWT signing failed"));
 
-            // when & then: 包装成DomainException（AUTHENTICATION_FAILED）
             assertThatThrownBy(() -> jwtTokenService.generateTokenPair(
                     TestFixtures.USER_ID,
                     TestFixtures.USER_DOMAIN,
@@ -141,7 +126,6 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("Token有效，返回JwtToken对象")
         void whenTokenValid_thenReturnJwtToken() {
-            // given: 未过期 + 不在黑名单
             JwtToken validToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
             when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(false);
@@ -156,7 +140,6 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("Token已过期，抛出TokenExpiredException")
         void whenTokenExpired_thenThrowTokenExpiredException() {
-            // given: Token已过期
             JwtToken expiredToken = TestFixtures.expiredAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
 
@@ -169,7 +152,6 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("Token在黑名单中，抛出TokenInvalidException")
         void whenTokenInBlacklist_thenThrowTokenInvalidException() {
-            // given: 未过期但在黑名单
             JwtToken validToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
             when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(true);
@@ -190,7 +172,6 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("有效Token登出：加入黑名单 + 删除RefreshToken缓存")
         void whenValidTokens_thenBlacklistAndDeleteRefresh() {
-            // given
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(accessToken);
             when(tokenManagementPort.parseRefreshToken(TestFixtures.FAKE_REFRESH_TOKEN))
@@ -199,40 +180,33 @@ class JwtTokenServiceTest {
             // when
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
 
-            // then: AccessToken加入黑名单
             ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
             verify(cachePort).set(
                     eq("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value()),
                     eq("1"),
                     ttlCaptor.capture());
             assertThat(ttlCaptor.getValue().getSeconds()).isGreaterThan(0);
-
-            // then: RefreshToken缓存删除
             verify(cachePort).delete("auth:refresh:" + TestFixtures.REFRESH_TOKEN_ID.value());
         }
 
         @Test
         @DisplayName("AccessToken已过期，不写入黑名单（已自然过期无需额外吊销）")
         void whenAccessTokenExpired_thenSkipBlacklist() {
-            // given: Token已过期（getRemainingSeconds() == 0）
             JwtToken expiredToken = TestFixtures.expiredAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
 
             // when
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 
-            // then: 不写黑名单，不抛异常
             verify(cachePort, never()).set(contains("auth:blacklist:"), any(), any(Duration.class));
         }
 
         @Test
         @DisplayName("AccessToken解析失败（已损坏/无效），不抛异常（幂等容错）")
         void whenAccessTokenParseFails_thenNoException() {
-            // given: 解析抛出异常
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .thenThrow(new RuntimeException("malformed JWT"));
 
-            // when & then: 不应抛出任何异常
             assertThatCode(() -> jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null))
                     .doesNotThrowAnyException();
         }
@@ -240,14 +214,12 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("未提供RefreshToken时，只吊销AccessToken，不调用RefreshToken删除")
         void whenRefreshTokenNull_thenOnlyRevokeAccessToken() {
-            // given
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(accessToken);
 
             // when
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 
-            // then: 不解析RefreshToken
             verify(tokenManagementPort, never()).parseRefreshToken(anyString());
         }
     }
@@ -261,14 +233,11 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("将TokenId加入黑名单，使用指定TTL")
         void whenCalled_thenStoreBlacklistKeyWithTtl() {
-            // given
             TokenId tokenId = TokenId.of("blacklist-test-001");
             long remainingSeconds = 1800L;
 
-            // when
             jwtTokenService.addToBlacklist(tokenId, remainingSeconds);
 
-            // then
             verify(cachePort).set(
                     eq("auth:blacklist:" + tokenId.value()),
                     eq("1"),

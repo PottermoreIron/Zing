@@ -26,20 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * PermissionDomainService 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>cachePermissionsWithMetadata：计算摘要、递增版本号、缓存权限和摘要，返回元数据</li>
- * <li>incrementPermissionVersion：正确递增并返回新版本号</li>
- * <li>getCurrentPermissionVersion：命中缓存时返回缓存版本，否则返回初始版本</li>
- * <li>getCachedPermissions：命中缓存时返回权限，空占位符被过滤，未命中返回空集合</li>
- * <li>invalidatePermissionCache：删除权限Key和摘要Key</li>
- * <li>verifyPermissionDigest：匹配时返回true，不匹配时返回false，无缓存时降级返回true</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for PermissionDomainService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PermissionDomainService 单元测试")
@@ -75,12 +62,8 @@ class PermissionDomainServiceTest {
             PermissionCacheMetadata metadata = permissionDomainService
                     .cachePermissionsWithMetadata(USER_ID, USER_DOMAIN, permissions);
 
-            // then: 版本号正确
             assertThat(metadata.version()).isEqualTo(5L);
-            // then: 摘要非空
             assertThat(metadata.digest()).isNotBlank();
-
-            // then: 调用了increment（版本递增）、set×2（权限+摘要缓存）
             verify(cachePort).increment(any(), eq(1L), eq(Duration.ZERO));
             verify(cachePort, times(2)).set(any(), any(), any(Duration.class));
         }
@@ -132,7 +115,6 @@ class PermissionDomainServiceTest {
             PermissionVersion version = permissionDomainService
                     .incrementPermissionVersion(USER_ID, USER_DOMAIN);
 
-            // then: 降级为初始版本号
             assertThat(version.value()).isEqualTo(PermissionVersion.initial().value());
         }
     }
@@ -259,7 +241,6 @@ class PermissionDomainServiceTest {
             // when
             permissionDomainService.invalidatePermissionCache(USER_ID, USER_DOMAIN);
 
-            // then: 删除了两个key（权限 + 摘要）
             verify(cachePort, times(2)).delete(any());
         }
 
@@ -269,7 +250,6 @@ class PermissionDomainServiceTest {
             // given
             doThrow(new RuntimeException("Redis error")).when(cachePort).delete(any());
 
-            // when & then: 不抛出异常
             permissionDomainService.invalidatePermissionCache(USER_ID, USER_DOMAIN);
         }
     }
@@ -283,7 +263,6 @@ class PermissionDomainServiceTest {
         @Test
         @DisplayName("缓存中的摘要与当前权限匹配，返回true")
         void whenDigestMatches_thenReturnTrue() {
-            // given: 缓存存储"member:read"的MD5
             Set<String> permissions = Set.of("member:read");
             String realDigest = PermissionDigest.from(permissions).value();
             when(cachePort.get(any(), eq(String.class))).thenReturn(Optional.of(realDigest));
@@ -298,7 +277,6 @@ class PermissionDomainServiceTest {
         @Test
         @DisplayName("缓存中的摘要与当前权限不匹配，返回false")
         void whenDigestNotMatch_thenReturnFalse() {
-            // given: 缓存存储一个假的摘要
             String fakeDigest = "00000000000000000000000000000000"; // 32位非真实MD5
             when(cachePort.get(any(), eq(String.class))).thenReturn(Optional.of(fakeDigest));
 

@@ -12,18 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 /**
- * Spring上下文集成启动测试
- *
- * <p>
- * 验证整个Spring Boot应用上下文能够正常启动，
- * 捕获Bean配置错误、循环依赖等上下文加载问题。
- *
- * <p>
- * 外部依赖通过以下方式隔离：
- * <ul>
- * <li>application-test.yml 禁用Nacos、限流、MQ、Touch等</li>
- * <li>@MockBean 替代需要网络连接的适配器</li>
- * </ul>
+ * Context startup test for auth-service with external adapters mocked out.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
@@ -34,35 +23,24 @@ import org.springframework.test.context.TestPropertySource;
 @DisplayName("Spring上下文加载测试")
 class AuthServiceApplicationTests {
 
-    /**
-     * 阻止TouchModuleAdapter被创建（需要真实的TouchService）
-     */
+    // Avoid creating TouchModuleAdapter during context startup.
     @MockitoBean
     private NotificationPort notificationPort;
 
-    /**
-     * 阻止MemberModuleAdapter被创建（需要Nacos + member-service）
-     */
+    // Avoid creating MemberModuleAdapter during context startup.
     @MockitoBean
     private UserModulePort userModulePort;
 
-    /**
-     * OAuth2OneStopAuthStrategy需要OAuth2Port，而HttpOAuth2PortAdapter需要auth.oauth2.enabled=true
-     * 测试环境Mock替代
-     */
+    // Provide OAuth2Port without enabling the HTTP adapter in the test profile.
     @MockitoBean
     private OAuth2Port oAuth2Port;
 
-    /**
-     * WeChatOneStopAuthStrategy需要WeChatPort，而HttpWeChatPortAdapter需要auth.wechat.enabled=true
-     * 测试环境Mock替代
-     */
+    // Provide WeChatPort without enabling the HTTP adapter in the test profile.
     @MockitoBean
     private WeChatPort weChatPort;
 
     @Test
     @DisplayName("Spring上下文正常启动，无Bean配置错误")
     void contextLoads() {
-        // 如果上下文加载失败，此测试自动失败
     }
 }

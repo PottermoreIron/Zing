@@ -29,17 +29,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.doReturn;
 
 /**
- * LoginApplicationService 单元测试
- *
- * <p>
- * 验证应用层编排逻辑：
- * <ul>
- * <li>正确构建AuthenticationContext并委托给LoginStrategyFactory</li>
- * <li>将AuthenticationResult映射为LoginResponse</li>
- * <li>策略抛出异常时，异常向上传播</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for LoginApplicationService.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LoginApplicationService 单元测试")
@@ -77,14 +67,12 @@ class LoginApplicationServiceTest {
         // when
         LoginResponse response = loginApplicationService.login(request, "127.0.0.1", "Mozilla/5.0");
 
-        // then: 响应字段正确映射
         assertThat(response.userId()).isEqualTo(USER_ID.value());
         assertThat(response.userDomain()).isEqualTo(USER_DOMAIN.name());
         assertThat(response.nickname()).isEqualTo(USERNAME);
         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
 
-        // then: 策略调用时，AuthenticationContext正确构建
         ArgumentCaptor<AuthenticationContext> contextCaptor = ArgumentCaptor.forClass(AuthenticationContext.class);
         verify(mockStrategy).execute(contextCaptor.capture());
         AuthenticationContext capturedContext = contextCaptor.getValue();
@@ -120,7 +108,6 @@ class LoginApplicationServiceTest {
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenReturn(authResult());
 
-        // when & then: 不抛出NPE
         loginApplicationService.login(request, "127.0.0.1", null);
         verify(mockStrategy).execute(any());
     }

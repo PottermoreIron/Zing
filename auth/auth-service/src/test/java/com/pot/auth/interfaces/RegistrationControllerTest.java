@@ -25,13 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * RegistrationController 切片测试（@WebMvcTest）
- *
- * <p>
- * 仅加载Web层Bean，所有应用服务均使用MockBean替代，
- * 专注验证：HTTP协议、请求反序列化、校验逻辑、异常处理。
- *
- * @author pot
+ * Web slice tests for RegistrationController.
  */
 @WebMvcTest(controllers = RegistrationController.class)
 @Import(GlobalExceptionHandler.class)
@@ -50,8 +44,6 @@ class RegistrationControllerTest {
         private RegistrationApplicationService registrationApplicationService;
 
         private static final String REGISTER_URL = "/auth/api/v1/register";
-
-        // 用户名密码注册
 
         @Nested
         @DisplayName("用户名密码注册")
@@ -158,8 +150,6 @@ class RegistrationControllerTest {
                                         .andExpect(jsonPath("$.code").value("AUTH_0300"));
                 }
         }
-
-        // 邮箱验证码注册
 
         @Nested
         @DisplayName("邮箱验证码注册")

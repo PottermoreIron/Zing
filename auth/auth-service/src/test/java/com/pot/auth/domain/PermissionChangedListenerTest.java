@@ -23,20 +23,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
- * PermissionChangedEventListener 单元测试
- *
- * <p>
- * 验证：
- * <ul>
- * <li>合法事件时，正确失效受影响会员的权限缓存</li>
- * <li>PermissionDomainService 抛出异常时，异常被捕获，不向外传播</li>
- * <li>队列名和消息类型与 MQ 约定一致</li>
- * </ul>
- *
- * @author pot
+ * Unit tests for PermissionChangedEventListener.
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PermissionChangedEventListener 单元测试")

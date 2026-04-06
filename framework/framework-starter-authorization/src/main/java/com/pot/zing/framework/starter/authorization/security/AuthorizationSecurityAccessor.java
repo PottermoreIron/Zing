@@ -3,7 +3,7 @@ package com.pot.zing.framework.starter.authorization.security;
 import java.util.Set;
 
 /**
- * 授权切面需要的安全上下文读取接口。
+ * Reads security-context data required by authorization aspects.
  */
 public interface AuthorizationSecurityAccessor {
 

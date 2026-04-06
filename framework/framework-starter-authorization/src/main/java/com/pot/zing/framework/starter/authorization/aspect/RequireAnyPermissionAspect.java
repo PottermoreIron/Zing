@@ -14,7 +14,7 @@ import org.aspectj.lang.annotation.Aspect;
 import java.lang.reflect.Method;
 
 /**
- * 任一权限检查切面。
+ * Aspect that enforces any-of permission requirements.
  */
 @Slf4j
 @Aspect

@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 授权切面公共支持。
+ * Shared support code for authorization aspects.
  */
 @RequiredArgsConstructor
 abstract class AuthorizationAspectSupport {

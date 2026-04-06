@@ -15,9 +15,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 /**
- * @author: Pot
- * @created: 2025/8/16 22:07
- * @description: Jwt工具类
+ * JWT creation and parsing helpers.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class JwtUtils {
     private volatile SecretKey secretKey;
 
     /**
-     * 获取密钥(懒加载,线程安全)
+     * Lazily resolves the signing key.
      */
     private SecretKey getSecretKey() {
         if (secretKey == null) {
@@ -41,11 +39,7 @@ public class JwtUtils {
     }
 
     /**
-     * 创建令牌
-     *
-     * @param claims     声明
-     * @param expiration 过期时间(毫秒)
-     * @return JWT令牌
+     * Creates a JWT with the supplied claims and expiration.
      */
     public String createToken(Map<String, Object> claims, Long expiration) {
         if (claims == null || claims.isEmpty()) {
@@ -69,21 +63,21 @@ public class JwtUtils {
     }
 
     /**
-     * 创建访问令牌
+     * Creates an access token.
      */
     public String createAccessToken(Object userId) {
         return createToken(Map.of("uid", userId), jwtProperties.getAccessTokenExpiration());
     }
 
     /**
-     * 创建刷新令牌
+     * Creates a refresh token.
      */
     public String createRefreshToken(Object userId) {
         return createToken(Map.of("uid", userId), jwtProperties.getRefreshTokenExpiration());
     }
 
     /**
-     * 解析令牌
+     * Parses and validates a JWT.
      */
     public Claims parseToken(String token) {
         if (token == null || token.isBlank()) {
@@ -115,7 +109,7 @@ public class JwtUtils {
     }
 
     /**
-     * 从令牌中获取声明
+     * Resolves a claim from a JWT.
      */
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         Claims claims = parseToken(token);
@@ -123,7 +117,7 @@ public class JwtUtils {
     }
 
     /**
-     * 从令牌中获取用户ID
+     * Extracts the user ID from a JWT.
      */
     public Long getUid(String token) {
         return getClaimFromToken(token, claims -> {
@@ -140,7 +134,7 @@ public class JwtUtils {
     }
 
     /**
-     * 从请求中获取用户ID
+     * Extracts the user ID from an HTTP request.
      */
     public Long getUid(HttpServletRequest request) {
         String token = extractToken(request);
@@ -148,7 +142,7 @@ public class JwtUtils {
     }
 
     /**
-     * 从请求头中提取令牌
+     * Extracts the token from the configured authorization header.
      */
     public String extractToken(HttpServletRequest request) {
         String header = request.getHeader(jwtProperties.getTokenHeader());
@@ -159,7 +153,7 @@ public class JwtUtils {
     }
 
     /**
-     * 验证令牌是否有效
+     * Returns whether the token is valid.
      */
     public boolean validateToken(String token) {
         try {
@@ -172,7 +166,7 @@ public class JwtUtils {
     }
 
     /**
-     * 检查令牌是否过期
+     * Returns whether the token is expired.
      */
     public boolean isTokenExpired(String token) {
         try {

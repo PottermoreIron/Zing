@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * 邮箱密码一键认证策略
+ * One-stop auth strategy for email and password credentials.
  *
  * @author pot
  * @since 2025-11-29

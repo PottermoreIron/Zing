@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 简单权限表达式。
+ * Permission expression backed by a single permission string.
  */
 @Slf4j
 @Getter
