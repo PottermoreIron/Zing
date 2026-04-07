@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.controller;
+package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.application.service.LoginApplicationService;
@@ -39,7 +39,7 @@ public class LoginController {
     private final LoginApplicationService loginApplicationService;
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
 
-    @Operation(summary = "传统登录", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE 四种登录方式")
+    @Operation(operationId = "authLogin", summary = "传统登录", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE 四种登录方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "登录请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/login")
     public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
@@ -52,7 +52,7 @@ public class LoginController {
         return R.success(response);
     }
 
-    @Operation(summary = "刷新 Token", description = "使用 refreshToken 换取新的 accessToken，refreshToken 在滑动窗口内自动续期")
+    @Operation(operationId = "authRefreshToken", summary = "刷新 Token", description = "使用 refreshToken 换取新的 accessToken，refreshToken 在滑动窗口内自动续期")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 10.0, message = "Token刷新请求过于频繁，请稍后再试")
     @PostMapping("/api/v1/refresh")
     public R<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {

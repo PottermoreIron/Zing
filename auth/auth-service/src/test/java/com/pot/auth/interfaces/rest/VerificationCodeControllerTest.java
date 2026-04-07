@@ -1,19 +1,18 @@
-package com.pot.auth.interfaces;
+package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
 import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeSendTooFrequentException;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
-import com.pot.auth.interfaces.controller.VerificationCodeController;
 import com.pot.auth.interfaces.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyString;

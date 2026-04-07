@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.controller;
+package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
 import com.pot.auth.domain.validation.annotations.ValidEmail;
@@ -33,7 +33,7 @@ public class VerificationCodeController {
 
     private final VerificationCodeApplicationService verificationCodeApplicationService;
 
-    @Operation(summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
+    @Operation(operationId = "authSendEmailCode", summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:email:' + #email", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/email")
     public R<Void> sendEmailCode(
@@ -44,12 +44,11 @@ public class VerificationCodeController {
 
         if (sent) {
             return R.success();
-        } else {
-            return R.fail("验证码发送失败");
         }
+        return R.fail("验证码发送失败");
     }
 
-    @Operation(summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
+    @Operation(operationId = "authSendSmsCode", summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:sms:' + #phone", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
     @PostMapping("/sms")
     public R<Void> sendSmsCode(
@@ -60,8 +59,7 @@ public class VerificationCodeController {
 
         if (sent) {
             return R.success();
-        } else {
-            return R.fail("验证码发送失败");
         }
+        return R.fail("验证码发送失败");
     }
 }

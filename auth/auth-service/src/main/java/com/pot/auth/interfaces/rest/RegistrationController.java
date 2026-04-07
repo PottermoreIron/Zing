@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.controller;
+package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.service.RegistrationApplicationService;
@@ -36,9 +36,9 @@ public class RegistrationController {
 
     private final RegistrationApplicationService registrationApplicationService;
 
-    @Operation(summary = "注册", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT 六种注册方式")
+    @Operation(operationId = "authRegister", summary = "注册", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT 六种注册方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "注册请求过于频繁，请稍后再试")
-    @PostMapping("api/v1/register")
+    @PostMapping("/api/v1/register")
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         log.info("注册请求: registerType={}", request.registerType());
 

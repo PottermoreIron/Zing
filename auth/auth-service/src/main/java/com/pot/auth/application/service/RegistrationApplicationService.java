@@ -12,6 +12,7 @@ import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.interfaces.dto.onestop.OAuth2AuthRequest;
+import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
 import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
 import com.pot.auth.interfaces.dto.register.OAuth2RegisterRequest;
 import com.pot.auth.interfaces.dto.register.RegisterRequest;
@@ -71,7 +72,7 @@ public class RegistrationApplicationService {
                 return toRegisterResponse(authResponse);
         }
 
-        private com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest toOneStopAuthRequest(RegisterRequest request) {
+        private OneStopAuthRequest toOneStopAuthRequest(RegisterRequest request) {
                 return switch (request) {
                         case OAuth2RegisterRequest oauth2Request -> new OAuth2AuthRequest(
                                         AuthType.OAUTH2,

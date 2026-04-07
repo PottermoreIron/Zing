@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.controller;
+package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.LogoutApplicationService;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
@@ -31,7 +31,7 @@ public class LogoutController {
 
     private final LogoutApplicationService logoutApplicationService;
 
-    @Operation(summary = "登出", description = "将当前 AccessToken 加入黑名单，可选同步删除 RefreshToken")
+    @Operation(operationId = "authLogout", summary = "登出", description = "将当前 AccessToken 加入黑名单，可选同步删除 RefreshToken")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/api/v1/logout")
     public R<Void> logout(

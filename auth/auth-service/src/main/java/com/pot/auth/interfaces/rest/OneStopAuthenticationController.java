@@ -1,4 +1,4 @@
-package com.pot.auth.interfaces.controller;
+package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.service.OneStopAuthenticationService;
@@ -34,25 +34,25 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
 @Validated
 public class OneStopAuthenticationController {
 
-        private final OneStopAuthenticationService oneStopAuthenticationService;
+    private final OneStopAuthenticationService oneStopAuthenticationService;
 
-        @Operation(summary = "一键认证（自动注册/登录）", description = "支持 USERNAME_PASSWORD / PHONE_CODE / EMAIL_CODE / OAUTH2 / WECHAT 等方式，用户不存在时自动注册")
-        @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "认证请求过于频繁，请稍后再试")
-        @PostMapping("/api/v1/authenticate")
-        public R<OneStopAuthResponse> authenticate(
-                        @Valid @RequestBody OneStopAuthRequest request,
-                        HttpServletRequest httpRequest) {
+    @Operation(operationId = "authAuthenticateOneStop", summary = "一键认证（自动注册/登录）", description = "支持 USERNAME_PASSWORD / PHONE_CODE / EMAIL_CODE / OAUTH2 / WECHAT 等方式，用户不存在时自动注册")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "认证请求过于频繁，请稍后再试")
+    @PostMapping("/api/v1/authenticate")
+    public R<OneStopAuthResponse> authenticate(
+            @Valid @RequestBody OneStopAuthRequest request,
+            HttpServletRequest httpRequest) {
 
-                log.info("[一键认证] 收到认证请求: authType={}, userDomain={}",
-                                request.authType(), request.userDomain());
+        log.info("[一键认证] 收到认证请求: authType={}, userDomain={}",
+                request.authType(), request.userDomain());
 
-                OneStopAuthResponse response = oneStopAuthenticationService.authenticate(
-                                request,
-                                getClientIp(httpRequest),
-                                httpRequest.getHeader("User-Agent"));
+        OneStopAuthResponse response = oneStopAuthenticationService.authenticate(
+                request,
+                getClientIp(httpRequest),
+                httpRequest.getHeader("User-Agent"));
 
-                log.info("[一键认证] 认证成功: userId={}", response.userId());
+        log.info("[一键认证] 认证成功: userId={}", response.userId());
 
-                return R.success(response);
-        }
+        return R.success(response);
+    }
 }

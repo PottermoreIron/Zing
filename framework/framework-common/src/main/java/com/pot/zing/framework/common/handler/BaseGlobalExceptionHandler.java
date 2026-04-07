@@ -4,11 +4,13 @@ import com.pot.zing.framework.common.enums.ResultCode;
 import com.pot.zing.framework.common.excption.BusinessException;
 import com.pot.zing.framework.common.model.R;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public abstract class BaseGlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleValidationException(MethodArgumentNotValidException ex) {
         List<String> messages = ex.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage)
@@ -37,12 +40,14 @@ public abstract class BaseGlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleBusinessException(BusinessException ex) {
         log.warn("Business error: {}", ex.getMessage());
         return R.fail(ex.getResultCode(), ex.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleConstraintViolationException(ConstraintViolationException ex) {
         String message = ex.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
@@ -51,17 +56,20 @@ public abstract class BaseGlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         log.warn("Request body parse error: {}", ex.getMessage());
         return R.fail(ResultCode.PARAM_ERROR, "请求参数格式错误");
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
         return R.fail(ResultCode.PARAM_ERROR, "缺少必填参数: " + ex.getParameterName());
     }
 
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<?> handleGeneralException(Exception ex) {
         log.error("System error: {}", ex.getMessage(), ex);
         boolean isProduction = false;
