@@ -5,9 +5,12 @@ import com.pot.member.facade.dto.MemberProfileDTO;
 import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import com.pot.member.service.application.assembler.MemberAssembler;
 import com.pot.member.service.application.command.ChangePasswordCommand;
+import com.pot.member.service.application.command.CreateMemberCommand;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.command.UpdateMemberProfileCommand;
 import com.pot.member.service.application.dto.MemberDTO;
+import com.pot.member.service.application.exception.MemberException;
+import com.pot.member.service.application.exception.MemberResultCode;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.domain.model.device.DeviceAggregate;
 import com.pot.member.service.domain.model.member.Email;
@@ -24,6 +27,7 @@ import com.pot.member.service.domain.repository.SocialConnectionRepository;
 import com.pot.member.service.domain.service.MemberDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,30 +59,80 @@ public class MemberApplicationService {
     public MemberDTO register(RegisterMemberCommand command) {
         log.info("注册新会员: {}", command.getEmail());
 
-        Nickname nickname = Nickname.of(command.getNickname());
-        if (memberRepository.existsByNickname(nickname)) {
-            throw new IllegalArgumentException("昵称已被使用");
-        }
+        Nickname nickname = requireAvailableNickname(command.getNickname());
+        PhoneNumber phoneNumber = resolveAvailablePhone(command.getPhoneNumber());
+        Email email = requireAvailableEmail(command.getEmail());
 
-        PhoneNumber phoneNumber = null;
-        if (command.getPhoneNumber() != null && !command.getPhoneNumber().isBlank()) {
-            phoneNumber = PhoneNumber.of(command.getPhoneNumber());
-            if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-                throw new IllegalArgumentException("手机号已被注册");
-            }
-        }
-
-        Email email = Email.of(command.getEmail());
         MemberAggregate member = memberDomainService.register(nickname, email, command.getPassword());
 
         if (phoneNumber != null) {
             member.updatePhoneNumber(phoneNumber);
         }
 
-        member = memberRepository.save(member);
+        return persistNewMember(member, "会员注册成功");
+    }
+
+    @Transactional
+    public MemberDTO createMember(CreateMemberCommand command) {
+        log.info("内部创建会员: nickname={}", command.getNickname());
+
+        Nickname nickname = requireAvailableNickname(command.getNickname());
+        PhoneNumber phoneNumber = resolveAvailablePhone(command.getPhoneNumber());
+        Email email = resolveAvailableEmail(command.getEmail());
+
+        MemberAggregate member = memberDomainService.createMember(nickname, email, command.getPassword());
+
+        if (phoneNumber != null) {
+            member.updatePhoneNumber(phoneNumber);
+        }
+
+        return persistNewMember(member, "内部创建会员成功");
+    }
+
+    private MemberDTO persistNewMember(MemberAggregate member, String successLogMessage) {
+        try {
+            member = memberRepository.save(member);
+        } catch (DataIntegrityViolationException ex) {
+            throw mapRegistrationConflict(ex);
+        }
         publishAndClearEvents(member);
-        log.info("会员注册成功: memberId={}", member.getMemberId().value());
+        log.info("{}: memberId={}", successLogMessage, member.getMemberId().value());
         return memberAssembler.toDTO(member);
+    }
+
+    private Nickname requireAvailableNickname(String nicknameValue) {
+        Nickname nickname = Nickname.of(nicknameValue);
+        if (memberRepository.existsByNickname(nickname)) {
+            throw new MemberException(MemberResultCode.NICKNAME_ALREADY_EXISTS);
+        }
+        return nickname;
+    }
+
+    private PhoneNumber resolveAvailablePhone(String phoneNumberValue) {
+        if (phoneNumberValue == null || phoneNumberValue.isBlank()) {
+            return null;
+        }
+
+        PhoneNumber phoneNumber = PhoneNumber.of(phoneNumberValue);
+        if (memberRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new MemberException(MemberResultCode.PHONE_ALREADY_EXISTS);
+        }
+        return phoneNumber;
+    }
+
+    private Email requireAvailableEmail(String emailValue) {
+        Email email = Email.of(emailValue);
+        if (memberRepository.existsByEmail(email)) {
+            throw new MemberException(MemberResultCode.EMAIL_ALREADY_EXISTS);
+        }
+        return email;
+    }
+
+    private Email resolveAvailableEmail(String emailValue) {
+        if (emailValue == null || emailValue.isBlank()) {
+            return null;
+        }
+        return requireAvailableEmail(emailValue);
     }
 
     @Transactional
@@ -111,16 +165,13 @@ public class MemberApplicationService {
     }
 
     public MemberDTO getMember(GetMemberQuery query) {
-        MemberAggregate member = null;
-        if (query.getMemberId() != null) {
-            member = memberRepository.findById(MemberId.of(query.getMemberId())).orElse(null);
-        } else if (query.getEmail() != null) {
-            member = memberRepository.findByEmail(Email.of(query.getEmail())).orElse(null);
-        } else if (query.getPhoneNumber() != null) {
-            member = memberRepository.findByPhoneNumber(PhoneNumber.of(query.getPhoneNumber())).orElse(null);
-        } else if (query.getNickname() != null) {
-            member = memberRepository.findByNickname(Nickname.of(query.getNickname())).orElse(null);
-        }
+        MemberAggregate member = switch (query.getSelector()) {
+            case MEMBER_ID -> memberRepository.findById(MemberId.of(query.getMemberId())).orElse(null);
+            case EMAIL -> memberRepository.findByEmail(Email.of(query.getEmail())).orElse(null);
+            case PHONE_NUMBER ->
+                memberRepository.findByPhoneNumber(PhoneNumber.of(query.getPhoneNumber())).orElse(null);
+            case NICKNAME -> memberRepository.findByNickname(Nickname.of(query.getNickname())).orElse(null);
+        };
         return memberAssembler.toDTO(member);
     }
 
@@ -152,13 +203,13 @@ public class MemberApplicationService {
 
     public MemberDTO authenticateWithPassword(String identifier, String rawPassword) {
         MemberAggregate member = resolveByIdentifier(identifier)
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "用户不存在"));
 
         if (!memberDomainService.verifyPassword(member, rawPassword)) {
-            throw new IllegalArgumentException("密码不正确");
+            throw new MemberException(MemberResultCode.PASSWORD_INCORRECT);
         }
         if (!member.isAvailable()) {
-            throw new IllegalStateException("账户已被禁用或锁定");
+            throw new MemberException(MemberResultCode.ACCOUNT_UNAVAILABLE);
         }
         return memberAssembler.toDTO(member);
     }
@@ -177,7 +228,11 @@ public class MemberApplicationService {
     public void changePassword(ChangePasswordCommand command) {
         log.info("修改密码: memberId={}", command.getMemberId());
         MemberAggregate member = requireMember(command.getMemberId());
-        memberDomainService.changePassword(member, command.getOldPassword(), command.getNewPassword());
+        try {
+            memberDomainService.changePassword(member, command.getOldPassword(), command.getNewPassword());
+        } catch (IllegalArgumentException ex) {
+            throw new MemberException(MemberResultCode.PASSWORD_INCORRECT, ex.getMessage());
+        }
         memberRepository.save(member);
     }
 
@@ -322,7 +377,23 @@ public class MemberApplicationService {
 
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("会员不存在: " + memberId));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "会员不存在: " + memberId));
+    }
+
+    private MemberException mapRegistrationConflict(RuntimeException ex) {
+        String message = ex.getMessage();
+        if (message != null) {
+            if (message.contains("uk_nickname") || message.contains("nickname")) {
+                return new MemberException(MemberResultCode.NICKNAME_ALREADY_EXISTS);
+            }
+            if (message.contains("uk_email") || message.contains("email")) {
+                return new MemberException(MemberResultCode.EMAIL_ALREADY_EXISTS);
+            }
+            if (message.contains("uk_phone") || message.contains("phone")) {
+                return new MemberException(MemberResultCode.PHONE_ALREADY_EXISTS);
+            }
+        }
+        return new MemberException(MemberResultCode.REGISTRATION_CONFLICT, ex.getMessage());
     }
 
     private void publishAndClearEvents(MemberAggregate member) {

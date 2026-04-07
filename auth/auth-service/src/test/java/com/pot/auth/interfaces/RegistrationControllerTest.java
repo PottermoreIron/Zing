@@ -24,9 +24,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Web slice tests for RegistrationController.
- */
 @WebMvcTest(controllers = RegistrationController.class)
 @Import(GlobalExceptionHandler.class)
 @ActiveProfiles("test")
@@ -52,7 +49,6 @@ class RegistrationControllerTest {
                 @Test
                 @DisplayName("合法的用户名密码注册请求，返回200和RegisterResponse")
                 void whenValidRequest_thenReturn200WithResponse() throws Exception {
-                        // given
                         long now = System.currentTimeMillis() / 1000;
                         RegisterResponse response = RegisterResponse.success(
                                         TestFixtures.USER_ID.value(),
@@ -76,7 +72,6 @@ class RegistrationControllerTest {
                                         }
                                         """;
 
-                        // when & then
                         mockMvc.perform(post(REGISTER_URL)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(requestBody))
@@ -128,7 +123,6 @@ class RegistrationControllerTest {
                 @Test
                 @DisplayName("服务抛出 USERNAME_ALREADY_EXISTS，返回400并携带错误码")
                 void whenUsernameAlreadyExists_thenReturn400WithErrorCode() throws Exception {
-                        // given
                         when(registrationApplicationService.register(any(), any(), any()))
                                         .thenThrow(new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS));
 
@@ -141,7 +135,6 @@ class RegistrationControllerTest {
                                         }
                                         """;
 
-                        // when & then
                         mockMvc.perform(post(REGISTER_URL)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(requestBody))
@@ -158,7 +151,6 @@ class RegistrationControllerTest {
                 @Test
                 @DisplayName("合法的邮箱验证码注册请求，返回200")
                 void whenValidEmailCodeRequest_thenReturn200() throws Exception {
-                        // given
                         long now = System.currentTimeMillis() / 1000;
                         when(registrationApplicationService.register(any(), any(), any()))
                                         .thenReturn(RegisterResponse.success(

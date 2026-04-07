@@ -94,10 +94,10 @@ public class OAuth2OneStopAuthStrategy
                         () -> userDefaultsGenerator.generateNicknameFromEmail(oauth2UserInfo.email()))
                 : generateAvailableNickname(userModulePort, userDefaultsGenerator::generateNickname);
         CreateUserCommand command = CreateUserCommand.builder()
-                .username(generatedNickname)
+                .nickname(generatedNickname)
                 .email(StringUtils.hasText(oauth2UserInfo.email()) ? Email.of(oauth2UserInfo.email()) : null)
                 .password(Password.of(password))
-                .nickname(oauth2UserInfo.nickname())
+                .displayName(oauth2UserInfo.nickname())
                 .avatarUrl(avatarUrl)
                 .emailVerified(oauth2UserInfo.emailVerified() != null && oauth2UserInfo.emailVerified())
                 .oauth2Provider(request.oauth2ProviderCode())

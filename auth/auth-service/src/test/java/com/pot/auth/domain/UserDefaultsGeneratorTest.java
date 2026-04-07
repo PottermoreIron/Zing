@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for UserDefaultsGenerator.
- */
 @DisplayName("UserDefaultsGenerator 单元测试")
 class UserDefaultsGeneratorTest {
 

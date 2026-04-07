@@ -9,21 +9,6 @@ import java.util.*;
 /**
  * Aggregate root for member identity, account state, profile data, and role
  * assignments.
- * package com.pot.member.service.domain.model.member;
- * 
- * import com.pot.member.service.domain.event.MemberDomainEvent;
- * import lombok.Getter;
- * 
- * import java.time.LocalDateTime;
- * import java.util.ArrayList;
- * import java.util.Collections;
- * import java.util.HashSet;
- * import java.util.List;
- * import java.util.Set;
- * 
- * /**
- * Aggregate root for member identity, account state, profile data, and role
- * assignments.
  *
  * @author Pot
  * @since 2026-03-18

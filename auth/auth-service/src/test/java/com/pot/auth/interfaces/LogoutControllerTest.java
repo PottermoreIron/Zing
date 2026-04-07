@@ -25,9 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Web slice tests for LogoutController.
- */
 @WebMvcTest(controllers = LogoutController.class)
 @Import(GlobalExceptionHandler.class)
 @ActiveProfiles("test")
@@ -56,7 +53,6 @@ class LogoutControllerTest {
                         // Logout is idempotent, so no extra mock behavior is required.
                         doNothing().when(logoutApplicationService).logout(anyString(), isNull());
 
-                        // when & then
                         mockMvc.perform(post(LOGOUT_URL)
                                         .header("Authorization", "Bearer " + TestFixtures.FAKE_ACCESS_TOKEN)
                                         .contentType(MediaType.APPLICATION_JSON))
@@ -81,7 +77,6 @@ class LogoutControllerTest {
                 @Test
                 @DisplayName("同时提供refreshToken，两者均传递给服务层")
                 void whenBothTokensProvided_thenPassBothToService() throws Exception {
-                        // given
                         doNothing().when(logoutApplicationService).logout(anyString(), anyString());
 
                         String requestBody = """
@@ -90,7 +85,6 @@ class LogoutControllerTest {
                                         }
                                         """.formatted(TestFixtures.FAKE_REFRESH_TOKEN);
 
-                        // when & then
                         mockMvc.perform(post(LOGOUT_URL)
                                         .header("Authorization", "Bearer " + TestFixtures.FAKE_ACCESS_TOKEN)
                                         .contentType(MediaType.APPLICATION_JSON)

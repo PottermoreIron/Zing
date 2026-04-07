@@ -75,7 +75,7 @@ class MemberPermissionApplicationServiceTest {
         @Test
         @DisplayName("查询权限成功：调用领域服务并装配 DTO")
         void getMemberPermissions_returnsAssembledPermissions() {
-            GetMemberPermissionsQuery query = GetMemberPermissionsQuery.builder().memberId(1L).build();
+            GetMemberPermissionsQuery query = GetMemberPermissionsQuery.ofMemberId(1L);
             PermissionAggregate permission = PermissionAggregate.reconstitute(
                     PermissionId.of(10L),
                     "member.read",

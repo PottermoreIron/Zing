@@ -26,9 +26,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Web slice tests for LoginController.
- */
 @WebMvcTest(controllers = LoginController.class)
 @Import(GlobalExceptionHandler.class)
 @ActiveProfiles("test")
@@ -57,7 +54,6 @@ class LoginControllerTest {
     @Test
     @DisplayName("用户名密码登录请求合法，返回200和LoginResponse")
     void whenValidUsernamePasswordRequest_thenReturn200WithLoginResponse() throws Exception {
-      // given
       LoginResponse loginResponse = TestFixtures.loginResponse();
       when(loginApplicationService.login(any(), any(), any()))
           .thenReturn(loginResponse);
@@ -71,7 +67,6 @@ class LoginControllerTest {
           }
           """;
 
-      // when & then
       mockMvc.perform(post(LOGIN_URL)
           .contentType(MediaType.APPLICATION_JSON)
           .content(requestBody))
@@ -97,7 +92,6 @@ class LoginControllerTest {
           }
           """;
 
-      // when & then
       mockMvc.perform(post(LOGIN_URL)
           .contentType(MediaType.APPLICATION_JSON)
           .content(requestBody))
@@ -137,7 +131,6 @@ class LoginControllerTest {
           }
           """;
 
-      // when & then
       mockMvc.perform(post(LOGIN_URL)
           .contentType(MediaType.APPLICATION_JSON)
           .content(requestBody))
@@ -149,7 +142,6 @@ class LoginControllerTest {
     @Test
     @DisplayName("邮箱验证码登录请求合法，返回200")
     void whenValidEmailCodeRequest_thenReturn200() throws Exception {
-      // given
       when(loginApplicationService.login(any(), any(), any()))
           .thenReturn(TestFixtures.loginResponse());
 
@@ -179,7 +171,6 @@ class LoginControllerTest {
     @Test
     @DisplayName("有效refreshToken，返回200和新的TokenPair")
     void whenValidRefreshToken_thenReturn200() throws Exception {
-      // given
       when(tokenRefreshApplicationService.refreshToken(anyString()))
           .thenReturn(TestFixtures.loginResponse());
 

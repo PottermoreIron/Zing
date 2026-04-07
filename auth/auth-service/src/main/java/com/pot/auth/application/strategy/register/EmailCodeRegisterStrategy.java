@@ -11,7 +11,9 @@ import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.RegisterType;
 import com.pot.auth.domain.shared.exception.DomainException;
+import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
 import com.pot.auth.domain.shared.valueobject.Email;
+import com.pot.auth.domain.shared.valueobject.Password;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,14 +24,17 @@ public class EmailCodeRegisterStrategy extends AbstractRegisterStrategyImpl {
 
     private final UserModulePortFactory userModulePortFactory;
     private final VerificationCodeService verificationCodeService;
+    private final UserDefaultsGenerator userDefaultsGenerator;
 
     public EmailCodeRegisterStrategy(
             JwtTokenService jwtTokenService,
             UserModulePortFactory userModulePortFactory,
-            VerificationCodeService verificationCodeService) {
+            VerificationCodeService verificationCodeService,
+            UserDefaultsGenerator userDefaultsGenerator) {
         super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
         this.verificationCodeService = verificationCodeService;
+        this.userDefaultsGenerator = userDefaultsGenerator;
     }
 
     @Override
@@ -56,8 +61,13 @@ public class EmailCodeRegisterStrategy extends AbstractRegisterStrategyImpl {
     protected UserDTO createUser(RegistrationContext context) {
         var request = context.request();
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        String generatedNickname = generateAvailableNickname(
+                userModulePort,
+                () -> userDefaultsGenerator.generateNicknameFromEmail(request.email()));
         CreateUserCommand createCommand = CreateUserCommand.builder()
+                .nickname(generatedNickname)
                 .email(Email.of(request.email()))
+                .password(Password.of(userDefaultsGenerator.generateRandomPassword()))
                 .build();
         var userId = userModulePort.createUser(createCommand);
         return userModulePort.findById(userId)

@@ -2,7 +2,6 @@ package com.pot.auth.interfaces.dto.onestop;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
@@ -19,13 +18,40 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
                 @JsonSubTypes.Type(value = OAuth2AuthRequest.class, name = "OAUTH2"),
                 @JsonSubTypes.Type(value = WeChatAuthRequest.class, name = "WECHAT")
 })
-public interface OneStopAuthRequest extends OneStopAuthCommand {
+public interface OneStopAuthRequest {
 
         AuthType authType();
 
         UserDomain userDomain();
 
-        @Override
+        default String nickname() {
+                return null;
+        }
+
+        default String email() {
+                return null;
+        }
+
+        default String phone() {
+                return null;
+        }
+
+        default String password() {
+                return null;
+        }
+
+        default String verificationCode() {
+                return null;
+        }
+
+        default String code() {
+                return null;
+        }
+
+        default String state() {
+                return null;
+        }
+
         default String oauth2ProviderCode() {
                 if (this instanceof OAuth2AuthRequest request) {
                         return request.provider().getCode();

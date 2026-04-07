@@ -96,7 +96,7 @@ public class EmailPasswordOneStopAuthStrategy extends AbstractOneStopAuthStrateg
         var userId = port.createUser(CreateUserCommand.builder()
                 .email(Email.of(request.email()))
                 .password(Password.of(password))
-                .username(generatedNickname)
+                .nickname(generatedNickname)
                 .avatarUrl(userDefaultsGenerator.getDefaultAvatarUrl())
                 .build());
 

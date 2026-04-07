@@ -28,9 +28,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for JwtTokenService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("JwtTokenService 单元测试")
 class JwtTokenServiceTest {
@@ -70,7 +67,6 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("成功生成Token，写入RefreshToken缓存，返回TokenPair")
         void whenAllDepsOk_thenReturnTokenPairAndStoreRefresh() {
-            // given
             when(permissionDomainService.cachePermissionsWithMetadata(
                     eq(TestFixtures.USER_ID),
                     eq(TestFixtures.USER_DOMAIN),
@@ -86,7 +82,6 @@ class JwtTokenServiceTest {
                     any()))
                     .thenReturn(expected);
 
-            // when
             TokenPair result = jwtTokenService.generateTokenPair(
                     TestFixtures.USER_ID,
                     TestFixtures.USER_DOMAIN,
@@ -101,7 +96,6 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("TokenManagementPort抛出异常，包装为DomainException")
         void whenTokenPortFails_thenThrowDomainException() {
-            // given
             when(permissionDomainService.cachePermissionsWithMetadata(any(), any(), any()))
                     .thenReturn(TestFixtures.permCacheMetadata());
             when(tokenManagementPort.generateTokenPair(any(), any(), any(), any(), any()))
@@ -130,10 +124,8 @@ class JwtTokenServiceTest {
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
             when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(false);
 
-            // when
             JwtToken result = jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN);
 
-            // then
             assertThat(result).isEqualTo(validToken);
         }
 
@@ -143,7 +135,6 @@ class JwtTokenServiceTest {
             JwtToken expiredToken = TestFixtures.expiredAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
 
-            // when & then
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .isInstanceOf(TokenExpiredException.class)
                     .hasMessageContaining("过期");
@@ -156,7 +147,6 @@ class JwtTokenServiceTest {
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
             when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(true);
 
-            // when & then
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .isInstanceOf(TokenInvalidException.class)
                     .hasMessageContaining("失效");
@@ -177,7 +167,6 @@ class JwtTokenServiceTest {
             when(tokenManagementPort.parseRefreshToken(TestFixtures.FAKE_REFRESH_TOKEN))
                     .thenReturn(TestFixtures.validRefreshToken());
 
-            // when
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
 
             ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
@@ -195,7 +184,6 @@ class JwtTokenServiceTest {
             JwtToken expiredToken = TestFixtures.expiredAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
 
-            // when
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 
             verify(cachePort, never()).set(contains("auth:blacklist:"), any(), any(Duration.class));
@@ -217,7 +205,6 @@ class JwtTokenServiceTest {
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(accessToken);
 
-            // when
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 
             verify(tokenManagementPort, never()).parseRefreshToken(anyString());

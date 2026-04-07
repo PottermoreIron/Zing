@@ -24,9 +24,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * Unit tests for PermissionChangedEventListener.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PermissionChangedEventListener 单元测试")
 class PermissionChangedListenerTest {

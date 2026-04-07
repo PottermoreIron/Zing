@@ -8,22 +8,14 @@ import com.pot.auth.domain.shared.exception.InvalidEmailException;
 import com.pot.auth.domain.shared.exception.InvalidPhoneException;
 import com.pot.auth.domain.shared.exception.WeakPasswordException;
 import com.pot.auth.domain.shared.valueobject.VerificationCode;
+import com.pot.zing.framework.common.handler.BaseGlobalExceptionHandler;
 import com.pot.zing.framework.common.model.R;
 import com.pot.zing.framework.starter.authorization.exception.PermissionDeniedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-
-import java.util.stream.Collectors;
 
 /**
  * Maps auth-service exceptions to unified API responses.
@@ -33,7 +25,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends BaseGlobalExceptionHandler {
 
     @ExceptionHandler(JwtTokenService.TokenExpiredException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -105,17 +97,6 @@ public class GlobalExceptionHandler {
         return R.fail(AuthResultCode.WEAK_PASSWORD);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Void> handleValidationException(MethodArgumentNotValidException e) {
-        String errorMessage = e.getBindingResult().getFieldErrors().stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.joining("; "));
-
-        log.warn("[异常] 参数验证失败: {}", errorMessage);
-        return R.fail(AuthResultCode.INVALID_PARAMETER, errorMessage);
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleIllegalArgument(IllegalArgumentException e) {
@@ -139,36 +120,5 @@ public class GlobalExceptionHandler {
     public R<Void> handlePermissionDenied(PermissionDeniedException e) {
         log.warn("[异常] 权限拒绝: {}", e.getMessage());
         return R.fail(AuthResultCode.PERMISSION_DENIED, e.getMessage());
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Void> handleConstraintViolation(ConstraintViolationException e) {
-        String errorMessage = e.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(java.util.stream.Collectors.joining("; "));
-        log.warn("[异常] 参数约束违反: {}", errorMessage);
-        return R.fail(AuthResultCode.INVALID_PARAMETER, errorMessage);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Void> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        log.warn("[异常] 请求体解析失败: {}", e.getMessage());
-        return R.fail(AuthResultCode.INVALID_PARAMETER, "请求参数格式错误");
-    }
-
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public R<Void> handleMissingServletRequestParameter(MissingServletRequestParameterException e) {
-        log.warn("[异常] 缺少请求参数: {}", e.getParameterName());
-        return R.fail(AuthResultCode.INVALID_PARAMETER, "缺少必填参数: " + e.getParameterName());
-    }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public R<Void> handleException(Exception e) {
-        log.error("[异常] 系统异常", e);
-        return R.fail(AuthResultCode.SYSTEM_ERROR);
     }
 }

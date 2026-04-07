@@ -139,7 +139,7 @@ public class MemberModuleAdapter implements UserModulePort {
     public UserId createUser(CreateUserCommand command) {
         try {
             CreateMemberRequest request = CreateMemberRequest.builder()
-                    .nickname(command.username()) // member-facade使用nickname字段
+                    .nickname(command.nickname())
                     .email(command.email() != null ? command.email().value() : null)
                     .phone(command.phone() != null ? command.phone().value() : null)
                     .password(command.password() != null ? command.password().value() : null)
@@ -158,7 +158,7 @@ public class MemberModuleAdapter implements UserModulePort {
             return UserId.of(memberDTO.getMemberId());
 
         } catch (Exception e) {
-            log.error("创建用户失败: nickname={}", command.username(), e);
+            log.error("创建用户失败: nickname={}", command.nickname(), e);
             throw new UserCreationException("创建用户失败: " + e.getMessage(), e);
         }
     }

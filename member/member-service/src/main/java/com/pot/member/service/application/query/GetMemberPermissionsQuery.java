@@ -1,15 +1,17 @@
 package com.pot.member.service.application.query;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class GetMemberPermissionsQuery {
+@Getter
+public final class GetMemberPermissionsQuery {
 
-    private Long memberId;
+    private final Long memberId;
+
+    private GetMemberPermissionsQuery(Long memberId) {
+        this.memberId = memberId;
+    }
+
+    public static GetMemberPermissionsQuery ofMemberId(Long memberId) {
+        return new GetMemberPermissionsQuery(memberId);
+    }
 }

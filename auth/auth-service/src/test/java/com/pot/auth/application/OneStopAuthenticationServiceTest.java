@@ -1,5 +1,6 @@
 package com.pot.auth.application;
 
+import com.pot.auth.application.assembler.AuthCommandAssembler;
 import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.service.OneStopAuthenticationService;
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,9 +28,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for OneStopAuthenticationService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("OneStopAuthenticationService 单元测试")
 class OneStopAuthenticationServiceTest {
@@ -48,13 +47,15 @@ class OneStopAuthenticationServiceTest {
     @Mock
     private ValidationChain<OneStopAuthContext> oneStopAuthValidationChain;
 
+    @Spy
+    private AuthCommandAssembler authCommandAssembler;
+
     @InjectMocks
     private OneStopAuthenticationService service;
 
     @Test
     @DisplayName("用户名密码认证：正确构建上下文，委托给策略，返回OneStopAuthResponse")
     void whenUsernamePasswordAuth_thenBuildContextAndReturnResponse() {
-        // given
         UsernamePasswordAuthRequest request = new UsernamePasswordAuthRequest(
                 AuthType.USERNAME_PASSWORD,
                 USERNAME,
@@ -66,7 +67,6 @@ class OneStopAuthenticationServiceTest {
         doReturn(mockStrategy).when(strategyFactory).getStrategy(AuthType.USERNAME_PASSWORD);
         when(mockStrategy.execute(any(OneStopAuthContext.class))).thenReturn(authResult);
 
-        // when
         OneStopAuthResponse response = service.authenticate(request, "192.168.1.1", "Chrome/120.0");
 
         assertThat(response).isNotNull();
@@ -92,7 +92,6 @@ class OneStopAuthenticationServiceTest {
     @Test
     @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出NPE")
     void whenUserAgentNull_thenUseDefaultAndNotThrow() {
-        // given
         UsernamePasswordAuthRequest request = new UsernamePasswordAuthRequest(
                 AuthType.USERNAME_PASSWORD,
                 USERNAME,
@@ -103,7 +102,6 @@ class OneStopAuthenticationServiceTest {
         doReturn(mockStrategy).when(strategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenReturn(authResult());
 
-        // when & then
         OneStopAuthResponse response = service.authenticate(request, "127.0.0.1", null);
         assertThat(response).isNotNull();
         verify(mockStrategy).execute(any());
@@ -112,7 +110,6 @@ class OneStopAuthenticationServiceTest {
     @Test
     @DisplayName("策略抛出 DomainException，异常向上传播")
     void whenStrategyThrowsDomainException_thenPropagateException() {
-        // given
         UsernamePasswordAuthRequest request = new UsernamePasswordAuthRequest(
                 AuthType.USERNAME_PASSWORD,
                 USERNAME,
@@ -123,7 +120,6 @@ class OneStopAuthenticationServiceTest {
         doReturn(mockStrategy).when(strategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
-        // when & then
         assertThatThrownBy(() -> service.authenticate(request, "127.0.0.1", "UA"))
                 .isInstanceOf(DomainException.class);
     }

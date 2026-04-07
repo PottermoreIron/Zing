@@ -73,9 +73,9 @@ public class WeChatOneStopAuthStrategy
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         String generatedNickname = generateAvailableNickname(userModulePort, userDefaultsGenerator::generateNickname);
         CreateUserCommand command = CreateUserCommand.builder()
-                .username(generatedNickname)
+                .nickname(generatedNickname)
                 .password(Password.of(password))
-                .nickname(weChatUserInfo.getDisplayName())
+                .displayName(weChatUserInfo.getDisplayName())
                 .avatarUrl(avatarUrl)
                 .weChatOpenId(weChatUserInfo.getOpenId())
                 .weChatUnionId(weChatUserInfo.getUnionId())

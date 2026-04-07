@@ -6,7 +6,7 @@ import com.pot.member.facade.dto.MemberProfileDTO;
 import com.pot.member.facade.dto.RoleDTO;
 import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import com.pot.member.facade.dto.request.CreateMemberRequest;
-import com.pot.member.service.application.command.RegisterMemberCommand;
+import com.pot.member.service.application.command.CreateMemberCommand;
 import com.pot.member.service.application.query.GetMemberQuery;
 import com.pot.member.service.application.service.MemberApplicationService;
 import com.pot.member.service.application.service.MemberPermissionApplicationService;
@@ -47,28 +47,28 @@ public class InternalMemberController {
     @GetMapping("/{memberId}")
     public R<MemberDTO> findById(@PathVariable Long memberId) {
         var internalDTO = memberApplicationService.getMember(
-                GetMemberQuery.builder().memberId(memberId).build());
+                GetMemberQuery.byMemberId(memberId));
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-email")
     public R<MemberDTO> findByEmail(@RequestParam String email) {
         var internalDTO = memberApplicationService.getMember(
-                GetMemberQuery.builder().email(email).build());
+                GetMemberQuery.byEmail(email));
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-phone")
     public R<MemberDTO> findByPhone(@RequestParam String phone) {
         var internalDTO = memberApplicationService.getMember(
-                GetMemberQuery.builder().phoneNumber(phone).build());
+                GetMemberQuery.byPhoneNumber(phone));
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-nickname")
     public R<MemberDTO> findByNickname(@RequestParam String nickname) {
         var internalDTO = memberApplicationService.getMember(
-                GetMemberQuery.builder().nickname(nickname).build());
+                GetMemberQuery.byNickname(nickname));
         return R.success(toFacadeDTO(internalDTO));
     }
 
@@ -101,13 +101,13 @@ public class InternalMemberController {
 
     @PostMapping
     public R<MemberDTO> createMember(@RequestBody @Valid CreateMemberRequest request) {
-        RegisterMemberCommand command = RegisterMemberCommand.builder()
+        CreateMemberCommand command = CreateMemberCommand.builder()
                 .nickname(request.getNickname())
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .phoneNumber(request.getPhone())
                 .build();
-        var internalDTO = memberApplicationService.register(command);
+        var internalDTO = memberApplicationService.createMember(command);
         return R.success(toFacadeDTO(internalDTO));
     }
 

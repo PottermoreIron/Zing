@@ -4,9 +4,14 @@ import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.port.dto.UserDTO;
+import com.pot.auth.domain.port.UserModulePort;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.RegisterType;
+import com.pot.auth.domain.shared.exception.DomainException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.function.Supplier;
 
 /**
  * Base template for register strategies.
@@ -102,6 +107,16 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
                 context.request().registerType(),
                 context.ipAddress().value(),
                 e.getMessage());
+    }
+
+    protected String generateAvailableNickname(UserModulePort userModulePort, Supplier<String> candidateSupplier) {
+        for (int attempt = 0; attempt < 5; attempt++) {
+            String candidate = candidateSupplier.get();
+            if (!userModulePort.existsByNickname(candidate)) {
+                return candidate;
+            }
+        }
+        throw new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS);
     }
 
     /**

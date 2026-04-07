@@ -1,5 +1,6 @@
 package com.pot.auth.application;
 
+import com.pot.auth.application.assembler.AuthCommandAssembler;
 import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.service.OneStopAuthenticationService;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,9 +34,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for RegistrationApplicationService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RegistrationApplicationService 单元测试")
 class RegistrationApplicationServiceTest {
@@ -57,6 +56,9 @@ class RegistrationApplicationServiceTest {
         @Mock
         private OneStopAuthenticationService oneStopAuthenticationService;
 
+        @Spy
+        private AuthCommandAssembler authCommandAssembler;
+
         @InjectMocks
         private RegistrationApplicationService service;
 
@@ -67,7 +69,6 @@ class RegistrationApplicationServiceTest {
                 @Test
                 @DisplayName("用户名密码注册：委托给策略，返回RegisterResponse且字段正确")
                 void whenUsernamePasswordRegister_thenDelegateAndReturnResponse() {
-                        // given
                         UsernamePasswordRegisterRequest request = new UsernamePasswordRegisterRequest(
                                         RegisterType.USERNAME_PASSWORD,
                                         USERNAME,
@@ -80,10 +81,8 @@ class RegistrationApplicationServiceTest {
                                         .getStrategy(RegisterType.USERNAME_PASSWORD);
                         when(mockStrategy.execute(any(RegistrationContext.class))).thenReturn(authResult);
 
-                        // when
                         RegisterResponse response = service.register(request, "127.0.0.1", "Mozilla/5.0");
 
-                        // then
                         assertThat(response).isNotNull();
                         assertThat(response.userId()).isEqualTo(USER_ID.value());
                         assertThat(response.userDomain()).isEqualTo(USER_DOMAIN.name());
@@ -100,7 +99,6 @@ class RegistrationApplicationServiceTest {
                 @Test
                 @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出NPE")
                 void whenUserAgentNull_thenUseDefaultValue() {
-                        // given
                         UsernamePasswordRegisterRequest request = new UsernamePasswordRegisterRequest(
                                         RegisterType.USERNAME_PASSWORD,
                                         USERNAME,
@@ -118,7 +116,6 @@ class RegistrationApplicationServiceTest {
                 @Test
                 @DisplayName("策略抛出DomainException，异常向上传播")
                 void whenStrategyThrows_thenPropagateException() {
-                        // given
                         UsernamePasswordRegisterRequest request = new UsernamePasswordRegisterRequest(
                                         RegisterType.USERNAME_PASSWORD,
                                         USERNAME,
@@ -130,7 +127,6 @@ class RegistrationApplicationServiceTest {
                         when(mockStrategy.execute(any()))
                                         .thenThrow(new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS));
 
-                        // when & then
                         assertThatThrownBy(() -> service.register(request, "127.0.0.1", "UA"))
                                         .isInstanceOf(DomainException.class);
                 }
@@ -143,7 +139,6 @@ class RegistrationApplicationServiceTest {
                 @Test
                 @DisplayName("OAuth2注册：委托给OneStopAuth，将响应转换为RegisterResponse")
                 void whenOAuth2Register_thenDelegateToOneStopAuth() {
-                        // given
                         OAuth2RegisterRequest request = new OAuth2RegisterRequest(
                                         RegisterType.OAUTH2,
                                         OAuth2Provider.GOOGLE,
@@ -167,10 +162,8 @@ class RegistrationApplicationServiceTest {
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
                                         .thenReturn(authResponse);
 
-                        // when
                         RegisterResponse response = service.register(request, "127.0.0.1", "UA");
 
-                        // then
                         assertThat(response).isNotNull();
                         assertThat(response.userId()).isEqualTo(USER_ID.value());
                         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
@@ -187,7 +180,6 @@ class RegistrationApplicationServiceTest {
                 @Test
                 @DisplayName("微信注册：委托给OneStopAuth，将响应转换为RegisterResponse")
                 void whenWeChatRegister_thenDelegateToOneStopAuth() {
-                        // given
                         WeChatRegisterRequest request = new WeChatRegisterRequest(
                                         RegisterType.WECHAT,
                                         "wechat_code_abc",
@@ -210,10 +202,8 @@ class RegistrationApplicationServiceTest {
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
                                         .thenReturn(authResponse);
 
-                        // when
                         RegisterResponse response = service.register(request, "10.0.0.1", "WeChat/8.0");
 
-                        // then
                         assertThat(response).isNotNull();
                         assertThat(response.userId()).isEqualTo(USER_ID.value());
                         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);

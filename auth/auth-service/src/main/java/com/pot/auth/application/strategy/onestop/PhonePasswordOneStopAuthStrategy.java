@@ -100,7 +100,7 @@ public class PhonePasswordOneStopAuthStrategy
         CreateUserCommand command = CreateUserCommand.builder()
                 .phone(Phone.of(request.phone()))
                 .password(Password.of(password))
-                .username(generatedNickname)
+                .nickname(generatedNickname)
                 .avatarUrl(avatarUrl)
                 .build();
 

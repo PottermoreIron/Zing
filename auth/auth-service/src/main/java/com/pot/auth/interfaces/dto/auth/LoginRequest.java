@@ -2,7 +2,6 @@ package com.pot.auth.interfaces.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.pot.auth.application.command.LoginCommand;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 
@@ -16,7 +15,7 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
                 @JsonSubTypes.Type(value = EmailCodeLoginRequest.class, name = "EMAIL_CODE"),
                 @JsonSubTypes.Type(value = PhoneCodeLoginRequest.class, name = "PHONE_CODE")
 })
-public sealed interface LoginRequest extends LoginCommand permits
+public sealed interface LoginRequest permits
                 UsernamePasswordLoginRequest,
                 EmailPasswordLoginRequest,
                 EmailCodeLoginRequest,
@@ -25,4 +24,24 @@ public sealed interface LoginRequest extends LoginCommand permits
         LoginType loginType();
 
         UserDomain userDomain();
+
+        default String nickname() {
+                return null;
+        }
+
+        default String email() {
+                return null;
+        }
+
+        default String phone() {
+                return null;
+        }
+
+        default String password() {
+                return null;
+        }
+
+        default String verificationCode() {
+                return null;
+        }
 }

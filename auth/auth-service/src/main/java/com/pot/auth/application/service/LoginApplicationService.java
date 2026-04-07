@@ -1,12 +1,12 @@
 package com.pot.auth.application.service;
 
+import com.pot.auth.application.assembler.AuthCommandAssembler;
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.LoginStrategy;
 import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.application.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.application.context.AuthenticationContext;
-import com.pot.auth.application.command.LoginCommand;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
@@ -26,6 +26,7 @@ public class LoginApplicationService {
 
     private final LoginStrategyFactory loginStrategyFactory;
     private final ValidationChain<AuthenticationContext> authenticationValidationChain;
+    private final AuthCommandAssembler authCommandAssembler;
 
     /**
      * Executes a login request with the matching strategy.
@@ -35,7 +36,7 @@ public class LoginApplicationService {
                 request.loginType(), request.userDomain());
 
         AuthenticationContext context = AuthenticationContext.builder()
-                .request(toCommand(request))
+                .request(authCommandAssembler.toCommand(request))
                 .ipAddress(IpAddress.of(ipAddress))
                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                 .sessionId(generateSessionId())
@@ -63,44 +64,5 @@ public class LoginApplicationService {
 
     private String generateSessionId() {
         return UUID.randomUUID().toString();
-    }
-
-    private LoginCommand toCommand(LoginRequest request) {
-        return new LoginCommand() {
-            @Override
-            public com.pot.auth.domain.shared.enums.LoginType loginType() {
-                return request.loginType();
-            }
-
-            @Override
-            public com.pot.auth.domain.shared.valueobject.UserDomain userDomain() {
-                return request.userDomain();
-            }
-
-            @Override
-            public String nickname() {
-                return request.nickname();
-            }
-
-            @Override
-            public String email() {
-                return request.email();
-            }
-
-            @Override
-            public String phone() {
-                return request.phone();
-            }
-
-            @Override
-            public String password() {
-                return request.password();
-            }
-
-            @Override
-            public String verificationCode() {
-                return request.verificationCode();
-            }
-        };
     }
 }

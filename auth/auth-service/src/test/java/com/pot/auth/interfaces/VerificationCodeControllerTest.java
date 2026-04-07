@@ -22,9 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Web slice tests for VerificationCodeController.
- */
 @WebMvcTest(controllers = VerificationCodeController.class)
 @Import(GlobalExceptionHandler.class)
 @ActiveProfiles("test")
@@ -50,7 +47,6 @@ class VerificationCodeControllerTest {
         @Test
         @DisplayName("合法邮箱地址，返回200成功")
         void whenValidEmail_thenReturn200() throws Exception {
-            // given
             when(verificationCodeApplicationService.sendEmailCode(anyString())).thenReturn(true);
 
             mockMvc.perform(post(EMAIL_CODE_URL)

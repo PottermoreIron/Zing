@@ -29,9 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for VerificationCodeService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("VerificationCodeService 单元测试")
 class VerificationCodeServiceTest {
@@ -97,7 +94,6 @@ class VerificationCodeServiceTest {
             when(cachePort.exists(sendLimitKey)).thenReturn(false);
             when(notificationPort.sendEmailVerificationCode(eq(email), anyString())).thenReturn(true);
 
-            // when
             boolean result = verificationCodeService.sendEmailVerificationCode(new Email(email));
 
             assertThat(result).isTrue();
@@ -115,7 +111,6 @@ class VerificationCodeServiceTest {
             when(cachePort.exists(sendLimitKey)).thenReturn(false);
             when(notificationPort.sendEmailVerificationCode(eq(email), anyString())).thenReturn(false);
 
-            // when
             boolean result = verificationCodeService.sendEmailVerificationCode(new Email(email));
 
             assertThat(result).isFalse();
@@ -166,7 +161,6 @@ class VerificationCodeServiceTest {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.of("0"));
 
-            // when
             boolean result = verificationCodeService.verifyCode(recipient, storedCode);
 
             assertThat(result).isTrue();
@@ -179,7 +173,6 @@ class VerificationCodeServiceTest {
         void whenCodeNotFound_thenThrowCodeNotFoundException() {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.empty());
 
-            // when & then
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))
                     .isInstanceOf(CodeNotFoundException.class)
                     .hasMessageContaining("过期");
@@ -191,7 +184,6 @@ class VerificationCodeServiceTest {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.of("1"));
 
-            // when & then
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, "999999"))
                     .isInstanceOf(CodeMismatchException.class)
                     .hasMessageContaining("错误");
@@ -206,7 +198,6 @@ class VerificationCodeServiceTest {
             when(cachePort.get(attemptsKey, String.class))
                     .thenReturn(Optional.of(String.valueOf(POLICY.maxAttempts())));
 
-            // when & then
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))
                     .isInstanceOf(CodeVerificationExceededException.class)
                     .hasMessageContaining("超限");
@@ -221,7 +212,6 @@ class VerificationCodeServiceTest {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.empty());
 
-            // when
             boolean result = verificationCodeService.verifyCode(recipient, storedCode);
 
             assertThat(result).isTrue();

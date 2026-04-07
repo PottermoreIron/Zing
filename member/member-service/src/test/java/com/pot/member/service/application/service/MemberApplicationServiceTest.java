@@ -3,8 +3,11 @@ package com.pot.member.service.application.service;
 import com.pot.member.service.application.assembler.MemberAssembler;
 import com.pot.member.service.application.assembler.PermissionAssembler;
 import com.pot.member.service.application.command.ChangePasswordCommand;
+import com.pot.member.service.application.command.CreateMemberCommand;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.dto.MemberDTO;
+import com.pot.member.service.application.exception.MemberException;
+import com.pot.member.service.application.exception.MemberResultCode;
 import com.pot.member.service.domain.model.member.*;
 import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 import com.pot.member.service.domain.port.DomainEventPublisher;
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -59,8 +63,7 @@ class MemberApplicationServiceTest {
     @InjectMocks
     private MemberApplicationService service;
 
-
-        private MemberAggregate persistedMember(Long id) {
+    private MemberAggregate persistedMember(Long id) {
         return MemberAggregate.reconstitute(
                 MemberId.of(id),
                 Nickname.of("user" + id),
@@ -74,7 +77,6 @@ class MemberApplicationServiceTest {
                 LocalDateTime.now(),
                 null);
     }
-
 
     @Nested
     @DisplayName("register()")
@@ -114,32 +116,117 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("昵称已存在 → 抛出 IllegalArgumentException")
+        @DisplayName("昵称已存在 → 抛出 MemberException")
         void register_duplicateNickname_throws() {
             given(memberRepository.existsByNickname(any())).willReturn(true);
 
             assertThatThrownBy(() -> service.register(cmd))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("昵称");
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.NICKNAME_ALREADY_EXISTS);
 
             then(memberDomainService).shouldHaveNoInteractions();
         }
 
         @Test
-        @DisplayName("手机号已注册 → 抛出 IllegalArgumentException")
+        @DisplayName("手机号已注册 → 抛出 MemberException")
         void register_duplicatePhone_throws() {
-            cmd.setPhoneNumber("13800138000");
+            cmd = cmd.toBuilder().phoneNumber("13800138000").build();
             given(memberRepository.existsByNickname(any())).willReturn(false);
             given(memberRepository.existsByPhoneNumber(any())).willReturn(true);
 
             assertThatThrownBy(() -> service.register(cmd))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("手机号");
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.PHONE_ALREADY_EXISTS);
 
             then(memberDomainService).shouldHaveNoInteractions();
         }
+
+        @Test
+        @DisplayName("唯一键冲突 → 转换为 MemberException")
+        void register_duplicateKeyFromPersistence_throwsMemberException() {
+            MemberAggregate created = MemberAggregate.create(
+                    Nickname.of("newuser"), Email.of("new@test.com"), "$hash");
+
+            given(memberRepository.existsByNickname(any())).willReturn(false);
+            given(memberRepository.existsByEmail(any())).willReturn(false);
+            given(memberDomainService.register(any(), any(), any())).willReturn(created);
+            given(memberRepository.save(any()))
+                    .willThrow(new DuplicateKeyException("Duplicate entry for key 'uk_email'"));
+
+            assertThatThrownBy(() -> service.register(cmd))
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.EMAIL_ALREADY_EXISTS);
+        }
     }
 
+    @Nested
+    @DisplayName("createMember()")
+    class CreateMember {
+
+        @Test
+        @DisplayName("仅昵称和密码也能创建会员")
+        void createMember_nicknameOnly_happyPath() {
+            CreateMemberCommand command = CreateMemberCommand.builder()
+                    .nickname("nickname_only")
+                    .password("Password1!")
+                    .build();
+            MemberAggregate created = MemberAggregate.create(
+                    Nickname.of("nickname_only"), null, "$hash");
+            MemberDTO expected = MemberDTO.builder().nickname("nickname_only").build();
+
+            given(memberRepository.existsByNickname(any())).willReturn(false);
+            given(memberDomainService.createMember(any(), isNull(), any())).willReturn(created);
+            given(memberRepository.save(any())).willAnswer(inv -> {
+                MemberAggregate aggregate = inv.getArgument(0);
+                aggregate.assignMemberId(MemberId.of(10L));
+                return aggregate;
+            });
+            given(memberAssembler.toDTO(any())).willReturn(expected);
+
+            MemberDTO result = service.createMember(command);
+
+            assertThat(result).isEqualTo(expected);
+            then(memberRepository).should().existsByNickname(Nickname.of("nickname_only"));
+            then(memberDomainService).should().createMember(eq(Nickname.of("nickname_only")), isNull(),
+                    eq("Password1!"));
+            then(memberRepository).should().save(argThat(member -> member.getEmail() == null
+                    && member.getPhoneNumber() == null));
+        }
+
+        @Test
+        @DisplayName("手机号注册路径允许邮箱为空")
+        void createMember_phoneOnly_happyPath() {
+            CreateMemberCommand command = CreateMemberCommand.builder()
+                    .nickname("phone_only")
+                    .phoneNumber("13800138000")
+                    .password("Password1!")
+                    .build();
+            MemberAggregate created = MemberAggregate.create(
+                    Nickname.of("phone_only"), null, "$hash");
+            MemberDTO expected = MemberDTO.builder().nickname("phone_only").phoneNumber("13800138000").build();
+
+            given(memberRepository.existsByNickname(any())).willReturn(false);
+            given(memberRepository.existsByPhoneNumber(any())).willReturn(false);
+            given(memberDomainService.createMember(any(), isNull(), any())).willReturn(created);
+            given(memberRepository.save(any())).willAnswer(inv -> {
+                MemberAggregate aggregate = inv.getArgument(0);
+                aggregate.assignMemberId(MemberId.of(11L));
+                return aggregate;
+            });
+            given(memberAssembler.toDTO(any())).willReturn(expected);
+
+            MemberDTO result = service.createMember(command);
+
+            assertThat(result).isEqualTo(expected);
+            then(memberRepository).should().existsByPhoneNumber(PhoneNumber.of("13800138000"));
+            then(memberDomainService).should().createMember(eq(Nickname.of("phone_only")), isNull(), eq("Password1!"));
+            then(memberRepository).should().save(argThat(member -> member.getEmail() == null
+                    && member.getPhoneNumber().equals(PhoneNumber.of("13800138000"))));
+        }
+    }
 
     @Nested
     @DisplayName("changePassword()")
@@ -165,7 +252,6 @@ class MemberApplicationServiceTest {
         }
     }
 
-
     @Nested
     @DisplayName("authenticateWithPassword()")
     class AuthenticateWithPassword {
@@ -186,29 +272,31 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("用户不存在 → 抛出 IllegalArgumentException")
+        @DisplayName("用户不存在 → 抛出 MemberException")
         void authenticate_memberNotFound_throws() {
             given(memberRepository.findByEmail(any())).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.authenticateWithPassword("nobody@test.com", "pass"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("用户不存在");
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.MEMBER_NOT_FOUND);
         }
 
         @Test
-        @DisplayName("密码错误 → 抛出 IllegalArgumentException")
+        @DisplayName("密码错误 → 抛出 MemberException")
         void authenticate_wrongPassword_throws() {
             MemberAggregate member = persistedMember(1L);
             given(memberRepository.findByEmail(any())).willReturn(Optional.of(member));
             given(memberDomainService.verifyPassword(member, "wrong")).willReturn(false);
 
             assertThatThrownBy(() -> service.authenticateWithPassword("u1@test.com", "wrong"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("密码");
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.PASSWORD_INCORRECT);
         }
 
         @Test
-        @DisplayName("账户被锁定 → 抛出 IllegalStateException")
+        @DisplayName("账户被锁定 → 抛出 MemberException")
         void authenticate_lockedAccount_throws() {
             MemberAggregate member = persistedMember(1L);
             member.lock(); // ACTIVE → LOCKED
@@ -216,11 +304,11 @@ class MemberApplicationServiceTest {
             given(memberDomainService.verifyPassword(member, "pass")).willReturn(true);
 
             assertThatThrownBy(() -> service.authenticateWithPassword("u1@test.com", "pass"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("禁用或锁定");
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.ACCOUNT_UNAVAILABLE);
         }
     }
-
 
     @Nested
     @DisplayName("lockMember() / unlockMember()")
@@ -240,11 +328,13 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("lockMember() 会员不存在 → 抛出 IllegalArgumentException")
+        @DisplayName("lockMember() 会员不存在 → 抛出 MemberException")
         void lockMember_memberNotFound_throws() {
             given(memberRepository.findById(any())).willReturn(Optional.empty());
             assertThatThrownBy(() -> service.lockMember(99L))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(MemberException.class)
+                    .extracting("resultCode")
+                    .isEqualTo(MemberResultCode.MEMBER_NOT_FOUND);
         }
 
         @Test
@@ -261,7 +351,6 @@ class MemberApplicationServiceTest {
             then(memberRepository).should().save(member);
         }
     }
-
 
     @Nested
     @DisplayName("bindOAuth2()")
@@ -320,7 +409,6 @@ class MemberApplicationServiceTest {
             then(socialConnectionRepository).should().save(existing);
         }
     }
-
 
     @Nested
     @DisplayName("recordDeviceLogin()")

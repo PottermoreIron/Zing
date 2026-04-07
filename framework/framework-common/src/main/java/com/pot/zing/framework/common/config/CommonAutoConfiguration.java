@@ -1,5 +1,7 @@
 package com.pot.zing.framework.common.config;
 
+import com.pot.zing.framework.common.handler.BaseGlobalExceptionHandler;
+import com.pot.zing.framework.common.handler.DefaultGlobalExceptionHandler;
 import com.pot.zing.framework.common.properties.JwtProperties;
 import com.pot.zing.framework.common.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -32,5 +34,12 @@ public class CommonAutoConfiguration {
     public JwtUtils jwtUtils(JwtProperties jwtProperties) {
         log.info("初始化 JwtUtils, issuer: {}", jwtProperties.getIssuer());
         return new JwtUtils(jwtProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(BaseGlobalExceptionHandler.class)
+    public DefaultGlobalExceptionHandler defaultGlobalExceptionHandler() {
+        log.info("初始化默认全局异常处理器");
+        return new DefaultGlobalExceptionHandler();
     }
 }

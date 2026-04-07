@@ -24,9 +24,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Web slice tests for OneStopAuthenticationController.
- */
 @WebMvcTest(controllers = OneStopAuthenticationController.class)
 @Import(GlobalExceptionHandler.class)
 @ActiveProfiles("test")
@@ -52,7 +49,6 @@ class OneStopAuthenticationControllerTest {
                 @Test
                 @DisplayName("合法的用户名密码请求，返回200和OneStopAuthResponse")
                 void whenValidRequest_thenReturn200WithResponse() throws Exception {
-                        // given
                         long now = System.currentTimeMillis() / 1000;
                         OneStopAuthResponse authResponse = OneStopAuthResponse.builder()
                                         .userId(TestFixtures.USER_ID)
@@ -77,7 +73,6 @@ class OneStopAuthenticationControllerTest {
                                         }
                                         """;
 
-                        // when & then
                         mockMvc.perform(post(AUTH_URL)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(requestBody))
@@ -127,7 +122,6 @@ class OneStopAuthenticationControllerTest {
                 @Test
                 @DisplayName("服务抛出 AUTHENTICATION_FAILED，返回400并携带 AUTH_0001 错误码")
                 void whenAuthFailed_thenReturn400WithErrorCode() throws Exception {
-                        // given
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
                                         .thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
@@ -140,7 +134,6 @@ class OneStopAuthenticationControllerTest {
                                         }
                                         """;
 
-                        // when & then
                         mockMvc.perform(post(AUTH_URL)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(requestBody))
@@ -157,7 +150,6 @@ class OneStopAuthenticationControllerTest {
                 @Test
                 @DisplayName("合法手机验证码请求，返回200")
                 void whenValidPhoneCodeRequest_thenReturn200() throws Exception {
-                        // given
                         long now = System.currentTimeMillis() / 1000;
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
                                         .thenReturn(OneStopAuthResponse.builder()
@@ -194,7 +186,6 @@ class OneStopAuthenticationControllerTest {
                 @Test
                 @DisplayName("合法邮箱验证码请求，返回200")
                 void whenValidEmailCodeRequest_thenReturn200() throws Exception {
-                        // given
                         long now = System.currentTimeMillis() / 1000;
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
                                         .thenReturn(OneStopAuthResponse.builder()

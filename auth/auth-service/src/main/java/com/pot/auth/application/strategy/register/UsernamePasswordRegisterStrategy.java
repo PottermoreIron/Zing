@@ -50,7 +50,7 @@ public class UsernamePasswordRegisterStrategy extends AbstractRegisterStrategyIm
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
 
         var userId = port.createUser(CreateUserCommand.builder()
-                .username(request.nickname())
+                .nickname(request.nickname())
                 .password(Password.of(request.password()))
                 .build());
 

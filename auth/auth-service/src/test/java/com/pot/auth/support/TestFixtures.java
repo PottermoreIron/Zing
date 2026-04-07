@@ -17,9 +17,6 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Shared test fixtures for auth-service tests.
- */
 public final class TestFixtures {
 
     public static final UserId USER_ID = UserId.of(10001L);

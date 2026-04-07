@@ -1,5 +1,6 @@
 package com.pot.auth.application;
 
+import com.pot.auth.application.assembler.AuthCommandAssembler;
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.application.service.LoginApplicationService;
 import com.pot.auth.application.strategy.LoginStrategy;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,9 +30,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.doReturn;
 
-/**
- * Unit tests for LoginApplicationService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LoginApplicationService 单元测试")
 class LoginApplicationServiceTest {
@@ -50,13 +49,15 @@ class LoginApplicationServiceTest {
     @Mock
     private ValidationChain<AuthenticationContext> authenticationValidationChain;
 
+    @Spy
+    private AuthCommandAssembler authCommandAssembler;
+
     @InjectMocks
     private LoginApplicationService loginApplicationService;
 
     @Test
     @DisplayName("用户名密码登录：委托给策略，返回正确的LoginResponse")
     void whenUsernamePasswordLogin_thenDelegateToStrategyAndReturnResponse() {
-        // given
         LoginRequest request = usernamePasswordRequest();
         AuthenticationResult authResult = authResult();
 
@@ -64,7 +65,6 @@ class LoginApplicationServiceTest {
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(LoginType.USERNAME_PASSWORD);
         when(mockStrategy.execute(any(AuthenticationContext.class))).thenReturn(authResult);
 
-        // when
         LoginResponse response = loginApplicationService.login(request, "127.0.0.1", "Mozilla/5.0");
 
         assertThat(response.userId()).isEqualTo(USER_ID.value());
@@ -88,13 +88,11 @@ class LoginApplicationServiceTest {
     @Test
     @DisplayName("策略抛出DomainException，异常向上传播")
     void whenStrategyThrowsDomainException_thenPropagateException() {
-        // given
         LoginRequest request = usernamePasswordRequest();
         LoginStrategy mockStrategy = mock(LoginStrategy.class);
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(any());
         when(mockStrategy.execute(any())).thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
-        // when & then
         assertThatThrownBy(() -> loginApplicationService.login(request, "127.0.0.1", "UA"))
                 .isInstanceOf(DomainException.class);
     }
@@ -102,7 +100,6 @@ class LoginApplicationServiceTest {
     @Test
     @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出异常")
     void whenUserAgentNull_thenUseDefaultValue() {
-        // given
         LoginRequest request = usernamePasswordRequest();
         LoginStrategy mockStrategy = mock(LoginStrategy.class);
         doReturn(mockStrategy).when(loginStrategyFactory).getStrategy(any());

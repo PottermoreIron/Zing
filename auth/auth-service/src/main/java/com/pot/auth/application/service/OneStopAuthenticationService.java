@@ -1,7 +1,7 @@
 package com.pot.auth.application.service;
 
+import com.pot.auth.application.assembler.AuthCommandAssembler;
 import com.pot.auth.application.dto.OneStopAuthResponse;
-import com.pot.auth.application.command.OneStopAuthCommand;
 import com.pot.auth.application.strategy.OneStopAuthStrategy;
 import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.factory.OneStopAuthStrategyFactory;
@@ -24,6 +24,7 @@ public class OneStopAuthenticationService {
 
         private final OneStopAuthStrategyFactory strategyFactory;
         private final ValidationChain<OneStopAuthContext> oneStopAuthValidationChain;
+        private final AuthCommandAssembler authCommandAssembler;
 
         /**
          * Executes a one-stop authentication request.
@@ -37,7 +38,7 @@ public class OneStopAuthenticationService {
                                 request.authType(), request.userDomain());
 
                 OneStopAuthContext context = OneStopAuthContext.builder()
-                                .request(toCommand(request))
+                                .request(authCommandAssembler.toCommand(request))
                                 .ipAddress(IpAddress.of(ipAddress))
                                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                                 .build();
@@ -53,59 +54,5 @@ public class OneStopAuthenticationService {
                                 result.userId(), request.authType());
 
                 return response;
-        }
-
-        private OneStopAuthCommand toCommand(OneStopAuthRequest request) {
-                return new OneStopAuthCommand() {
-                        @Override
-                        public com.pot.auth.domain.shared.enums.AuthType authType() {
-                                return request.authType();
-                        }
-
-                        @Override
-                        public com.pot.auth.domain.shared.valueobject.UserDomain userDomain() {
-                                return request.userDomain();
-                        }
-
-                        @Override
-                        public String nickname() {
-                                return request.nickname();
-                        }
-
-                        @Override
-                        public String email() {
-                                return request.email();
-                        }
-
-                        @Override
-                        public String phone() {
-                                return request.phone();
-                        }
-
-                        @Override
-                        public String password() {
-                                return request.password();
-                        }
-
-                        @Override
-                        public String verificationCode() {
-                                return request.verificationCode();
-                        }
-
-                        @Override
-                        public String code() {
-                                return request.code();
-                        }
-
-                        @Override
-                        public String state() {
-                                return request.state();
-                        }
-
-                        @Override
-                        public String oauth2ProviderCode() {
-                                return request.oauth2ProviderCode();
-                        }
-                };
         }
 }

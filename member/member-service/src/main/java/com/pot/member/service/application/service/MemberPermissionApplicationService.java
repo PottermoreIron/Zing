@@ -3,6 +3,8 @@ package com.pot.member.service.application.service;
 import com.pot.member.facade.dto.RoleDTO;
 import com.pot.member.service.application.assembler.PermissionAssembler;
 import com.pot.member.service.application.dto.PermissionDTO;
+import com.pot.member.service.application.exception.MemberException;
+import com.pot.member.service.application.exception.MemberResultCode;
 import com.pot.member.service.application.query.GetMemberPermissionsQuery;
 import com.pot.member.service.domain.model.member.MemberAggregate;
 import com.pot.member.service.domain.model.member.MemberId;
@@ -54,7 +56,7 @@ public class MemberPermissionApplicationService {
 
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("会员不存在: " + memberId));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "会员不存在: " + memberId));
     }
 
     private RoleDTO toFacadeRoleDTO(RoleAggregate role) {

@@ -12,9 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.verify;
 
-/**
- * Unit tests for LogoutApplicationService.
- */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LogoutApplicationService 单元测试")
 class LogoutApplicationServiceTest {
@@ -28,7 +25,6 @@ class LogoutApplicationServiceTest {
     @Test
     @DisplayName("提供AccessToken和RefreshToken，两者均委托给JwtTokenService")
     void whenBothTokensProvided_thenDelegateToBothRevocations() {
-        // when
         logoutApplicationService.logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
 
         verify(jwtTokenService).logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
@@ -37,10 +33,8 @@ class LogoutApplicationServiceTest {
     @Test
     @DisplayName("仅提供AccessToken（RefreshToken为null），委托时RefreshToken为null")
     void whenOnlyAccessToken_thenDelegateWithNullRefresh() {
-        // when
         logoutApplicationService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 
-        // then
         verify(jwtTokenService).logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
     }
 }

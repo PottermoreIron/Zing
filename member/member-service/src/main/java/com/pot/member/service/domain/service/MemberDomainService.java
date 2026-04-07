@@ -30,7 +30,22 @@ public class MemberDomainService {
             Email email,
             String rawPassword) {
 
-        if (memberRepository.existsByEmail(email)) {
+        if (email == null) {
+            throw new IllegalArgumentException("邮箱不能为空");
+        }
+
+        return createMember(nickname, email, rawPassword);
+    }
+
+    /**
+     * Create a new member with password credentials.
+     */
+    public MemberAggregate createMember(
+            Nickname nickname,
+            Email email,
+            String rawPassword) {
+
+        if (email != null && memberRepository.existsByEmail(email)) {
             throw new IllegalStateException("邮箱已被注册: " + email.getValue());
         }
 

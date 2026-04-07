@@ -1,6 +1,7 @@
 package com.pot.zing.framework.common.excption;
 
 import com.pot.zing.framework.common.enums.ResultCode;
+import com.pot.zing.framework.common.service.IResultCode;
 import lombok.Getter;
 
 /**
@@ -8,14 +9,14 @@ import lombok.Getter;
  */
 @Getter
 public class BusinessException extends RuntimeException {
-    private final ResultCode resultCode;
+    private final IResultCode resultCode;
 
-    public BusinessException(ResultCode resultCode) {
+    public BusinessException(IResultCode resultCode) {
         super(resultCode.getMsg());
         this.resultCode = resultCode;
     }
 
-    public BusinessException(ResultCode resultCode, String message) {
+    public BusinessException(IResultCode resultCode, String message) {
         super(message);
         this.resultCode = resultCode;
     }
