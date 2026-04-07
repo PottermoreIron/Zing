@@ -1,26 +1,19 @@
 package com.pot.member.service.application.command;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UpdateMemberProfileCommand {
-
-    private Long memberId;
-    private String nickname;
-    private String firstName;
-    private String lastName;
-    private Integer gender;
-    private String birthDate;
-    private String bio;
-    private String countryCode;
-    private String region;
-    private String city;
-    private String timezone;
-    private String locale;
+public record UpdateMemberProfileCommand(
+        Long memberId,
+        String nickname,
+        String firstName,
+        String lastName,
+        Integer gender,
+        String birthDate,
+        String bio,
+        String countryCode,
+        String region,
+        String city,
+        String timezone,
+        String locale) {
 }

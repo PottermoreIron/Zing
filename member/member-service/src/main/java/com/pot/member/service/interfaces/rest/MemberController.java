@@ -94,11 +94,10 @@ public class MemberController {
     public R<Void> changePassword(
             @PathVariable Long memberId,
             @Valid @RequestBody ChangePasswordRequest request) {
-        ChangePasswordCommand command = ChangePasswordCommand.builder()
-                .memberId(memberId)
-                .oldPassword(request.oldPassword())
-                .newPassword(request.newPassword())
-                .build();
+        ChangePasswordCommand command = new ChangePasswordCommand(
+                memberId,
+                request.oldPassword(),
+                request.newPassword());
         memberApplicationService.changePassword(command);
         return R.success();
     }

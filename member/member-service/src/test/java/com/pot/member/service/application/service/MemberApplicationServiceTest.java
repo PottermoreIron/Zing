@@ -131,7 +131,12 @@ class MemberApplicationServiceTest {
         @Test
         @DisplayName("手机号已注册 → 抛出 MemberException")
         void register_duplicatePhone_throws() {
-            cmd = cmd.toBuilder().phoneNumber("13800138000").build();
+            cmd = RegisterMemberCommand.builder()
+                    .nickname(cmd.nickname())
+                    .email(cmd.email())
+                    .password(cmd.password())
+                    .phoneNumber("13800138000")
+                    .build();
             given(memberRepository.existsByNickname(any())).willReturn(false);
             given(memberRepository.existsByPhoneNumber(any())).willReturn(true);
 
@@ -236,11 +241,7 @@ class MemberApplicationServiceTest {
         @DisplayName("修改密码成功：委托领域服务并保存聚合")
         void changePassword_savesMemberAfterDomainChange() {
             MemberAggregate member = persistedMember(1L);
-            ChangePasswordCommand command = ChangePasswordCommand.builder()
-                    .memberId(1L)
-                    .oldPassword("oldPassword")
-                    .newPassword("newPassword")
-                    .build();
+            ChangePasswordCommand command = new ChangePasswordCommand(1L, "oldPassword", "newPassword");
 
             given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));
             given(memberRepository.save(any())).willAnswer(inv -> inv.getArgument(0));

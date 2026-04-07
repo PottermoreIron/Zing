@@ -1,48 +1,56 @@
 package com.pot.member.service.application.query;
 
-import lombok.Getter;
+import java.util.Objects;
 
 /**
  * Query object that represents exactly one member lookup selector.
  */
-@Getter
-public final class GetMemberQuery {
+public sealed interface GetMemberQuery permits GetMemberQuery.ByMemberId,
+        GetMemberQuery.ByEmail,
+        GetMemberQuery.ByPhoneNumber,
+        GetMemberQuery.ByNickname {
 
-    public enum Selector {
-        MEMBER_ID,
-        EMAIL,
-        PHONE_NUMBER,
-        NICKNAME
+    static GetMemberQuery byMemberId(Long memberId) {
+        return new ByMemberId(memberId);
     }
 
-    private final Selector selector;
-
-    private final Long memberId;
-    private final String email;
-    private final String phoneNumber;
-    private final String nickname;
-
-    private GetMemberQuery(Selector selector, Long memberId, String email, String phoneNumber, String nickname) {
-        this.selector = selector;
-        this.memberId = memberId;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.nickname = nickname;
+    static GetMemberQuery byEmail(String email) {
+        return new ByEmail(email);
     }
 
-    public static GetMemberQuery byMemberId(Long memberId) {
-        return new GetMemberQuery(Selector.MEMBER_ID, memberId, null, null, null);
+    static GetMemberQuery byPhoneNumber(String phoneNumber) {
+        return new ByPhoneNumber(phoneNumber);
     }
 
-    public static GetMemberQuery byEmail(String email) {
-        return new GetMemberQuery(Selector.EMAIL, null, email, null, null);
+    static GetMemberQuery byNickname(String nickname) {
+        return new ByNickname(nickname);
     }
 
-    public static GetMemberQuery byPhoneNumber(String phoneNumber) {
-        return new GetMemberQuery(Selector.PHONE_NUMBER, null, null, phoneNumber, null);
+    record ByMemberId(Long memberId) implements GetMemberQuery {
+
+        public ByMemberId {
+            Objects.requireNonNull(memberId, "memberId must not be null");
+        }
     }
 
-    public static GetMemberQuery byNickname(String nickname) {
-        return new GetMemberQuery(Selector.NICKNAME, null, null, null, nickname);
+    record ByEmail(String email) implements GetMemberQuery {
+
+        public ByEmail {
+            Objects.requireNonNull(email, "email must not be null");
+        }
+    }
+
+    record ByPhoneNumber(String phoneNumber) implements GetMemberQuery {
+
+        public ByPhoneNumber {
+            Objects.requireNonNull(phoneNumber, "phoneNumber must not be null");
+        }
+    }
+
+    record ByNickname(String nickname) implements GetMemberQuery {
+
+        public ByNickname {
+            Objects.requireNonNull(nickname, "nickname must not be null");
+        }
     }
 }

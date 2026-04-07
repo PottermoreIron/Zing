@@ -23,41 +23,41 @@ public class RoleApplicationService {
     private final PermissionDomainService permissionDomainService;
     private final RoleAssembler roleAssembler;
 
-        public RoleDTO getRole(Long roleId) {
+    public RoleDTO getRole(Long roleId) {
         RoleAggregate role = roleRepository.findById(RoleId.of(roleId))
                 .orElse(null);
         return roleAssembler.toDTO(role);
     }
 
-        public RoleDTO getRoleByCode(String roleCode) {
+    public RoleDTO getRoleByCode(String roleCode) {
         RoleAggregate role = roleRepository.findByCode(roleCode)
                 .orElse(null);
         return roleAssembler.toDTO(role);
     }
 
-        public List<RoleDTO> getMemberRoles(Long memberId) {
+    public List<RoleDTO> getMemberRoles(Long memberId) {
         List<RoleAggregate> roles = roleRepository.findByMemberId(memberId);
         return roleAssembler.toDTOList(roles);
     }
 
-        @Transactional
+    @Transactional
     public void assignRole(AssignRoleCommand command) {
-        log.info("为会员分配角色: memberId={}, roleId={}", command.getMemberId(), command.getRoleId());
+        log.info("为会员分配角色: memberId={}, roleId={}", command.memberId(), command.roleId());
 
         permissionDomainService.assignRoleToMember(
-                command.getMemberId(),
-                command.getRoleId(),
-                command.getOperator());
+                command.memberId(),
+                command.roleId(),
+                command.operator());
     }
 
-        @Transactional
+    @Transactional
     public void revokeRole(Long memberId, Long roleId, String operator) {
         log.info("撤销会员角色: memberId={}, roleId={}", memberId, roleId);
 
         permissionDomainService.revokeRoleFromMember(memberId, roleId, operator);
     }
 
-        public List<RoleDTO> getAllRoles() {
+    public List<RoleDTO> getAllRoles() {
         List<RoleAggregate> roles = roleRepository.findAll();
         return roleAssembler.toDTOList(roles);
     }

@@ -33,7 +33,7 @@ public class MemberPermissionApplicationService {
     private final PermissionAssembler permissionAssembler;
 
     public Set<PermissionDTO> getMemberPermissions(GetMemberPermissionsQuery query) {
-        Set<PermissionAggregate> permissions = permissionDomainService.getMemberPermissions(query.getMemberId());
+        Set<PermissionAggregate> permissions = permissionDomainService.getMemberPermissions(query.memberId());
         return permissionAssembler.toDTOSet(permissions);
     }
 

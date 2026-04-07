@@ -57,13 +57,13 @@ public class MemberApplicationService {
 
     @Transactional
     public MemberDTO register(RegisterMemberCommand command) {
-        log.info("注册新会员: {}", command.getEmail());
+        log.info("注册新会员: {}", command.email());
 
-        Nickname nickname = requireAvailableNickname(command.getNickname());
-        PhoneNumber phoneNumber = resolveAvailablePhone(command.getPhoneNumber());
-        Email email = requireAvailableEmail(command.getEmail());
+        Nickname nickname = requireAvailableNickname(command.nickname());
+        PhoneNumber phoneNumber = resolveAvailablePhone(command.phoneNumber());
+        Email email = requireAvailableEmail(command.email());
 
-        MemberAggregate member = memberDomainService.register(nickname, email, command.getPassword());
+        MemberAggregate member = memberDomainService.register(nickname, email, command.password());
 
         if (phoneNumber != null) {
             member.updatePhoneNumber(phoneNumber);
@@ -74,13 +74,13 @@ public class MemberApplicationService {
 
     @Transactional
     public MemberDTO createMember(CreateMemberCommand command) {
-        log.info("内部创建会员: nickname={}", command.getNickname());
+        log.info("内部创建会员: nickname={}", command.nickname());
 
-        Nickname nickname = requireAvailableNickname(command.getNickname());
-        PhoneNumber phoneNumber = resolveAvailablePhone(command.getPhoneNumber());
-        Email email = resolveAvailableEmail(command.getEmail());
+        Nickname nickname = requireAvailableNickname(command.nickname());
+        PhoneNumber phoneNumber = resolveAvailablePhone(command.phoneNumber());
+        Email email = resolveAvailableEmail(command.email());
 
-        MemberAggregate member = memberDomainService.createMember(nickname, email, command.getPassword());
+        MemberAggregate member = memberDomainService.createMember(nickname, email, command.password());
 
         if (phoneNumber != null) {
             member.updatePhoneNumber(phoneNumber);
@@ -165,12 +165,15 @@ public class MemberApplicationService {
     }
 
     public MemberDTO getMember(GetMemberQuery query) {
-        MemberAggregate member = switch (query.getSelector()) {
-            case MEMBER_ID -> memberRepository.findById(MemberId.of(query.getMemberId())).orElse(null);
-            case EMAIL -> memberRepository.findByEmail(Email.of(query.getEmail())).orElse(null);
-            case PHONE_NUMBER ->
-                memberRepository.findByPhoneNumber(PhoneNumber.of(query.getPhoneNumber())).orElse(null);
-            case NICKNAME -> memberRepository.findByNickname(Nickname.of(query.getNickname())).orElse(null);
+        MemberAggregate member = switch (query) {
+            case GetMemberQuery.ByMemberId byMemberId ->
+                memberRepository.findById(MemberId.of(byMemberId.memberId())).orElse(null);
+            case GetMemberQuery.ByEmail byEmail ->
+                memberRepository.findByEmail(Email.of(byEmail.email())).orElse(null);
+            case GetMemberQuery.ByPhoneNumber byPhoneNumber ->
+                memberRepository.findByPhoneNumber(PhoneNumber.of(byPhoneNumber.phoneNumber())).orElse(null);
+            case GetMemberQuery.ByNickname byNickname ->
+                memberRepository.findByNickname(Nickname.of(byNickname.nickname())).orElse(null);
         };
         return memberAssembler.toDTO(member);
     }
@@ -226,10 +229,10 @@ public class MemberApplicationService {
 
     @Transactional
     public void changePassword(ChangePasswordCommand command) {
-        log.info("修改密码: memberId={}", command.getMemberId());
-        MemberAggregate member = requireMember(command.getMemberId());
+        log.info("修改密码: memberId={}", command.memberId());
+        MemberAggregate member = requireMember(command.memberId());
         try {
-            memberDomainService.changePassword(member, command.getOldPassword(), command.getNewPassword());
+            memberDomainService.changePassword(member, command.oldPassword(), command.newPassword());
         } catch (IllegalArgumentException ex) {
             throw new MemberException(MemberResultCode.PASSWORD_INCORRECT, ex.getMessage());
         }
@@ -272,21 +275,21 @@ public class MemberApplicationService {
 
     @Transactional
     public MemberDTO updateProfile(UpdateMemberProfileCommand command) {
-        log.info("更新会员资料: memberId={}", command.getMemberId());
-        MemberAggregate member = requireMember(command.getMemberId());
+        log.info("更新会员资料: memberId={}", command.memberId());
+        MemberAggregate member = requireMember(command.memberId());
 
         MemberProfile newProfile = MemberProfile.builder()
-                .nickname(command.getNickname())
-                .firstName(command.getFirstName())
-                .lastName(command.getLastName())
-                .gender(command.getGender())
-                .birthDate(command.getBirthDate())
-                .bio(command.getBio())
-                .countryCode(command.getCountryCode())
-                .region(command.getRegion())
-                .city(command.getCity())
-                .timezone(command.getTimezone())
-                .locale(command.getLocale())
+                .nickname(command.nickname())
+                .firstName(command.firstName())
+                .lastName(command.lastName())
+                .gender(command.gender())
+                .birthDate(command.birthDate())
+                .bio(command.bio())
+                .countryCode(command.countryCode())
+                .region(command.region())
+                .city(command.city())
+                .timezone(command.timezone())
+                .locale(command.locale())
                 .build();
 
         member.updateProfile(newProfile);
