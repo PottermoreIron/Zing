@@ -7,7 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-import java.nio.file.Files;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -31,9 +33,9 @@ public class JwtConfig {
      * Creates the public key bean from inline content or the configured resource.
      */
     @Bean
-    public PublicKey jwtPublicKey() throws Exception {
+    public PublicKey jwtPublicKey() {
         try {
-            if (jwtProperties.getPublicKey() != null && !jwtProperties.getPublicKey().isEmpty()) {
+            if (hasInlinePublicKey()) {
                 log.info("[JWT配置] 从配置属性加载公钥");
                 return loadPublicKeyFromString(jwtProperties.getPublicKey());
             }
@@ -43,16 +45,28 @@ public class JwtConfig {
 
             Resource resource = resourceLoader.getResource(location);
             if (!resource.exists()) {
-                throw new IllegalStateException("JWT公钥文件不存在: " + location);
+                throw new GatewayConfigurationException("JWT公钥文件不存在: " + location);
             }
 
-            String keyContent = Files.readString(resource.getFile().toPath());
+            String keyContent = readKeyContent(resource);
             return loadPublicKeyFromString(keyContent);
 
         } catch (Exception e) {
             log.error("[JWT配置] 加载公钥失败", e);
-            throw new IllegalStateException("无法加载JWT公钥，请检查配置: gateway.jwt.publicKeyLocation 或 gateway.jwt.publicKey",
+            throw new GatewayConfigurationException(
+                    "无法加载JWT公钥，请检查配置: gateway.jwt.publicKeyLocation 或 gateway.jwt.publicKey",
                     e);
+        }
+    }
+
+    private boolean hasInlinePublicKey() {
+        String publicKey = jwtProperties.getPublicKey();
+        return publicKey != null && !publicKey.isBlank();
+    }
+
+    private String readKeyContent(Resource resource) throws IOException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 

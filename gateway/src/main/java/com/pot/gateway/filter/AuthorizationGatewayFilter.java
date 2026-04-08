@@ -2,6 +2,7 @@ package com.pot.gateway.filter;
 
 import com.pot.gateway.config.GatewayProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,15 @@ import java.security.PublicKey;
 @RequiredArgsConstructor
 public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
 
+    private static final String DEFAULT_USER_DOMAIN = "member";
+    private static final String HEADER_USER_ID = "X-User-Id";
+    private static final String HEADER_USER_DOMAIN = "X-User-Domain";
+    private static final String HEADER_PERMISSION_VERSION = "X-Perm-Version";
+    private static final String HEADER_PERMISSION_DIGEST = "X-Perm-Digest";
+    private static final String CLAIM_PERMISSION_VERSION = "perm_version";
+    private static final String CLAIM_PERMISSION_DIGEST = "perm_digest";
+    private static final String CLAIM_USER_DOMAIN = "user_domain";
+
     private final RedisTemplate<String, Object> redisTemplate;
     private final PublicKey jwtPublicKey;
     private final GatewayProperties gatewayProperties;
@@ -48,8 +58,7 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
 
         if (isInternalPath(path)) {
             log.warn("[鉴权] 禁止访问内部路径: path={}", path);
-            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-            return exchange.getResponse().setComplete();
+            return reject(exchange, HttpStatus.FORBIDDEN);
         }
 
         if (isWhiteListed(path)) {
@@ -59,34 +68,26 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         String token = extractToken(exchange);
         if (token == null) {
             log.warn("[鉴权] 未提供 Token: path={}", path);
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
+        AuthenticatedPrincipal principal;
         try {
-            Claims claims = parseToken(token);
-            String userId = claims.getSubject();
-            Long permVersion = claims.get("perm_version", Long.class);
-            String permDigest = claims.get("perm_digest", String.class);
-            String userDomain = claims.get("user_domain", String.class);
-
-            if (!isPermVersionValid(userId, userDomain, permVersion)) {
-                log.warn("[鉴权] 权限版本已过期，请重新登录: userId={}, tokenVersion={}", userId, permVersion);
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                return exchange.getResponse().setComplete();
-            }
-
-            ServerWebExchange enrichedExchange = injectUserHeaders(exchange, userId, userDomain, permVersion,
-                    permDigest);
-
-            log.debug("[鉴权] 验证通过: userId={}, domain={}, path={}", userId, userDomain, path);
-            return chain.filter(enrichedExchange);
-
-        } catch (Exception e) {
-            log.warn("[鉴权] Token 验证失败: path={}, error={}", path, e.getMessage());
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            principal = authenticate(token);
+        } catch (JwtException | IllegalArgumentException ex) {
+            log.warn("[鉴权] Token 验证失败: path={}, error={}", path, ex.getMessage());
+            return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
+
+        if (!isPermVersionValid(principal.userId(), principal.userDomain(), principal.permVersion())) {
+            log.warn("[鉴权] 权限版本已过期，请重新登录: userId={}, tokenVersion={}", principal.userId(),
+                    principal.permVersion());
+            return reject(exchange, HttpStatus.UNAUTHORIZED);
+        }
+
+        ServerWebExchange enrichedExchange = injectUserHeaders(exchange, principal);
+        log.debug("[鉴权] 验证通过: userId={}, domain={}, path={}", principal.userId(), principal.userDomain(), path);
+        return chain.filter(enrichedExchange);
     }
 
     @Override
@@ -120,12 +121,24 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
                 .getPayload();
     }
 
+    private AuthenticatedPrincipal authenticate(String token) {
+        Claims claims = parseToken(token);
+        String userId = claims.getSubject();
+        if (userId == null || userId.isBlank()) {
+            throw new JwtException("Token subject is missing");
+        }
+
+        Long permVersion = claims.get(CLAIM_PERMISSION_VERSION, Long.class);
+        String permDigest = claims.get(CLAIM_PERMISSION_DIGEST, String.class);
+        String userDomain = normalizeUserDomain(claims.get(CLAIM_USER_DOMAIN, String.class));
+        return new AuthenticatedPrincipal(userId, userDomain, permVersion, permDigest);
+    }
+
     private boolean isPermVersionValid(String userId, String userDomain, Long tokenVersion) {
         if (tokenVersion == null) {
             return true;
         }
-        String domain = (userDomain != null) ? userDomain.toLowerCase() : "member";
-        String key = PERM_VERSION_KEY_PREFIX + domain + ":" + userId;
+        String key = PERM_VERSION_KEY_PREFIX + userDomain + ":" + userId;
         Object currentVersionObj = redisTemplate.opsForValue().get(key);
         if (currentVersionObj == null) {
             // Allow requests to continue when the cache has not been populated yet.
@@ -135,18 +148,29 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         return currentVersion <= tokenVersion;
     }
 
-    private ServerWebExchange injectUserHeaders(
-            ServerWebExchange exchange,
-            String userId,
-            String userDomain,
-            Long permVersion,
-            String permDigest) {
+    private String normalizeUserDomain(String userDomain) {
+        if (userDomain == null || userDomain.isBlank()) {
+            return DEFAULT_USER_DOMAIN;
+        }
+        return userDomain.toLowerCase();
+    }
+
+    private ServerWebExchange injectUserHeaders(ServerWebExchange exchange, AuthenticatedPrincipal principal) {
         return exchange.mutate()
                 .request(r -> r
-                        .header("X-User-Id", userId)
-                        .header("X-User-Domain", userDomain != null ? userDomain : "")
-                        .header("X-Perm-Version", permVersion != null ? permVersion.toString() : "")
-                        .header("X-Perm-Digest", permDigest != null ? permDigest : ""))
+                        .header(HEADER_USER_ID, principal.userId())
+                        .header(HEADER_USER_DOMAIN, principal.userDomain())
+                        .header(HEADER_PERMISSION_VERSION,
+                                principal.permVersion() != null ? principal.permVersion().toString() : "")
+                        .header(HEADER_PERMISSION_DIGEST, principal.permDigest() != null ? principal.permDigest() : ""))
                 .build();
+    }
+
+    private Mono<Void> reject(ServerWebExchange exchange, HttpStatus status) {
+        exchange.getResponse().setStatusCode(status);
+        return exchange.getResponse().setComplete();
+    }
+
+    private record AuthenticatedPrincipal(String userId, String userDomain, Long permVersion, String permDigest) {
     }
 }

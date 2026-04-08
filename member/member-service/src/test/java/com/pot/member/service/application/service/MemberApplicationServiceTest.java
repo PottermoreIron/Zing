@@ -1,8 +1,6 @@
 package com.pot.member.service.application.service;
 
 import com.pot.member.service.application.assembler.MemberAssembler;
-import com.pot.member.service.application.assembler.PermissionAssembler;
-import com.pot.member.service.application.command.ChangePasswordCommand;
 import com.pot.member.service.application.command.CreateMemberCommand;
 import com.pot.member.service.application.command.RegisterMemberCommand;
 import com.pot.member.service.application.dto.MemberDTO;
@@ -13,10 +11,8 @@ import com.pot.member.service.domain.model.social.SocialConnectionAggregate;
 import com.pot.member.service.domain.port.DomainEventPublisher;
 import com.pot.member.service.domain.repository.DeviceRepository;
 import com.pot.member.service.domain.repository.MemberRepository;
-import com.pot.member.service.domain.repository.RoleRepository;
 import com.pot.member.service.domain.repository.SocialConnectionRepository;
 import com.pot.member.service.domain.service.MemberDomainService;
-import com.pot.member.service.domain.service.PermissionDomainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,15 +44,9 @@ class MemberApplicationServiceTest {
     @Mock
     private DeviceRepository deviceRepository;
     @Mock
-    private RoleRepository roleRepository;
-    @Mock
     private MemberDomainService memberDomainService;
     @Mock
-    private PermissionDomainService permissionDomainService;
-    @Mock
     private MemberAssembler memberAssembler;
-    @Mock
-    private PermissionAssembler permissionAssembler;
     @Mock
     private DomainEventPublisher eventPublisher;
 
@@ -230,126 +220,6 @@ class MemberApplicationServiceTest {
             then(memberDomainService).should().createMember(eq(Nickname.of("phone_only")), isNull(), eq("Password1!"));
             then(memberRepository).should().save(argThat(member -> member.getEmail() == null
                     && member.getPhoneNumber().equals(PhoneNumber.of("13800138000"))));
-        }
-    }
-
-    @Nested
-    @DisplayName("changePassword()")
-    class ChangePassword {
-
-        @Test
-        @DisplayName("修改密码成功：委托领域服务并保存聚合")
-        void changePassword_savesMemberAfterDomainChange() {
-            MemberAggregate member = persistedMember(1L);
-            ChangePasswordCommand command = new ChangePasswordCommand(1L, "oldPassword", "newPassword");
-
-            given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));
-            given(memberRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-
-            service.changePassword(command);
-
-            then(memberDomainService).should().changePassword(member, "oldPassword", "newPassword");
-            then(memberRepository).should().save(member);
-        }
-    }
-
-    @Nested
-    @DisplayName("authenticateWithPassword()")
-    class AuthenticateWithPassword {
-
-        @Test
-        @DisplayName("正确密码 + 账户可用 → 返回 DTO")
-        void authenticate_correctPassword_returnsDTO() {
-            MemberAggregate member = persistedMember(1L);
-            MemberDTO dto = MemberDTO.builder().memberId(1L).build();
-
-            given(memberRepository.findByEmail(any())).willReturn(Optional.of(member));
-            given(memberDomainService.verifyPassword(member, "pass123")).willReturn(true);
-            given(memberAssembler.toDTO(member)).willReturn(dto);
-
-            MemberDTO result = service.authenticateWithPassword("user@test.com", "pass123");
-
-            assertThat(result).isEqualTo(dto);
-        }
-
-        @Test
-        @DisplayName("用户不存在 → 抛出 MemberException")
-        void authenticate_memberNotFound_throws() {
-            given(memberRepository.findByEmail(any())).willReturn(Optional.empty());
-
-            assertThatThrownBy(() -> service.authenticateWithPassword("nobody@test.com", "pass"))
-                    .isInstanceOf(MemberException.class)
-                    .extracting("resultCode")
-                    .isEqualTo(MemberResultCode.MEMBER_NOT_FOUND);
-        }
-
-        @Test
-        @DisplayName("密码错误 → 抛出 MemberException")
-        void authenticate_wrongPassword_throws() {
-            MemberAggregate member = persistedMember(1L);
-            given(memberRepository.findByEmail(any())).willReturn(Optional.of(member));
-            given(memberDomainService.verifyPassword(member, "wrong")).willReturn(false);
-
-            assertThatThrownBy(() -> service.authenticateWithPassword("u1@test.com", "wrong"))
-                    .isInstanceOf(MemberException.class)
-                    .extracting("resultCode")
-                    .isEqualTo(MemberResultCode.PASSWORD_INCORRECT);
-        }
-
-        @Test
-        @DisplayName("账户被锁定 → 抛出 MemberException")
-        void authenticate_lockedAccount_throws() {
-            MemberAggregate member = persistedMember(1L);
-            member.lock(); // ACTIVE → LOCKED
-            given(memberRepository.findByEmail(any())).willReturn(Optional.of(member));
-            given(memberDomainService.verifyPassword(member, "pass")).willReturn(true);
-
-            assertThatThrownBy(() -> service.authenticateWithPassword("u1@test.com", "pass"))
-                    .isInstanceOf(MemberException.class)
-                    .extracting("resultCode")
-                    .isEqualTo(MemberResultCode.ACCOUNT_UNAVAILABLE);
-        }
-    }
-
-    @Nested
-    @DisplayName("lockMember() / unlockMember()")
-    class LockUnlock {
-
-        @Test
-        @DisplayName("lockMember() 保存并发布事件")
-        void lockMember_savesAndPublishesEvents() {
-            MemberAggregate member = persistedMember(1L);
-            given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));
-            given(memberRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-
-            service.lockMember(1L);
-
-            assertThat(member.getStatus()).isEqualTo(MemberStatus.LOCKED);
-            then(memberRepository).should().save(member);
-        }
-
-        @Test
-        @DisplayName("lockMember() 会员不存在 → 抛出 MemberException")
-        void lockMember_memberNotFound_throws() {
-            given(memberRepository.findById(any())).willReturn(Optional.empty());
-            assertThatThrownBy(() -> service.lockMember(99L))
-                    .isInstanceOf(MemberException.class)
-                    .extracting("resultCode")
-                    .isEqualTo(MemberResultCode.MEMBER_NOT_FOUND);
-        }
-
-        @Test
-        @DisplayName("unlockMember() 解锁并保存")
-        void unlockMember_savesAfterUnlock() {
-            MemberAggregate member = persistedMember(2L);
-            member.lock();
-            given(memberRepository.findById(MemberId.of(2L))).willReturn(Optional.of(member));
-            given(memberRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
-
-            service.unlockMember(2L);
-
-            assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
-            then(memberRepository).should().save(member);
         }
     }
 

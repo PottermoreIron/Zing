@@ -1,8 +1,8 @@
 package com.pot.gateway.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import java.util.List;
  * @author pot
  * @since 2026-03-09
  */
-@Data
-@Component
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "gateway.security")
 public class GatewayProperties {
 

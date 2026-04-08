@@ -1,20 +1,23 @@
 package com.pot.auth.infrastructure.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for auth permission caching.
  */
-@Data
+@Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "auth.permission")
 public class AuthPermissionProperties {
 
     private Cache cache = new Cache();
 
-    @Data
+    @Getter
+    @Setter
     public static class Cache {
         private long redisTtl = 3600;
         private long localTtl = 300;

@@ -123,9 +123,9 @@ class MemberPermissionApplicationServiceTest {
             assertThat(result)
                     .singleElement()
                     .satisfies(roleDTO -> {
-                        assertThat(roleDTO.getRoleId()).isEqualTo(20L);
-                        assertThat(roleDTO.getRoleCode()).isEqualTo("ADMIN");
-                        assertThat(roleDTO.getRoleName()).isEqualTo("管理员");
+                        assertThat(roleDTO.roleId()).isEqualTo(20L);
+                        assertThat(roleDTO.roleCode()).isEqualTo("ADMIN");
+                        assertThat(roleDTO.roleName()).isEqualTo("管理员");
                     });
         }
     }

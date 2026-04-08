@@ -1,6 +1,7 @@
 package com.pot.member.service.infrastructure.event;
 
 import com.pot.member.service.domain.event.MemberDomainEvent;
+import com.pot.member.service.infrastructure.exception.MemberInfrastructureException;
 import com.pot.zing.framework.mq.core.MessageProducer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,7 +24,7 @@ class RabbitMQEventPublisherAdapterTest {
     @InjectMocks
     private RabbitMQEventPublisherAdapter adapter;
 
-        private MemberDomainEvent testEvent(String aggregateId) {
+    private MemberDomainEvent testEvent(String aggregateId) {
         return new MemberDomainEvent(aggregateId) {
             @Override
             protected String getEventName() {
@@ -50,15 +51,16 @@ class RabbitMQEventPublisherAdapterTest {
         }
 
         @Test
-        @DisplayName("MessageProducer 抛出异常 → 包裹为 RuntimeException 并重新抛出")
-        void publish_producerThrows_wrapsInRuntimeException() {
+        @DisplayName("MessageProducer 抛出异常 → 包裹为 MemberInfrastructureException 并重新抛出")
+        void publish_producerThrows_wrapsInMemberInfrastructureException() {
             MemberDomainEvent event = testEvent("member-99");
             willThrow(new RuntimeException("RabbitMQ down"))
                     .given(messageProducer).send(any(), any(), any());
 
             assertThatThrownBy(() -> adapter.publish(event))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("领域事件发布失败");
+                    .isInstanceOf(MemberInfrastructureException.class)
+                    .hasMessageContaining("领域事件发布失败")
+                    .hasCauseInstanceOf(RuntimeException.class);
         }
     }
 }

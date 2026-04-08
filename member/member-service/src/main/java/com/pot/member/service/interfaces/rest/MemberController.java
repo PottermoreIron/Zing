@@ -6,8 +6,10 @@ import com.pot.member.service.application.dto.MemberDTO;
 import com.pot.member.service.application.dto.PermissionDTO;
 import com.pot.member.service.application.query.GetMemberPermissionsQuery;
 import com.pot.member.service.application.query.GetMemberQuery;
+import com.pot.member.service.application.service.MemberAccountApplicationService;
 import com.pot.member.service.application.service.MemberApplicationService;
 import com.pot.member.service.application.service.MemberPermissionApplicationService;
+import com.pot.member.service.application.service.MemberQueryApplicationService;
 import com.pot.member.service.interfaces.rest.request.ChangePasswordRequest;
 import com.pot.member.service.interfaces.rest.request.UpdateMemberProfileRequest;
 import com.pot.zing.framework.common.model.R;
@@ -35,8 +37,10 @@ import java.util.Set;
 @Tag(name = "会员", description = "会员资料、密码与权限管理")
 public class MemberController {
 
+    private final MemberAccountApplicationService memberAccountApplicationService;
     private final MemberApplicationService memberApplicationService;
     private final MemberPermissionApplicationService memberPermissionApplicationService;
+    private final MemberQueryApplicationService memberQueryApplicationService;
 
     /**
      * Get member details.
@@ -45,7 +49,7 @@ public class MemberController {
     @GetMapping("/{memberId}")
     public R<MemberDTO> getMember(@PathVariable Long memberId) {
         GetMemberQuery query = GetMemberQuery.byMemberId(memberId);
-        MemberDTO member = memberApplicationService.getMember(query);
+        MemberDTO member = memberQueryApplicationService.getMember(query);
         return R.success(member);
     }
 
@@ -56,7 +60,7 @@ public class MemberController {
     @GetMapping("/me")
     public R<MemberDTO> getCurrentMember(@RequestAttribute("memberId") Long memberId) {
         GetMemberQuery query = GetMemberQuery.byMemberId(memberId);
-        MemberDTO member = memberApplicationService.getMember(query);
+        MemberDTO member = memberQueryApplicationService.getMember(query);
         return R.success(member);
     }
 
@@ -98,7 +102,7 @@ public class MemberController {
                 memberId,
                 request.oldPassword(),
                 request.newPassword());
-        memberApplicationService.changePassword(command);
+        memberAccountApplicationService.changePassword(command);
         return R.success();
     }
 
@@ -119,7 +123,7 @@ public class MemberController {
     @Operation(summary = "锁定会员")
     @PostMapping("/{memberId}/lock")
     public R<Void> lockMember(@PathVariable Long memberId) {
-        memberApplicationService.lockMember(memberId);
+        memberAccountApplicationService.lockMember(memberId);
         return R.success();
     }
 
@@ -129,7 +133,7 @@ public class MemberController {
     @Operation(summary = "解锁会员")
     @PostMapping("/{memberId}/unlock")
     public R<Void> unlockMember(@PathVariable Long memberId) {
-        memberApplicationService.unlockMember(memberId);
+        memberAccountApplicationService.unlockMember(memberId);
         return R.success();
     }
 }

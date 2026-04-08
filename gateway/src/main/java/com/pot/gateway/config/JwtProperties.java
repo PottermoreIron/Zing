@@ -1,8 +1,8 @@
 package com.pot.gateway.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Externalized properties for JWT public key loading.
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
  * @author Copilot
  * @since 2026-01-05
  */
-@Data
-@Component
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "gateway.jwt")
 public class JwtProperties {
 

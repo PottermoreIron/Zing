@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -28,7 +29,8 @@ public class CommonAutoConfiguration {
      * Registers JwtUtils when JWT support is enabled.
      */
     @Bean
-    @ConditionalOnClass(name = "io.jsonwebtoken.Jwts")
+    @ConditionalOnClass(name = { "io.jsonwebtoken.Jwts", "jakarta.servlet.http.HttpServletRequest" })
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "pot.jwt", name = "enabled", havingValue = "true", matchIfMissing = true)
     public JwtUtils jwtUtils(JwtProperties jwtProperties) {
@@ -37,6 +39,8 @@ public class CommonAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnClass(name = "jakarta.servlet.ServletException")
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnMissingBean(BaseGlobalExceptionHandler.class)
     public DefaultGlobalExceptionHandler defaultGlobalExceptionHandler() {
         log.info("初始化默认全局异常处理器");

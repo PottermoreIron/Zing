@@ -1,13 +1,15 @@
 package com.pot.auth.infrastructure.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
  * Configuration properties for WeChat login.
  */
-@Data
+@Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "auth.wechat")
 public class WeChatProperties {

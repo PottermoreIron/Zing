@@ -6,6 +6,7 @@ import com.pot.auth.domain.port.dto.DeviceDTO;
 import com.pot.auth.domain.port.dto.RoleDTO;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.valueobject.*;
+import com.pot.auth.infrastructure.exception.AuthInfrastructureException;
 import com.pot.auth.infrastructure.client.MemberServiceClient;
 import com.pot.member.facade.dto.MemberDTO;
 import com.pot.member.facade.dto.request.BindSocialAccountRequest;
@@ -153,10 +154,12 @@ public class MemberModuleAdapter implements UserModulePort {
             }
 
             MemberDTO memberDTO = response.getData();
-            log.info("用户创建成功: memberId={}, nickname={}", memberDTO.getMemberId(), memberDTO.getNickname());
+            log.info("用户创建成功: memberId={}, nickname={}", memberDTO.memberId(), memberDTO.nickname());
 
-            return UserId.of(memberDTO.getMemberId());
+            return UserId.of(memberDTO.memberId());
 
+        } catch (UserCreationException e) {
+            throw e;
         } catch (Exception e) {
             log.error("创建用户失败: nickname={}", command.nickname(), e);
             throw new UserCreationException("创建用户失败: " + e.getMessage(), e);
@@ -203,7 +206,7 @@ public class MemberModuleAdapter implements UserModulePort {
             log.info("密码更新成功: userId={}", userId);
         } catch (Exception e) {
             log.error("密码更新失败: userId={}", userId, e);
-            throw new RuntimeException("密码更新失败: " + e.getMessage(), e);
+            throw new AuthInfrastructureException("密码更新失败: " + e.getMessage(), e);
         }
     }
 
@@ -214,7 +217,7 @@ public class MemberModuleAdapter implements UserModulePort {
             log.info("锁定账户成功: userId={}", userId);
         } catch (Exception e) {
             log.error("锁定账户失败: userId={}", userId, e);
-            throw new RuntimeException("锁定账户失败: " + e.getMessage(), e);
+            throw new AuthInfrastructureException("锁定账户失败: " + e.getMessage(), e);
         }
     }
 
@@ -225,7 +228,7 @@ public class MemberModuleAdapter implements UserModulePort {
             log.info("解锁账户成功: userId={}", userId);
         } catch (Exception e) {
             log.error("解锁账户失败: userId={}", userId, e);
-            throw new RuntimeException("解锁账户失败: " + e.getMessage(), e);
+            throw new AuthInfrastructureException("解锁账户失败: " + e.getMessage(), e);
         }
     }
 
@@ -265,8 +268,8 @@ public class MemberModuleAdapter implements UserModulePort {
             if (response != null && response.isSuccess() && response.getData() != null) {
                 return response.getData().stream()
                         .map(r -> RoleDTO.builder()
-                                .roleCode(r.getRoleCode())
-                                .roleName(r.getRoleName())
+                                .roleCode(r.roleCode())
+                                .roleName(r.roleName())
                                 .build())
                         .collect(java.util.stream.Collectors.toSet());
             }
@@ -303,8 +306,8 @@ public class MemberModuleAdapter implements UserModulePort {
             if (response != null && response.isSuccess() && response.getData() != null) {
                 return response.getData().stream()
                         .map(d -> DeviceDTO.builder()
-                                .deviceId(d.getDeviceToken() != null ? DeviceId.of(d.getDeviceToken()) : null)
-                                .deviceType(d.getDeviceType())
+                                .deviceId(d.deviceToken() != null ? DeviceId.of(d.deviceToken()) : null)
+                                .deviceType(d.deviceType())
                                 .build())
                         .collect(java.util.stream.Collectors.toList());
             }
@@ -328,7 +331,7 @@ public class MemberModuleAdapter implements UserModulePort {
             log.info("踢出设备成功: userId={}, deviceId={}", userId, deviceId);
         } catch (Exception e) {
             log.error("踢出设备失败: userId={}, deviceId={}", userId, deviceId, e);
-            throw new RuntimeException("踢出设备失败: " + e.getMessage(), e);
+            throw new AuthInfrastructureException("踢出设备失败: " + e.getMessage(), e);
         }
     }
 
@@ -348,6 +351,8 @@ public class MemberModuleAdapter implements UserModulePort {
             }
 
             log.info("OAuth2账号绑定成功: userId={}, provider={}, providerId={}", userId, provider, providerId);
+        } catch (OAuth2BindException e) {
+            throw e;
         } catch (Exception e) {
             log.error("绑定OAuth2账号失败: userId={}, provider={}", userId, provider, e);
             throw new OAuth2BindException("绑定OAuth2账号失败: " + e.getMessage(), e);
@@ -359,15 +364,15 @@ public class MemberModuleAdapter implements UserModulePort {
      */
     private UserDTO convertToUserDTO(MemberDTO memberDTO) {
         return UserDTO.builder()
-                .userId(UserId.of(memberDTO.getMemberId()))
+                .userId(UserId.of(memberDTO.memberId()))
                 .userDomain(UserDomain.MEMBER)
-                .nickname(memberDTO.getNickname())
-                .email(memberDTO.getEmail())
-                .phone(memberDTO.getPhone())
-                .status(memberDTO.getStatus())
+                .nickname(memberDTO.nickname())
+                .email(memberDTO.email())
+                .phone(memberDTO.phone())
+                .status(memberDTO.status())
                 .emailVerifiedAt(null)
                 .phoneVerifiedAt(null)
-                .lastLoginAt(convertToLocalDateTime(memberDTO.getGmtLastLoginAt()))
+                .lastLoginAt(convertToLocalDateTime(memberDTO.gmtLastLoginAt()))
                 .lastLoginIp(null)
                 .build();
     }

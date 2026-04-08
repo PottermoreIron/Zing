@@ -2,6 +2,7 @@ package com.pot.member.service.infrastructure.event;
 
 import com.pot.member.service.domain.event.MemberDomainEvent;
 import com.pot.member.service.domain.port.DomainEventPublisher;
+import com.pot.member.service.infrastructure.exception.MemberInfrastructureException;
 import com.pot.zing.framework.mq.core.MessageProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class RabbitMQEventPublisherAdapter implements DomainEventPublisher {
         } catch (Exception e) {
             log.error("领域事件发布失败: eventType={}, aggregateId={}, error={}",
                     event.getEventType(), event.getAggregateId(), e.getMessage(), e);
-            throw new RuntimeException("领域事件发布失败: " + event.getEventType(), e);
+            throw new MemberInfrastructureException("领域事件发布失败: " + event.getEventType(), e);
         }
     }
 }

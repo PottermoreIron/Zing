@@ -110,7 +110,7 @@ public class PermissionRepositoryImpl implements PermissionRepository {
         log.debug("删除权限: {}", permissionId.value());
     }
 
-        private PermissionAggregate toAggregate(Permission entity) {
+    private PermissionAggregate toAggregate(Permission entity) {
         return PermissionAggregate.reconstitute(
                 PermissionId.of(entity.getId()),
                 entity.getPermissionCode(),
@@ -122,7 +122,7 @@ public class PermissionRepositoryImpl implements PermissionRepository {
                 entity.getGmtUpdatedAt());
     }
 
-        private Permission toEntity(PermissionAggregate aggregate) {
+    private Permission toEntity(PermissionAggregate aggregate) {
         Permission entity = new Permission();
         if (aggregate.getPermissionId() != null) {
             entity.setId(aggregate.getPermissionId().value());
@@ -130,14 +130,7 @@ public class PermissionRepositoryImpl implements PermissionRepository {
         entity.setPermissionCode(aggregate.getPermissionCode());
         entity.setPermissionName(aggregate.getPermissionName());
         entity.setResourceType(aggregate.getResource());
-        // Set actionType field directly using reflection to avoid enum conversion
-        try {
-            java.lang.reflect.Field field = Permission.class.getDeclaredField("actionType");
-            field.setAccessible(true);
-            field.set(entity, aggregate.getAction());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to set actionType field", e);
-        }
+        entity.setActionType(aggregate.getAction());
         entity.setPermissionDescription(aggregate.getDescription());
         entity.setGmtCreatedAt(aggregate.getCreatedAt());
         entity.setGmtUpdatedAt(aggregate.getUpdatedAt());

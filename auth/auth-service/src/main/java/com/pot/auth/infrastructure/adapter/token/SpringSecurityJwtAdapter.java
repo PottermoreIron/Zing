@@ -9,6 +9,7 @@ import com.pot.auth.domain.shared.valueobject.TokenId;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
 import com.pot.auth.infrastructure.config.JwtProperties;
+import com.pot.auth.infrastructure.exception.AuthInfrastructureException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
@@ -72,7 +73,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                         log.info("[JWT] RSA密钥对加载成功");
                 } catch (Exception e) {
                         log.error("[JWT] RSA密钥对加载失败", e);
-                        throw new RuntimeException("RSA密钥对加载失败", e);
+                        throw new AuthInfrastructureException("RSA密钥对加载失败", e);
                 }
         }
 
@@ -181,7 +182,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                                         new HashMap<>(claims));
                 } catch (Exception e) {
                         log.error("[JWT] AccessToken解析失败", e);
-                        throw new RuntimeException("Token解析失败", e);
+                        throw new AuthInfrastructureException("Token解析失败", e);
                 }
         }
 
@@ -212,7 +213,7 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                                         tokenString);
                 } catch (Exception e) {
                         log.error("[JWT] RefreshToken解析失败", e);
-                        throw new RuntimeException("Token解析失败", e);
+                        throw new AuthInfrastructureException("Token解析失败", e);
                 }
         }
 }
