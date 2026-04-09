@@ -154,8 +154,37 @@ class AuthorizationGatewayFilterTest {
         assertThat(exchange.getResponse().getStatusCode()).isNull();
     }
 
+    @Test
+    @DisplayName("黑名单内的 Token 返回 401")
+    void filter_blacklistedToken_returnsUnauthorized() {
+        String jti = "test-jti-blacklisted";
+        String token = signedTokenWithId(jti, 5L, "member", "digest-v1");
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get("/member/api/v1/profile")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .build());
+        given(redisTemplate.hasKey("auth:blacklist:" + jti)).willReturn(true);
+
+        filter.filter(exchange, requestExchange -> Mono.empty()).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
     private String signedToken(Long permissionVersion, String userDomain, String permissionDigest) {
         return Jwts.builder()
+                .subject("user-1")
+                .claim("perm_version", permissionVersion)
+                .claim("user_domain", userDomain)
+                .claim("perm_digest", permissionDigest)
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(Date.from(Instant.now().plusSeconds(300)))
+                .signWith(keyPair.getPrivate())
+                .compact();
+    }
+
+    private String signedTokenWithId(String jti, Long permissionVersion, String userDomain, String permissionDigest) {
+        return Jwts.builder()
+                .id(jti)
                 .subject("user-1")
                 .claim("perm_version", permissionVersion)
                 .claim("user_domain", userDomain)

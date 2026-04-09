@@ -52,6 +52,9 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
     /** Redis key prefix for cached permission versions. */
     private static final String PERM_VERSION_KEY_PREFIX = "auth:perm:version:";
 
+    /** Redis key prefix for revoked access tokens. */
+    private static final String BLACKLIST_KEY_PREFIX = "auth:blacklist:";
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
@@ -76,6 +79,11 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
             principal = authenticate(token);
         } catch (JwtException | IllegalArgumentException ex) {
             log.warn("[鉴权] Token 验证失败: path={}, error={}", path, ex.getMessage());
+            return reject(exchange, HttpStatus.UNAUTHORIZED);
+        }
+
+        if (isBlacklisted(principal.tokenId())) {
+            log.warn("[鉴权] Token 已被吊销（黑名单）: tokenId={}", principal.tokenId());
             return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
@@ -131,7 +139,15 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         Long permVersion = claims.get(CLAIM_PERMISSION_VERSION, Long.class);
         String permDigest = claims.get(CLAIM_PERMISSION_DIGEST, String.class);
         String userDomain = normalizeUserDomain(claims.get(CLAIM_USER_DOMAIN, String.class));
-        return new AuthenticatedPrincipal(userId, userDomain, permVersion, permDigest);
+        String tokenId = claims.getId();
+        return new AuthenticatedPrincipal(userId, userDomain, permVersion, permDigest, tokenId);
+    }
+
+    private boolean isBlacklisted(String tokenId) {
+        if (tokenId == null || tokenId.isBlank()) {
+            return false;
+        }
+        return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_KEY_PREFIX + tokenId));
     }
 
     private boolean isPermVersionValid(String userId, String userDomain, Long tokenVersion) {
@@ -171,6 +187,7 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         return exchange.getResponse().setComplete();
     }
 
-    private record AuthenticatedPrincipal(String userId, String userDomain, Long permVersion, String permDigest) {
+    private record AuthenticatedPrincipal(String userId, String userDomain, Long permVersion, String permDigest,
+            String tokenId) {
     }
 }
