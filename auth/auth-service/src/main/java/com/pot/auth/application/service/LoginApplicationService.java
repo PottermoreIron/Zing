@@ -1,6 +1,6 @@
 package com.pot.auth.application.service;
 
-import com.pot.auth.application.assembler.AuthCommandAssembler;
+import com.pot.auth.application.command.LoginCommand;
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.application.validation.ValidationChain;
 import com.pot.auth.application.strategy.LoginStrategy;
@@ -9,7 +9,6 @@ import com.pot.auth.application.strategy.factory.LoginStrategyFactory;
 import com.pot.auth.application.context.AuthenticationContext;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,17 +25,16 @@ public class LoginApplicationService {
 
     private final LoginStrategyFactory loginStrategyFactory;
     private final ValidationChain<AuthenticationContext> authenticationValidationChain;
-    private final AuthCommandAssembler authCommandAssembler;
 
     /**
-     * Executes a login request with the matching strategy.
+     * Executes a login command with the matching strategy.
      */
-    public LoginResponse login(LoginRequest request, String ipAddress, String userAgent) {
+    public LoginResponse login(LoginCommand command, String ipAddress, String userAgent) {
         log.info("[登录服务] 登录请求: loginType={}, userDomain={}",
-                request.loginType(), request.userDomain());
+                command.loginType(), command.userDomain());
 
         AuthenticationContext context = AuthenticationContext.builder()
-                .request(authCommandAssembler.toCommand(request))
+                .request(command)
                 .ipAddress(IpAddress.of(ipAddress))
                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                 .sessionId(generateSessionId())
@@ -44,7 +42,7 @@ public class LoginApplicationService {
 
         authenticationValidationChain.validate(context);
 
-        LoginStrategy strategy = loginStrategyFactory.getStrategy(request.loginType());
+        LoginStrategy strategy = loginStrategyFactory.getStrategy(command.loginType());
         AuthenticationResult result = strategy.execute(context);
 
         LoginResponse response = new LoginResponse(
@@ -58,7 +56,7 @@ public class LoginApplicationService {
                 result.accessTokenExpiresAt(),
                 result.refreshTokenExpiresAt());
 
-        log.info("[登录服务] 登录成功: userId={}, loginType={}", result.userId(), request.loginType());
+        log.info("[登录服务] 登录成功: userId={}, loginType={}", result.userId(), command.loginType());
         return response;
     }
 

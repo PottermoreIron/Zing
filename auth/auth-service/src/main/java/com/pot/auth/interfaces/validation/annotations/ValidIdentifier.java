@@ -1,20 +1,20 @@
-package com.pot.auth.domain.validation.annotations;
+package com.pot.auth.interfaces.validation.annotations;
 
-import com.pot.auth.domain.validation.validators.PhoneValidator;
+import com.pot.auth.interfaces.validation.validators.EmailValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
 /**
- * Validates phone values.
+ * Validates generic login identifiers.
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = PhoneValidator.class)
-public @interface ValidPhone {
-    String message() default "Invalid phone number";
+@Constraint(validatedBy = EmailValidator.class)
+public @interface ValidIdentifier {
+    String message() default "Invalid email address";
 
     Class<?>[] groups() default {};
 

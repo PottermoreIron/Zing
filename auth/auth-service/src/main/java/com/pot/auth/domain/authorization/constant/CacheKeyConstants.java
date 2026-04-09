@@ -1,4 +1,4 @@
-package com.pot.auth.infrastructure.constant;
+package com.pot.auth.domain.authorization.constant;
 
 /**
  * Cache key segments and builders used by auth-service.

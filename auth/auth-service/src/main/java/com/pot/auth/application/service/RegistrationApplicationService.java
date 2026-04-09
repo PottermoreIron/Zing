@@ -1,6 +1,8 @@
 package com.pot.auth.application.service;
 
-import com.pot.auth.application.assembler.AuthCommandAssembler;
+import com.pot.auth.application.command.OneStopAuthCommand;
+import com.pot.auth.application.command.OneStopAuthRequestCommand;
+import com.pot.auth.application.command.RegisterCommand;
 import com.pot.auth.application.dto.OneStopAuthResponse;
 import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.strategy.RegisterStrategy;
@@ -11,12 +13,6 @@ import com.pot.auth.application.context.RegistrationContext;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.valueobject.DeviceInfo;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
-import com.pot.auth.interfaces.dto.onestop.OAuth2AuthRequest;
-import com.pot.auth.interfaces.dto.onestop.OneStopAuthRequest;
-import com.pot.auth.interfaces.dto.onestop.WeChatAuthRequest;
-import com.pot.auth.interfaces.dto.register.OAuth2RegisterRequest;
-import com.pot.auth.interfaces.dto.register.RegisterRequest;
-import com.pot.auth.interfaces.dto.register.WeChatRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,62 +28,57 @@ public class RegistrationApplicationService {
         private final RegisterStrategyFactory registerStrategyFactory;
         private final ValidationChain<RegistrationContext> registrationValidationChain;
         private final OneStopAuthenticationService oneStopAuthenticationService;
-        private final AuthCommandAssembler authCommandAssembler;
 
         /**
-         * Executes a register request with the matching flow.
+         * Executes a register command with the matching flow.
          */
-        public RegisterResponse register(RegisterRequest request, String ipAddress, String userAgent) {
+        public RegisterResponse register(RegisterCommand command, String ipAddress, String userAgent) {
                 log.info("[应用服务] 注册请求: registerType={}, userDomain={}",
-                                request.registerType(), request.userDomain());
+                                command.registerType(), command.userDomain());
 
-                return switch (request.registerType()) {
-                        case OAUTH2, WECHAT -> registerThroughOneStop(request, ipAddress, userAgent);
-                        default -> registerThroughStrategy(request, ipAddress, userAgent);
+                return switch (command.registerType()) {
+                        case OAUTH2, WECHAT -> registerThroughOneStop(command, ipAddress, userAgent);
+                        default -> registerThroughStrategy(command, ipAddress, userAgent);
                 };
         }
 
-        private RegisterResponse registerThroughStrategy(RegisterRequest request, String ipAddress, String userAgent) {
+        private RegisterResponse registerThroughStrategy(RegisterCommand command, String ipAddress, String userAgent) {
                 RegistrationContext context = RegistrationContext.builder()
-                                .request(authCommandAssembler.toCommand(request))
+                                .request(command)
                                 .ipAddress(IpAddress.of(ipAddress))
                                 .deviceInfo(DeviceInfo.fromUserAgent(userAgent != null ? userAgent : "Unknown"))
                                 .build();
 
                 registrationValidationChain.validate(context);
 
-                RegisterStrategy strategy = registerStrategyFactory.getStrategy(request.registerType());
+                RegisterStrategy strategy = registerStrategyFactory.getStrategy(command.registerType());
                 AuthenticationResult result = strategy.execute(context);
                 RegisterResponse response = toRegisterResponse(result);
 
-                log.info("[应用服务] 注册成功: userId={}, registerType={}", result.userId(), request.registerType());
+                log.info("[应用服务] 注册成功: userId={}, registerType={}", result.userId(), command.registerType());
                 return response;
         }
 
-        private RegisterResponse registerThroughOneStop(RegisterRequest request, String ipAddress, String userAgent) {
+        private RegisterResponse registerThroughOneStop(RegisterCommand command, String ipAddress, String userAgent) {
                 OneStopAuthResponse authResponse = oneStopAuthenticationService.authenticate(
-                                toOneStopAuthRequest(request),
+                                toOneStopAuthCommand(command),
                                 ipAddress,
                                 userAgent);
                 return toRegisterResponse(authResponse);
         }
 
-        private OneStopAuthRequest toOneStopAuthRequest(RegisterRequest request) {
-                return switch (request) {
-                        case OAuth2RegisterRequest oauth2Request -> new OAuth2AuthRequest(
-                                        AuthType.OAUTH2,
-                                        OAuth2AuthRequest.OAuth2Provider.valueOf(
-                                                        oauth2Request.provider().getCode().toUpperCase()),
-                                        oauth2Request.code(),
-                                        oauth2Request.state(),
-                                        oauth2Request.userDomain());
-                        case WeChatRegisterRequest weChatRequest -> new WeChatAuthRequest(
-                                        AuthType.WECHAT,
-                                        weChatRequest.code(),
-                                        weChatRequest.state(),
-                                        weChatRequest.userDomain());
-                        default -> throw new IllegalArgumentException("不支持的一键注册类型: " + request.registerType());
-                };
+        private OneStopAuthCommand toOneStopAuthCommand(RegisterCommand command) {
+                return new OneStopAuthRequestCommand(
+                                AuthType.fromCode(command.registerType().getCode()),
+                                command.userDomain(),
+                                command.nickname(),
+                                command.email(),
+                                command.phone(),
+                                command.password(),
+                                command.verificationCode(),
+                                command.code(),
+                                command.state(),
+                                command.oauth2ProviderCode());
         }
 
         private RegisterResponse toRegisterResponse(AuthenticationResult result) {

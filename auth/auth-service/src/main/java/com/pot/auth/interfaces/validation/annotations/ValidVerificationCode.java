@@ -1,11 +1,14 @@
-package com.pot.auth.domain.validation.annotations;
+package com.pot.auth.interfaces.validation.annotations;
 
-import com.pot.auth.domain.validation.validators.VerificationCodeValidator;
+import com.pot.auth.interfaces.validation.validators.VerificationCodeValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
+/**
+ * Validates verification code values.
+ */
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -18,5 +21,4 @@ public @interface ValidVerificationCode {
     Class<? extends Payload>[] payload() default {};
 
     String pattern() default "";
-
 }

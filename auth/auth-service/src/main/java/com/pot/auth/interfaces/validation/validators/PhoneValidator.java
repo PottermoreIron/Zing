@@ -1,6 +1,6 @@
-package com.pot.auth.domain.validation.validators;
+package com.pot.auth.interfaces.validation.validators;
 
-import com.pot.auth.domain.validation.annotations.ValidPhone;
+import com.pot.auth.interfaces.validation.annotations.ValidPhone;
 import com.pot.zing.framework.common.util.ValidationUtils;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

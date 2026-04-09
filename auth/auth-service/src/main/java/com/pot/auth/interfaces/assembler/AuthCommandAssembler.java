@@ -1,4 +1,4 @@
-package com.pot.auth.application.assembler;
+package com.pot.auth.interfaces.assembler;
 
 import com.pot.auth.application.command.LoginCommand;
 import com.pot.auth.application.command.LoginRequestCommand;

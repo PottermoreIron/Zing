@@ -6,7 +6,7 @@ import com.pot.auth.domain.authorization.service.PermissionDomainService;
 import com.pot.auth.domain.port.PermissionQueryPort;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
-import com.pot.auth.infrastructure.constant.CacheKeyConstants;
+import com.pot.auth.domain.authorization.constant.CacheKeyConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

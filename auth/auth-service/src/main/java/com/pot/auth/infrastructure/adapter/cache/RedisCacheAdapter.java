@@ -1,7 +1,7 @@
 package com.pot.auth.infrastructure.adapter.cache;
 
 import com.pot.auth.domain.port.CachePort;
-import com.pot.auth.infrastructure.constant.CacheKeyConstants;
+import com.pot.auth.domain.authorization.constant.CacheKeyConstants;
 import com.pot.zing.framework.starter.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -5,6 +5,7 @@ import com.pot.auth.application.service.LoginApplicationService;
 import com.pot.auth.application.service.TokenRefreshApplicationService;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
+import com.pot.auth.interfaces.assembler.AuthCommandAssembler;
 import com.pot.auth.interfaces.exception.GlobalExceptionHandler;
 import com.pot.auth.support.TestFixtures;
 import org.junit.jupiter.api.DisplayName;
@@ -30,176 +31,179 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(GlobalExceptionHandler.class)
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-        "spring.cloud.nacos.discovery.enabled=false",
-        "pot.ratelimit.enabled=false"
+                "spring.cloud.nacos.discovery.enabled=false",
+                "pot.ratelimit.enabled=false"
 })
 @DisplayName("LoginController 切片测试")
 class LoginControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @MockitoBean
-    private LoginApplicationService loginApplicationService;
+        @MockitoBean
+        private LoginApplicationService loginApplicationService;
 
-    @MockitoBean
-    private TokenRefreshApplicationService tokenRefreshApplicationService;
+        @MockitoBean
+        private TokenRefreshApplicationService tokenRefreshApplicationService;
 
-    @Nested
-    @DisplayName("POST /auth/api/v1/login")
-    class Login {
+        @MockitoBean
+        private AuthCommandAssembler authCommandAssembler;
 
-        private static final String LOGIN_URL = "/auth/api/v1/login";
+        @Nested
+        @DisplayName("POST /auth/api/v1/login")
+        class Login {
 
-        @Test
-        @DisplayName("用户名密码登录请求合法，返回200和LoginResponse")
-        void whenValidUsernamePasswordRequest_thenReturn200WithLoginResponse() throws Exception {
-            LoginResponse loginResponse = TestFixtures.loginResponse();
-            when(loginApplicationService.login(any(), any(), any()))
-                    .thenReturn(loginResponse);
+                private static final String LOGIN_URL = "/auth/api/v1/login";
 
-            String requestBody = """
-                    {
-                      "loginType": "USERNAME_PASSWORD",
-                                                                                        "nickname": "test_user",
-                      "password": "Password123!",
-                      "userDomain": "member"
-                    }
-                    """;
+                @Test
+                @DisplayName("用户名密码登录请求合法，返回200和LoginResponse")
+                void whenValidUsernamePasswordRequest_thenReturn200WithLoginResponse() throws Exception {
+                        LoginResponse loginResponse = TestFixtures.loginResponse();
+                        when(loginApplicationService.login(any(), any(), any()))
+                                        .thenReturn(loginResponse);
 
-            mockMvc.perform(post(LOGIN_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data.accessToken").value(TestFixtures.FAKE_ACCESS_TOKEN))
-                    .andExpect(jsonPath("$.data.refreshToken")
-                            .value(TestFixtures.FAKE_REFRESH_TOKEN))
-                    .andExpect(jsonPath("$.data.userId").value(TestFixtures.USER_ID.value()))
-                    .andExpect(jsonPath("$.data.nickname").value(TestFixtures.USERNAME));
+                        String requestBody = """
+                                        {
+                                          "loginType": "USERNAME_PASSWORD",
+                                                                                                            "nickname": "test_user",
+                                          "password": "Password123!",
+                                          "userDomain": "member"
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(LOGIN_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.success").value(true))
+                                        .andExpect(jsonPath("$.data.accessToken").value(TestFixtures.FAKE_ACCESS_TOKEN))
+                                        .andExpect(jsonPath("$.data.refreshToken")
+                                                        .value(TestFixtures.FAKE_REFRESH_TOKEN))
+                                        .andExpect(jsonPath("$.data.userId").value(TestFixtures.USER_ID.value()))
+                                        .andExpect(jsonPath("$.data.nickname").value(TestFixtures.USERNAME));
+                }
+
+                @Test
+                @DisplayName("未知loginType，Jackson反序列化失败返回400")
+                void whenUsernameMissing_thenReturn400ValidationError() throws Exception {
+                        String requestBody = """
+                                        {
+                                          "loginType": "UNKNOWN_TYPE",
+                                          "password": "Password123!",
+                                          "userDomain": "member"
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(LOGIN_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isBadRequest());
+                }
+
+                @Test
+                @DisplayName("密码格式不合法（太短），返回400")
+                void whenPasswordTooShort_thenReturn400() throws Exception {
+                        String requestBody = """
+                                        {
+                                          "loginType": "USERNAME_PASSWORD",
+                                                                                                            "nickname": "test_user",
+                                          "password": "weak",
+                                          "userDomain": "member"
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(LOGIN_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isBadRequest());
+                }
+
+                @Test
+                @DisplayName("服务抛出AUTHENTICATION_FAILED，返回400并携带AUTH_0001错误码")
+                void whenServiceThrowsAuthFailed_thenReturn400WithAuthErrorCode() throws Exception {
+                        when(loginApplicationService.login(any(), any(), any()))
+                                        .thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
+
+                        String requestBody = """
+                                        {
+                                          "loginType": "USERNAME_PASSWORD",
+                                                                                                            "nickname": "test_user",
+                                          "password": "Password123!",
+                                          "userDomain": "member"
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(LOGIN_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isBadRequest())
+                                        .andExpect(jsonPath("$.success").value(false))
+                                        .andExpect(jsonPath("$.code").value("AUTH_0001"));
+                }
+
+                @Test
+                @DisplayName("邮箱验证码登录请求合法，返回200")
+                void whenValidEmailCodeRequest_thenReturn200() throws Exception {
+                        when(loginApplicationService.login(any(), any(), any()))
+                                        .thenReturn(TestFixtures.loginResponse());
+
+                        String requestBody = """
+                                        {
+                                          "loginType": "EMAIL_CODE",
+                                          "email": "test@example.com",
+                                          "code": "123456",
+                                          "userDomain": "member"
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(LOGIN_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.success").value(true));
+                }
         }
 
-        @Test
-        @DisplayName("未知loginType，Jackson反序列化失败返回400")
-        void whenUsernameMissing_thenReturn400ValidationError() throws Exception {
-            String requestBody = """
-                    {
-                      "loginType": "UNKNOWN_TYPE",
-                      "password": "Password123!",
-                      "userDomain": "member"
-                    }
-                    """;
+        @Nested
+        @DisplayName("POST /auth/api/v1/refresh")
+        class RefreshToken {
 
-            mockMvc.perform(post(LOGIN_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isBadRequest());
+                private static final String REFRESH_URL = "/auth/api/v1/refresh";
+
+                @Test
+                @DisplayName("有效refreshToken，返回200和新的TokenPair")
+                void whenValidRefreshToken_thenReturn200() throws Exception {
+                        when(tokenRefreshApplicationService.refreshToken(anyString()))
+                                        .thenReturn(TestFixtures.loginResponse());
+
+                        String requestBody = """
+                                        {
+                                          "refreshToken": "valid.refresh.token"
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(REFRESH_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isOk())
+                                        .andExpect(jsonPath("$.success").value(true))
+                                        .andExpect(jsonPath("$.data.accessToken")
+                                                        .value(TestFixtures.FAKE_ACCESS_TOKEN));
+                }
+
+                @Test
+                @DisplayName("refreshToken为空，返回400")
+                void whenRefreshTokenBlank_thenReturn400() throws Exception {
+                        String requestBody = """
+                                        {
+                                          "refreshToken": ""
+                                        }
+                                        """;
+
+                        mockMvc.perform(post(REFRESH_URL)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isBadRequest());
+                }
         }
-
-        @Test
-        @DisplayName("密码格式不合法（太短），返回400")
-        void whenPasswordTooShort_thenReturn400() throws Exception {
-            String requestBody = """
-                    {
-                      "loginType": "USERNAME_PASSWORD",
-                                                                                        "nickname": "test_user",
-                      "password": "weak",
-                      "userDomain": "member"
-                    }
-                    """;
-
-            mockMvc.perform(post(LOGIN_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isBadRequest());
-        }
-
-        @Test
-        @DisplayName("服务抛出AUTHENTICATION_FAILED，返回400并携带AUTH_0001错误码")
-        void whenServiceThrowsAuthFailed_thenReturn400WithAuthErrorCode() throws Exception {
-            when(loginApplicationService.login(any(), any(), any()))
-                    .thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
-
-            String requestBody = """
-                    {
-                      "loginType": "USERNAME_PASSWORD",
-                                                                                        "nickname": "test_user",
-                      "password": "Password123!",
-                      "userDomain": "member"
-                    }
-                    """;
-
-            mockMvc.perform(post(LOGIN_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.code").value("AUTH_0001"));
-        }
-
-        @Test
-        @DisplayName("邮箱验证码登录请求合法，返回200")
-        void whenValidEmailCodeRequest_thenReturn200() throws Exception {
-            when(loginApplicationService.login(any(), any(), any()))
-                    .thenReturn(TestFixtures.loginResponse());
-
-            String requestBody = """
-                    {
-                      "loginType": "EMAIL_CODE",
-                      "email": "test@example.com",
-                      "code": "123456",
-                      "userDomain": "member"
-                    }
-                    """;
-
-            mockMvc.perform(post(LOGIN_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true));
-        }
-    }
-
-    @Nested
-    @DisplayName("POST /auth/api/v1/refresh")
-    class RefreshToken {
-
-        private static final String REFRESH_URL = "/auth/api/v1/refresh";
-
-        @Test
-        @DisplayName("有效refreshToken，返回200和新的TokenPair")
-        void whenValidRefreshToken_thenReturn200() throws Exception {
-            when(tokenRefreshApplicationService.refreshToken(anyString()))
-                    .thenReturn(TestFixtures.loginResponse());
-
-            String requestBody = """
-                    {
-                      "refreshToken": "valid.refresh.token"
-                    }
-                    """;
-
-            mockMvc.perform(post(REFRESH_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data.accessToken")
-                            .value(TestFixtures.FAKE_ACCESS_TOKEN));
-        }
-
-        @Test
-        @DisplayName("refreshToken为空，返回400")
-        void whenRefreshTokenBlank_thenReturn400() throws Exception {
-            String requestBody = """
-                    {
-                      "refreshToken": ""
-                    }
-                    """;
-
-            mockMvc.perform(post(REFRESH_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isBadRequest());
-        }
-    }
 }

@@ -1,20 +1,20 @@
-package com.pot.auth.domain.validation.annotations;
+package com.pot.auth.interfaces.validation.annotations;
 
-import com.pot.auth.domain.validation.validators.EmailValidator;
+import com.pot.auth.interfaces.validation.validators.PasswordValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
 /**
- * Validates email values.
+ * Validates password values.
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = EmailValidator.class)
-public @interface ValidEmail {
-    String message() default "Invalid email address";
+@Constraint(validatedBy = PasswordValidator.class)
+public @interface ValidPassword {
+    String message() default "Invalid password";
 
     Class<?>[] groups() default {};
 

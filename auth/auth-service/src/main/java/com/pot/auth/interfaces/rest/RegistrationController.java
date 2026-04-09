@@ -2,6 +2,7 @@ package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.dto.RegisterResponse;
 import com.pot.auth.application.service.RegistrationApplicationService;
+import com.pot.auth.interfaces.assembler.AuthCommandAssembler;
 import com.pot.auth.interfaces.dto.register.RegisterRequest;
 import com.pot.zing.framework.common.model.R;
 import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
@@ -35,6 +36,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
 public class RegistrationController {
 
     private final RegistrationApplicationService registrationApplicationService;
+    private final AuthCommandAssembler authCommandAssembler;
 
     @Operation(operationId = "authRegister", summary = "注册", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT 六种注册方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "注册请求过于频繁，请稍后再试")
@@ -42,7 +44,8 @@ public class RegistrationController {
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
         log.info("注册请求: registerType={}", request.registerType());
 
-        RegisterResponse response = registrationApplicationService.register(request, getClientIp(httpRequest),
+        RegisterResponse response = registrationApplicationService.register(authCommandAssembler.toCommand(request),
+                getClientIp(httpRequest),
                 httpRequest.getHeader("User-Agent"));
 
         return R.success(response);

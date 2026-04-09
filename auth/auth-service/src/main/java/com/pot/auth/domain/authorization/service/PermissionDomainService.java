@@ -6,7 +6,7 @@ import com.pot.auth.domain.authorization.valueobject.PermissionVersion;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.domain.shared.valueobject.UserId;
-import com.pot.auth.infrastructure.constant.CacheKeyConstants;
+import com.pot.auth.domain.authorization.constant.CacheKeyConstants;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -25,7 +25,7 @@ public class PermissionDomainService {
         this.permissionCacheTtl = permissionCacheTtl;
     }
 
-        public PermissionCacheMetadata cachePermissionsWithMetadata(
+    public PermissionCacheMetadata cachePermissionsWithMetadata(
             UserId userId,
             UserDomain userDomain,
             Set<String> permissions) {
@@ -46,7 +46,7 @@ public class PermissionDomainService {
         return new PermissionCacheMetadata(version.value(), digest.value());
     }
 
-        public void incrementPermissionVersion(String namespace, String userId) {
+    public void incrementPermissionVersion(String namespace, String userId) {
         try {
             incrementPermissionVersion(
                     new UserId(Long.parseLong(userId)),
@@ -57,7 +57,7 @@ public class PermissionDomainService {
         }
     }
 
-        public PermissionVersion incrementPermissionVersion(UserId userId, UserDomain userDomain) {
+    public PermissionVersion incrementPermissionVersion(UserId userId, UserDomain userDomain) {
         String versionKey = CacheKeyConstants.buildPermissionVersionKey(
                 userDomain.getCode(),
                 userId.value().toString());
@@ -77,7 +77,7 @@ public class PermissionDomainService {
         }
     }
 
-        public PermissionVersion getCurrentPermissionVersion(UserId userId, UserDomain userDomain) {
+    public PermissionVersion getCurrentPermissionVersion(UserId userId, UserDomain userDomain) {
         String versionKey = CacheKeyConstants.buildPermissionVersionKey(
                 userDomain.getCode(),
                 userId.value().toString());
@@ -94,7 +94,7 @@ public class PermissionDomainService {
         return PermissionVersion.initial();
     }
 
-        private void cachePermissions(
+    private void cachePermissions(
             UserId userId,
             UserDomain userDomain,
             Set<String> permissions) {
@@ -119,7 +119,7 @@ public class PermissionDomainService {
         }
     }
 
-        private void cachePermissionDigest(
+    private void cachePermissionDigest(
             UserId userId,
             UserDomain userDomain,
             PermissionDigest digest) {
@@ -137,7 +137,7 @@ public class PermissionDomainService {
         }
     }
 
-        public Set<String> getCachedPermissions(UserId userId, UserDomain userDomain) {
+    public Set<String> getCachedPermissions(UserId userId, UserDomain userDomain) {
         String cacheKey = CacheKeyConstants.buildPermissionKey(
                 userDomain.getCode(),
                 userId.value().toString());
@@ -163,7 +163,7 @@ public class PermissionDomainService {
         return Collections.emptySet();
     }
 
-        public void invalidatePermissionCache(String namespace, String userId) {
+    public void invalidatePermissionCache(String namespace, String userId) {
         try {
             invalidatePermissionCache(
                     new UserId(Long.parseLong(userId)),
@@ -174,7 +174,7 @@ public class PermissionDomainService {
         }
     }
 
-        public void invalidatePermissionCache(UserId userId, UserDomain userDomain) {
+    public void invalidatePermissionCache(UserId userId, UserDomain userDomain) {
         String permKey = CacheKeyConstants.buildPermissionKey(
                 userDomain.getCode(),
                 userId.value().toString());
@@ -191,7 +191,7 @@ public class PermissionDomainService {
         }
     }
 
-        public boolean verifyPermissionDigest(
+    public boolean verifyPermissionDigest(
             UserId userId,
             UserDomain userDomain,
             Set<String> permissions) {

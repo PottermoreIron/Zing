@@ -1,14 +1,16 @@
-package com.pot.auth.domain.validation.validators;
+package com.pot.auth.interfaces.validation.validators;
 
-import com.pot.auth.domain.validation.annotations.ValidVerificationCode;
+import com.pot.auth.interfaces.validation.annotations.ValidVerificationCode;
 import com.pot.zing.framework.common.util.ValidationUtils;
 import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Bean Validation adapter for verification codes.
  */
 public class VerificationCodeValidator implements ConstraintValidator<ValidVerificationCode, String> {
+
     private String pattern;
 
     @Override
@@ -17,7 +19,7 @@ public class VerificationCodeValidator implements ConstraintValidator<ValidVerif
     }
 
     @Override
-    public boolean isValid(String verificationCode, jakarta.validation.ConstraintValidatorContext context) {
+    public boolean isValid(String verificationCode, ConstraintValidatorContext context) {
         if (StringUtils.isBlank(verificationCode)) {
             return true;
         }
@@ -25,5 +27,4 @@ public class VerificationCodeValidator implements ConstraintValidator<ValidVerif
                 ? ValidationUtils.isValidVerificationCode(verificationCode)
                 : ValidationUtils.isValidVerificationCode(verificationCode, pattern);
     }
-
 }

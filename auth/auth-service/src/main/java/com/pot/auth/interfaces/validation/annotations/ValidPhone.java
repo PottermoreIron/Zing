@@ -1,20 +1,20 @@
-package com.pot.auth.domain.validation.annotations;
+package com.pot.auth.interfaces.validation.annotations;
 
-import com.pot.auth.domain.validation.validators.UsernameValidator;
+import com.pot.auth.interfaces.validation.validators.PhoneValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
 /**
- * Validates nickname values.
+ * Validates phone values.
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = UsernameValidator.class)
-public @interface ValidUsername {
-    String message() default "Invalid nickname";
+@Constraint(validatedBy = PhoneValidator.class)
+public @interface ValidPhone {
+    String message() default "Invalid phone number";
 
     Class<?>[] groups() default {};
 

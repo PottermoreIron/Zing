@@ -3,6 +3,7 @@ package com.pot.auth.interfaces.rest;
 import com.pot.auth.application.dto.LoginResponse;
 import com.pot.auth.application.service.LoginApplicationService;
 import com.pot.auth.application.service.TokenRefreshApplicationService;
+import com.pot.auth.interfaces.assembler.AuthCommandAssembler;
 import com.pot.auth.interfaces.dto.RefreshTokenRequest;
 import com.pot.auth.interfaces.dto.auth.LoginRequest;
 import com.pot.zing.framework.common.model.R;
@@ -38,6 +39,7 @@ public class LoginController {
 
     private final LoginApplicationService loginApplicationService;
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
+    private final AuthCommandAssembler authCommandAssembler;
 
     @Operation(operationId = "authLogin", summary = "传统登录", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE 四种登录方式")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "登录请求过于频繁，请稍后再试")
@@ -46,7 +48,8 @@ public class LoginController {
         log.info("[登录] 传统登录请求: loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
-        LoginResponse response = loginApplicationService.login(request, getClientIp(httpRequest),
+        LoginResponse response = loginApplicationService.login(authCommandAssembler.toCommand(request),
+                getClientIp(httpRequest),
                 httpRequest.getHeader("User-Agent"));
 
         return R.success(response);

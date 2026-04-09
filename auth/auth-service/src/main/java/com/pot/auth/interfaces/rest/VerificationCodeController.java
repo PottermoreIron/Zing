@@ -1,8 +1,8 @@
 package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
-import com.pot.auth.domain.validation.annotations.ValidEmail;
-import com.pot.auth.domain.validation.annotations.ValidPhone;
+import com.pot.auth.interfaces.validation.annotations.ValidEmail;
+import com.pot.auth.interfaces.validation.annotations.ValidPhone;
 import com.pot.zing.framework.common.model.R;
 import com.pot.zing.framework.starter.ratelimit.annotation.RateLimit;
 import com.pot.zing.framework.starter.ratelimit.enums.RateLimitMethodEnum;
