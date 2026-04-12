@@ -1,58 +1,56 @@
-# 权限变更事件系统实现总结
+# Permission Change Event System — Implementation Summary
 
-## 实现概述
+## Overview
 
-实现了基于消息队列的权限变更事件系统，解决了权限数据变更后，auth-service 中的权限缓存无法实时失效的问题。
+A message-queue-based permission change event system has been implemented to address the problem of stale permission caches in `auth-service` after permission data changes in `member-service`.
 
-## 技术架构
+## Technical Architecture
 
-### 核心组件
+### Core Components
 
-1. **framework-starter-mq**: 消息队列抽象层
+1. **framework-starter-mq**: Message queue abstraction layer
+   - Supports RabbitMQ and Kafka
+   - Provides a unified `MessageTemplate` API
+   - Auto-configuration and consumer registration
 
-   - 支持 RabbitMQ 和 Kafka
-   - 提供统一的 MessageTemplate API
-   - 自动装配和消费者注册
+2. **member-service**: Permission event publisher
+   - `PermissionChangedEvent`: permission change domain event
+   - `PermissionChangeEventPublisher`: event publisher
+   - `MemberRoleController`: role assignment/revocation API
+   - `RolePermissionController`: role-permission management API
 
-2. **member-service**: 权限事件发布者
+3. **auth-service**: Permission cache manager
+   - `PermissionChangedEventListener`: event listener
+   - `PermissionDomainService`: cache invalidation logic
 
-   - PermissionChangedEvent: 权限变更领域事件
-   - PermissionChangeEventPublisher: 事件发布器
-   - MemberRoleController: 角色分配/撤销 API
-   - RolePermissionController: 角色权限管理 API
+## Created Files
 
-3. **auth-service**: 权限缓存管理者
-   - PermissionChangedEventListener: 事件监听器
-   - PermissionDomainService: 缓存失效逻辑
-
-## 已创建文件
-
-### framework-starter-mq 模块
+### framework-starter-mq Module
 
 ```
 framework/framework-starter-mq/
 ├── src/main/java/com/pot/zing/framework/mq/
 │   ├── core/
-│   │   ├── DomainEvent.java              # 领域事件接口
-│   │   ├── AbstractDomainEvent.java       # 领域事件抽象类
-│   │   ├── MessageProducer.java           # 消息生产者接口
-│   │   ├── MessageConsumer.java           # 消息消费者接口
-│   │   └── MessageTemplate.java           # 消息模板（类似RedisTemplate）
+│   │   ├── DomainEvent.java              # Domain event interface
+│   │   ├── AbstractDomainEvent.java       # Abstract domain event base class
+│   │   ├── MessageProducer.java           # Message producer interface
+│   │   ├── MessageConsumer.java           # Message consumer interface
+│   │   └── MessageTemplate.java           # Message template (analogous to RedisTemplate)
 │   ├── adapter/
 │   │   ├── rabbitmq/
 │   │   │   └── RabbitMQMessageProducer.java
 │   │   └── kafka/
 │   │       └── KafkaMessageProducer.java
 │   └── config/
-│       ├── MQAutoConfiguration.java       # 自动配置
-│       └── MQProperties.java              # 配置属性
+│       ├── MQAutoConfiguration.java       # Auto-configuration
+│       └── MQProperties.java              # Configuration properties
 └── src/main/resources/
     └── META-INF/
         └── spring/
             └── org.springframework.boot.autoconfigure.AutoConfiguration.imports
 ```
 
-### member-service 变更
+### member-service Changes
 
 ```
 member/member-service/
@@ -64,11 +62,11 @@ member/member-service/
 │       ├── MemberRoleController.java             # UPDATED
 │       └── RolePermissionController.java         # UPDATED
 ├── src/main/resources/
-│   └── application.yml                           # UPDATED (添加RabbitMQ配置)
-└── pom.xml                                       # UPDATED (添加framework-starter-mq依赖)
+│   └── application.yml                           # UPDATED (RabbitMQ config added)
+└── pom.xml                                       # UPDATED (framework-starter-mq dependency added)
 ```
 
-### auth-service 变更
+### auth-service Changes
 
 ```
 auth/auth-service/
@@ -79,42 +77,42 @@ auth/auth-service/
 │       └── listener/
 │           └── PermissionChangedEventListener.java # NEW
 ├── src/main/resources/
-│   └── application.yml                           # UPDATED (添加RabbitMQ配置)
-└── pom.xml                                       # UPDATED (添加framework-starter-mq依赖)
+│   └── application.yml                           # UPDATED (RabbitMQ config added)
+└── pom.xml                                       # UPDATED (framework-starter-mq dependency added)
 ```
 
-### 文档
+### Documentation
 
 ```
 docs/
 └── permission-event-system-test.md               # NEW
 ```
 
-## 事件类型
+## Event Types
 
 ### PermissionChangedEvent.ChangeType
 
-- `MEMBER_ROLE_ASSIGNED`: 会员角色分配
-- `MEMBER_ROLE_REVOKED`: 会员角色撤销
-- `ROLE_PERMISSION_ADDED`: 角色权限添加
-- `ROLE_PERMISSION_REMOVED`: 角色权限移除
-- `ROLE_UPDATED`: 角色更新
-- `PERMISSION_UPDATED`: 权限更新
+- `MEMBER_ROLE_ASSIGNED`: member role was assigned
+- `MEMBER_ROLE_REVOKED`: member role was revoked
+- `ROLE_PERMISSION_ADDED`: permission added to a role
+- `ROLE_PERMISSION_REMOVED`: permission removed from a role
+- `ROLE_UPDATED`: role definition updated
+- `PERMISSION_UPDATED`: permission definition updated
 
-## API 端点
+## API Endpoints
 
 ### member-service
 
 ```
-POST   /memberRole/assign      # 分配角色
-DELETE /memberRole/revoke      # 撤销角色
-POST   /rolePermission/add     # 为角色添加权限
-DELETE /rolePermission/remove  # 从角色移除权限
+POST   /memberRole/assign      # Assign a role to a member
+DELETE /memberRole/revoke      # Revoke a role from a member
+POST   /rolePermission/add     # Add a permission to a role
+DELETE /rolePermission/remove  # Remove a permission from a role
 ```
 
-## 配置要求
+## Configuration Requirements
 
-### 环境变量 (.env)
+### Environment Variables (.env)
 
 ```dotenv
 RABBITMQ_HOST=localhost
@@ -124,7 +122,7 @@ RABBITMQ_PASSWORD=guest
 RABBITMQ_VHOST=/
 ```
 
-### application.yml (已自动配置)
+### application.yml (auto-configured)
 
 ```yaml
 spring:
@@ -136,16 +134,16 @@ spring:
     virtual-host: ${RABBITMQ_VHOST:/}
 ```
 
-## 工作流程
+## Workflow
 
-### 1. 角色分配流程
+### 1. Role Assignment Flow
 
 ```
-用户调用API
+User calls API
   ↓
 MemberRoleController.assignRole()
   ↓
-保存member_member_role记录
+Persist member_member_role record
   ↓
 PermissionChangeEventPublisher.publishMemberRoleAssigned()
   ↓
@@ -157,105 +155,105 @@ PermissionChangedEventListener.consume()
   ↓
 PermissionDomainService.invalidatePermissionCache()
   ↓
-清除Redis缓存
+Evict Redis cache entry
 ```
 
-### 2. 角色权限变更流程
+### 2. Role Permission Change Flow
 
 ```
-用户调用API
+User calls API
   ↓
 RolePermissionController.addPermission()
   ↓
-保存member_role_permission记录
+Persist member_role_permission record
   ↓
-查询所有拥有该角色的会员
+Query all members holding the role
   ↓
 PermissionChangeEventPublisher.publishRolePermissionAdded()
   ↓
-消息包含affectedMemberIds (可能是多个会员)
+Event payload includes affectedMemberIds (potentially multiple members)
   ↓
 PermissionChangedEventListener.consume()
   ↓
-遍历所有affectedMemberIds，逐个清除缓存
+Iterate affectedMemberIds and invalidate cache for each member
 ```
 
-## 优点
+## Advantages
 
-### 1. 实时性
+### 1. Real-Time Invalidation
 
-- 权限变更后立即通过消息队列通知 auth-service
-- 无需等待缓存过期，用户下次请求即可获得最新权限
+- Permission changes immediately notify `auth-service` via the message queue.
+- No waiting for cache TTL expiry; users see up-to-date permissions on their next request.
 
-### 2. 解耦
+### 2. Decoupling
 
-- member-service 和 auth-service 通过消息队列解耦
-- member-service 无需知道 auth-service 的存在
-- auth-service 无需轮询或调用 member-service API
+- `member-service` and `auth-service` are decoupled through the message queue.
+- `member-service` has no knowledge of `auth-service`.
+- `auth-service` does not poll or call `member-service` directly.
 
-### 3. 可扩展性
+### 3. Scalability
 
-- 支持多个 auth-service 实例，每个实例都会收到事件
-- 可以轻松添加其他服务监听权限变更事件
-- 支持切换到 Kafka 以获得更高吞吐量
+- All `auth-service` instances receive the event.
+- Additional consumers can be added to listen for permission change events with minimal effort.
+- Switching to Kafka for higher throughput is straightforward.
 
-### 4. 可靠性
+### 4. Reliability
 
-- RabbitMQ 保证消息不丢失
-- 消费者异常不会导致消息丢失（重试机制）
-- 缓存失效失败不影响业务（下次请求重新加载）
+- RabbitMQ guarantees message durability.
+- Consumer exceptions do not cause message loss (retry mechanism).
+- Cache invalidation failures do not affect business logic (cache is reloaded on the next request).
 
-## 注意事项
+## Considerations
 
-### 1. 消息顺序
+### 1. Message Ordering
 
-- 对同一个会员的多次权限变更，消息可能乱序
-- 解决方案：使用时间戳或版本号进行乐观控制
-- 当前实现：直接清除缓存，下次请求重新加载（最简单有效）
+- Multiple permission changes for the same member may arrive out of order.
+- Resolution: use timestamps or version numbers for optimistic concurrency control.
+- Current approach: invalidate the cache directly; the next request reloads it (simplest and most effective).
 
-### 2. 性能考虑
+### 2. Performance Considerations
 
-- 大规模角色权限变更可能影响大量用户
-- 事件包含所有 affectedMemberIds（可能很大）
-- 优化方向：批量清除缓存、使用 Redis Pipeline
+- Large-scale role permission changes may affect many users.
+- Event payloads include all `affectedMemberIds` (potentially large).
+- Optimization options: batch cache eviction, Redis Pipeline.
 
-### 3. 异常处理
+### 3. Error Handling
 
-- 缓存失效失败不抛出异常（避免消息重试）
-- 记录错误日志供后续排查
-- 依赖缓存 TTL 兜底（最终一致性）
+- Cache invalidation failures do not throw exceptions (to avoid message re-delivery).
+- Errors are logged for subsequent investigation.
+- Cache TTL acts as the final safety net (eventual consistency).
 
-### 4. 幂等性
+### 4. Idempotency
 
-- 当前实现天然幂等（清除不存在的缓存 key 不会报错）
-- 如果未来需要其他副作用操作，需要考虑幂等性
+- The current implementation is naturally idempotent (deleting a non-existent cache key is a no-op).
+- If additional side effects are introduced in the future, idempotency must be explicitly considered.
 
-## 下一步优化建议
+## Next Steps
 
-### 1. 性能优化
+### 1. Performance Optimization
 
-- [ ] 使用 Redis Pipeline 批量删除缓存
-- [ ] 对大量 affectedMemberIds 进行分批处理
-- [ ] 添加消息处理性能监控
+- [ ] Use Redis Pipeline for batch cache deletion
+- [ ] Process large `affectedMemberIds` in chunks
+- [ ] Add message processing performance monitoring
 
-### 2. 可靠性增强
+### 2. Reliability Enhancement
 
-- [ ] 添加死信队列处理失败消息
-- [ ] 实现消息重试策略
-- [ ] 添加消息追踪和审计日志
+- [ ] Add a dead-letter queue for failed messages
+- [ ] Implement a message retry strategy
+- [ ] Add message tracing and audit logging
 
-### 3. 功能扩展
+### 3. Feature Extension
 
-- [ ] 支持更多权限变更场景（Permission 自身更新、Role 更新等）
-- [ ] 实现权限变更事件历史记录
-- [ ] 添加权限变更通知（发送邮件/站内消息）
+- [ ] Support more permission change scenarios (Permission update, Role update, etc.)
+- [ ] Implement permission change event history
+- [ ] Add permission change notifications (email / in-app message)
 
-### 4. 监控和运维
+### 4. Observability and Operations
 
-- [ ] 添加消息处理延迟监控
-- [ ] 添加消息堆积告警
-- [ ] 实现 RabbitMQ 健康检查
+- [ ] Add message processing latency monitoring
+- [ ] Add queue backlog alerting
+- [ ] Implement RabbitMQ health checks
 
-## 测试指南
+## Testing Guide
 
-参见: [permission-event-system-test.md](permission-event-system-test.md)
+See: [permission-event-system-test.md](permission-event-system-test.md)

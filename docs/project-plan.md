@@ -1,322 +1,322 @@
-# Zing 项目架构分析与开发计划
+# Zing Project Architecture Analysis and Development Plan
 
-> 生成日期：2026-03-09
+> Generated: 2026-03-09
 
 ---
 
-## 一、系统架构概览
+## 1. System Architecture Overview
 
-### 1.1 整体技术栈
+### 1.1 Technology Stack
 
-| 分类       | 技术                       | 版本        |
-| ---------- | -------------------------- | ----------- |
-| 语言       | Java                       | 21          |
-| 框架       | Spring Boot                | 3.4.2       |
-| 微服务     | Spring Cloud               | 2024.0.2    |
-| 服务注册   | Spring Cloud Alibaba Nacos | 2023.0.3.3  |
-| ORM        | MyBatis-Plus               | 3.5.12      |
-| 数据库     | MySQL                      | 9.2.0       |
-| 缓存       | Redis                      | -           |
-| 网络       | Netty                      | 4.2.3.Final |
-| JWT        | JJWT                       | 0.12.6      |
-| 分布式ID   | Meituan Leaf               | 1.0.1       |
-| 消息队列   | RabbitMQ / Kafka（双支持） | -           |
-| API文档    | SpringDoc OpenAPI          | 2.8.9       |
-| 第三方登录 | weixin-java-mp（微信）     | 4.7.7.B     |
+| Category          | Technology                                | Version       |
+| ----------------- | ----------------------------------------- | ------------- |
+| Language          | Java                                      | 21            |
+| Framework         | Spring Boot                               | 3.4.2         |
+| Microservices     | Spring Cloud                              | 2024.0.2      |
+| Service Registry  | Spring Cloud Alibaba Nacos                | 2023.0.3.3    |
+| ORM               | MyBatis-Plus                              | 3.5.12        |
+| Database          | MySQL                                     | 9.2.0         |
+| Cache             | Redis                                     | —             |
+| Networking        | Netty                                     | 4.2.3.Final   |
+| JWT               | JJWT                                      | 0.12.6        |
+| Distributed ID    | Meituan Leaf                              | 1.0.1         |
+| Message Queue     | RabbitMQ / Kafka (dual support)           | —             |
+| API Documentation | SpringDoc OpenAPI                         | 2.8.9         |
+| Third-party Login | weixin-java-mp (WeChat)                   | 4.7.7.B       |
 
-### 1.2 模块拓扑
+### 1.2 Module Topology
 
 ```
-zing (父 pom)
-├── dependencies          # 版本管理 BOM（统一依赖版本）
-├── framework             # 框架基础层（自研 Starter）
-│   ├── framework-common              # 公共工具（R模型、异常、工具类）
-│   ├── framework-starter-id          # 分布式ID（Meituan Leaf 封装）
-│   ├── framework-starter-redis       # Redis 服务封装
-│   ├── framework-starter-ratelimit   # 限流（Guava/Redis 双实现）
-│   ├── framework-starter-mq          # 消息队列抽象（Kafka/RabbitMQ 双适配）
-│   ├── framework-starter-touch       # 触达服务（SMS/Email 多渠道）
-│   └── framework-starter-code-generator  # 代码生成器
-├── gateway               # API 网关（Spring Cloud Gateway）
-├── auth                  # 认证授权服务（DDD + 六边形架构）
-│   ├── auth-facade       # API 接口定义
-│   └── auth-service      # 核心实现
-├── member                # 会员服务（DDD）
-│   ├── member-facade     # API 接口定义
-│   └── member-service    # 核心实现
-├── im                    # 即时通讯服务（Netty TCP + REST）
-│   ├── im-facade         # API 接口定义
-│   └── im-service        # 核心实现
-└── admin                 # 管理后台服务（待开发）
+zing (parent pom)
+├── dependencies          # Version management BOM (unified dependency versions)
+├── framework             # Framework foundation layer (custom starters)
+│   ├── framework-common              # Common utilities (Result model, exceptions, utils)
+│   ├── framework-starter-id          # Distributed ID (Meituan Leaf wrapper)
+│   ├── framework-starter-redis       # Redis service wrapper
+│   ├── framework-starter-ratelimit   # Rate limiting (Guava/Redis dual implementation)
+│   ├── framework-starter-mq          # Message queue abstraction (Kafka/RabbitMQ dual adapter)
+│   ├── framework-starter-touch       # Notification delivery (SMS/Email multi-channel)
+│   └── framework-starter-code-generator  # Code generator
+├── gateway               # API Gateway (Spring Cloud Gateway)
+├── auth                  # Authentication and authorization service (DDD + Hexagonal)
+│   ├── auth-facade       # API contract definitions
+│   └── auth-service      # Core implementation
+├── member                # Member service (DDD)
+│   ├── member-facade     # API contract definitions
+│   └── member-service    # Core implementation
+├── im                    # Instant messaging service (Netty TCP + REST)
+│   ├── im-facade         # API contract definitions
+│   └── im-service        # Core implementation
+└── admin                 # Administration back-office service (under development)
     ├── admin-facade
     └── admin-service
 ```
 
-### 1.3 请求流转路径
+### 1.3 Request Flow
 
 ```
 Client
   │
   ▼
-Gateway（JWT验证 + 权限版本校验 + Header注入）
+Gateway (JWT validation + permission version check + header injection)
   │
-  ├──▶ auth-service（登录/注册/Token刷新/验证码）
-  │       └── 通过 MemberServiceClient (Feign) 调用 member-service
+  ├──▶ auth-service (login / registration / token refresh / verification code)
+  │       └── calls member-service via MemberServiceClient (Feign)
   │
-  ├──▶ member-service（会员信息/RBAC权限/设备/社交账号）
-  │       └── 权限变更时通过 RabbitMQ/Kafka 发布事件到 auth-service
+  ├──▶ member-service (member profile / RBAC / devices / social accounts)
+  │       └── publishes permission change events to auth-service via RabbitMQ/Kafka
   │
-  ├──▶ im-service（Netty TCP长连接 + REST HTTP接口）
+  ├──▶ im-service (Netty TCP long connection + REST HTTP endpoints)
   │
-  └──▶ admin-service（管理后台，待开发）
+  └──▶ admin-service (administration back-office, under development)
 ```
 
-### 1.4 核心设计模式
+### 1.4 Core Design Patterns
 
-| 模块                        | 设计模式                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------- |
-| auth-service                | DDD（领域驱动）+ 六边形架构（Ports & Adapters）+ Strategy（登录/注册/认证策略）+ Validation Chain |
-| member-service              | DDD（聚合根 MemberAggregate/RoleAggregate/PermissionAggregate）+ Repository 模式                  |
-| im-service                  | Netty Pipeline + MessageProcessor 工厂模式 + ConnectionManager                                    |
-| framework-starter-ratelimit | AOP + 策略模式（IP/用户/固定 限流键 + Guava/Redis 限流实现）                                      |
-| framework-starter-touch     | 模板方法 + 策略模式（渠道选择 + 降级）                                                            |
-| framework-starter-mq        | 适配器模式（统一 MessageTemplate API，屏蔽 Kafka/RabbitMQ 差异）                                  |
-
----
-
-## 二、各功能模块完成度评分
-
-### 2.1 Framework 框架层 ⭐⭐⭐⭐☆ (8/10)
-
-| 子模块                           | 完成状态    | 说明                                                               |
-| -------------------------------- | ----------- | ------------------------------------------------------------------ |
-| framework-common                 | ✅ 完成     | R模型、全局异常Handler、常用工具类完整                             |
-| framework-starter-id             | ✅ 完成     | Leaf 分布式ID封装完整，含异常处理                                  |
-| framework-starter-redis          | ✅ 完成     | Redis服务封装完整                                                  |
-| framework-starter-ratelimit      | ✅ 完成     | AOP注解限流，支持IP/用户/固定三种key，Guava/Redis双实现            |
-| framework-starter-mq             | ⚠️ 基本完成 | 生产者完整（Kafka/RabbitMQ），消费者注册机制存在但无实际消费者实现 |
-| framework-starter-touch          | ⚠️ 基本完成 | 抽象层完整，多渠道降级，**缺实际 SMS/Email provider实现**          |
-| framework-starter-code-generator | ✅ 完成     | 代码生成逻辑完整                                                   |
-
-**扣分项：**
-
-- touch 模块无实际短信服务商（阿里云/腾讯云）和邮件服务商（SMTP/SendGrid）实现
-- MQ 消费者注册机制设计完整但无具体业务消费者
+| Module                       | Design Patterns                                                                                          |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| auth-service                 | DDD + Hexagonal (Ports & Adapters) + Strategy (login/registration/auth strategies) + Validation Chain   |
+| member-service               | DDD (aggregate roots: MemberAggregate/RoleAggregate/PermissionAggregate) + Repository pattern           |
+| im-service                   | Netty Pipeline + MessageProcessor factory pattern + ConnectionManager                                    |
+| framework-starter-ratelimit  | AOP + Strategy pattern (IP/user/fixed key + Guava/Redis implementations)                                 |
+| framework-starter-touch      | Template Method + Strategy pattern (channel selection + fallback)                                        |
+| framework-starter-mq         | Adapter pattern (unified MessageTemplate API abstracting Kafka/RabbitMQ differences)                     |
 
 ---
 
-### 2.2 Gateway 网关 ⭐⭐⭐☆☆ (6/10)
+## 2. Module Completion Score
 
-| 功能                 | 完成状态 | 说明                                             |
-| -------------------- | -------- | ------------------------------------------------ |
-| JWT Token 验证       | ✅ 完成  | RSA公钥验证、异常处理完整                        |
-| 权限版本号校验       | ✅ 完成  | Redis读取当前版本，与Token中版本比对             |
-| 白名单路径           | ✅ 完成  | `/auth/login`、`/auth/register`、`/auth/refresh` |
-| 用户信息 Header 注入 | ✅ 完成  | `X-User-Id`、`X-Perm-Version`、`X-Perm-Digest`   |
-| 路由配置             | ❌ 未见  | 无 `application.yml` 路由规则（需补充）          |
-| 服务发现集成         | ❌ 未见  | Nacos服务发现集成未验证                          |
-| 熔断降级             | ❌ 缺失  | 无 Resilience4j / Sentinel 配置                  |
-| 请求日志链路追踪     | ❌ 缺失  | 无 TraceId 注入                                  |
+### 2.1 Framework Layer ⭐⭐⭐⭐☆ (8/10)
 
----
+| Sub-module                        | Status         | Notes                                                                   |
+| --------------------------------- | -------------- | ----------------------------------------------------------------------- |
+| framework-common                  | ✅ Complete    | Result model, global exception handler, and common utilities complete   |
+| framework-starter-id              | ✅ Complete    | Leaf distributed ID wrapper complete with error handling                |
+| framework-starter-redis           | ✅ Complete    | Redis service wrapper complete                                          |
+| framework-starter-ratelimit       | ✅ Complete    | AOP annotation-based limiting; supports IP/user/fixed key; Guava+Redis  |
+| framework-starter-mq              | ⚠️ Mostly done | Producer complete (Kafka/RabbitMQ); consumer registration present but no concrete consumer |
+| framework-starter-touch           | ⚠️ Mostly done | Abstract layer complete with multi-channel fallback; **no actual SMS/Email provider** |
+| framework-starter-code-generator  | ✅ Complete    | Code generation logic complete                                          |
 
-### 2.3 Auth 认证授权服务 ⭐⭐⭐⭐☆ (7.5/10)
+**Points deducted:**
 
-| 功能                    | 完成状态  | 说明                                                          |
-| ----------------------- | --------- | ------------------------------------------------------------- |
-| 传统登录（4种方式）     | ✅ 完成   | 用户名密码、邮箱密码、邮箱验证码、手机验证码                  |
-| 传统注册（4种方式）     | ✅ 完成   | 对应4种注册方式                                               |
-| 一键认证（一站式）      | ✅ 完成   | 自动判断注册/登录，支持7种方式含OAuth2/微信                   |
-| JWT Token 生成          | ✅ 完成   | 含 `perm_version` + `perm_digest` 字段                        |
-| Token 刷新              | ✅ 完成   | RefreshToken机制                                              |
-| 验证码发送              | ✅ 完成   | 邮件/短信双渠道，含限流                                       |
-| 接口限流                | ✅ 完成   | 所有认证端点均有 IP 限流保护                                  |
-| 权限缓存 & 版本管理     | ✅ 完成   | Redis缓存权限集合、版本号递增、摘要计算                       |
-| 权限变更事件监听        | ✅ 完成   | MQ消费 member-service 权限变更，失效缓存                      |
-| 权限校验注解            | ✅ 完成   | `@RequirePermission`、`@RequireRole`、`@RequireAnyPermission` |
-| OAuth2 登录实现         | ⚠️ 接口   | Port 定义完整，**无实际 HTTP 调用实现**                       |
-| 微信登录实现            | ⚠️ 接口   | Port 定义完整，**无实际微信接口对接**                         |
-| 退出登录 / Token 黑名单 | ❌ 缺失   | 无 logout 端点，Token 无法主动失效                            |
-| 多设备会话管理          | ❌ 缺失   | 无会话数量限制、踢下线逻辑                                    |
-| Admin 域用户认证        | ⚠️ 桩代码 | `AdminModuleAdapter` 存在但未实现                             |
+- No actual SMS provider (Aliyun / Tencent Cloud) or email provider (SMTP / SendGrid) implementation in the `touch` module.
+- MQ consumer registration design is complete but no concrete business consumers.
 
 ---
 
-### 2.4 Member 会员服务 ⭐⭐⭐☆☆ (6/10)
+### 2.2 Gateway ⭐⭐⭐☆☆ (6/10)
 
-| 功能                   | 完成状态  | 说明                                                               |
-| ---------------------- | --------- | ------------------------------------------------------------------ |
-| 会员 DDD 聚合根        | ✅ 完成   | `MemberAggregate` 含完整领域方法                                   |
-| 会员基础 CRUD          | ✅ 完成   | 通过 `MemberApplicationService` + Repository                       |
-| RBAC 角色权限管理      | ✅ 完成   | Role/Permission/MemberRole CRUD + 分配/撤销                        |
-| 权限变更事件发布       | ✅ 完成   | 角色/权限变更后通过 MQ 发布事件                                    |
-| 社交账号绑定           | ✅ 完成   | `SocialConnection` + Facade 接口                                   |
-| 设备管理               | ✅ 完成   | Device CRUD                                                        |
-| 内部认证接口           | ✅ 完成   | `InternalAuthController`、`InternalPermissionController`           |
-| 基础 Service 实现      | ⚠️ 空壳   | `MemberServiceImpl` 等多数仅继承 `ServiceImpl`，**无业务逻辑重写** |
-| 会员列表 / 搜索 / 分页 | ❌ 缺失   | 无会员列表查询接口                                                 |
-| 头像上传               | ❌ 缺失   | 无 OSS 集成                                                        |
-| 邮箱/手机号验证流程    | ❌ 缺失   | 注册后无验证流程触发                                               |
-| 会员积分/等级          | ❌ 未规划 | 扩展功能                                                           |
+| Feature                    | Status       | Notes                                                        |
+| -------------------------- | ------------ | ------------------------------------------------------------ |
+| JWT token validation       | ✅ Complete  | RSA public key validation with full error handling           |
+| Permission version check   | ✅ Complete  | Reads current version from Redis, compares with token        |
+| Path allowlist             | ✅ Complete  | `/auth/login`, `/auth/register`, `/auth/refresh`             |
+| User info header injection | ✅ Complete  | `X-User-Id`, `X-Perm-Version`, `X-Perm-Digest`              |
+| Route configuration        | ❌ Not found | No `application.yml` routing rules (needs to be added)       |
+| Service discovery          | ❌ Not found | Nacos service discovery integration unverified               |
+| Circuit breaking           | ❌ Missing   | No Resilience4j / Sentinel configuration                     |
+| Request trace propagation  | ❌ Missing   | No TraceId injection                                         |
 
 ---
 
-### 2.5 IM 即时通讯服务 ⭐⭐☆☆☆ (4/10)
+### 2.3 Auth Service ⭐⭐⭐⭐☆ (7.5/10)
 
-| 功能                  | 完成状态    | 说明                                          |
-| --------------------- | ----------- | --------------------------------------------- |
-| Netty TCP 服务器      | ✅ 完成     | IMServer 启动、优雅关闭                       |
-| 连接管理              | ✅ 完成     | ConnectionManager（用户-Channel 双向映射）    |
-| 自定义二进制协议      | ✅ 完成     | ProtocolEncoder/Decoder、ProtocolHeader       |
-| 消息处理器工厂        | ✅ 完成     | 支持多处理器、优先级排序、异步执行            |
-| 鉴权处理器            | ✅ 完成     | `AuthRequestProcessor`                        |
-| 心跳处理器            | ✅ 完成     | `HeartbeatProcessor`                          |
-| 数据库实体 & Mapper   | ✅ 完成     | Message、Conversation、Friend、Group等10个表  |
-| **业务 Service 实现** | ❌ **全空** | 所有 ServiceImpl 均为空，仅继承 `ServiceImpl` |
-| **REST 接口实现**     | ❌ **全空** | 所有 Controller 均为空                        |
-| 消息路由 / 投递逻辑   | ❌ 缺失     | 无实际消息发送逻辑                            |
-| 离线消息存储          | ❌ 缺失     | 无离线消息队列                                |
-| 消息已读回执          | ❌ 缺失     | 有 `MessageReadStatus` 表但无逻辑             |
-| 推送通知集成          | ❌ 缺失     | 无 APNs/FCM 集成                              |
-| 分布式部署支持        | ❌ 缺失     | ConnectionManager 纯内存，无 Redis 集群路由   |
-| 群组聊天逻辑          | ❌ 缺失     | 有实体无实现                                  |
-| 文件传输              | ❌ 缺失     | 有 File 实体无实现                            |
-
----
-
-### 2.6 Admin 管理后台 ⭐☆☆☆☆ (1/10)
-
-| 功能     | 完成状态        | 说明                        |
-| -------- | --------------- | --------------------------- |
-| 项目骨架 | ✅ 存在         | pom.xml、启动类、facade定义 |
-| 管理功能 | ❌ **全部缺失** | 无任何业务实现              |
+| Feature                          | Status        | Notes                                                                         |
+| -------------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| Traditional login (4 methods)    | ✅ Complete   | Username+password, email+password, email OTP, phone OTP                       |
+| Traditional registration (4)     | ✅ Complete   | Corresponding 4 registration methods                                          |
+| One-stop authentication          | ✅ Complete   | Auto-detects register/login; supports 7 methods including OAuth2 and WeChat   |
+| JWT token generation             | ✅ Complete   | Includes `perm_version` and `perm_digest` claims                              |
+| Token refresh                    | ✅ Complete   | Refresh token mechanism                                                       |
+| Verification code delivery       | ✅ Complete   | Email + SMS dual channel with rate limiting                                   |
+| Endpoint rate limiting           | ✅ Complete   | All auth endpoints protected with IP-based rate limiting                      |
+| Permission cache & version mgmt  | ✅ Complete   | Redis-cached permission set, version increment, digest computation            |
+| Permission change event listener | ✅ Complete   | Consumes MQ events from member-service, invalidates cache                     |
+| Permission check annotations     | ✅ Complete   | `@RequirePermission`, `@RequireRole`, `@RequireAnyPermission`                 |
+| OAuth2 login implementation      | ⚠️ Interface  | Port fully defined; **no actual HTTP call implementation**                    |
+| WeChat login implementation      | ⚠️ Interface  | Port fully defined; **no actual WeChat API integration**                      |
+| Logout / token blocklist         | ❌ Missing    | No logout endpoint; tokens cannot be actively invalidated                     |
+| Multi-device session management  | ❌ Missing    | No session count limits or forced logout logic                                |
+| Admin domain authentication      | ⚠️ Stub       | `AdminModuleAdapter` present but not implemented                              |
 
 ---
 
-## 三、总体完成度汇总
+### 2.4 Member Service ⭐⭐⭐☆☆ (6/10)
 
-| 模块          | 得分   | 权重 | 加权得分       |
-| ------------- | ------ | ---- | -------------- |
-| Framework     | 8/10   | 15%  | 1.2            |
-| Gateway       | 6/10   | 10%  | 0.6            |
-| Auth 认证授权 | 7.5/10 | 25%  | 1.875          |
-| Member 会员   | 6/10   | 20%  | 1.2            |
-| IM 即时通讯   | 4/10   | 20%  | 0.8            |
-| Admin 后台    | 1/10   | 10%  | 0.1            |
-| **综合评分**  |        |      | **5.775 / 10** |
-
-> **总结：** 项目架构设计清晰，框架层和认证层质量较高，但 IM 服务和 Admin 服务尚处于骨架阶段，大量业务逻辑待实现。
-
----
-
-## 四、TODO 优先级列表
-
-### 🔴 P0 — 核心缺失，立即补全
-
-| #   | 任务                                  | 模块           | 说明                                                                                                                |
-| --- | ------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 1   | **实现 IM Service 所有业务逻辑**      | im-service     | FriendServiceImpl、MessageServiceImpl、GroupServiceImpl、ConversationServiceImpl 等10个均为空壳，需实现完整业务逻辑 |
-| 2   | **实现 IM 所有 REST Controller**      | im-service     | MessageController、FriendController、GroupController 等10个均为空，需完整实现 CRUD                                  |
-| 3   | **实现 IM 消息投递路由**              | im-service     | 核心功能：收到消息后查询目标用户 Channel，推送消息；目标离线则存入离线队列                                          |
-| 4   | **实现 Auth 退出登录 / Token 黑名单** | auth-service   | 添加 `/auth/api/v1/logout` 接口，将 Token JTI 加入 Redis 黑名单，Gateway 过滤时检查                                 |
-| 5   | **修复 Member Service 空实现**        | member-service | 将基础 ServiceImpl 补充业务逻辑，或明确哪些由 ApplicationService 直接代理                                           |
+| Feature                    | Status       | Notes                                                                           |
+| -------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| Member DDD aggregate root  | ✅ Complete  | `MemberAggregate` with complete domain methods                                  |
+| Member basic CRUD          | ✅ Complete  | Via `MemberApplicationService` + Repository                                     |
+| RBAC role-permission mgmt  | ✅ Complete  | Role/Permission/MemberRole CRUD + assignment/revocation                         |
+| Permission change events   | ✅ Complete  | Publishes events via MQ after role/permission changes                           |
+| Social account binding     | ✅ Complete  | `SocialConnection` + facade interface                                           |
+| Device management          | ✅ Complete  | Device CRUD                                                                     |
+| Internal auth endpoints    | ✅ Complete  | `InternalAuthController`, `InternalPermissionController`                        |
+| Base service implementations | ⚠️ Skeleton | Most `ServiceImpl` classes extend only `ServiceImpl` with **no business logic** |
+| Member list / search / page | ❌ Missing   | No member list query endpoint                                                   |
+| Avatar upload              | ❌ Missing   | No OSS integration                                                              |
+| Email/phone verification   | ❌ Missing   | No post-registration verification flow                                          |
+| Member points / levels     | ❌ Not planned | Extension feature                                                             |
 
 ---
 
-### 🟠 P1 — 重要功能，尽快完成
+### 2.5 IM Service ⭐⭐☆☆☆ (4/10)
 
-| #   | 任务                         | 模块                    | 说明                                                                  |
-| --- | ---------------------------- | ----------------------- | --------------------------------------------------------------------- |
-| 6   | **实现 Touch 短信 Provider** | framework-starter-touch | 接入阿里云短信 / 腾讯云短信，实现 `AbstractSmsChannelImpl` 子类       |
-| 7   | **实现 Touch 邮件 Provider** | framework-starter-touch | 接入 SMTP / SendGrid，实现 `AbstractEmailChannelImpl` 子类            |
-| 8   | **实现 OAuth2 登录适配器**   | auth-service            | 实现 `OAuth2Port`，完成 Google/GitHub 等授权码换 Token 及用户信息获取 |
-| 9   | **实现微信登录适配器**       | auth-service            | 完成 `WeChatPort`，通过 weixin-java-mp 换取 openid/unionid            |
-| 10  | **补全 Gateway 路由配置**    | gateway                 | 编写 `application.yml` 服务路由规则，集成 Nacos 服务发现              |
-| 11  | **IM 离线消息支持**          | im-service              | 用户离线时消息存入 Redis 队列或 DB，上线后推送                        |
-| 12  | **Admin 服务基础功能**       | admin-service           | 实现会员管理（列表/封禁/解封）、角色权限分配、系统配置 CRUD           |
-
----
-
-### 🟡 P2 — 重要提升，计划完成
-
-| #   | 任务                       | 模块                        | 说明                                                                |
-| --- | -------------------------- | --------------------------- | ------------------------------------------------------------------- |
-| 13  | **IM 分布式连接路由**      | im-service                  | 用 Redis 存储 userId → 服务节点 映射，实现跨节点消息路由            |
-| 14  | **多设备会话管理**         | auth-service                | Token 中嵌入设备ID，支持踢下线、会话数量限制                        |
-| 15  | **Member 列表查询 / 搜索** | member-service              | 分页查询会员列表，支持按状态/注册时间筛选                           |
-| 16  | **头像 / 文件上传（OSS）** | member-service / im-service | 接入对象存储（阿里云 OSS / MinIO），实现头像上传和 IM 文件传输      |
-| 17  | **Gateway 熔断降级**       | gateway                     | 集成 Resilience4j，对下游服务配置熔断器和限流                       |
-| 18  | **Gateway 请求追踪**       | gateway                     | 注入 `X-Trace-Id`，配合日志实现全链路追踪                           |
-| 19  | **邮箱/手机验证流程**      | member-service              | 注册完成后发送验证邮件/短信，确认后更新 `gmt_email_verified_at`     |
-| 20  | **MQ 消费者实现**          | framework-starter-mq        | 实现 `MessageConsumerRegistry` 实际消费逻辑，确保权限事件被正确消费 |
+| Feature                     | Status        | Notes                                                        |
+| --------------------------- | ------------- | ------------------------------------------------------------ |
+| Netty TCP server            | ✅ Complete   | IMServer startup with graceful shutdown                      |
+| Connection management       | ✅ Complete   | ConnectionManager (bidirectional user-Channel mapping)       |
+| Custom binary protocol      | ✅ Complete   | ProtocolEncoder/Decoder, ProtocolHeader                      |
+| Message processor factory   | ✅ Complete   | Multiple processors, priority ordering, async execution      |
+| Auth processor              | ✅ Complete   | `AuthRequestProcessor`                                       |
+| Heartbeat processor         | ✅ Complete   | `HeartbeatProcessor`                                         |
+| DB entities & mappers       | ✅ Complete   | Message, Conversation, Friend, Group, etc. (10 tables)       |
+| **Business service impls**  | ❌ **Empty**  | All `ServiceImpl` classes are empty, extending only `ServiceImpl` |
+| **REST controller impls**   | ❌ **Empty**  | All controllers are empty                                    |
+| Message routing / delivery  | ❌ Missing    | No actual message send logic                                 |
+| Offline message storage     | ❌ Missing    | No offline message queue                                     |
+| Read receipts               | ❌ Missing    | `MessageReadStatus` table exists but no logic                |
+| Push notification           | ❌ Missing    | No APNs/FCM integration                                      |
+| Distributed deployment      | ❌ Missing    | ConnectionManager is in-memory only; no Redis cluster routing |
+| Group chat logic            | ❌ Missing    | Entities exist but no implementation                         |
+| File transfer               | ❌ Missing    | File entity exists but no implementation                     |
 
 ---
 
-### 🟢 P3 — 质量提升，持续迭代
+### 2.6 Admin Service ⭐☆☆☆☆ (1/10)
 
-| #   | 任务                    | 模块               | 说明                                                     |
-| --- | ----------------------- | ------------------ | -------------------------------------------------------- |
-| 21  | **单元测试补全**        | 全局               | 当前测试类均为空，至少补全 auth、member 核心逻辑测试     |
-| 22  | **集成测试**            | auth / member      | 使用 Testcontainers 进行 MySQL/Redis 集成测试            |
-| 23  | **OpenAPI 文档完善**    | auth / member / im | 补充 Controller 方法的 Swagger 注解                      |
-| 24  | **Docker Compose 环境** | 全局               | 提供开发环境一键启动（MySQL、Redis、Nacos、RabbitMQ）    |
-| 25  | **Flyway 数据库迁移**   | member / im        | 管理 DB schema 版本，避免手动执行 SQL                    |
-| 26  | **Actuator / 监控接入** | 全局               | 配置健康检查、Prometheus metrics 端点                    |
-| 27  | **IM 消息已读回执**     | im-service         | 实现 `MessageReadStatus` 完整逻辑，支持已读/未读状态同步 |
-| 28  | **推送通知集成**        | im-service         | 离线用户通过 APNs/FCM 推送消息提醒                       |
-| 29  | **Admin 运营功能**      | admin-service      | 数据看板、用户行为分析、系统公告等                       |
+| Feature            | Status          | Notes                                          |
+| ------------------ | --------------- | ---------------------------------------------- |
+| Project skeleton   | ✅ Present      | pom.xml, startup class, facade definitions     |
+| Admin features     | ❌ **All missing** | No business logic implemented               |
 
 ---
 
-## 五、建议开发顺序（冲刺计划）
+## 3. Overall Completion Summary
 
-### Sprint 1（当前冲刺 —— 核心功能闭环）
+| Module        | Score   | Weight | Weighted Score |
+| ------------- | ------- | ------ | -------------- |
+| Framework     | 8/10    | 15%    | 1.20           |
+| Gateway       | 6/10    | 10%    | 0.60           |
+| Auth          | 7.5/10  | 25%    | 1.875          |
+| Member        | 6/10    | 20%    | 1.20           |
+| IM            | 4/10    | 20%    | 0.80           |
+| Admin         | 1/10    | 10%    | 0.10           |
+| **Overall**   |         |        | **5.775 / 10** |
+
+> **Summary:** The project architecture is clear and well-structured. The framework layer and authentication layer are of high quality. However, the IM service and Admin service are still in skeleton form, with a large amount of business logic remaining to be implemented.
+
+---
+
+## 4. Prioritized TODO List
+
+### 🔴 P0 — Critical gaps; address immediately
+
+| #   | Task                                          | Module         | Notes                                                                                                                       |
+| --- | --------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Implement all IM service business logic**   | im-service     | FriendServiceImpl, MessageServiceImpl, GroupServiceImpl, ConversationServiceImpl, etc. (10 empty shells) — full implementation required |
+| 2   | **Implement all IM REST controllers**         | im-service     | MessageController, FriendController, GroupController, etc. (10 empty controllers) — full CRUD required                      |
+| 3   | **Implement IM message delivery routing**     | im-service     | Core feature: look up the target user's Channel on receive, push message; queue offline if target is disconnected           |
+| 4   | **Implement Auth logout / token blocklist**   | auth-service   | Add `POST /auth/api/v1/logout`; record token JTI in Redis blocklist; check blocklist in Gateway filter                     |
+| 5   | **Fix Member service empty implementations**  | member-service | Add business logic to base ServiceImpl classes, or clarify which operations are already handled by ApplicationService       |
+
+---
+
+### 🟠 P1 — Important features; complete soon
+
+| #   | Task                                   | Module                   | Notes                                                                              |
+| --- | -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| 6   | **Implement Touch SMS provider**       | framework-starter-touch  | Integrate Aliyun SMS / Tencent Cloud SMS; implement `AbstractSmsChannelImpl`       |
+| 7   | **Implement Touch email provider**     | framework-starter-touch  | Integrate SMTP / SendGrid; implement `AbstractEmailChannelImpl`                    |
+| 8   | **Implement OAuth2 login adapter**     | auth-service             | Implement `OAuth2Port`; handle authorization code exchange and user info retrieval for Google/GitHub |
+| 9   | **Implement WeChat login adapter**     | auth-service             | Complete `WeChatPort`; obtain openid/unionid via weixin-java-mp                    |
+| 10  | **Add Gateway route configuration**    | gateway                  | Write `application.yml` service routing rules; integrate Nacos service discovery  |
+| 11  | **IM offline message support**         | im-service               | Queue messages in Redis or DB when target is offline; deliver on reconnection      |
+| 12  | **Admin service baseline features**    | admin-service            | Implement member management (list/ban/unban), role-permission assignment, system configuration CRUD |
+
+---
+
+### 🟡 P2 — Important improvements; plan and complete
+
+| #   | Task                                  | Module                      | Notes                                                                       |
+| --- | ------------------------------------- | --------------------------- | --------------------------------------------------------------------------- |
+| 13  | **IM distributed connection routing** | im-service                  | Store userId → service node mapping in Redis; implement cross-node routing  |
+| 14  | **Multi-device session management**   | auth-service                | Embed device ID in token; support forced logout and session count limits    |
+| 15  | **Member list query / search**        | member-service              | Paginated member list with filtering by status and registration date        |
+| 16  | **Avatar / file upload (OSS)**        | member-service / im-service | Integrate object storage (Aliyun OSS / MinIO) for avatars and IM files     |
+| 17  | **Gateway circuit breaking**          | gateway                     | Integrate Resilience4j; configure circuit breakers and rate limits for downstream services |
+| 18  | **Gateway request tracing**           | gateway                     | Inject `X-Trace-Id`; support end-to-end distributed tracing with logs      |
+| 19  | **Email/phone verification flow**     | member-service              | Send verification email/SMS after registration; update `gmt_email_verified_at` on confirmation |
+| 20  | **MQ consumer implementation**        | framework-starter-mq        | Validate `MessageConsumerRegistry` works end-to-end for permission events  |
+
+---
+
+### 🟢 P3 — Quality improvements; continuous iteration
+
+| #   | Task                         | Module               | Notes                                                               |
+| --- | ---------------------------- | -------------------- | ------------------------------------------------------------------- |
+| 21  | **Unit test coverage**       | Global               | Current test classes are empty; at minimum cover auth and member core logic |
+| 22  | **Integration tests**        | auth / member        | Use Testcontainers for MySQL/Redis integration tests                |
+| 23  | **OpenAPI documentation**    | auth / member / im   | Complete Swagger annotations on all controller methods              |
+| 24  | **Docker Compose environment** | Global             | One-command dev environment (MySQL, Redis, Nacos, RabbitMQ)        |
+| 25  | **Flyway database migration** | member / im          | Manage DB schema versions; eliminate manual SQL execution           |
+| 26  | **Actuator / monitoring**    | Global               | Configure health checks and Prometheus metrics endpoints            |
+| 27  | **IM read receipts**         | im-service           | Implement full `MessageReadStatus` logic with read/unread sync      |
+| 28  | **Push notification**        | im-service           | Deliver offline message alerts via APNs/FCM                         |
+| 29  | **Admin operational features** | admin-service      | Data dashboard, user behavior analytics, system announcements       |
+
+---
+
+## 5. Recommended Development Sequence (Sprint Plan)
+
+### Sprint 1 — Core Feature Closure
 
 ```
-Week 1-2:
-  [P0] Touch 短信/邮件 Provider 实现     → 解除 auth 验证码发送阻塞
-  [P0] Auth 退出/Token黑名单              → 安全基线达标
-  [P1] OAuth2 + 微信登录适配器            → 社交登录闭环
+Week 1–2:
+  [P0] Touch SMS/Email provider implementation     → Unblock auth verification code delivery
+  [P0] Auth logout / token blocklist               → Meet security baseline
+  [P1] OAuth2 + WeChat login adapters              → Social login closure
 
-Week 3-4:
-  [P0] IM Service 业务逻辑实现（单聊为主）→ 核心 IM 功能可用
-  [P0] IM REST Controller 实现           → REST API 可用
-  [P0] IM 消息路由 + 离线消息基础版       → 基本可联调
+Week 3–4:
+  [P0] IM service business logic (1-on-1 chat first) → Core IM functionality usable
+  [P0] IM REST controller implementation           → REST API available
+  [P0] IM message routing + basic offline support  → Ready for integration testing
 ```
 
-### Sprint 2（功能完善）
+### Sprint 2 — Feature Completion
 
 ```
-Week 5-6:
-  [P1] Gateway 路由 + Nacos 集成         → 微服务整体连通
-  [P1] Admin 服务基础功能                 → 管理能力建立
-  [P2] Member 列表 / 搜索                 → 运营基础
+Week 5–6:
+  [P1] Gateway routing + Nacos integration         → End-to-end microservice connectivity
+  [P1] Admin service baseline features             → Management capability established
+  [P2] Member list / search                        → Operational foundation
 
-Week 7-8:
-  [P2] OSS 文件上传                       → 头像 + IM 文件
-  [P2] IM 分布式连接路由                  → 水平扩展能力
-  [P2] 多设备会话管理                     → 安全体验提升
+Week 7–8:
+  [P2] OSS file upload                             → Avatar + IM file transfer
+  [P2] IM distributed connection routing           → Horizontal scaling capability
+  [P2] Multi-device session management             → Security and UX improvement
 ```
 
-### Sprint 3（质量保障）
+### Sprint 3 — Quality Assurance
 
 ```
-Week 9-10:
-  [P3] 单元测试 + 集成测试                → 质量底线
-  [P3] Docker Compose 开发环境            → 开发效率
-  [P3] OpenAPI 文档                       → 协作效率
-  [P3] 监控 / 链路追踪                    → 运维能力
+Week 9–10:
+  [P3] Unit tests + integration tests              → Quality baseline
+  [P3] Docker Compose dev environment              → Developer efficiency
+  [P3] OpenAPI documentation                       → Collaboration efficiency
+  [P3] Monitoring / distributed tracing            → Operational readiness
 ```
 
 ---
 
-## 六、关键技术风险
+## 6. Key Technical Risks
 
-| 风险                                   | 影响 | 缓解措施                                         |
-| -------------------------------------- | ---- | ------------------------------------------------ |
-| IM 单机 ConnectionManager 无法水平扩展 | 高   | Sprint 2 优先实现 Redis 分布式路由               |
-| Touch 模块无实际发送能力               | 高   | Sprint 1 第一周完成 Provider 接入                |
-| 大量空 ServiceImpl 导致接口空转        | 中   | 梳理哪些 ApplicationService 已覆盖，补全缺失逻辑 |
-| MQ 消费者缺失导致权限事件积压          | 中   | Sprint 1 中验证 RabbitMQ 消费端正常工作          |
-| Admin 长期空置影响运营                 | 中   | Sprint 2 建立基础管理能力                        |
-| 无 Token 黑名单存在安全隐患            | 高   | Sprint 1 优先修复                                |
+| Risk                                           | Impact | Mitigation                                                        |
+| ---------------------------------------------- | ------ | ----------------------------------------------------------------- |
+| IM single-node ConnectionManager cannot scale horizontally | High | Implement Redis-backed distributed routing in Sprint 2 |
+| Touch module lacks actual delivery capability  | High   | Complete provider integration in Sprint 1, Week 1                |
+| Numerous empty ServiceImpl classes cause silent failures | Medium | Audit which operations ApplicationService already covers; fill gaps |
+| Missing MQ consumers cause permission event backlog | Medium | Verify RabbitMQ consumer operates correctly during Sprint 1     |
+| Admin service absence impacts operations       | Medium | Establish baseline admin capabilities in Sprint 2                |
+| No token blocklist poses security risk         | High   | Prioritize fix in Sprint 1                                        |

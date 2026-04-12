@@ -1,66 +1,66 @@
-# 权限变更事件系统测试指南
+# Permission Change Event System — Test Guide
 
-## 概述
+## Overview
 
-本文档说明如何测试权限变更事件系统，该系统使用 framework-starter-mq 实现 member-service 和 auth-service 之间的消息通信。
+This document describes how to test the permission change event system, which uses `framework-starter-mq` to enable message-based communication between `member-service` and `auth-service`.
 
-## 架构
+## Architecture
 
-- **member-service**: 权限数据的 owner，负责发布权限变更事件
-- **auth-service**: 权限缓存的 consumer，监听权限变更事件并刷新缓存
-- **RabbitMQ**: 消息中间件，传递权限变更事件
+- **member-service**: Owner of permission data; responsible for publishing permission change events.
+- **auth-service**: Consumer of permission cache; listens for permission change events and refreshes the cache.
+- **RabbitMQ**: Message broker that delivers permission change events.
 
-## 事件流程
+## Event Flow
 
-### 1. 分配角色
+### 1. Assign Role
 
 ```bash
 POST http://localhost:11000/memberRole/assign?memberId=1&roleId=1&operator=admin
 
-# 执行流程：
-# 1. MemberRoleController创建member_member_role记录
+# Execution flow:
+# 1. MemberRoleController creates a member_member_role record
 # 2. PermissionChangeEventPublisher.publishMemberRoleAssigned()
-# 3. 消息发送到RabbitMQ队列 "member.permission"
-# 4. PermissionChangedEventListener接收事件
-# 5. PermissionDomainService.invalidatePermissionCache()清除auth-service的权限缓存
+# 3. Message sent to RabbitMQ queue "member.permission"
+# 4. PermissionChangedEventListener receives the event
+# 5. PermissionDomainService.invalidatePermissionCache() evicts the auth-service permission cache
 ```
 
-### 2. 撤销角色
+### 2. Revoke Role
 
 ```bash
 DELETE http://localhost:11000/memberRole/revoke?memberId=1&roleId=1&operator=admin
 ```
 
-### 3. 为角色添加权限
+### 3. Add Permission to Role
 
 ```bash
 POST http://localhost:11000/rolePermission/add?roleId=1&permissionId=100&operator=admin
 
-# 注意：此操作会查找所有拥有该角色的会员，并为每个会员发布权限变更事件
+# Note: This operation queries all members holding the role and publishes a permission change event for each.
 ```
 
-### 4. 从角色移除权限
+### 4. Remove Permission from Role
 
 ```bash
 DELETE http://localhost:11000/rolePermission/remove?roleId=1&permissionId=100&operator=admin
 ```
 
-## 环境配置
+## Environment Setup
 
-### 1. 启动 RabbitMQ
+### 1. Start RabbitMQ
 
 ```bash
-# 使用Docker启动
+# Start with Docker
 docker run -d --name rabbitmq \
   -p 5672:5672 \
   -p 15672:15672 \
   rabbitmq:3-management
 
-# 访问管理界面: http://localhost:15672
-# 用户名/密码: guest/guest
+# Management UI: http://localhost:15672
+# Credentials: guest / guest
 ```
 
-### 2. 配置环境变量 (.env)
+### 2. Configure Environment Variables (.env)
 
 ```dotenv
 # RabbitMQ Configuration
@@ -71,106 +71,106 @@ RABBITMQ_PASSWORD=guest
 RABBITMQ_VHOST=/
 ```
 
-### 3. 启动服务
+### 3. Start Services
 
 ```bash
-# 1. 启动member-service
+# 1. Start member-service
 cd member/member-service
 mvn spring-boot:run
 
-# 2. 启动auth-service
+# 2. Start auth-service
 cd auth/auth-service
 mvn spring-boot:run
 ```
 
-## 验证步骤
+## Verification Steps
 
-### 1. 检查 RabbitMQ 连接
+### 1. Check RabbitMQ Connections
 
-打开 RabbitMQ 管理界面，检查：
+Open the RabbitMQ management UI and verify:
 
-- Connections: 应该看到来自 member-service 和 auth-service 的连接
-- Exchanges: 应该自动创建 "member.permission" exchange
-- Queues: 应该自动创建 "member.permission" queue
+- **Connections**: connections from both `member-service` and `auth-service` should be visible.
+- **Exchanges**: the `member.permission` exchange should be created automatically.
+- **Queues**: the `member.permission` queue should be created automatically.
 
-### 2. 测试角色分配
+### 2. Test Role Assignment
 
 ```bash
-# 分配角色
+# Assign a role
 curl -X POST "http://localhost:11000/memberRole/assign?memberId=1&roleId=1&operator=admin"
 
-# 检查日志：
+# Expected log entries:
 # member-service: "Published MEMBER_ROLE_ASSIGNED event for member: 1, role: 1"
-# auth-service: "[权限变更监听] 收到权限变更事件: changeType=MEMBER_ROLE_ASSIGNED"
-# auth-service: "[权限变更监听] 成功清除1个会员的权限缓存"
+# auth-service: "[Permission] Permission change event received: changeType=MEMBER_ROLE_ASSIGNED"
+# auth-service: "[Permission] Successfully invalidated cache for 1 member(s)"
 ```
 
-### 3. 测试角色权限变更
+### 3. Test Role Permission Change
 
 ```bash
-# 先创建一些测试数据
-# 会员1拥有角色1
-# 会员2拥有角色1
+# Prerequisite test data:
+# - Member 1 has role 1
+# - Member 2 has role 1
 
-# 为角色1添加权限100
+# Add permission 100 to role 1
 curl -X POST "http://localhost:11000/rolePermission/add?roleId=1&permissionId=100&operator=admin"
 
-# 检查日志：
-# member-service: "为角色添加权限成功: roleId=1, permissionId=100, affectedMembers=2"
-# auth-service: "[权限变更监听] 收到权限变更事件: changeType=ROLE_PERMISSION_ADDED, affectedMembers=2"
-# auth-service: "[权限变更监听] 成功清除2个会员的权限缓存"
+# Expected log entries:
+# member-service: "Permission added to role: roleId=1, permissionId=100, affectedMembers=2"
+# auth-service: "[Permission] Permission change event received: changeType=ROLE_PERMISSION_ADDED, affectedMembers=2"
+# auth-service: "[Permission] Successfully invalidated cache for 2 member(s)"
 ```
 
-## 监控和调试
+## Monitoring and Debugging
 
-### 查看消息队列状态
+### Check Queue Status
 
 ```bash
-# 使用rabbitmqctl
+# Using rabbitmqctl
 docker exec rabbitmq rabbitmqctl list_queues
 
-# 查看队列详情
+# Queue details
 docker exec rabbitmq rabbitmqctl list_queues name messages_ready messages_unacknowledged
 ```
 
-### 日志关键点
+### Key Log Points
 
-- member-service: `PermissionChangeEventPublisher`
-- framework-starter-mq: `RabbitMQMessageProducer`, `MessageConsumerRegistry`
-- auth-service: `PermissionChangedEventListener`
-- auth-service: `PermissionDomainService`
+- **member-service**: `PermissionChangeEventPublisher`
+- **framework-starter-mq**: `RabbitMQMessageProducer`, `MessageConsumerRegistry`
+- **auth-service**: `PermissionChangedEventListener`
+- **auth-service**: `PermissionDomainService`
 
-## 故障排查
+## Troubleshooting
 
-### 1. 消息未发送
+### 1. Message Not Sent
 
-- 检查 RabbitMQ 是否运行
-- 检查 member-service 的 RabbitMQ 配置
-- 查看 member-service 日志是否有连接错误
+- Verify RabbitMQ is running.
+- Check the RabbitMQ configuration in `member-service`.
+- Look for connection errors in `member-service` logs.
 
-### 2. 消息未消费
+### 2. Message Not Consumed
 
-- 检查 auth-service 的 RabbitMQ 配置
-- 检查 auth-service 日志是否有 MessageConsumerRegistry 注册日志
-- 确认队列名称匹配（"member.permission"）
+- Check the RabbitMQ configuration in `auth-service`.
+- Look for `MessageConsumerRegistry` registration logs in `auth-service`.
+- Confirm the queue name matches (`"member.permission"`).
 
-### 3. 消息消费失败
+### 3. Message Consumption Failure
 
-- 查看 auth-service 的 PermissionChangedEventListener 日志
-- 检查 JSON 序列化/反序列化问题
-- 确认 PermissionChangedEvent 字段在两个服务中定义一致
+- Review `PermissionChangedEventListener` logs in `auth-service`.
+- Check for JSON serialization/deserialization issues.
+- Ensure the `PermissionChangedEvent` fields are defined consistently in both services.
 
-## 性能注意事项
+## Performance Considerations
 
-- 角色权限变更可能影响大量用户，事件处理是异步的
-- 缓存失效是批量操作，但逐个用户处理
-- 考虑使用 Redis Pipeline 或批量删除优化性能
-- 消息重试策略由 RabbitMQ 配置控制
+- Role permission changes can affect a large number of users; event processing is asynchronous.
+- Cache invalidation is performed per-member, which may be slow for large member sets.
+- Consider using Redis Pipeline or batch deletion to improve throughput.
+- Message retry strategy is controlled by the RabbitMQ configuration.
 
-## 扩展建议
+## Extension Recommendations
 
-1. 添加死信队列处理失败消息
-2. 实现消息重试机制
-3. 添加消息追踪和审计
-4. 实现消息幂等性处理
-5. 添加性能监控（消息延迟、处理时间等）
+1. Add a dead-letter queue to handle failed messages.
+2. Implement a message retry mechanism.
+3. Add message tracing and auditing.
+4. Implement idempotent message processing.
+5. Add performance monitoring (message latency, processing time, etc.).
