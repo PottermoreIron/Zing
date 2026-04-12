@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,7 +26,7 @@ import org.springframework.kafka.core.KafkaTemplate;
  * @since 2026-01-05
  */
 @Slf4j
-@AutoConfiguration
+@AutoConfiguration(after = JacksonAutoConfiguration.class)
 @EnableConfigurationProperties(MQProperties.class)
 @ConditionalOnProperty(prefix = "pot.mq", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class MQAutoConfiguration {

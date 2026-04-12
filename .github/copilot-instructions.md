@@ -23,7 +23,6 @@
 
 ## 仓库不变量
 
-- 用户显示名统一使用 `nickname`，不使用 `username`。
 - 业务 ID 由 ID 生成器产生，不使用数据库自增。
 - 数据库表名使用单数。
 - 持久化实体位于 `infrastructure.persistence.entity`。
@@ -35,5 +34,4 @@
 
 - 优先做最小且完整的改动，修复根因，不打表面补丁。
 - 修改具体文件前，必须读取匹配的 `.github/instructions/*.instructions.md`。
-- 遇到聚合建模、Java 测试、MyBatis Mapper 维护等可复用流程时，优先加载对应 skill。
 - 模块职责、技术版本、架构边界发生变化时，同时更新本文件与 `.github/README.md`。

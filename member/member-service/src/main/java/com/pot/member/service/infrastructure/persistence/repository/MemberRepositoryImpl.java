@@ -135,7 +135,7 @@ public class MemberRepositoryImpl implements MemberRepository {
                         Collectors.mapping(MemberRole::getRoleId, Collectors.toSet())));
     }
 
-        private MemberAggregate toAggregate(Member entity) {
+    private MemberAggregate toAggregate(Member entity) {
         MemberProfile profile = MemberProfile.builder()
                 .nickname(entity.getNickname())
                 .firstName(entity.getFirstName())
@@ -165,11 +165,11 @@ public class MemberRepositoryImpl implements MemberRepository {
                 entity.getGmtLastLoginAt());
     }
 
-        private Set<Long> loadRoleIds(Long memberId) {
+    private Set<Long> loadRoleIds(Long memberId) {
         return findRoleIdsByMemberIds(Set.of(memberId)).getOrDefault(memberId, Set.of());
     }
 
-        private Member toEntity(MemberAggregate aggregate) {
+    private Member toEntity(MemberAggregate aggregate) {
         Member entity = new Member();
         if (aggregate.getMemberId() != null) {
             // memberId is the business ID — set it so MyBatisPlus UPDATE can find the
@@ -191,7 +191,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         if (profile != null) {
             entity.setFirstName(profile.getFirstName());
             entity.setLastName(profile.getLastName());
-            entity.setGender(
+            entity.setGenderEnum(
                     profile.getGender() != null ? Member.Gender.fromCode(profile.getGender()) : Member.Gender.UNKNOWN);
             entity.setBirth(profile.getBirthDate() != null
                     ? java.time.LocalDate.parse(profile.getBirthDate())
@@ -205,7 +205,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         return entity;
     }
 
-        private MemberStatus mapStatus(String status) {
+    private MemberStatus mapStatus(String status) {
         if (status == null) {
             return MemberStatus.ACTIVE;
         }
@@ -217,7 +217,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         };
     }
 
-        private String mapStatusToString(MemberStatus status) {
+    private String mapStatusToString(MemberStatus status) {
         return switch (status) {
             case ACTIVE -> "active";
             case DISABLED -> "inactive";

@@ -106,7 +106,7 @@ public class Member implements Serializable {
         return this.gender != null ? Gender.fromCode(this.gender) : Gender.UNKNOWN;
     }
 
-    public void setGender(Gender gender) {
+    public void setGenderEnum(Gender gender) {
         this.gender = gender != null ? gender.getCode() : Gender.UNKNOWN.getCode();
     }
 

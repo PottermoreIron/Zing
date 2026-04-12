@@ -18,7 +18,6 @@ spring:
           # Allow startup to continue when Nacos is unavailable in local development.
         fail-fast: false
         register-enabled: ${NACOS_REGISTER_ENABLED:true}
-
         # Redis connection settings.
   data:
     redis:

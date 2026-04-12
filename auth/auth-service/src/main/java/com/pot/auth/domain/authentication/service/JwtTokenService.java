@@ -47,19 +47,20 @@ public class JwtTokenService {
         this.permissionVersionEnabled = permissionVersionEnabled;
     }
 
-        public TokenPair generateTokenPair(
+    public TokenPair generateTokenPair(
             UserId userId,
             UserDomain userDomain,
             String nickname,
             Set<String> permissions) {
+        Set<String> safePermissions = permissions != null ? permissions : Set.of();
         log.info("[Token] 生成Token对: userId={}, userDomain={}, nickname={}, permCount={}",
-                userId, userDomain, nickname, permissions.size());
+                userId, userDomain, nickname, safePermissions.size());
 
         try {
             PermissionCacheMetadata metadata = permissionDomainService.cachePermissionsWithMetadata(
                     userId,
                     userDomain,
-                    permissions);
+                    safePermissions);
 
             log.debug("[Token] 权限已缓存: userId={}, version={}, digest={}",
                     userId, metadata.version(), metadata.digest());
@@ -68,7 +69,7 @@ public class JwtTokenService {
                     userId,
                     userDomain,
                     nickname,
-                    permissions,
+                    safePermissions,
                     metadata);
 
             storeRefreshToken(tokenPair.refreshToken());
@@ -84,7 +85,7 @@ public class JwtTokenService {
         }
     }
 
-        public JwtToken validateAccessToken(String tokenString) {
+    public JwtToken validateAccessToken(String tokenString) {
         log.debug("[Token] 验证AccessToken");
 
         JwtToken token = tokenManagementPort.parseAccessToken(tokenString);
@@ -107,7 +108,7 @@ public class JwtTokenService {
         return token;
     }
 
-        private void validatePermissionVersion(JwtToken token) {
+    private void validatePermissionVersion(JwtToken token) {
         try {
             Long tokenPermVersion = token.getClaim("perm_version", Long.class);
             if (tokenPermVersion == null) {
@@ -136,7 +137,7 @@ public class JwtTokenService {
         }
     }
 
-        public TokenPair refreshToken(String refreshTokenString) {
+    public TokenPair refreshToken(String refreshTokenString) {
         log.info("[Token] 开始刷新Token");
 
         RefreshToken oldRefreshToken = tokenManagementPort.parseRefreshToken(refreshTokenString);
@@ -182,14 +183,14 @@ public class JwtTokenService {
         return newTokenPair;
     }
 
-        public void addToBlacklist(TokenId tokenId, long remainingSeconds) {
+    public void addToBlacklist(TokenId tokenId, long remainingSeconds) {
         log.info("[Token] 将Token加入黑名单: tokenId={}, ttl={}s", tokenId, remainingSeconds);
 
         String blacklistKey = "auth:blacklist:" + tokenId.value();
         cachePort.set(blacklistKey, "1", Duration.ofSeconds(remainingSeconds));
     }
 
-        public void logout(String accessTokenStr, String refreshTokenStr) {
+    public void logout(String accessTokenStr, String refreshTokenStr) {
         log.info("[Token] 执行登出");
 
         try {
@@ -220,31 +221,31 @@ public class JwtTokenService {
         log.info("[Token] 登出完成");
     }
 
-        private boolean isInBlacklist(TokenId tokenId) {
+    private boolean isInBlacklist(TokenId tokenId) {
         String blacklistKey = "auth:blacklist:" + tokenId.value();
         return cachePort.exists(blacklistKey);
     }
 
-        private void storeRefreshToken(RefreshToken refreshToken) {
+    private void storeRefreshToken(RefreshToken refreshToken) {
         String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
         long ttl = Math.min(refreshToken.getRemainingSeconds(), refreshTokenTtl);
         cachePort.set(cacheKey, refreshToken.rawToken(), Duration.ofSeconds(ttl));
     }
 
-        private String getNicknameFromCache(RefreshToken refreshToken) {
+    private String getNicknameFromCache(RefreshToken refreshToken) {
         return userModulePortFactory.getPort(refreshToken.userDomain())
                 .findById(refreshToken.userId())
                 .map(user -> user.nickname())
                 .orElse("unknown");
     }
 
-        public static class TokenExpiredException extends DomainException {
+    public static class TokenExpiredException extends DomainException {
         public TokenExpiredException(String message) {
             super(message);
         }
     }
 
-        public static class TokenInvalidException extends DomainException {
+    public static class TokenInvalidException extends DomainException {
         public TokenInvalidException(String message) {
             super(message);
         }
