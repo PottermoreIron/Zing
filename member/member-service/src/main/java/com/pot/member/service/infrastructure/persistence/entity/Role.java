@@ -108,8 +108,8 @@ public class Role implements Serializable {
 
     @Getter
     public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
+        DISABLED(0, "Disabled"),
+        ENABLED(1, "Enabled");
 
         private final Integer code;
         private final String description;
@@ -125,14 +125,14 @@ public class Role implements Serializable {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("未知的角色状态: " + code);
+            throw new IllegalArgumentException("Unknown role status: " + code);
         }
     }
 
     @Getter
     public enum SystemFlag {
-        USER_DEFINED(0, "用户自定义"),
-        SYSTEM_BUILTIN(1, "系统内置");
+        USER_DEFINED(0, "User-defined"),
+        SYSTEM_BUILTIN(1, "System built-in");
 
         private final Integer code;
         private final String description;
@@ -148,14 +148,14 @@ public class Role implements Serializable {
                     return flag;
                 }
             }
-            throw new IllegalArgumentException("未知的系统角色标识: " + code);
+            throw new IllegalArgumentException("Unknown system role flag: " + code);
         }
     }
 
     @Getter
     public enum PredefinedRoles {
-        SUPER_ADMIN("super_admin", "超级管理员"),
-        ADMIN("admin", "管理员");
+        SUPER_ADMIN("super_admin", "Super Admin"),
+        ADMIN("admin", "Administrator");
 
         private final String code;
         private final String description;
@@ -171,7 +171,7 @@ public class Role implements Serializable {
                     return role;
                 }
             }
-            throw new IllegalArgumentException("未知的预定义角色: " + code);
+            throw new IllegalArgumentException("Unknown predefined role: " + code);
         }
     }
 }

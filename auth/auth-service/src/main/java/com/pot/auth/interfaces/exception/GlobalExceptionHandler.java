@@ -30,77 +30,77 @@ public class GlobalExceptionHandler extends BaseGlobalExceptionHandler {
     @ExceptionHandler(JwtTokenService.TokenExpiredException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public R<Void> handleTokenExpired(JwtTokenService.TokenExpiredException e) {
-        log.warn("[异常] Token过期: {}", e.getMessage());
+        log.warn("[Exception] Token expired: {}", e.getMessage());
         return R.fail(AuthResultCode.TOKEN_EXPIRED);
     }
 
     @ExceptionHandler(JwtTokenService.TokenInvalidException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public R<Void> handleTokenInvalid(JwtTokenService.TokenInvalidException e) {
-        log.warn("[异常] Token无效: {}", e.getMessage());
+        log.warn("[Exception] Token invalid: {}", e.getMessage());
         return R.fail(AuthResultCode.TOKEN_INVALID);
     }
 
     @ExceptionHandler(VerificationCodeService.CodeSendTooFrequentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleCodeSendTooFrequent(VerificationCodeService.CodeSendTooFrequentException e) {
-        log.warn("[异常] 验证码发送过于频繁: {}", e.getMessage());
+        log.warn("[Exception] Verification code sent too frequently: {}", e.getMessage());
         return R.fail(AuthResultCode.CODE_SEND_TOO_FREQUENT);
     }
 
     @ExceptionHandler(VerificationCodeService.CodeNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleCodeNotFound(VerificationCodeService.CodeNotFoundException e) {
-        log.warn("[异常] 验证码不存在: {}", e.getMessage());
+        log.warn("[Exception] Verification code not found: {}", e.getMessage());
         return R.fail(AuthResultCode.CODE_NOT_FOUND);
     }
 
     @ExceptionHandler(VerificationCodeService.CodeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleCodeMismatch(VerificationCodeService.CodeMismatchException e) {
-        log.warn("[异常] 验证码错误: {}", e.getMessage());
+        log.warn("[Exception] Incorrect verification code: {}", e.getMessage());
         return R.fail(AuthResultCode.CODE_MISMATCH);
     }
 
     @ExceptionHandler(VerificationCodeService.CodeVerificationExceededException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleCodeVerificationExceeded(VerificationCodeService.CodeVerificationExceededException e) {
-        log.warn("[异常] 验证次数超限: {}", e.getMessage());
+        log.warn("[Exception] Verification attempt limit exceeded: {}", e.getMessage());
         return R.fail(AuthResultCode.CODE_VERIFICATION_EXCEEDED);
     }
 
     @ExceptionHandler(VerificationCode.InvalidVerificationCodeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleInvalidVerificationCode(VerificationCode.InvalidVerificationCodeException e) {
-        log.warn("[异常] 验证码格式错误: {}", e.getMessage());
+        log.warn("[Exception] Invalid verification code format: {}", e.getMessage());
         return R.fail(AuthResultCode.CODE_FORMAT_INVALID);
     }
 
     @ExceptionHandler(InvalidEmailException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleInvalidEmail(InvalidEmailException e) {
-        log.warn("[异常] 邮箱格式错误: {}", e.getMessage());
+        log.warn("[Exception] Invalid email format: {}", e.getMessage());
         return R.fail(AuthResultCode.INVALID_EMAIL);
     }
 
     @ExceptionHandler(InvalidPhoneException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleInvalidPhone(InvalidPhoneException e) {
-        log.warn("[异常] 手机号格式错误: {}", e.getMessage());
+        log.warn("[Exception] Invalid phone format: {}", e.getMessage());
         return R.fail(AuthResultCode.INVALID_PHONE);
     }
 
     @ExceptionHandler(WeakPasswordException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleWeakPassword(WeakPasswordException e) {
-        log.warn("[异常] 密码强度不足: {}", e.getMessage());
+        log.warn("[Exception] Weak password: {}", e.getMessage());
         return R.fail(AuthResultCode.WEAK_PASSWORD);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleIllegalArgument(IllegalArgumentException e) {
-        log.warn("[异常] 参数错误: {}", e.getMessage());
+        log.warn("[Exception] Invalid parameter: {}", e.getMessage());
         return R.fail(AuthResultCode.INVALID_PARAMETER, e.getMessage());
     }
 
@@ -108,17 +108,17 @@ public class GlobalExceptionHandler extends BaseGlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleDomainException(DomainException e) {
         if (e.getResultCode() != null) {
-            log.warn("[异常] 领域异常: code={}, msg={}", e.getResultCode().getCode(), e.getMessage());
+            log.warn("[Exception] Domain exception — code={}, msg={}", e.getResultCode().getCode(), e.getMessage());
             return R.fail(e.getResultCode());
         }
-        log.warn("[异常] 领域异常: {}", e.getMessage());
+        log.warn("[Exception] Domain exception: {}", e.getMessage());
         return R.fail(AuthResultCode.SYSTEM_ERROR, e.getMessage());
     }
 
     @ExceptionHandler(PermissionDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public R<Void> handlePermissionDenied(PermissionDeniedException e) {
-        log.warn("[异常] 权限拒绝: {}", e.getMessage());
+        log.warn("[Exception] Access denied: {}", e.getMessage());
         return R.fail(AuthResultCode.PERMISSION_DENIED, e.getMessage());
     }
 }

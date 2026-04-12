@@ -36,14 +36,14 @@ public class EmailPasswordLoginStrategy extends AbstractLoginStrategyImpl {
     @Override
     protected void validateCredential(AuthenticationContext context) {
         var request = context.request();
-        log.debug("[邮箱密码登录] 验证凭证: email={}", request.email());
+        log.debug("[EmailPasswordLogin] Verifying credentials — email={}", request.email());
 
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
         UserDTO user = port.authenticateWithPassword(request.email(), request.password())
                 .orElseThrow(() -> new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
         context.withExtraAttribute(AUTHENTICATED_USER_KEY, user);
-        log.debug("[邮箱密码登录] 凭证验证通过: email={}", request.email());
+        log.debug("[EmailPasswordLogin] Credentials verified — email={}", request.email());
     }
 
     /**

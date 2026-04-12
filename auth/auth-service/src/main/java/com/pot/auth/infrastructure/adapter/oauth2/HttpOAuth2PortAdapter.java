@@ -64,7 +64,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
 
     @Override
     public OAuth2UserInfo getUserInfo(OAuth2Provider provider, OAuth2AuthorizationCode code, String redirectUri) {
-        log.info("[OAuth2] 获取用户信息: provider={}", provider.getCode());
+        log.info("[OAuth2] Fetching user info — provider={}", provider.getCode());
 
         ProviderConfig config = getConfig(provider);
         validateConfig(provider, config);
@@ -75,14 +75,14 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[OAuth2] 获取用户信息失败: provider={}, error={}", provider.getCode(), e.getMessage(), e);
-            throw new DomainException("OAuth2 认证失败: " + e.getMessage(), e);
+            log.error("[OAuth2] Failed to fetch user info — provider={}, error={}", provider.getCode(), e.getMessage(), e);
+            throw new DomainException("OAuth2 authentication failed: " + e.getMessage(), e);
         }
     }
 
     @Override
     public String refreshAccessToken(OAuth2Provider provider, String refreshToken) {
-        log.info("[OAuth2] 刷新 Access Token: provider={}", provider.getCode());
+        log.info("[OAuth2] Refreshing access token — provider={}", provider.getCode());
 
         ProviderConfig config = getConfig(provider);
         validateConfig(provider, config);
@@ -108,8 +108,8 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
             JsonNode json = objectMapper.readTree(responseBody);
             return json.path("access_token").asText();
         } catch (Exception e) {
-            log.error("[OAuth2] 刷新 Token 失败: provider={}", provider.getCode(), e);
-            throw new DomainException("OAuth2 Token 刷新失败: " + e.getMessage(), e);
+            log.error("[OAuth2] Failed to refresh token — provider={}", provider.getCode(), e);
+            throw new DomainException("OAuth2 token refresh failed: " + e.getMessage(), e);
         }
     }
 
@@ -144,15 +144,15 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
 
         if (json.has("error")) {
             String errorDesc = json.path("error_description").asText(json.path("error").asText());
-            throw new DomainException("OAuth2 授权码无效: " + errorDesc);
+            throw new DomainException("OAuth2 authorization code invalid: " + errorDesc);
         }
 
         String accessToken = json.path("access_token").asText(null);
         if (accessToken == null || accessToken.isBlank()) {
-            throw new DomainException("OAuth2 提供商未返回 Access Token");
+            throw new DomainException("OAuth2 provider did not return an access token");
         }
 
-        log.debug("[OAuth2] Access Token 获取成功: provider={}", provider.getCode());
+        log.debug("[OAuth2] Access token acquired — provider={}", provider.getCode());
         return accessToken;
     }
 
@@ -258,7 +258,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         // endpoint.
         String[] parts = idToken.split("\\.");
         if (parts.length < 2) {
-            throw new DomainException("Apple id_token 格式无效");
+            throw new DomainException("Apple id_token format is invalid");
         }
 
         byte[] payloadBytes = java.util.Base64.getUrlDecoder().decode(
@@ -281,7 +281,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     private ProviderConfig getConfig(OAuth2Provider provider) {
         ProviderConfig config = properties.getProvider(provider.getCode());
         if (config == null) {
-            throw new DomainException("OAuth2 提供商配置不存在: " + provider.getCode());
+            throw new DomainException("OAuth2 provider configuration not found: " + provider.getCode());
         }
         return config;
     }
@@ -291,9 +291,9 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
      */
     private void validateConfig(OAuth2Provider provider, ProviderConfig config) {
         if (!config.isConfigured()) {
-            log.error("[OAuth2] 提供商配置不完整，缺少 clientId 或 clientSecret: provider={}",
+            log.error("[OAuth2] Provider configuration incomplete, missing clientId or clientSecret — provider={}",
                     provider.getCode());
-            throw new DomainException("OAuth2 提供商 [" + provider.getDisplayName() + "] 未配置，请联系管理员");
+            throw new DomainException("OAuth2 provider [" + provider.getDisplayName() + "] is not configured, please contact your administrator");
         }
     }
 }

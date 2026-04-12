@@ -29,7 +29,7 @@ abstract class AuthorizationAspectSupport {
 
     protected void requireAuthenticated() {
         if (!securityAccessor.isAuthenticated()) {
-            throw new PermissionDeniedException("未登录用户无法访问资源");
+            throw new PermissionDeniedException("Unauthenticated user cannot access the resource");
         }
     }
 

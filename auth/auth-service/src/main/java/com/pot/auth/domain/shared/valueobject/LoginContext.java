@@ -13,8 +13,8 @@ public record LoginContext(
 ) {
 
         public LoginContext {
-        Objects.requireNonNull(ipAddress, "IP地址不能为空");
-        Objects.requireNonNull(deviceInfo, "设备信息不能为空");
+        Objects.requireNonNull(ipAddress, "IP address must not be null");
+        Objects.requireNonNull(deviceInfo, "Device info must not be null");
         timestamp = timestamp != null ? timestamp : TimeUtils.currentTimestamp();
     }
 

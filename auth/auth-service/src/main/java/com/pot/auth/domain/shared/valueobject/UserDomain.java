@@ -5,11 +5,11 @@ import lombok.Getter;
 @Getter
 public enum UserDomain {
 
-        MEMBER("member", "会员"),
+        MEMBER("member", "Member"),
 
-        ADMIN("admin", "后台用户"),
+        ADMIN("admin", "Admin"),
 
-        MERCHANT("merchant", "商户");
+        MERCHANT("merchant", "Merchant");
 
     private final String code;
     private final String description;
@@ -25,7 +25,7 @@ public enum UserDomain {
                 return domain;
             }
         }
-        throw new IllegalArgumentException("无效的用户域编码: " + code);
+        throw new IllegalArgumentException("Invalid user domain code: " + code);
     }
 }
 

@@ -1,5 +1,5 @@
 ---
-description: "Use when designing or refactoring Zing module boundaries or DDD layers. Covers MVC vs DDD decisions, layer responsibilities, facades, ports, assemblers, repositories, aggregates, and pattern selection. Trigger words: DDD, aggregate, value object, repository, application service, port, assembler, module boundary, 聚合, 值对象, 仓储, 应用服务, 端口, 装配器."
+description: "Use when designing or refactoring Zing module boundaries or DDD layers. Covers MVC vs DDD decisions, layer responsibilities, facades, ports, assemblers, repositories, aggregates, and pattern selection. Trigger words: DDD, aggregate, value object, repository, application service, port, assembler, module boundary, aggregate, value object, repository, application service, port, assembler."
 name: "Zing Architecture Rules"
 applyTo: "**/domain/**/*.java, **/application/**/*.java, **/infrastructure/**/*.java, **/interfaces/**/*.java, **/*Facade*.java, **/*Port*.java, **/*Assembler.java"
 ---

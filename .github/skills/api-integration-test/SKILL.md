@@ -1,6 +1,6 @@
 ---
 name: api-integration-test
-description: "API integration test workflow: discover endpoints from OpenAPI, curl all APIs, verify DB/cache/MQ state via mysql-mcp/redis-mcp/rabbitmq-mcp, generate Markdown report. Use when testing APIs, verifying endpoints, curl testing, integration testing, validating database state, checking Redis cache, verifying RabbitMQ events. Trigger: API测试、接口验证、curl测试、集成测试、测试报告、验证接口、中间件验证。"
+description: "API integration test workflow: discover endpoints from OpenAPI, curl all APIs, verify DB/cache/MQ state via mysql-mcp/redis-mcp/rabbitmq-mcp, generate Markdown report. Use when testing APIs, verifying endpoints, curl testing, integration testing, validating database state, checking Redis cache, verifying RabbitMQ events. Trigger: API test, endpoint validation, curl testing, integration testing, test report, API verification, middleware validation."
 argument-hint: "Optional: module scope (auth/member/all, default all) or base URL override"
 ---
 

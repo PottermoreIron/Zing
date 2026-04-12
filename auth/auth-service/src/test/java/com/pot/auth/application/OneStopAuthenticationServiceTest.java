@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("OneStopAuthenticationService 单元测试")
+@DisplayName("OneStopAuthenticationService unit test")
 class OneStopAuthenticationServiceTest {
 
     private static final UserId USER_ID = UserId.of(10001L);
@@ -50,7 +50,7 @@ class OneStopAuthenticationServiceTest {
     private OneStopAuthenticationService service;
 
     @Test
-    @DisplayName("用户名密码认证：正确构建上下文，委托给策略，返回OneStopAuthResponse")
+    @DisplayName("Username-password authentication: context built correctly, delegates to strategy, returns OneStopAuthResponse")
     void whenUsernamePasswordAuth_thenBuildContextAndReturnResponse() {
         OneStopAuthCommand command = new OneStopAuthRequestCommand(
                 AuthType.USERNAME_PASSWORD,
@@ -92,7 +92,7 @@ class OneStopAuthenticationServiceTest {
     }
 
     @Test
-    @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出NPE")
+    @DisplayName("Null userAgent uses default value 'Unknown' without throwing NPE")
     void whenUserAgentNull_thenUseDefaultAndNotThrow() {
         OneStopAuthCommand command = new OneStopAuthRequestCommand(
                 AuthType.USERNAME_PASSWORD,
@@ -116,7 +116,7 @@ class OneStopAuthenticationServiceTest {
     }
 
     @Test
-    @DisplayName("策略抛出 DomainException，异常向上传播")
+    @DisplayName("Strategy throws DomainException which propagates upward")
     void whenStrategyThrowsDomainException_thenPropagateException() {
         OneStopAuthCommand command = new OneStopAuthRequestCommand(
                 AuthType.USERNAME_PASSWORD,

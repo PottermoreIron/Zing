@@ -37,7 +37,7 @@ public class TouchServiceImpl implements TouchService {
                 .sorted(Comparator.comparingInt(TouchChannel::getPriority))
                 .forEach(channel -> channelMap.put(channel.getChannelType(), channel));
 
-        log.info("触达渠道初始化完成: {}", channelMap.keySet());
+        log.info("[Touch] Channel initialization complete: {}", channelMap.keySet());
     }
 
     public R<TouchResponse> send(TouchRequest request) {
@@ -50,8 +50,8 @@ public class TouchServiceImpl implements TouchService {
         TouchChannel channel = getChannel(channelType);
 
         if (!channel.isAvailable()) {
-            log.warn("渠道不可用: {}", channelType);
-            return R.fail("渠道暂不可用");
+            log.warn("[Touch] Channel unavailable: {}", channelType);
+            return R.fail("Channel is currently unavailable");
         }
 
         return channel.send(request);
@@ -73,7 +73,7 @@ public class TouchServiceImpl implements TouchService {
                         TouchRequest fallbackRequest = cloneRequest(request, fallback);
                         result = channel.send(fallbackRequest);
                         if (result.isSuccess()) {
-                            log.info("降级发送成功: channel={}", fallback);
+                            log.info("[Touch] Fallback delivery succeeded — channel={}", fallback);
                             break;
                         }
                     }
@@ -86,7 +86,7 @@ public class TouchServiceImpl implements TouchService {
 
     public R<List<TouchResponse>> batchSend(List<TouchRequest> requests) {
         if (requests == null || requests.isEmpty()) {
-            return R.fail("请求列表不能为空");
+            return R.fail("Request list must not be empty");
         }
 
         Map<TouchChannelType, List<TouchRequest>> groupedRequests = new ConcurrentHashMap<>();
@@ -113,16 +113,16 @@ public class TouchServiceImpl implements TouchService {
 
     private void validateRequest(TouchRequest request) {
         if (request == null) {
-            throw new TouchException("请求对象不能为空");
+            throw new TouchException("Request object must not be null");
         }
         if (request.getTarget() == null || request.getTarget().trim().isEmpty()) {
-            throw new TouchException("接收目标不能为空");
+            throw new TouchException("Delivery target must not be blank");
         }
     }
 
     private TouchChannel getChannel(TouchChannelType type) {
         return Optional.ofNullable(channelMap.get(type))
-                .orElseThrow(() -> new TouchException("不支持的触达渠道: " + type));
+                .orElseThrow(() -> new TouchException("Unsupported touch channel: " + type));
     }
 
     private TouchRequest cloneRequest(TouchRequest original, TouchChannelType newChannelType) {

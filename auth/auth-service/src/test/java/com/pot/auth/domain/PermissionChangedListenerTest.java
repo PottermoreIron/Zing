@@ -25,7 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("PermissionChangedEventListener 单元测试")
+@DisplayName("PermissionChangedEventListener unit test")
 class PermissionChangedListenerTest {
 
     @Mock
@@ -43,7 +43,7 @@ class PermissionChangedListenerTest {
         setField(validEvent, "changeType", PermissionChangedEvent.ChangeType.ROLE_UPDATED);
         setField(validEvent, "roleId", 20001L);
         setField(validEvent, "permissionId", 30001L);
-        setField(validEvent, "reason", "管理员手动修改权限");
+        setField(validEvent, "reason", "administrator manually changed permissions");
         setField(validEvent, "eventId", "evt-10001");
     }
 
@@ -52,7 +52,7 @@ class PermissionChangedListenerTest {
     class Consume {
 
         @Test
-        @DisplayName("合法事件：对所有受影响会员失效权限缓存")
+        @DisplayName("Valid event: invalidates permission cache for all affected members")
         void whenValidEvent_thenInvalidateAllAffectedMemberCaches() {
             listener.consume(validEvent);
 
@@ -65,7 +65,7 @@ class PermissionChangedListenerTest {
         }
 
         @Test
-        @DisplayName("领域服务抛出异常：异常被捕获，不向外传播")
+        @DisplayName("Domain service exception is caught and does not propagate")
         void whenDomainServiceThrows_thenSwallowException() {
             doThrow(new RuntimeException("Redis unavailable"))
                     .when(permissionDomainService)
@@ -79,7 +79,7 @@ class PermissionChangedListenerTest {
     }
 
     @Test
-    @DisplayName("MQ 元数据：返回正确的消息类型和队列名")
+    @DisplayName("MQ metadata: returns correct message type and queue name")
     void shouldExposeQueueMetadata() {
         assertThat(listener.getMessageType()).isEqualTo(PermissionChangedEvent.class);
         assertThat(listener.getQueue()).isEqualTo("member.permission");

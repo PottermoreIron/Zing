@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author pot
  * @since 2025-11-10
  */
-@Tag(name = "验证码", description = "发送邮件/短信验证码，用于注册、登录等场景")
+@Tag(name = "Verification Code", description = "Send email/SMS verification codes for registration, login, and other scenarios")
 @Slf4j
 @RestController
 @RequestMapping("/auth/code")
@@ -33,33 +33,33 @@ public class VerificationCodeController {
 
     private final VerificationCodeApplicationService verificationCodeApplicationService;
 
-    @Operation(operationId = "authSendEmailCode", summary = "发送邮件验证码", description = "向指定邮箱发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:email:' + #email", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
+    @Operation(operationId = "authSendEmailCode", summary = "Send email verification code", description = "Send a 6-digit verification code to the specified email address; rate-limiting and throttle policy are configuration-driven")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:email:' + #email", rate = 1.0, message = "Verification code sent too frequently, please try again later")
     @PostMapping("/email")
     public R<Void> sendEmailCode(
-            @RequestParam("email") @NotBlank(message = "邮箱不能为空") @ValidEmail(message = "邮箱格式不正确") String email) {
-        log.info("[接口] 发送邮件验证码: email={}", email);
+            @RequestParam("email") @NotBlank(message = "Email address must not be blank") @ValidEmail(message = "Invalid email format") String email) {
+        log.info("[API] Sending email verification code — email={}", email);
 
         boolean sent = verificationCodeApplicationService.sendEmailCode(email);
 
         if (sent) {
             return R.success();
         }
-        return R.fail("验证码发送失败");
+        return R.fail("Failed to send verification code");
     }
 
-    @Operation(operationId = "authSendSmsCode", summary = "发送短信验证码", description = "向指定手机号发送 6 位数字验证码，接口限流与业务节流策略由配置控制")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:sms:' + #phone", rate = 1.0, message = "验证码发送过于频繁，请稍后再试")
+    @Operation(operationId = "authSendSmsCode", summary = "Send SMS verification code", description = "Send a 6-digit verification code to the specified phone number; rate-limiting and throttle policy are configuration-driven")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, key = "'verification-code:sms:' + #phone", rate = 1.0, message = "Verification code sent too frequently, please try again later")
     @PostMapping("/sms")
     public R<Void> sendSmsCode(
-            @RequestParam("phone") @NotBlank(message = "手机号不能为空") @ValidPhone(message = "手机号格式不正确") String phone) {
-        log.info("[接口] 发送短信验证码: phone={}", phone);
+            @RequestParam("phone") @NotBlank(message = "Phone number must not be blank") @ValidPhone(message = "Invalid phone number format") String phone) {
+        log.info("[API] Sending SMS verification code — phone={}", phone);
 
         boolean sent = verificationCodeApplicationService.sendSmsCode(phone);
 
         if (sent) {
             return R.success();
         }
-        return R.fail("验证码发送失败");
+        return R.fail("Failed to send verification code");
     }
 }

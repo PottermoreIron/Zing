@@ -27,9 +27,9 @@ public class FallbackController {
         String path = exchange.getRequest().getURI().getPath();
         Object failureReason = exchange.getAttribute("circuitBreaker.failureReason");
 
-        log.warn("[熔断降级] 服务不可用: path={}, reason={}", path, failureReason);
+        log.warn("[Fallback] Service unavailable — path={}, reason={}", path, failureReason);
 
         exchange.getResponse().setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
-        return Mono.just(R.fail("服务暂时不可用，请稍后重试"));
+        return Mono.just(R.fail("Service temporarily unavailable, please try again later"));
     }
 }

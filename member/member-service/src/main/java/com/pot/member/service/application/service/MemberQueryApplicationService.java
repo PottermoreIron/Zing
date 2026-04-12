@@ -105,7 +105,7 @@ public class MemberQueryApplicationService {
 
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
-                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "会员不存在: " + memberId));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "Member not found: " + memberId));
     }
 
     private DeviceDTO toFacadeDeviceDTO(DeviceAggregate device) {

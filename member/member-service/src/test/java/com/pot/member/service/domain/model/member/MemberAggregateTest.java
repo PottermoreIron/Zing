@@ -21,7 +21,7 @@ class MemberAggregateTest {
     class Create {
 
         @Test
-        @DisplayName("正常注册：状态为 ACTIVE，profile 为空，无角色")
+        @DisplayName("Normal registration: status is ACTIVE, profile is null, no roles")
         void create_happyPath() {
             Nickname nickname = Nickname.of("testuser");
             Email email = Email.of("test@example.com");
@@ -35,7 +35,7 @@ class MemberAggregateTest {
             assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
             assertThat(member.getProfile()).isNotNull();
             assertThat(member.getRoleIds()).isEmpty();
-            assertThat(member.getMemberId()).isNull(); // 持久化前无 ID
+            assertThat(member.getMemberId()).isNull(); // no ID before persistence
             assertThat(member.getCreatedAt()).isNotNull();
         }
     }
@@ -45,7 +45,7 @@ class MemberAggregateTest {
     class CreateFromOAuth2 {
 
         @Test
-        @DisplayName("OAuth2 创建：没有密码哈希，nickname 写入 profile")
+        @DisplayName("OAuth2 creation: no password hash, nickname written to profile")
         void createFromOAuth2_happyPath() {
             Nickname nickname = Nickname.of("WeChatABC"); // nickname is the display name
             Email email = Email.of("oauth@example.com");
@@ -60,7 +60,7 @@ class MemberAggregateTest {
 
 
     @Nested
-    @DisplayName("账号状态机")
+    @DisplayName("Account state machine")
     class StateMachine {
 
         private MemberAggregate activeMember() {
@@ -85,7 +85,7 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("ACTIVE → unlock() → 状态不变（无效操作静默忽略）")
+        @DisplayName("ACTIVE → unlock() → state unchanged (no-op silently ignored)")
         void unlock_fromActive_noop() {
             MemberAggregate member = activeMember();
             member.unlock(); // already active
@@ -110,23 +110,23 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("DISABLED → lock() → 抛出 IllegalStateException")
+        @DisplayName("DISABLED → lock() → throws IllegalStateException")
         void lock_fromDisabled_throws() {
             MemberAggregate member = activeMember();
             member.disable();
             assertThatThrownBy(member::lock)
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("禁用");
+                    .hasMessageContaining("disabled");
         }
     }
 
 
     @Nested
-    @DisplayName("角色管理")
+    @DisplayName("Role management")
     class RoleManagement {
 
         @Test
-        @DisplayName("assignRole() 添加角色 ID")
+        @DisplayName("assignRole() adds role ID")
         void assignRole_addsRoleId() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
             member.assignRole(10L);
@@ -134,7 +134,7 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("assignRole() 重复添加同一角色，幂等（Set 去重）")
+        @DisplayName("assignRole() adding duplicate role is idempotent (Set deduplication)")
         void assignRole_idempotent() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
             member.assignRole(10L);
@@ -143,7 +143,7 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("assignRole() 传入 null → 抛出 IllegalArgumentException")
+        @DisplayName("assignRole() with null throws IllegalArgumentException")
         void assignRole_nullRoleId_throws() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
             assertThatThrownBy(() -> member.assignRole(null))
@@ -151,7 +151,7 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("revokeRole() 移除角色 ID")
+        @DisplayName("revokeRole() removes role ID")
         void revokeRole_removesRoleId() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
             member.assignRole(10L);
@@ -160,7 +160,7 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("getRoleIds() 返回不可变视图")
+        @DisplayName("getRoleIds() returns unmodifiable view")
         void getRoleIds_isUnmodifiable() {
             MemberAggregate member = MemberAggregate.reconstitute(
                     MemberId.of(1L), Nickname.of("userOne"), Email.of("u1@test.com"),
@@ -179,16 +179,16 @@ class MemberAggregateTest {
     class UpdateProfile {
 
         @Test
-        @DisplayName("更新 profile 后新值生效，updatedAt 刷新")
+        @DisplayName("After profile update, new values take effect and updatedAt is refreshed")
         void updateProfile_replacesProfile() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
             LocalDateTime before = member.getUpdatedAt();
 
-            MemberProfile newProfile = MemberProfile.builder().nickname("新昵称").city("上海").build();
+            MemberProfile newProfile = MemberProfile.builder().nickname("NewNickname").city("Shanghai").build();
             member.updateProfile(newProfile);
 
-            assertThat(member.getProfile().getNickname()).isEqualTo("新昵称");
-            assertThat(member.getProfile().getCity()).isEqualTo("上海");
+            assertThat(member.getProfile().getNickname()).isEqualTo("NewNickname");
+            assertThat(member.getProfile().getCity()).isEqualTo("Shanghai");
             assertThat(member.getUpdatedAt()).isAfterOrEqualTo(before);
         }
     }
@@ -199,7 +199,7 @@ class MemberAggregateTest {
     class UpdatePassword {
 
         @Test
-        @DisplayName("更新密码哈希成功")
+        @DisplayName("Password hash update succeeds")
         void updatePassword_success() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "oldHash");
             member.updatePassword("newHash");
@@ -207,7 +207,7 @@ class MemberAggregateTest {
         }
 
         @Test
-        @DisplayName("空密码哈希 → 抛出 IllegalArgumentException")
+        @DisplayName("Blank password hash throws IllegalArgumentException")
         void updatePassword_blank_throws() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
             assertThatThrownBy(() -> member.updatePassword(""))
@@ -223,7 +223,7 @@ class MemberAggregateTest {
     class DomainEvents {
 
         @Test
-        @DisplayName("pullDomainEvents() 取走事件后清空")
+        @DisplayName("pullDomainEvents() clears events after retrieval")
         void pullDomainEvents_clearsAfterPull() {
             MemberAggregate member = MemberAggregate.create(Nickname.of("u1"), Email.of("u1@test.com"), "hash");
 

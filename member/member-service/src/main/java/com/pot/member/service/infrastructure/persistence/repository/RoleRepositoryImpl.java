@@ -34,10 +34,10 @@ public class RoleRepositoryImpl implements RoleRepository {
 
         if (entity.getId() == null) {
             roleMapper.insert(entity);
-            log.debug("新增角色: {}", entity.getId());
+            log.debug("[Role] Inserting role — id={}", entity.getId());
         } else {
             roleMapper.updateById(entity);
-            log.debug("更新角色: {}", entity.getId());
+            log.debug("[Role] Updating role — id={}", entity.getId());
         }
 
         updateRolePermissions(entity.getId(), aggregate.getPermissionIds());
@@ -142,7 +142,7 @@ public class RoleRepositoryImpl implements RoleRepository {
         rolePermissionMapper.delete(wrapper);
 
         roleMapper.deleteById(roleId.value());
-        log.debug("删除角色: {}", roleId.value());
+        log.debug("[Role] Deleting role — id={}", roleId.value());
     }
 
         private void updateRolePermissions(Long roleId, Set<Long> permissionIds) {

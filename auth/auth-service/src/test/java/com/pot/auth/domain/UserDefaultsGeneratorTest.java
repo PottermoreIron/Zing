@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("UserDefaultsGenerator 单元测试")
+@DisplayName("UserDefaultsGenerator unit test")
 class UserDefaultsGeneratorTest {
 
     private static final String DEFAULT_AVATAR_URL = "https://cdn.example.com/avatars/default.png";
@@ -23,7 +23,7 @@ class UserDefaultsGeneratorTest {
     // generateNicknameFromPhone
 
     @Test
-    @DisplayName("基于手机号生成昵称，以 user_ 前缀开头，且包含时间戳和随机部分")
+    @DisplayName("Phone-based nickname starts with user_ and includes timestamp and random suffix")
     void whenGenerateFromPhone_thenFollowFormat() {
         String nickname = generator.generateNicknameFromPhone("13800138000");
         assertThat(nickname).startsWith("user_");
@@ -32,7 +32,7 @@ class UserDefaultsGeneratorTest {
     }
 
     @RepeatedTest(5)
-    @DisplayName("多次基于手机号生成昵称，每次都不为空")
+    @DisplayName("Multiple phone-based nickname generations are all non-blank")
     void whenGenerateFromPhoneRepeated_thenAlwaysNotBlank() {
         String nickname = generator.generateNicknameFromPhone("13912345678");
         assertThat(nickname).isNotBlank();
@@ -41,14 +41,14 @@ class UserDefaultsGeneratorTest {
     // generateNicknameFromEmail
 
     @Test
-    @DisplayName("基于邮箱生成昵称，包含邮箱前缀部分")
+    @DisplayName("Email-based nickname contains the email local part")
     void whenGenerateFromEmail_thenContainsEmailPrefix() {
         String nickname = generator.generateNicknameFromEmail("johndoe@example.com");
         assertThat(nickname).startsWith("johndoe_");
     }
 
     @Test
-    @DisplayName("基于邮箱生成昵称，以下划线分隔后缀随机字符")
+    @DisplayName("Email-based nickname uses underscore-separated random suffix")
     void whenGenerateFromEmail_thenHasRandomSuffix() {
         String nickname = generator.generateNicknameFromEmail("test@example.com");
         String[] parts = nickname.split("_");
@@ -59,14 +59,14 @@ class UserDefaultsGeneratorTest {
     // generateNickname
 
     @Test
-    @DisplayName("生成通用昵称，以 user_ 前缀开头")
+    @DisplayName("Generic nickname starts with user_")
     void whenGenerateNickname_thenStartWithPrefix() {
         String nickname = generator.generateNickname();
         assertThat(nickname).startsWith("user_");
     }
 
     @RepeatedTest(3)
-    @DisplayName("多次生成通用昵称，每次结果不为空")
+    @DisplayName("Multiple generic nickname generations are all non-blank")
     void whenGenerateNicknameRepeated_thenNotBlank() {
         assertThat(generator.generateNickname()).isNotBlank();
     }
@@ -74,42 +74,42 @@ class UserDefaultsGeneratorTest {
     // generateRandomPassword
 
     @Test
-    @DisplayName("生成的随机密码长度为12位")
+    @DisplayName("Generated random password is 12 characters long")
     void whenGeneratePassword_thenHasCorrectLength() {
         String password = generator.generateRandomPassword();
         assertThat(password).hasSize(12);
     }
 
     @Test
-    @DisplayName("生成的随机密码包含大写字母")
+    @DisplayName("Generated random password contains uppercase letters")
     void whenGeneratePassword_thenContainsUpperCase() {
         String password = generator.generateRandomPassword();
         assertThat(password).matches(".*[A-Z].*");
     }
 
     @Test
-    @DisplayName("生成的随机密码包含小写字母")
+    @DisplayName("Generated random password contains lowercase letters")
     void whenGeneratePassword_thenContainsLowerCase() {
         String password = generator.generateRandomPassword();
         assertThat(password).matches(".*[a-z].*");
     }
 
     @Test
-    @DisplayName("生成的随机密码包含数字")
+    @DisplayName("Generated random password contains digits")
     void whenGeneratePassword_thenContainsDigit() {
         String password = generator.generateRandomPassword();
         assertThat(password).matches(".*[0-9].*");
     }
 
     @Test
-    @DisplayName("生成的随机密码包含特殊字符")
+    @DisplayName("Generated random password contains special characters")
     void whenGeneratePassword_thenContainsSpecialChar() {
         String password = generator.generateRandomPassword();
         assertThat(password).matches(".*[!@#$%^&*].*");
     }
 
     @RepeatedTest(5)
-    @DisplayName("多次生成密码，每次都不相同（随机性）")
+    @DisplayName("Multiple password generations produce distinct values (randomness)")
     void whenGeneratePasswordMultipleTimes_thenRandom() {
         String p1 = generator.generateRandomPassword();
         String p2 = generator.generateRandomPassword();
@@ -121,7 +121,7 @@ class UserDefaultsGeneratorTest {
     // getDefaultAvatarUrl
 
     @Test
-    @DisplayName("getDefaultAvatarUrl() 返回非空的URL字符串")
+    @DisplayName("getDefaultAvatarUrl() returns a non-blank URL string")
     void whenGetDefaultAvatarUrl_thenReturnNonEmpty() {
         String url = generator.getDefaultAvatarUrl();
         assertThat(url).isNotBlank();

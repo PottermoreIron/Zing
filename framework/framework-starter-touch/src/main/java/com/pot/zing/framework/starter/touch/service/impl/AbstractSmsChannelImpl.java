@@ -19,11 +19,11 @@ public abstract class AbstractSmsChannelImpl extends AbstractTouchChannelImpl {
     @Override
     protected void validateRequest(TouchRequest request) {
         if (!ValidationUtils.isValidPhone(request.getTarget())) {
-            throw new TouchException("手机号格式错误: " + request.getTarget());
+            throw new TouchException("Invalid phone number format: " + request.getTarget());
         }
 
         if (request.getTemplateId() == null || request.getTemplateId().trim().isEmpty()) {
-            throw new TouchException("短信模板ID不能为空");
+            throw new TouchException("SMS template ID must not be blank");
         }
     }
 

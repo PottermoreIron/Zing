@@ -29,15 +29,15 @@ public class PermissionDomainService {
             UserId userId,
             UserDomain userDomain,
             Set<String> permissions) {
-        log.debug("[权限缓存] 开始缓存权限: userId={}, userDomain={}, permCount={}",
+        log.debug("[PermCache] Caching permissions — userId={}, userDomain={}, permCount={}",
                 userId, userDomain, permissions.size());
 
         PermissionDigest digest = PermissionDigest.from(permissions);
-        log.debug("[权限缓存] 权限摘要计算完成: userId={}, digest={}",
+        log.debug("[PermCache] Digest computed — userId={}, digest={}",
                 userId, digest.shortValue());
 
         PermissionVersion version = incrementPermissionVersion(userId, userDomain);
-        log.debug("[权限缓存] 权限版本号: userId={}, version={}", userId, version);
+        log.debug("[PermCache] Permission version — userId={}, version={}", userId, version);
 
         cachePermissions(userId, userDomain, permissions);
 
@@ -52,7 +52,7 @@ public class PermissionDomainService {
                     new UserId(Long.parseLong(userId)),
                     UserDomain.fromCode(namespace));
         } catch (Exception e) {
-            log.error("[权限版本] 递增版本号失败: namespace={}, userId={}, error={}",
+            log.error("[PermVersion] Failed to increment version — namespace={}, userId={}, error={}",
                     namespace, userId, e.getMessage(), e);
         }
     }
@@ -65,13 +65,13 @@ public class PermissionDomainService {
         try {
             long newVersion = cachePort.increment(versionKey, 1, Duration.ZERO);
 
-            log.debug("[权限版本] 版本号递增: userId={}, userDomain={}, newVersion={}",
+            log.debug("[PermVersion] Version incremented — userId={}, userDomain={}, newVersion={}",
                     userId, userDomain, newVersion);
 
             return new PermissionVersion(newVersion);
 
         } catch (Exception e) {
-            log.error("[权限版本] 版本号递增失败，使用初始版本号: userId={}, error={}",
+            log.error("[PermVersion] Version increment failed, using initial version — userId={}, error={}",
                     userId, e.getMessage());
             return PermissionVersion.initial();
         }
@@ -88,7 +88,7 @@ public class PermissionDomainService {
                 return new PermissionVersion(versionOpt.get());
             }
         } catch (Exception e) {
-            log.warn("[权限版本] 获取版本号失败: userId={}, error={}", userId, e.getMessage());
+            log.warn("[PermVersion] Failed to retrieve version — userId={}, error={}", userId, e.getMessage());
         }
 
         return PermissionVersion.initial();
@@ -110,11 +110,11 @@ public class PermissionDomainService {
 
             cachePort.set(cacheKey, permsToCache, ttl);
 
-            log.info("[权限缓存] 权限已缓存到Redis: userId={}, userDomain={}, permCount={}, ttl={}s",
+            log.info("[PermCache] Permissions cached to Redis — userId={}, userDomain={}, permCount={}, ttl={}s",
                     userId, userDomain, permissions.size(), permissionCacheTtl);
 
         } catch (Exception e) {
-            log.error("[权限缓存] Redis缓存失败（非致命错误）: userId={}, error={}",
+            log.error("[PermCache] Redis cache failed (non-fatal) — userId={}, error={}",
                     userId, e.getMessage());
         }
     }
@@ -130,10 +130,10 @@ public class PermissionDomainService {
 
         try {
             cachePort.set(digestKey, digest.value(), ttl);
-            log.debug("[权限缓存] 权限摘要已缓存: userId={}, digest={}",
+            log.debug("[PermCache] Digest cached — userId={}, digest={}",
                     userId, digest.shortValue());
         } catch (Exception e) {
-            log.warn("[权限缓存] 摘要缓存失败: userId={}, error={}", userId, e.getMessage());
+            log.warn("[PermCache] Digest cache failed — userId={}, error={}", userId, e.getMessage());
         }
     }
 
@@ -153,11 +153,11 @@ public class PermissionDomainService {
                     return Collections.emptySet();
                 }
 
-                log.debug("[权限缓存] 命中缓存: userId={}, permCount={}", userId, perms.size());
+                log.debug("[PermCache] Cache hit — userId={}, permCount={}", userId, perms.size());
                 return perms;
             }
         } catch (Exception e) {
-            log.warn("[权限缓存] 获取缓存失败: userId={}, error={}", userId, e.getMessage());
+            log.warn("[PermCache] Cache read failed — userId={}, error={}", userId, e.getMessage());
         }
 
         return Collections.emptySet();
@@ -169,7 +169,7 @@ public class PermissionDomainService {
                     new UserId(Long.parseLong(userId)),
                     UserDomain.fromCode(namespace));
         } catch (Exception e) {
-            log.error("[权限缓存] 失效缓存失败: namespace={}, userId={}, error={}",
+            log.error("[PermCache] Cache invalidation failed — namespace={}, userId={}, error={}",
                     namespace, userId, e.getMessage(), e);
         }
     }
@@ -185,9 +185,9 @@ public class PermissionDomainService {
         try {
             cachePort.delete(permKey);
             cachePort.delete(digestKey);
-            log.info("[权限缓存] 缓存已清除: userId={}, userDomain={}", userId, userDomain);
+            log.info("[PermCache] Cache cleared — userId={}, userDomain={}", userId, userDomain);
         } catch (Exception e) {
-            log.error("[权限缓存] 清除缓存失败: userId={}, error={}", userId, e.getMessage());
+            log.error("[PermCache] Cache clear failed — userId={}, error={}", userId, e.getMessage());
         }
     }
 
@@ -202,7 +202,7 @@ public class PermissionDomainService {
         try {
             Optional<String> cachedDigestOpt = cachePort.get(digestKey, String.class);
             if (cachedDigestOpt.isEmpty()) {
-                log.debug("[权限验证] 无缓存摘要，跳过验证: userId={}", userId);
+                log.debug("[PermVerify] No cached digest, skipping verification — userId={}", userId);
                 return true;
             }
 
@@ -211,13 +211,13 @@ public class PermissionDomainService {
 
             boolean matches = cachedDigest.equals(currentDigest);
             if (!matches) {
-                log.warn("[权限验证] 摘要不匹配: userId={}, cached={}, current={}",
+                log.warn("[PermVerify] Digest mismatch — userId={}, cached={}, current={}",
                         userId, cachedDigest.shortValue(), currentDigest.shortValue());
             }
             return matches;
 
         } catch (Exception e) {
-            log.error("[权限验证] 摘要验证失败（降级放行）: userId={}, error={}",
+            log.error("[PermVerify] Digest verification failed (degraded, allowing through) — userId={}, error={}",
                     userId, e.getMessage());
             return true;
         }

@@ -33,7 +33,7 @@ public class MemberAccountApplicationService {
     @Transactional(readOnly = true)
     public MemberDTO authenticateWithPassword(String identifier, String rawPassword) {
         MemberAggregate member = resolveByIdentifier(identifier)
-                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "用户不存在"));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "User not found"));
 
         if (!memberDomainService.verifyPassword(member, rawPassword)) {
             throw new MemberException(MemberResultCode.PASSWORD_INCORRECT);
@@ -46,7 +46,7 @@ public class MemberAccountApplicationService {
 
     @Transactional
     public void changePassword(ChangePasswordCommand command) {
-        log.info("修改密码: memberId={}", command.memberId());
+        log.info("[Member] Changing password — memberId={}", command.memberId());
         MemberAggregate member = requireMember(command.memberId());
         try {
             memberDomainService.changePassword(member, command.oldPassword(), command.newPassword());
@@ -65,7 +65,7 @@ public class MemberAccountApplicationService {
 
     @Transactional
     public void lockMember(Long memberId) {
-        log.info("锁定会员: memberId={}", memberId);
+        log.info("[Member] Locking member — memberId={}", memberId);
         MemberAggregate member = requireMember(memberId);
         member.lock();
         memberRepository.save(member);
@@ -74,7 +74,7 @@ public class MemberAccountApplicationService {
 
     @Transactional
     public void unlockMember(Long memberId) {
-        log.info("解锁会员: memberId={}", memberId);
+        log.info("[Member] Unlocking member — memberId={}", memberId);
         MemberAggregate member = requireMember(memberId);
         member.unlock();
         memberRepository.save(member);
@@ -87,7 +87,7 @@ public class MemberAccountApplicationService {
             member.recordLogin();
             memberRepository.save(member);
         }
-        log.debug("记录登录尝试: memberId={}, success={}, ip={}", memberId, success, ip);
+        log.debug("[Member] Recording login attempt — memberId={}, success={}, ip={}", memberId, success, ip);
     }
 
     private Optional<MemberAggregate> resolveByIdentifier(String identifier) {
@@ -102,7 +102,7 @@ public class MemberAccountApplicationService {
 
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
-                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "会员不存在: " + memberId));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "Member not found: " + memberId));
     }
 
     private void publishAndClearEvents(MemberAggregate member) {

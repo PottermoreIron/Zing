@@ -94,7 +94,7 @@ public class MemberAggregate {
 
     public void assignMemberId(MemberId memberId) {
         if (this.memberId != null) {
-            throw new IllegalStateException("会员ID已分配，不可重复设置");
+            throw new IllegalStateException("Member ID has already been assigned and cannot be reassigned");
         }
         this.memberId = memberId;
     }
@@ -116,7 +116,7 @@ public class MemberAggregate {
 
     public void updatePassword(String newPasswordHash) {
         if (newPasswordHash == null || newPasswordHash.isBlank()) {
-            throw new IllegalArgumentException("密码哈希不能为空");
+            throw new IllegalArgumentException("Password hash must not be blank");
         }
         this.passwordHash = newPasswordHash;
         this.updatedAt = LocalDateTime.now();
@@ -124,7 +124,7 @@ public class MemberAggregate {
 
     public void lock() {
         if (this.status == MemberStatus.DISABLED) {
-            throw new IllegalStateException("已禁用的账号无法锁定");
+            throw new IllegalStateException("Accounts in a disabled state cannot be locked");
         }
         this.status = MemberStatus.LOCKED;
         this.updatedAt = LocalDateTime.now();
@@ -152,7 +152,7 @@ public class MemberAggregate {
 
     public void assignRole(Long roleId) {
         if (roleId == null || roleId <= 0) {
-            throw new IllegalArgumentException("角色ID无效");
+            throw new IllegalArgumentException("Invalid role ID");
         }
         this.roleIds.add(roleId);
         this.updatedAt = LocalDateTime.now();

@@ -53,7 +53,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("内部路径直接返回 403")
+    @DisplayName("Internal path returns 403 directly")
     void filter_internalPath_returnsForbidden() {
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/internal/member/profile").build());
@@ -69,7 +69,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("白名单路径跳过鉴权")
+    @DisplayName("Whitelisted path skips authentication")
     void filter_whitelistedPath_bypassesAuthentication() {
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/auth/api/v1/login").build());
@@ -85,7 +85,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("缺少 Token 时返回 401")
+    @DisplayName("Missing token returns 401")
     void filter_missingToken_returnsUnauthorized() {
         MockServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/member/api/v1/profile").build());
@@ -96,7 +96,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("有效 Token 注入用户头并放行")
+    @DisplayName("Valid token injects user headers and allows through")
     void filter_validToken_injectsHeadersAndContinues() {
         String token = signedToken(5L, null, "digest-v1");
         MockServerWebExchange exchange = MockServerWebExchange.from(
@@ -120,7 +120,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("权限版本过期时返回 401")
+    @DisplayName("Expired permission version returns 401")
     void filter_stalePermissionVersion_returnsUnauthorized() {
         String token = signedToken(3L, "member", "digest-v1");
         MockServerWebExchange exchange = MockServerWebExchange.from(
@@ -136,7 +136,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("下游异常不应被误映射为 401")
+    @DisplayName("Downstream exception must not be misclassified as 401")
     void filter_downstreamFailure_propagatesError() {
         String token = signedToken(5L, "member", "digest-v1");
         MockServerWebExchange exchange = MockServerWebExchange.from(
@@ -155,7 +155,7 @@ class AuthorizationGatewayFilterTest {
     }
 
     @Test
-    @DisplayName("黑名单内的 Token 返回 401")
+    @DisplayName("Blacklisted token returns 401")
     void filter_blacklistedToken_returnsUnauthorized() {
         String jti = "test-jti-blacklisted";
         String token = signedTokenWithId(jti, 5L, "member", "digest-v1");

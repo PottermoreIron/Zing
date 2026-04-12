@@ -12,20 +12,20 @@ import jakarta.validation.constraints.NotNull;
  * One-stop authentication request for OAuth2 providers.
  */
 public record OAuth2AuthRequest(
-        @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
+        @NotNull(message = "Auth type must not be null") @JsonProperty("authType") AuthType authType,
 
-        @NotNull(message = "OAuth2提供商不能为空") @JsonProperty("provider") OAuth2Provider provider,
+        @NotNull(message = "OAuth2 provider must not be null") @JsonProperty("provider") OAuth2Provider provider,
 
-        @NotBlank(message = "授权码不能为空") @JsonProperty("code") String code,
+        @NotBlank(message = "Authorization code must not be blank") @JsonProperty("code") String code,
 
         @JsonProperty("state") String state,
 
-        @NotNull(message = "用户域不能为空") @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+        @NotNull(message = "User domain must not be null") @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
         implements OneStopAuthRequest {
 
     public OAuth2AuthRequest {
         if (authType != null && authType != AuthType.OAUTH2) {
-            throw new IllegalArgumentException("OAuth2AuthRequest 的 authType 必须是 OAUTH2");
+            throw new IllegalArgumentException("OAuth2AuthRequest.authType must be OAUTH2");
         }
     }
 
@@ -56,7 +56,7 @@ public record OAuth2AuthRequest(
                     return provider;
                 }
             }
-            throw new IllegalArgumentException("未知的 OAuth2 提供商: " + code);
+            throw new IllegalArgumentException("Unknown OAuth2 provider: " + code);
         }
 
         public String getCode() {

@@ -34,9 +34,9 @@ public class WeChatUserInfo {
             return nickname;
         }
         if (openId != null && openId.length() > 8) {
-            return "微信用户_" + openId.substring(openId.length() - 8);
+            return "wechat_user_" + openId.substring(openId.length() - 8);
         }
-        return "微信用户";
+        return "WeChat User";
     }
 
         public String getUniqueId() {

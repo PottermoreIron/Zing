@@ -8,38 +8,38 @@ import java.util.Map;
 import java.util.Set;
 
 public record JwtToken(
-        TokenId tokenId, // JTI - Token唯一标识
-        UserId userId, // 用户ID
-        UserDomain userDomain, // 用户域
-        String nickname, // 显示名
-        Set<String> authorities, // 权限列表
-        Long issuedAt, // 签发时间（Unix时间戳）
-        Long expiresAt, // 过期时间（Unix时间戳）
-        String rawToken, // 原始Token字符串
-        Map<String, Object> claimsMap // 【新增】完整的Claims Map，用于获取自定义字段
+        TokenId tokenId, // JTI - unique token identifier
+        UserId userId, // user ID
+        UserDomain userDomain, // user domain
+        String nickname, // display name
+        Set<String> authorities, // permission list
+        Long issuedAt, // issued at (Unix timestamp)
+        Long expiresAt, // expires at (Unix timestamp)
+        String rawToken, // raw token string
+        Map<String, Object> claimsMap // complete claims map for accessing custom fields
 ) {
 
         public JwtToken {
         if (tokenId == null) {
-            throw new IllegalArgumentException("TokenId不能为空");
+            throw new IllegalArgumentException("TokenId must not be blank");
         }
         if (userId == null) {
-            throw new IllegalArgumentException("UserId不能为空");
+            throw new IllegalArgumentException("UserId must not be null");
         }
         if (userDomain == null) {
-            throw new IllegalArgumentException("UserDomain不能为空");
+            throw new IllegalArgumentException("UserDomain must not be null");
         }
         if (nickname == null || nickname.isBlank()) {
-            throw new IllegalArgumentException("昵称不能为空");
+            throw new IllegalArgumentException("Nickname must not be blank");
         }
         if (authorities == null) {
             authorities = Set.of();
         }
         if (issuedAt == null || expiresAt == null) {
-            throw new IllegalArgumentException("时间戳不能为空");
+            throw new IllegalArgumentException("Timestamps must not be null");
         }
         if (rawToken == null || rawToken.isBlank()) {
-            throw new IllegalArgumentException("Token字符串不能为空");
+            throw new IllegalArgumentException("Token string must not be blank");
         }
         if (claimsMap == null) {
             claimsMap = Map.of();

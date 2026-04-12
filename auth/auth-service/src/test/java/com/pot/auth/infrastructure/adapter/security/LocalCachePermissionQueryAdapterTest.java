@@ -32,7 +32,7 @@ class LocalCachePermissionQueryAdapterTest {
     class GetCachedPermissions {
 
         @Test
-        @DisplayName("L1 命中时，不再访问领域服务")
+        @DisplayName("L1 cache hit skips domain service")
         void getCachedPermissions_l1Hit_doNotCallDomainServiceAgain() {
             LocalCachePermissionQueryAdapter adapter = new LocalCachePermissionQueryAdapter(permissionDomainService);
             Set<String> permissions = Set.of("member:read", "member:write");
@@ -47,7 +47,7 @@ class LocalCachePermissionQueryAdapterTest {
         }
 
         @Test
-        @DisplayName("领域服务返回空集合时，不写入 L1")
+        @DisplayName("Empty collection from domain service is not written to L1")
         void getCachedPermissions_emptyResult_doNotCacheInL1() {
             LocalCachePermissionQueryAdapter adapter = new LocalCachePermissionQueryAdapter(permissionDomainService);
             when(permissionDomainService.getCachedPermissions(USER_ID, USER_DOMAIN)).thenReturn(Set.of());
@@ -66,7 +66,7 @@ class LocalCachePermissionQueryAdapterTest {
     class InvalidateLocalCache {
 
         @Test
-        @DisplayName("清理指定用户本地缓存后，会重新访问领域服务")
+        @DisplayName("After clearing user's local cache, domain service is queried again")
         void invalidateLocalCache_afterInvalidate_callDomainServiceAgain() {
             LocalCachePermissionQueryAdapter adapter = new LocalCachePermissionQueryAdapter(permissionDomainService);
             Set<String> firstPermissions = Set.of("member:read");

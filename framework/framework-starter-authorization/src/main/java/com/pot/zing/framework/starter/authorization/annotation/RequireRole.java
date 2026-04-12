@@ -20,5 +20,5 @@ public @interface RequireRole {
 
     Logical logical() default Logical.OR;
 
-    String message() default "角色权限不足";
+    String message() default "Insufficient role privileges";
 }

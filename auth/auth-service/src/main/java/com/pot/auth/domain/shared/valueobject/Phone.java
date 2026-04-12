@@ -13,14 +13,14 @@ public record Phone(String value) {
 
         public Phone {
         if (value == null || value.isBlank()) {
-            throw new InvalidPhoneException("手机号不能为空");
+            throw new InvalidPhoneException("Phone number must not be blank");
         }
 
         String trimmed = value.trim().replaceAll("\\s+", "");
 
         if (!CHINA_MOBILE_PATTERN.matcher(trimmed).matches()
                 && !INTERNATIONAL_PATTERN.matcher(trimmed).matches()) {
-            throw new InvalidPhoneException("手机号格式不正确: " + value);
+            throw new InvalidPhoneException("Invalid phone number format: " + value);
         }
 
         value = trimmed;

@@ -42,11 +42,11 @@ public class RabbitMQMessageProducer implements MessageProducer {
 
             rabbitTemplate.send(topic, routingKey, amqpMessage);
 
-            log.debug("[RabbitMQ] 消息发送成功: exchange={}, routingKey={}, message={}",
+            log.debug("[RabbitMQ] Message published — exchange={}, routingKey={}, type={}",
                     topic, routingKey, message.getClass().getSimpleName());
 
         } catch (Exception e) {
-            log.error("[RabbitMQ] 消息发送失败: exchange={}, routingKey={}", topic, routingKey, e);
+            log.error("[RabbitMQ] Failed to publish message — exchange={}, routingKey={}", topic, routingKey, e);
             throw new RuntimeException("Failed to send message to RabbitMQ", e);
         }
     }
@@ -65,13 +65,13 @@ public class RabbitMQMessageProducer implements MessageProducer {
             CorrelationData correlationData = new CorrelationData();
             correlationData.getFuture().whenComplete((result, ex) -> {
                 if (ex != null) {
-                    log.error("[RabbitMQ] 消息发送确认失败: exchange={}", topic, ex);
+                    log.error("[RabbitMQ] Publish confirmation failed — exchange={}", topic, ex);
                     callback.onFailure(ex);
                 } else if (result != null && result.isAck()) {
-                    log.debug("[RabbitMQ] 消息发送确认成功: exchange={}", topic);
+                    log.debug("[RabbitMQ] Publish confirmed — exchange={}", topic);
                     callback.onSuccess();
                 } else {
-                    log.error("[RabbitMQ] 消息发送被broker拒绝: exchange={}, reason={}",
+                    log.error("[RabbitMQ] Message rejected by broker — exchange={}, reason={}",
                             topic, result != null ? result.getReason() : "unknown");
                     callback.onFailure(new RuntimeException("Message rejected by broker"));
                 }
@@ -80,7 +80,7 @@ public class RabbitMQMessageProducer implements MessageProducer {
             rabbitTemplate.send(topic, "", amqpMessage, correlationData);
 
         } catch (Exception e) {
-            log.error("[RabbitMQ] 消息发送失败: exchange={}", topic, e);
+            log.error("[RabbitMQ] Failed to publish message — exchange={}", topic, e);
             callback.onFailure(e);
         }
     }

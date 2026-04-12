@@ -102,7 +102,7 @@ public final class JacksonUtils {
             return MAPPER.writeValueAsBytes(obj);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize object to bytes: {}", obj.getClass().getSimpleName(), e);
-            throw new JsonSerializationException("字节序列化失败", e);
+            throw new JsonSerializationException("Byte serialization failed", e);
         }
     }
 
@@ -118,7 +118,7 @@ public final class JacksonUtils {
             return MAPPER.readValue(json, clazz);
         } catch (JsonProcessingException e) {
             log.error("Failed to deserialize JSON to {}: {}", clazz.getSimpleName(), json, e);
-            throw new JsonDeserializationException("JSON反序列化失败", e);
+            throw new JsonDeserializationException("JSON deserialization failed", e);
         }
     }
 
@@ -134,7 +134,7 @@ public final class JacksonUtils {
             return MAPPER.readValue(json, typeReference);
         } catch (JsonProcessingException e) {
             log.error("Failed to deserialize JSON to TypeReference: {}", json, e);
-            throw new JsonDeserializationException("JSON反序列化失败", e);
+            throw new JsonDeserializationException("JSON deserialization failed", e);
         }
     }
 
@@ -150,7 +150,7 @@ public final class JacksonUtils {
             return MAPPER.readValue(data, clazz);
         } catch (IOException e) {
             log.error("Failed to deserialize bytes to {}", clazz.getSimpleName(), e);
-            throw new JsonDeserializationException("字节反序列化失败", e);
+            throw new JsonDeserializationException("Byte deserialization failed", e);
         }
     }
 
@@ -166,7 +166,7 @@ public final class JacksonUtils {
             return MAPPER.readValue(data, typeReference);
         } catch (IOException e) {
             log.error("Failed to deserialize bytes to TypeReference", e);
-            throw new JsonDeserializationException("字节反序列化失败", e);
+            throw new JsonDeserializationException("Byte deserialization failed", e);
         }
     }
 
@@ -182,7 +182,7 @@ public final class JacksonUtils {
             return MAPPER.readValue(inputStream, clazz);
         } catch (IOException e) {
             log.error("Failed to deserialize InputStream to {}", clazz.getSimpleName(), e);
-            throw new JsonDeserializationException("流反序列化失败", e);
+            throw new JsonDeserializationException("Stream deserialization failed", e);
         }
     }
 
@@ -198,7 +198,7 @@ public final class JacksonUtils {
             return MAPPER.readTree(json);
         } catch (JsonProcessingException e) {
             log.error("Failed to parse JSON tree: {}", json, e);
-            throw new JsonDeserializationException("JSON树解析失败", e);
+            throw new JsonDeserializationException("JSON tree parsing failed", e);
         }
     }
 
@@ -215,7 +215,7 @@ public final class JacksonUtils {
             return MAPPER.readValue(json, clazz);
         } catch (JsonProcessingException e) {
             log.error("Failed to deep copy object", e);
-            throw new JsonSerializationException("对象深拷贝失败", e);
+            throw new JsonSerializationException("Deep copy failed", e);
         }
     }
 

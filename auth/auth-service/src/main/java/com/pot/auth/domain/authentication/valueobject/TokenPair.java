@@ -7,16 +7,16 @@ public record TokenPair(
 
         public TokenPair {
         if (accessToken == null) {
-            throw new IllegalArgumentException("AccessToken不能为空");
+            throw new IllegalArgumentException("AccessToken must not be null");
         }
         if (refreshToken == null) {
-            throw new IllegalArgumentException("RefreshToken不能为空");
+            throw new IllegalArgumentException("RefreshToken must not be null");
         }
         if (!accessToken.userId().equals(refreshToken.userId())) {
-            throw new IllegalArgumentException("AccessToken和RefreshToken的用户ID不一致");
+            throw new IllegalArgumentException("AccessToken and RefreshToken have mismatched user IDs");
         }
         if (!accessToken.userDomain().equals(refreshToken.userDomain())) {
-            throw new IllegalArgumentException("AccessToken和RefreshToken的用户域不一致");
+            throw new IllegalArgumentException("AccessToken and RefreshToken have mismatched user domains");
         }
     }
 

@@ -39,12 +39,12 @@ public class MemberRepositoryImpl implements MemberRepository {
 
         if (isNew) {
             memberMapper.insert(entity);
-            log.debug("新增会员: memberId={}", entity.getMemberId());
+            log.debug("[Member] Inserting member — memberId={}", entity.getMemberId());
         } else {
             LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Member::getMemberId, aggregate.getMemberId().value());
             memberMapper.update(entity, wrapper);
-            log.debug("更新会员: memberId={}", entity.getMemberId());
+            log.debug("[Member] Updating member — memberId={}", entity.getMemberId());
         }
 
         return toAggregate(entity);
@@ -108,7 +108,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         LambdaQueryWrapper<Member> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Member::getMemberId, memberId.value());
         memberMapper.delete(wrapper);
-        log.debug("删除会员: {}", memberId.value());
+        log.debug("[Member] Deleting member — id={}", memberId.value());
     }
 
     @Override

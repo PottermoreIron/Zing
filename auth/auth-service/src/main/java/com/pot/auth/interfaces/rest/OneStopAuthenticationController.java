@@ -27,7 +27,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-30
  */
-@Tag(name = "一键认证", description = "无感认证：用户不存在自动注册，已存在直接登录，支持所有认证方式")
+@Tag(name = "One-Stop Authentication", description = "Frictionless authentication: auto-registers new users and directly logs in existing ones, supporting all authentication methods")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -38,14 +38,14 @@ public class OneStopAuthenticationController {
         private final OneStopAuthenticationService oneStopAuthenticationService;
         private final AuthCommandAssembler authCommandAssembler;
 
-        @Operation(operationId = "authAuthenticateOneStop", summary = "一键认证（自动注册/登录）", description = "支持 USERNAME_PASSWORD / PHONE_CODE / EMAIL_CODE / OAUTH2 / WECHAT 等方式，用户不存在时自动注册")
-        @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "认证请求过于频繁，请稍后再试")
+        @Operation(operationId = "authAuthenticateOneStop", summary = "Authenticate (auto-register or login)", description = "Supports USERNAME_PASSWORD / PHONE_CODE / EMAIL_CODE / OAUTH2 / WECHAT. Auto-registers if user not found")
+        @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "Too many authentication requests, please try again later")
         @PostMapping("/api/v1/authenticate")
         public R<OneStopAuthResponse> authenticate(
                         @Valid @RequestBody OneStopAuthRequest request,
                         HttpServletRequest httpRequest) {
 
-                log.info("[一键认证] 收到认证请求: authType={}, userDomain={}",
+                log.info("[OneStopAuth] Authentication request received — authType={}, userDomain={}",
                                 request.authType(), request.userDomain());
 
                 OneStopAuthResponse response = oneStopAuthenticationService.authenticate(
@@ -53,7 +53,7 @@ public class OneStopAuthenticationController {
                                 getClientIp(httpRequest),
                                 httpRequest.getHeader("User-Agent"));
 
-                log.info("[一键认证] 认证成功: userId={}", response.userId());
+                log.info("[OneStopAuth] Authentication successful — userId={}", response.userId());
 
                 return R.success(response);
         }

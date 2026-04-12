@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class AuthorizationAspectTest {
 
     @Test
-    @DisplayName("类级 RequirePermission 生效")
+    @DisplayName("Class-level @RequirePermission takes effect")
     void classLevelRequirePermission_appliesToMethod() {
         AuthorizationSecurityAccessor accessor = mockAccessor(true, Set.of("member:read"), Set.of("ROLE_USER"));
         ClassLevelPermissionService proxy = createPermissionProxy(new ClassLevelPermissionService(), accessor);
@@ -30,7 +30,7 @@ class AuthorizationAspectTest {
     }
 
     @Test
-    @DisplayName("方法级 RequirePermission 覆盖类级配置")
+    @DisplayName("Method-level @RequirePermission overrides class-level configuration")
     void methodLevelRequirePermission_overridesClassLevel() {
         AuthorizationSecurityAccessor accessor = mockAccessor(true, Set.of("member:read"), Set.of("ROLE_USER"));
         MethodLevelPermissionService proxy = createPermissionProxy(new MethodLevelPermissionService(), accessor);
@@ -39,7 +39,7 @@ class AuthorizationAspectTest {
     }
 
     @Test
-    @DisplayName("RequireAnyPermission 允许命中任一权限")
+    @DisplayName("@RequireAnyPermission grants access when any one permission matches")
     void requireAnyPermission_allowsAnyMatchedPermission() {
         AuthorizationSecurityAccessor accessor = mockAccessor(true, Set.of("member:write"), Set.of("ROLE_USER"));
         AnyPermissionService proxy = createPermissionProxy(new AnyPermissionService(), accessor);
@@ -48,7 +48,7 @@ class AuthorizationAspectTest {
     }
 
     @Test
-    @DisplayName("类级 RequireRole 生效")
+    @DisplayName("Class-level @RequireRole takes effect")
     void classLevelRequireRole_appliesToMethod() {
         AuthorizationSecurityAccessor accessor = mockAccessor(true, Set.of("member:read"), Set.of("ROLE_ADMIN"));
         ClassLevelRoleService proxy = createPermissionProxy(new ClassLevelRoleService(), accessor);
@@ -57,18 +57,18 @@ class AuthorizationAspectTest {
     }
 
     @Test
-    @DisplayName("未登录用户直接拒绝访问")
+    @DisplayName("Unauthenticated user is denied access immediately")
     void unauthenticatedUser_isRejected() {
         AuthorizationSecurityAccessor accessor = mockAccessor(false, Set.of(), Set.of());
         ClassLevelPermissionService proxy = createPermissionProxy(new ClassLevelPermissionService(), accessor);
 
         assertThatThrownBy(proxy::list)
                 .isInstanceOf(PermissionDeniedException.class)
-                .hasMessageContaining("未登录用户");
+                .hasMessageContaining("Unauthenticated user");
     }
 
     @Test
-    @DisplayName("SpEL 权限表达式可读取方法参数")
+    @DisplayName("SpEL permission expression can access method parameters")
     void spelPermission_canReadMethodParameter() {
         AuthorizationSecurityAccessor accessor = mockAccessor(true, Set.of("article:123:edit"), Set.of("ROLE_USER"));
         SpelPermissionService proxy = createPermissionProxy(new SpelPermissionService(), accessor);

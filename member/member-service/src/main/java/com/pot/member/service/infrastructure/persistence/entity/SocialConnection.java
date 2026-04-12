@@ -131,8 +131,8 @@ public class SocialConnection implements Serializable {
 
     @Getter
     public enum Status {
-        INACTIVE(0, "非活跃"),
-        ACTIVE(1, "活跃");
+        INACTIVE(0, "Inactive"),
+        ACTIVE(1, "Active");
 
         private final Integer code;
         private final String description;
@@ -148,15 +148,15 @@ public class SocialConnection implements Serializable {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("未知的连接状态: " + code);
+            throw new IllegalArgumentException("Unknown connection status: " + code);
         }
     }
 
     @Getter
     public enum Provider {
-        WECHAT("wechat", "微信"),
+        WECHAT("wechat", "WeChat"),
         QQ("qq", "QQ"),
-        WEIBO("weibo", "微博"),
+        WEIBO("weibo", "Weibo"),
         GITHUB("github", "GitHub"),
         GOOGLE("google", "Google"),
         FACEBOOK("facebook", "Facebook"),
@@ -177,7 +177,7 @@ public class SocialConnection implements Serializable {
                     return provider;
                 }
             }
-            throw new IllegalArgumentException("不支持的第三方平台: " + code);
+            throw new IllegalArgumentException("Unsupported social platform: " + code);
         }
     }
 }

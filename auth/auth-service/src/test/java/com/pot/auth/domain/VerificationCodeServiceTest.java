@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("VerificationCodeService 单元测试")
+@DisplayName("VerificationCodeService unit test")
 class VerificationCodeServiceTest {
 
     private static final VerificationCodePolicy POLICY = new VerificationCodePolicy(
@@ -69,7 +69,7 @@ class VerificationCodeServiceTest {
     }
 
     @Nested
-    @DisplayName("发送邮件验证码")
+    @DisplayName("Send email verification code")
     class SendEmailVerificationCode {
 
         private final String email = "test@example.com";
@@ -78,18 +78,18 @@ class VerificationCodeServiceTest {
         private final String attemptsKey = "auth:code:attempts:" + email;
 
         @Test
-        @DisplayName("当1分钟内重复发送时，抛出CodeSendTooFrequentException")
+        @DisplayName("Resending within 1 minute throws CodeSendTooFrequentException")
         void whenFreqLimitActive_thenThrowCodeSendTooFrequentException() {
             when(cachePort.exists(sendLimitKey)).thenReturn(true);
 
             assertThatThrownBy(() -> verificationCodeService.sendEmailVerificationCode(new Email(email)))
                     .isInstanceOf(CodeSendTooFrequentException.class)
-                    .hasMessageContaining("频繁");
+                    .hasMessageContaining("frequently");
             verifyNoInteractions(distributedLockPort, notificationPort);
         }
 
         @Test
-        @DisplayName("首次发送邮件验证码，写缓存并调用通知接口")
+        @DisplayName("First email code send writes to cache and calls notification port")
         void whenFirstSend_thenStoreCacheAndCallNotification() {
             when(cachePort.exists(sendLimitKey)).thenReturn(false);
             when(notificationPort.sendEmailVerificationCode(eq(email), anyString())).thenReturn(true);
@@ -106,7 +106,7 @@ class VerificationCodeServiceTest {
         }
 
         @Test
-        @DisplayName("发送失败时（通知接口返回false），返回false但不抛异常")
+        @DisplayName("Send failure (notification port returns false) returns false without throwing")
         void whenNotificationFails_thenReturnFalse() {
             when(cachePort.exists(sendLimitKey)).thenReturn(false);
             when(notificationPort.sendEmailVerificationCode(eq(email), anyString())).thenReturn(false);
@@ -118,14 +118,14 @@ class VerificationCodeServiceTest {
     }
 
     @Nested
-    @DisplayName("发送短信验证码")
+    @DisplayName("Send SMS verification code")
     class SendSmsVerificationCode {
 
         private final String phone = "+8613800138000";
         private final String sendLimitKey = "auth:code:send:" + phone;
 
         @Test
-        @DisplayName("短信发送频率限制，抛出CodeSendTooFrequentException")
+        @DisplayName("SMS send rate limit throws CodeSendTooFrequentException")
         void whenFreqLimitActive_thenThrowCodeSendTooFrequentException() {
             when(cachePort.exists(sendLimitKey)).thenReturn(true);
 
@@ -134,7 +134,7 @@ class VerificationCodeServiceTest {
         }
 
         @Test
-        @DisplayName("短信首次发送成功，调用通知接口")
+        @DisplayName("First SMS send succeeds and calls notification port")
         void whenFirstSend_thenCallSmsNotification() {
             when(cachePort.exists(sendLimitKey)).thenReturn(false);
             when(notificationPort.sendSmsVerificationCode(eq(phone), anyString())).thenReturn(true);
@@ -147,7 +147,7 @@ class VerificationCodeServiceTest {
     }
 
     @Nested
-    @DisplayName("验证码校验")
+    @DisplayName("Verification code verification")
     class VerifyCode {
 
         private final String recipient = "test@example.com";
@@ -156,7 +156,7 @@ class VerificationCodeServiceTest {
         private final String attemptsKey = "auth:code:attempts:" + recipient;
 
         @Test
-        @DisplayName("验证码正确，返回true并清除缓存")
+        @DisplayName("Correct code returns true and clears cache")
         void whenCodeMatches_thenReturnTrueAndDeleteCache() {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.of("0"));
@@ -169,30 +169,30 @@ class VerificationCodeServiceTest {
         }
 
         @Test
-        @DisplayName("验证码不存在（已过期或未发送），抛出CodeNotFoundException")
+        @DisplayName("Non-existent code (expired or never sent) throws CodeNotFoundException")
         void whenCodeNotFound_thenThrowCodeNotFoundException() {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))
                     .isInstanceOf(CodeNotFoundException.class)
-                    .hasMessageContaining("过期");
+                    .hasMessageContaining("expired");
         }
 
         @Test
-        @DisplayName("验证码错误，增加尝试次数，抛出CodeMismatchException")
+        @DisplayName("Incorrect verification code increments attempt count and throws CodeMismatchException")
         void whenCodeMismatch_thenIncrementAttemptsAndThrow() {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.of("1"));
 
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, "999999"))
                     .isInstanceOf(CodeMismatchException.class)
-                    .hasMessageContaining("错误");
+                    .hasMessageContaining("Incorrect");
 
             verify(cachePort).set(eq(attemptsKey), eq("2"), any(Duration.class));
         }
 
         @Test
-        @DisplayName("验证次数达到上限（3次），抛出CodeVerificationExceededException并清除缓存")
+        @DisplayName("Attempt limit (3) throws CodeVerificationExceededException and clears cache")
         void whenAttemptsExceedLimit_thenThrowAndClearCache() {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class))
@@ -200,14 +200,14 @@ class VerificationCodeServiceTest {
 
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))
                     .isInstanceOf(CodeVerificationExceededException.class)
-                    .hasMessageContaining("超限");
+                    .hasMessageContaining("limit");
 
             verify(cachePort).delete(codeKey);
             verify(cachePort).delete(attemptsKey);
         }
 
         @Test
-        @DisplayName("尝试次数为null时，视为0次，正常处理")
+        @DisplayName("Null attempt count is treated as 0 and processed normally")
         void whenAttemptsKeyMissing_thenTreatAsZero() {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.of(storedCode));
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.empty());

@@ -6,7 +6,7 @@ public record TokenId(String value) {
 
     public TokenId {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("TokenId不能为空");
+            throw new IllegalArgumentException("TokenId must not be blank");
         }
     }
 

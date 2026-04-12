@@ -34,7 +34,7 @@ public class TouchAutoConfiguration {
     public TouchServiceImpl touchService(
             List<TouchChannel> channels,
             ChannelSelectionStrategy selectionStrategy) {
-        log.info("初始化 TouchService, 发现 {} 个渠道实现", channels.size());
+        log.info("[Touch] Initializing TouchService — {} channel implementation(s) discovered", channels.size());
         return new TouchServiceImpl(channels, selectionStrategy);
     }
 

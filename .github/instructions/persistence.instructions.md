@@ -1,5 +1,5 @@
 ---
-description: "Use when modifying MyBatis mapper XML, repository implementations, persistence entities, or SQL in Zing. Covers repository boundaries, query safety, pagination, batching, indexing, N+1 prevention, and database performance. Trigger words: MyBatis, mapper XML, repository implementation, resultMap, SQL, 持久化, Mapper, XML, 查询, 索引."
+description: "Use when modifying MyBatis mapper XML, repository implementations, persistence entities, or SQL in Zing. Covers repository boundaries, query safety, pagination, batching, indexing, N+1 prevention, and database performance. Trigger words: MyBatis, mapper XML, repository implementation, resultMap, SQL, persistence, mapper XML, query, index."
 name: "Zing Persistence Rules"
 applyTo: "**/infrastructure/persistence/**/*.java, **/src/main/resources/mapper/**/*.xml, **/mapper/**/*.xml, **/*.sql"
 ---

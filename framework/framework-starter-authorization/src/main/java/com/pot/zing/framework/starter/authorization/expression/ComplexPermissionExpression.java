@@ -30,10 +30,11 @@ public class ComplexPermissionExpression implements PermissionExpression {
             List<String> tokens = tokenize(expression);
             List<String> postfix = infixToPostfix(tokens);
             boolean result = evaluatePostfix(postfix, context);
-            log.debug("[权限评估] 复杂表达式: expression={}, result={}", expression, result);
+            log.debug("[Permission] Complex expression evaluated — expression={}, result={}", expression, result);
             return result;
         } catch (Exception exception) {
-            log.error("[权限评估] 复杂表达式评估失败: expression={}, error={}", expression, exception.getMessage(), exception);
+            log.error("[Permission] Complex expression evaluation failed — expression={}, error={}", expression,
+                    exception.getMessage(), exception);
             return false;
         }
     }

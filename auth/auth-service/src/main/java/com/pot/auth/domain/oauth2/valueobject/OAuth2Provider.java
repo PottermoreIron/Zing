@@ -39,6 +39,6 @@ public enum OAuth2Provider {
                 return provider;
             }
         }
-        throw new IllegalArgumentException("不支持的OAuth2提供商: " + code);
+        throw new IllegalArgumentException("Unsupported OAuth2 provider: " + code);
     }
 }

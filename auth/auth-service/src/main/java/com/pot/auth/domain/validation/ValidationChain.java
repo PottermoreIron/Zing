@@ -31,31 +31,31 @@ public class ValidationChain<T> {
      */
     public void validate(T context) {
         if (handlers.isEmpty()) {
-            log.warn("[校验链] 未配置任何校验器");
+            log.warn("[ValidationChain] No validators configured");
             return;
         }
 
-        log.debug("[校验链] 开始执行校验，共 {} 个校验器", handlers.size());
+        log.debug("[ValidationChain] Starting validation with {} validator(s)", handlers.size());
 
         for (ValidationHandler<T> handler : handlers) {
             if (!handler.isEnabled(context)) {
-                log.debug("[校验链] 跳过已禁用的校验器: {}", handler.getClass().getSimpleName());
+                log.debug("[ValidationChain] Skipping disabled validator: {}", handler.getClass().getSimpleName());
                 continue;
             }
 
-            log.debug("[校验链] 执行校验器: {} (order={})",
+            log.debug("[ValidationChain] Executing validator: {} (order={})",
                     handler.getClass().getSimpleName(), handler.getOrder());
 
             try {
                 handler.validate(context);
             } catch (Exception e) {
-                log.error("[校验链] 校验失败: validator={}, error={}",
+                log.error("[ValidationChain] Validation failed — validator={}, error={}",
                         handler.getClass().getSimpleName(), e.getMessage());
                 throw e;
             }
         }
 
-        log.debug("[校验链] 所有校验通过");
+        log.debug("[ValidationChain] All validations passed");
     }
 
     public int size() {

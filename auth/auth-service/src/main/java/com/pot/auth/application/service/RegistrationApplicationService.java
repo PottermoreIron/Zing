@@ -33,7 +33,7 @@ public class RegistrationApplicationService {
          * Executes a register command with the matching flow.
          */
         public RegisterResponse register(RegisterCommand command, String ipAddress, String userAgent) {
-                log.info("[应用服务] 注册请求: registerType={}, userDomain={}",
+                log.info("[AppService] Registration request — registerType={}, userDomain={}",
                                 command.registerType(), command.userDomain());
 
                 return switch (command.registerType()) {
@@ -55,7 +55,8 @@ public class RegistrationApplicationService {
                 AuthenticationResult result = strategy.execute(context);
                 RegisterResponse response = toRegisterResponse(result);
 
-                log.info("[应用服务] 注册成功: userId={}, registerType={}", result.userId(), command.registerType());
+                log.info("[AppService] Registration successful — userId={}, registerType={}", result.userId(),
+                                command.registerType());
                 return response;
         }
 

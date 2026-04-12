@@ -8,8 +8,8 @@ import lombok.Builder;
 
 @Builder
 public record RegisterMemberCommand(
-        @NotBlank(message = "昵称不能为空") @Size(min = 2, max = 50, message = "昵称长度必须在2-50个字符之间") @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_-]+$", message = "昵称只能包含中文、英文、数字、下划线和横线") String nickname,
-        @NotBlank(message = "邮箱不能为空") @Email(message = "邮箱格式不正确") String email,
-        @NotBlank(message = "密码不能为空") @Size(min = 8, max = 128, message = "密码长度必须在8-128个字符之间") String password,
-        @Pattern(regexp = "^(1[3-9]\\d{9})?$", message = "手机号格式不正确") String phoneNumber) {
+        @NotBlank(message = "Nickname must not be blank") @Size(min = 2, max = 50, message = "Nickname must be between 2 and 50 characters") @Pattern(regexp = "^[\\u4e00-\\u9fa5a-zA-Z0-9_-]+$", message = "Nickname may only contain CJK characters, letters, digits, underscores, and hyphens") String nickname,
+        @NotBlank(message = "Email must not be blank") @Email(message = "Invalid email address") String email,
+        @NotBlank(message = "Password must not be blank") @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters") String password,
+        @Pattern(regexp = "^(1[3-9]\\d{9})?$", message = "Invalid phone number format") String phoneNumber) {
 }

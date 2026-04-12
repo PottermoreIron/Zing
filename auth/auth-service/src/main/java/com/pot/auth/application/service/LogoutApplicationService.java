@@ -13,8 +13,8 @@ public class LogoutApplicationService {
     private final JwtTokenService jwtTokenService;
 
         public void logout(String accessToken, String refreshToken) {
-        log.info("[登出] 执行登出操作");
+        log.info("[Logout] Executing logout");
         jwtTokenService.logout(accessToken, refreshToken);
-        log.info("[登出] 登出操作完成");
+        log.info("[Logout] Logout complete");
     }
 }

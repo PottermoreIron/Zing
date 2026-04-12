@@ -19,14 +19,14 @@ public class GlobalExceptionHandler extends BaseGlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("[会员异常] 参数错误: {}", ex.getMessage());
+        log.warn("[MemberException] Invalid parameter: {}", ex.getMessage());
         return R.fail(ResultCode.PARAM_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> handleIllegalState(IllegalStateException ex) {
-        log.warn("[会员异常] 状态错误: {}", ex.getMessage());
+        log.warn("[MemberException] Illegal state: {}", ex.getMessage());
         return R.fail(ResultCode.BAD_REQUEST, ex.getMessage());
     }
 }

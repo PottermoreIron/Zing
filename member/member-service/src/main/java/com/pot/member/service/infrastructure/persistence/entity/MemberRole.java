@@ -97,14 +97,14 @@ public class MemberRole implements Serializable {
 
     public void setExpiresInDays(int days) {
         if (days <= 0) {
-            throw new IllegalArgumentException("有效天数必须大于0");
+            throw new IllegalArgumentException("Validity days must be greater than 0");
         }
         this.gmtExpiresAt = LocalDateTime.now().plusDays(days);
     }
 
     public void extendExpiration(int days) {
         if (days <= 0) {
-            throw new IllegalArgumentException("延长天数必须大于0");
+            throw new IllegalArgumentException("Extension days must be greater than 0");
         }
 
         LocalDateTime baseTime = this.gmtExpiresAt != null ? this.gmtExpiresAt : LocalDateTime.now();
@@ -113,8 +113,8 @@ public class MemberRole implements Serializable {
 
     @Getter
     public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
+        DISABLED(0, "Disabled"),
+        ENABLED(1, "Enabled");
 
         private final Integer code;
         private final String description;
@@ -130,7 +130,7 @@ public class MemberRole implements Serializable {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("未知的角色状态: " + code);
+            throw new IllegalArgumentException("Unknown role status: " + code);
         }
     }
 }

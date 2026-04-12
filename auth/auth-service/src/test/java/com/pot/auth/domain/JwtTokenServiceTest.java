@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("JwtTokenService 单元测试")
+@DisplayName("JwtTokenService unit test")
 class JwtTokenServiceTest {
 
     @Mock
@@ -61,11 +61,11 @@ class JwtTokenServiceTest {
     // generateTokenPair
 
     @Nested
-    @DisplayName("生成TokenPair")
+    @DisplayName("Generate TokenPair")
     class GenerateTokenPair {
 
         @Test
-        @DisplayName("成功生成Token，写入RefreshToken缓存，返回TokenPair")
+        @DisplayName("Successful token generation writes RefreshToken to cache and returns TokenPair")
         void whenAllDepsOk_thenReturnTokenPairAndStoreRefresh() {
             when(permissionDomainService.cachePermissionsWithMetadata(
                     eq(TestFixtures.USER_ID),
@@ -94,7 +94,7 @@ class JwtTokenServiceTest {
         }
 
         @Test
-        @DisplayName("TokenManagementPort抛出异常，包装为DomainException")
+        @DisplayName("TokenManagementPort exception is wrapped as DomainException")
         void whenTokenPortFails_thenThrowDomainException() {
             when(permissionDomainService.cachePermissionsWithMetadata(any(), any(), any()))
                     .thenReturn(TestFixtures.permCacheMetadata());
@@ -107,18 +107,18 @@ class JwtTokenServiceTest {
                     TestFixtures.USERNAME,
                     TestFixtures.PERMISSIONS))
                     .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("密码");
+                    .hasMessageContaining("password");
         }
     }
 
     // validateAccessToken
 
     @Nested
-    @DisplayName("验证AccessToken")
+    @DisplayName("Validate AccessToken")
     class ValidateAccessToken {
 
         @Test
-        @DisplayName("Token有效，返回JwtToken对象")
+        @DisplayName("Valid token returns JwtToken object")
         void whenTokenValid_thenReturnJwtToken() {
             JwtToken validToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
@@ -130,18 +130,18 @@ class JwtTokenServiceTest {
         }
 
         @Test
-        @DisplayName("Token已过期，抛出TokenExpiredException")
+        @DisplayName("Expired token throws TokenExpiredException")
         void whenTokenExpired_thenThrowTokenExpiredException() {
             JwtToken expiredToken = TestFixtures.expiredAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
 
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .isInstanceOf(TokenExpiredException.class)
-                    .hasMessageContaining("过期");
+                    .hasMessageContaining("expired");
         }
 
         @Test
-        @DisplayName("Token在黑名单中，抛出TokenInvalidException")
+        @DisplayName("Blacklisted token throws TokenInvalidException")
         void whenTokenInBlacklist_thenThrowTokenInvalidException() {
             JwtToken validToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
@@ -149,18 +149,18 @@ class JwtTokenServiceTest {
 
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .isInstanceOf(TokenInvalidException.class)
-                    .hasMessageContaining("失效");
+                    .hasMessageContaining("revoked");
         }
     }
 
     // logout
 
     @Nested
-    @DisplayName("登出（Token吊销）")
+    @DisplayName("Logout (token revocation)")
     class Logout {
 
         @Test
-        @DisplayName("有效Token登出：加入黑名单 + 删除RefreshToken缓存")
+        @DisplayName("Valid token logout: blacklisted and RefreshToken cache deleted")
         void whenValidTokens_thenBlacklistAndDeleteRefresh() {
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(accessToken);
@@ -179,7 +179,7 @@ class JwtTokenServiceTest {
         }
 
         @Test
-        @DisplayName("AccessToken已过期，不写入黑名单（已自然过期无需额外吊销）")
+        @DisplayName("Expired AccessToken is not blacklisted (naturally expired, no additional revocation needed)")
         void whenAccessTokenExpired_thenSkipBlacklist() {
             JwtToken expiredToken = TestFixtures.expiredAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
@@ -190,7 +190,7 @@ class JwtTokenServiceTest {
         }
 
         @Test
-        @DisplayName("AccessToken解析失败（已损坏/无效），不抛异常（幂等容错）")
+        @DisplayName("Corrupted/invalid AccessToken does not throw exception (idempotent fault tolerance)")
         void whenAccessTokenParseFails_thenNoException() {
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .thenThrow(new RuntimeException("malformed JWT"));
@@ -200,7 +200,7 @@ class JwtTokenServiceTest {
         }
 
         @Test
-        @DisplayName("未提供RefreshToken时，只吊销AccessToken，不调用RefreshToken删除")
+        @DisplayName("Without RefreshToken: only AccessToken is revoked, RefreshToken delete is not called")
         void whenRefreshTokenNull_thenOnlyRevokeAccessToken() {
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(accessToken);
@@ -214,11 +214,11 @@ class JwtTokenServiceTest {
     // addToBlacklist
 
     @Nested
-    @DisplayName("加入黑名单")
+    @DisplayName("Add to blacklist")
     class AddToBlacklist {
 
         @Test
-        @DisplayName("将TokenId加入黑名单，使用指定TTL")
+        @DisplayName("TokenId is blacklisted with the specified TTL")
         void whenCalled_thenStoreBlacklistKeyWithTtl() {
             TokenId tokenId = TokenId.of("blacklist-test-001");
             long remainingSeconds = 1800L;

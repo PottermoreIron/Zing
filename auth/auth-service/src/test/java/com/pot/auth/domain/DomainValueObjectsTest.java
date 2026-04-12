@@ -20,29 +20,29 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisplayName("领域值对象单元测试")
+@DisplayName("Domain value object unit tests")
 class DomainValueObjectsTest {
 
     // Email
 
     @Nested
-    @DisplayName("Email 值对象")
+    @DisplayName("Email value object")
     class EmailTests {
 
-        @ParameterizedTest(name = "合法邮箱: {0}")
+        @ParameterizedTest(name = "Valid email: {0}")
         @ValueSource(strings = {
                 "test@example.com",
                 "user.name+tag@subdomain.example.org",
                 "admin@corp.cn",
                 "TEST@GMAIL.COM",
         })
-        @DisplayName("合法邮箱地址，创建成功且规范化为小写")
+        @DisplayName("Valid email address creates successfully and normalizes to lowercase")
         void whenValidEmail_thenCreateSuccessfully(String email) {
             Email e = Email.of(email);
             assertThat(e.value()).isEqualTo(email.toLowerCase());
         }
 
-        @ParameterizedTest(name = "非法邮箱: {0}")
+        @ParameterizedTest(name = "Invalid email: {0}")
         @ValueSource(strings = {
                 "not-an-email",
                 "@example.com",
@@ -50,41 +50,41 @@ class DomainValueObjectsTest {
                 "user @example.com",
                 "",
         })
-        @DisplayName("非法邮箱格式，抛出 InvalidEmailException")
+        @DisplayName("Invalid email format throws InvalidEmailException")
         void whenInvalidEmail_thenThrowException(String email) {
             assertThatThrownBy(() -> Email.of(email))
                     .isInstanceOf(InvalidEmailException.class);
         }
 
         @Test
-        @DisplayName("null 邮箱，抛出 InvalidEmailException")
+        @DisplayName("Null email throws InvalidEmailException")
         void whenNullEmail_thenThrowException() {
             assertThatThrownBy(() -> Email.of(null))
                     .isInstanceOf(InvalidEmailException.class);
         }
 
         @Test
-        @DisplayName("getDomain() 返回正确的域名")
+        @DisplayName("getDomain() returns the correct domain name")
         void whenGetDomain_thenReturnDomainPart() {
             Email email = Email.of("user@gmail.com");
             assertThat(email.getDomain()).isEqualTo("gmail.com");
         }
 
         @Test
-        @DisplayName("getLocalPart() 返回正确的用户名部分")
+        @DisplayName("getLocalPart() returns the correct local part")
         void whenGetLocalPart_thenReturnLocalPart() {
             Email email = Email.of("user@gmail.com");
             assertThat(email.getLocalPart()).isEqualTo("user");
         }
 
         @Test
-        @DisplayName("isCorporateEmail() 对企业邮箱返回true")
+        @DisplayName("isCorporateEmail() returns true for corporate email")
         void whenCorporateEmail_thenReturnTrue() {
             assertThat(Email.of("admin@acme.io").isCorporateEmail()).isTrue();
         }
 
         @Test
-        @DisplayName("isCorporateEmail() 对个人邮箱(gmail)返回false")
+        @DisplayName("isCorporateEmail() returns false for personal email (gmail)")
         void whenPersonalGmail_thenReturnFalse() {
             assertThat(Email.of("user@gmail.com").isCorporateEmail()).isFalse();
         }
@@ -93,61 +93,61 @@ class DomainValueObjectsTest {
     // Phone
 
     @Nested
-    @DisplayName("Phone 值对象")
+    @DisplayName("Phone value object")
     class PhoneTests {
 
-        @ParameterizedTest(name = "合法手机号: {0}")
+        @ParameterizedTest(name = "Valid phone: {0}")
         @ValueSource(strings = {
                 "13800138000",
                 "18612345678",
                 "+8613800138000",
                 "+14155552671",
         })
-        @DisplayName("合法手机号，创建成功")
+        @DisplayName("Valid phone number creates successfully")
         void whenValidPhone_thenCreateSuccessfully(String phone) {
             assertThat(Phone.of(phone)).isNotNull();
         }
 
-        @ParameterizedTest(name = "非法手机号: {0}")
+        @ParameterizedTest(name = "Invalid phone: {0}")
         @ValueSource(strings = {
                 "+0123456789",
                 "abcdefghijk",
                 "00000000000",
         })
-        @DisplayName("非法手机号格式，抛出 InvalidPhoneException")
+        @DisplayName("Invalid phone number format throws InvalidPhoneException")
         void whenInvalidPhone_thenThrowException(String phone) {
             assertThatThrownBy(() -> Phone.of(phone))
                     .isInstanceOf(InvalidPhoneException.class);
         }
 
         @Test
-        @DisplayName("null 手机号，抛出 InvalidPhoneException")
+        @DisplayName("Null phone number throws InvalidPhoneException")
         void whenNullPhone_thenThrowException() {
             assertThatThrownBy(() -> Phone.of(null))
                     .isInstanceOf(InvalidPhoneException.class);
         }
 
         @Test
-        @DisplayName("中国大陆手机号 isChinaMobile() 返回 true")
+        @DisplayName("Chinese mainland phone isChinaMobile() returns true")
         void whenChinaMobile_thenReturnTrue() {
             assertThat(Phone.of("13800138000").isChinaMobile()).isTrue();
         }
 
         @Test
-        @DisplayName("国际手机号 isChinaMobile() 返回 false")
+        @DisplayName("International phone isChinaMobile() returns false")
         void whenInternational_thenReturnFalse() {
             assertThat(Phone.of("+14155552671").isChinaMobile()).isFalse();
         }
 
         @Test
-        @DisplayName("toInternationalFormat() 为中国大陆号码加 +86 前缀")
+        @DisplayName("toInternationalFormat() prepends +86 for Chinese mainland numbers")
         void whenChinaMobileToInternational_thenAddPrefix() {
             assertThat(Phone.of("13800138000").toInternationalFormat())
                     .isEqualTo("+8613800138000");
         }
 
         @Test
-        @DisplayName("toMasked() 中间4位被掩码")
+        @DisplayName("toMasked() masks 4 middle digits")
         void whenToMasked_thenHideMiddleDigits() {
             String masked = Phone.of("13800138000").toMasked();
             assertThat(masked).contains("****");
@@ -159,17 +159,17 @@ class DomainValueObjectsTest {
     // Password
 
     @Nested
-    @DisplayName("Password 值对象")
+    @DisplayName("Password value object")
     class PasswordTests {
 
         @Test
-        @DisplayName("强密码（含大写、小写、数字、特殊字符），创建成功")
+        @DisplayName("Strong password (uppercase, lowercase, digits, special chars) creates successfully")
         void whenStrongPassword_thenCreateSuccessfully() {
             assertThat(Password.of("Password123!")).isNotNull();
         }
 
         @Test
-        @DisplayName("密码长度不足8位，抛出 WeakPasswordException")
+        @DisplayName("Password shorter than 8 characters throws WeakPasswordException")
         void whenTooShort_thenThrowException() {
             assertThatThrownBy(() -> Password.of("Aa1!"))
                     .isInstanceOf(WeakPasswordException.class)
@@ -177,7 +177,7 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("密码超过64位，抛出 WeakPasswordException")
+        @DisplayName("Password exceeding 64 characters throws WeakPasswordException")
         void whenTooLong_thenThrowException() {
             String longPwd = "Aa1!" + "a".repeat(65);
             assertThatThrownBy(() -> Password.of(longPwd))
@@ -185,45 +185,45 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("无大写字母，抛出 WeakPasswordException")
+        @DisplayName("Password without uppercase letter throws WeakPasswordException")
         void whenNoUppercase_thenThrowException() {
             assertThatThrownBy(() -> Password.of("password123!"))
                     .isInstanceOf(WeakPasswordException.class)
-                    .hasMessageContaining("大写");
+                    .hasMessageContaining("uppercase");
         }
 
         @Test
-        @DisplayName("无小写字母，抛出 WeakPasswordException")
+        @DisplayName("Password without lowercase letter throws WeakPasswordException")
         void whenNoLowercase_thenThrowException() {
             assertThatThrownBy(() -> Password.of("PASSWORD123!"))
                     .isInstanceOf(WeakPasswordException.class)
-                    .hasMessageContaining("小写");
+                    .hasMessageContaining("lowercase");
         }
 
         @Test
-        @DisplayName("无数字，抛出 WeakPasswordException")
+        @DisplayName("Password without digit throws WeakPasswordException")
         void whenNoDigit_thenThrowException() {
             assertThatThrownBy(() -> Password.of("PasswordABC!"))
                     .isInstanceOf(WeakPasswordException.class)
-                    .hasMessageContaining("数字");
+                    .hasMessageContaining("digit");
         }
 
         @Test
-        @DisplayName("null 密码，抛出 WeakPasswordException")
+        @DisplayName("Null password throws WeakPasswordException")
         void whenNull_thenThrowException() {
             assertThatThrownBy(() -> Password.of(null))
                     .isInstanceOf(WeakPasswordException.class);
         }
 
         @Test
-        @DisplayName("calculateStrength() 包含特殊字符时强度 > 60")
+        @DisplayName("calculateStrength() returns > 60 when special characters are included")
         void whenSpecialCharsIncluded_thenHighStrength() {
             int strength = Password.of("Password123!").calculateStrength();
             assertThat(strength).isGreaterThan(60);
         }
 
         @Test
-        @DisplayName("calculateStrength() 仅满足最低要求时强度在合理范围内")
+        @DisplayName("calculateStrength() stays within a reasonable range when only minimum requirements are met")
         void whenMinimalPassword_thenReasonableStrength() {
             int strength = Password.of("Password1").calculateStrength();
             assertThat(strength).isBetween(0, 100);
@@ -233,10 +233,10 @@ class DomainValueObjectsTest {
     // IpAddress
 
     @Nested
-    @DisplayName("IpAddress 值对象")
+    @DisplayName("IpAddress value object")
     class IpAddressTests {
 
-        @ParameterizedTest(name = "合法IP: {0}")
+        @ParameterizedTest(name = "Valid IP: {0}")
         @ValueSource(strings = {
                 "127.0.0.1",
                 "192.168.1.100",
@@ -244,20 +244,20 @@ class DomainValueObjectsTest {
                 "255.255.255.255",
                 "0.0.0.0",
         })
-        @DisplayName("合法IPv4地址，创建成功")
+        @DisplayName("Valid IPv4 address creates successfully")
         void whenValidIpv4_thenCreateSuccessfully(String ip) {
             assertThat(IpAddress.of(ip)).isNotNull();
         }
 
         @Test
-        @DisplayName("null IP，抛出异常")
+        @DisplayName("Null IP throws exception")
         void whenNull_thenThrowException() {
             assertThatThrownBy(() -> IpAddress.of(null))
                     .isInstanceOf(InvalidIpAddressException.class);
         }
 
         @Test
-        @DisplayName("空字符串IP，抛出异常")
+        @DisplayName("Blank IP string throws exception")
         void whenEmpty_thenThrowException() {
             assertThatThrownBy(() -> IpAddress.of(""))
                     .isInstanceOf(InvalidIpAddressException.class);
@@ -267,11 +267,11 @@ class DomainValueObjectsTest {
     // PermissionDigest
 
     @Nested
-    @DisplayName("PermissionDigest 值对象")
+    @DisplayName("PermissionDigest value object")
     class PermissionDigestTests {
 
         @Test
-        @DisplayName("从相同权限集合计算的摘要应相等（排序无关）")
+        @DisplayName("Digests computed from the same permission set are equal (order-independent)")
         void whenSamePermissions_thenSameDigest() {
             Set<String> perms1 = Set.of("b", "a", "c");
             Set<String> perms2 = Set.of("c", "b", "a");
@@ -281,7 +281,7 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("从不同权限集合计算的摘要不相等")
+        @DisplayName("Digests computed from different permission sets are not equal")
         void whenDifferentPermissions_thenDifferentDigest() {
             PermissionDigest d1 = PermissionDigest.from(Set.of("user:read"));
             PermissionDigest d2 = PermissionDigest.from(Set.of("admin:write"));
@@ -289,14 +289,14 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("空权限集合，返回 empty() 摘要")
+        @DisplayName("Empty permission set returns the empty() digest")
         void whenEmptyPermissions_thenReturnEmptyDigest() {
             PermissionDigest digest = PermissionDigest.from(Set.of());
             assertThat(digest).isEqualTo(PermissionDigest.empty());
         }
 
         @Test
-        @DisplayName("matches() 权限集合匹配时返回 true")
+        @DisplayName("matches() returns true when permission sets match")
         void whenMatchingPermissions_thenReturnTrue() {
             Set<String> perms = Set.of("user:read", "user:write");
             PermissionDigest digest = PermissionDigest.from(perms);
@@ -304,14 +304,14 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("matches() 权限集合不匹配时返回 false")
+        @DisplayName("matches() returns false when permission sets differ")
         void whenNotMatchingPermissions_thenReturnFalse() {
             PermissionDigest digest = PermissionDigest.from(Set.of("user:read"));
             assertThat(digest.matches(Set.of("admin:write"))).isFalse();
         }
 
         @Test
-        @DisplayName("shortValue() 返回前8位摘要")
+        @DisplayName("shortValue() returns the first 8 characters of the digest")
         void whenShortValue_thenReturnFirst8Chars() {
             PermissionDigest digest = PermissionDigest.from(Set.of("user:read"));
             assertThat(digest.shortValue()).hasSize(8);
@@ -319,14 +319,14 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("PermissionDigest 构造时，非MD5格式字符串抛出 IllegalArgumentException")
+        @DisplayName("PermissionDigest construction with non-MD5 string throws IllegalArgumentException")
         void whenInvalidFormat_thenThrowException() {
             assertThatThrownBy(() -> new PermissionDigest("not-a-md5"))
                     .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
-        @DisplayName("PermissionDigest 构造时，空字符串抛出 IllegalArgumentException")
+        @DisplayName("PermissionDigest construction with blank string throws IllegalArgumentException")
         void whenBlankValue_thenThrowException() {
             assertThatThrownBy(() -> new PermissionDigest(""))
                     .isInstanceOf(IllegalArgumentException.class);

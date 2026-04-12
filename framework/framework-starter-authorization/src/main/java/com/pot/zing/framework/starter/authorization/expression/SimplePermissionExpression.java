@@ -17,7 +17,7 @@ public class SimplePermissionExpression implements PermissionExpression {
     @Override
     public boolean evaluate(EvaluationContext context) {
         boolean hasPermission = context.hasPermission(expression);
-        log.debug("[权限评估] 简单权限: expression={}, result={}", expression, hasPermission);
+        log.debug("[Permission] Simple expression evaluated — expression={}, result={}", expression, hasPermission);
         return hasPermission;
     }
 }

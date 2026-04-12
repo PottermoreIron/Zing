@@ -138,13 +138,13 @@ public class Permission implements Serializable {
 
     @Getter
     public enum ActionType {
-        CREATE("CREATE", "创建"),
-        READ("READ", "读取"),
-        UPDATE("UPDATE", "更新"),
-        DELETE("DELETE", "删除"),
-        EXECUTE("EXECUTE", "执行"),
-        MANAGE("MANAGE", "管理"),
-        ALL("ALL", "全部权限");
+        CREATE("CREATE", "Create"),
+        READ("READ", "Read"),
+        UPDATE("UPDATE", "Update"),
+        DELETE("DELETE", "Delete"),
+        EXECUTE("EXECUTE", "Execute"),
+        MANAGE("MANAGE", "Manage"),
+        ALL("ALL", "All permissions");
 
         private final String code;
         private final String description;
@@ -160,14 +160,14 @@ public class Permission implements Serializable {
                     return type;
                 }
             }
-            throw new IllegalArgumentException("未知的操作类型: " + code);
+            throw new IllegalArgumentException("Unknown action type: " + code);
         }
     }
 
     @Getter
     public enum Status {
-        DISABLED(0, "禁用"),
-        ENABLED(1, "启用");
+        DISABLED(0, "Disabled"),
+        ENABLED(1, "Enabled");
 
         private final Integer code;
         private final String description;
@@ -183,14 +183,14 @@ public class Permission implements Serializable {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("未知的权限状态: " + code);
+            throw new IllegalArgumentException("Unknown permission status: " + code);
         }
     }
 
     @Getter
     public enum SystemFlag {
-        USER_DEFINED(0, "用户自定义"),
-        SYSTEM_BUILTIN(1, "系统内置");
+        USER_DEFINED(0, "User-defined"),
+        SYSTEM_BUILTIN(1, "System built-in");
 
         private final Integer code;
         private final String description;
@@ -206,7 +206,7 @@ public class Permission implements Serializable {
                     return flag;
                 }
             }
-            throw new IllegalArgumentException("未知的系统权限标识: " + code);
+            throw new IllegalArgumentException("Unknown system permission flag: " + code);
         }
     }
 }

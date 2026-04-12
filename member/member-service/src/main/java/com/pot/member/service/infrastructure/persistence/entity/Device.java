@@ -102,12 +102,12 @@ public class Device implements Serializable {
 
     @Getter
     public enum DeviceType {
-        MOBILE("MOBILE", "移动设备"),
-        TABLET("TABLET", "平板设备"),
-        DESKTOP("DESKTOP", "桌面设备"),
-        TV("TV", "电视设备"),
-        WATCH("WATCH", "手表设备"),
-        OTHER("OTHER", "其他设备");
+        MOBILE("MOBILE", "Mobile"),
+        TABLET("TABLET", "Tablet"),
+        DESKTOP("DESKTOP", "Desktop"),
+        TV("TV", "TV"),
+        WATCH("WATCH", "Wearable"),
+        OTHER("OTHER", "Other");
 
         private final String code;
         private final String description;
@@ -123,18 +123,18 @@ public class Device implements Serializable {
                     return type;
                 }
             }
-            throw new IllegalArgumentException("未知的设备类型: " + code);
+            throw new IllegalArgumentException("Unknown device type: " + code);
         }
     }
 
     @Getter
     public enum Platform {
-        IOS("iOS", "苹果iOS系统"),
-        ANDROID("Android", "安卓系统"),
-        WINDOWS("Windows", "微软Windows系统"),
-        MACOS("macOS", "苹果macOS系统"),
-        LINUX("Linux", "Linux系统"),
-        OTHER("Other", "其他系统");
+        IOS("iOS", "Apple iOS"),
+        ANDROID("Android", "Android"),
+        WINDOWS("Windows", "Microsoft Windows"),
+        MACOS("macOS", "Apple macOS"),
+        LINUX("Linux", "Linux"),
+        OTHER("Other", "Other");
 
         private final String code;
         private final String description;
@@ -150,14 +150,14 @@ public class Device implements Serializable {
                     return platform;
                 }
             }
-            throw new IllegalArgumentException("未知的平台类型: " + code);
+            throw new IllegalArgumentException("Unknown platform type: " + code);
         }
     }
 
     @Getter
     public enum Status {
-        INACTIVE(0, "非活跃"),
-        ACTIVE(1, "活跃");
+        INACTIVE(0, "Inactive"),
+        ACTIVE(1, "Active");
 
         private final Integer code;
         private final String description;
@@ -173,7 +173,7 @@ public class Device implements Serializable {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("未知的设备状态: " + code);
+            throw new IllegalArgumentException("Unknown device status: " + code);
         }
     }
 }

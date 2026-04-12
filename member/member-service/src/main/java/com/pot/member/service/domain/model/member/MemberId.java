@@ -4,7 +4,7 @@ public record MemberId(Long value) {
 
     public MemberId {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("会员ID不能为空且必须为正数");
+            throw new IllegalArgumentException("Member ID must not be null and must be a positive number");
         }
     }
 

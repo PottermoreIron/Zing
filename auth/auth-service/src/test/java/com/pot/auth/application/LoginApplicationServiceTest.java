@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("LoginApplicationService 单元测试")
+@DisplayName("LoginApplicationService unit test")
 class LoginApplicationServiceTest {
 
     private static final UserId USER_ID = UserId.of(10001L);
@@ -51,7 +51,7 @@ class LoginApplicationServiceTest {
     private LoginApplicationService loginApplicationService;
 
     @Test
-    @DisplayName("用户名密码登录：委托给策略，返回正确的LoginResponse")
+    @DisplayName("Username-password login: delegates to strategy and returns correct LoginResponse")
     void whenUsernamePasswordLogin_thenDelegateToStrategyAndReturnResponse() {
         LoginCommand command = usernamePasswordCommand();
         AuthenticationResult authResult = authResult();
@@ -81,7 +81,7 @@ class LoginApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("策略抛出DomainException，异常向上传播")
+    @DisplayName("Strategy throws DomainException which propagates upward")
     void whenStrategyThrowsDomainException_thenPropagateException() {
         LoginCommand command = usernamePasswordCommand();
         LoginStrategy mockStrategy = mock(LoginStrategy.class);
@@ -93,7 +93,7 @@ class LoginApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出异常")
+    @DisplayName("Null userAgent uses default value 'Unknown' without throwing an exception")
     void whenUserAgentNull_thenUseDefaultValue() {
         LoginCommand command = usernamePasswordCommand();
         LoginStrategy mockStrategy = mock(LoginStrategy.class);

@@ -37,11 +37,11 @@ public class MessageConsumerRegistry {
                 .getBeansOfType(MessageConsumer.class);
 
         if (consumers.isEmpty()) {
-            log.info("[MQ] 未找到MessageConsumer，跳过消费者注册");
+            log.info("[MQ] No MessageConsumer beans found, skipping consumer registration");
             return;
         }
 
-        log.info("[MQ] 发现{}个MessageConsumer，开始注册", consumers.size());
+        log.info("[MQ] Discovered {} MessageConsumer bean(s), starting registration", consumers.size());
 
         for (Map.Entry<String, MessageConsumer<?>> entry : consumers.entrySet()) {
             String beanName = entry.getKey();
@@ -50,7 +50,7 @@ public class MessageConsumerRegistry {
             try {
                 registerConsumer(beanName, consumer);
             } catch (Exception e) {
-                log.error("[MQ] 注册消费者失败: bean={}, error={}", beanName, e.getMessage(), e);
+                log.error("[MQ] Failed to register consumer — bean={}, error={}", beanName, e.getMessage(), e);
             }
         }
     }
@@ -67,11 +67,11 @@ public class MessageConsumerRegistry {
             @SuppressWarnings("unused")
             public void handleMessage(String message) {
                 try {
-                    log.debug("[MQ] 收到消息: queue={}, message={}", queueName, message);
+                    log.debug("[MQ] Message received — queue={}, message={}", queueName, message);
                     T event = objectMapper.readValue(message, messageType);
                     consumer.consume(event);
                 } catch (Exception e) {
-                    log.error("[MQ] 消息处理失败: queue={}, error={}", queueName, e.getMessage(), e);
+                    log.error("[MQ] Message processing failed — queue={}, error={}", queueName, e.getMessage(), e);
                     throw new RuntimeException("Message processing failed", e);
                 }
             }
@@ -80,7 +80,7 @@ public class MessageConsumerRegistry {
         container.setMessageListener(adapter);
         container.start();
 
-        log.info("[MQ] 消费者注册成功: bean={}, queue={}, messageType={}",
+        log.info("[MQ] Consumer registered — bean={}, queue={}, messageType={}",
                 beanName, queueName, messageType.getSimpleName());
     }
 }

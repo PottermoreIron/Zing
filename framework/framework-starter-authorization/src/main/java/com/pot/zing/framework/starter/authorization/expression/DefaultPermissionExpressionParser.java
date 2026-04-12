@@ -24,7 +24,7 @@ public class DefaultPermissionExpressionParser implements PermissionExpressionPa
     @Override
     public PermissionExpression parse(String expressionString) {
         if (expressionString == null || expressionString.isBlank()) {
-            throw new IllegalArgumentException("权限表达式不能为空");
+            throw new IllegalArgumentException("Permission expression must not be blank");
         }
 
         String trimmed = expressionString.trim();
@@ -38,14 +38,14 @@ public class DefaultPermissionExpressionParser implements PermissionExpressionPa
             return new SpelPermissionExpression(trimmed, spelParser);
         }
 
-        log.warn("[权限表达式] 无法确定表达式类型，当作简单权限处理: {}", trimmed);
+        log.warn("[Permission] Cannot determine expression type, treating as simple permission: {}", trimmed);
         return new SimplePermissionExpression(trimmed);
     }
 
     @Override
     public PermissionExpression parseMultiple(String[] expressions, Logical logical) {
         if (expressions == null || expressions.length == 0) {
-            throw new IllegalArgumentException("权限表达式数组不能为空");
+            throw new IllegalArgumentException("Permission expression array must not be empty");
         }
         if (expressions.length == 1) {
             return parse(expressions[0]);

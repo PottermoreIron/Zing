@@ -1,11 +1,11 @@
 package com.pot.member.service.domain.model.member;
 
 public enum MemberStatus {
-        ACTIVE(0, "正常"),
+        ACTIVE(0, "Active"),
 
-        DISABLED(1, "禁用"),
+        DISABLED(1, "Disabled"),
 
-        LOCKED(2, "锁定");
+        LOCKED(2, "Locked");
 
     private final int code;
     private final String description;
@@ -21,7 +21,7 @@ public enum MemberStatus {
                 return status;
             }
         }
-        throw new IllegalArgumentException("未知的会员状态代码: " + code);
+        throw new IllegalArgumentException("Unknown member status code: " + code);
     }
 
     public int getCode() {

@@ -9,14 +9,14 @@ public class Nickname {
 
     public Nickname(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("昵称不能为空");
+            throw new IllegalArgumentException("Nickname must not be blank");
         }
         String trimmed = value.trim();
         if (trimmed.length() < 2 || trimmed.length() > 50) {
-            throw new IllegalArgumentException("昵称长度必须在2-50个字符之间");
+            throw new IllegalArgumentException("Nickname must be between 2 and 50 characters");
         }
         if (!isValidNickname(trimmed)) {
-            throw new IllegalArgumentException("昵称只能包含中文、英文、数字、下划线和横线");
+            throw new IllegalArgumentException("Nickname may only contain CJK characters, letters, digits, underscores, and hyphens");
         }
         this.value = trimmed;
     }

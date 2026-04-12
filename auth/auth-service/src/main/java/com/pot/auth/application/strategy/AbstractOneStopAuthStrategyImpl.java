@@ -34,24 +34,24 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
     public final AuthenticationResult execute(OneStopAuthContext context) {
         var request = context.request();
 
-        log.info("[一键认证] 开始执行: authType={}, userDomain={}, ip={}",
+        log.info("[OneStopAuth] Executing — authType={}, userDomain={}, ip={}",
                 request.authType(), request.userDomain(), context.ipAddress().value());
 
         try {
             UserDTO user = findUser(context);
 
             if (user != null) {
-                log.info("[一键认证] 用户已存在，执行登录: userId={}, authType={}",
+                log.info("[OneStopAuth] User found, executing login — userId={}, authType={}",
                         user.userId(), request.authType());
 
                 return handleExistingUser(user, context);
             } else {
-                log.info("[一键认证] 用户不存在，执行注册: authType={}", request.authType());
+                log.info("[OneStopAuth] User not found, executing registration — authType={}", request.authType());
 
                 return handleNewUser(context);
             }
         } catch (Exception e) {
-            log.error("[一键认证] 认证失败: authType={}, error={}",
+            log.error("[OneStopAuth] Authentication failed — authType={}, error={}",
                     request.authType(), e.getMessage(), e);
             throw e;
         } finally {
@@ -69,7 +69,7 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
         AuthenticationResult result = generateAuthenticationResult(user, context);
         afterLogin(user, result, context);
 
-        log.info("[一键认证] 登录成功: userId={}, nickname={}", user.userId(), user.nickname());
+        log.info("[OneStopAuth] Login successful — userId={}, nickname={}", user.userId(), user.nickname());
         return result;
     }
 
@@ -83,7 +83,7 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
         afterRegister(user, context);
         AuthenticationResult result = generateAuthenticationResult(user, context);
 
-        log.info("[一键认证] 注册并登录成功: userId={}, nickname={}", user.userId(), user.nickname());
+        log.info("[OneStopAuth] Registration and login successful — userId={}, nickname={}", user.userId(), user.nickname());
         return result;
     }
 
@@ -111,28 +111,28 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
      * Hook invoked before login token generation.
      */
     protected void beforeLogin(UserDTO user, OneStopAuthContext context) {
-        log.debug("[一键认证钩子] 登录前置处理: userId={}", user.userId());
+        log.debug("[OneStopAuthHook] Pre-login processing — userId={}", user.userId());
     }
 
     /**
      * Hook invoked after a successful login.
      */
     protected void afterLogin(UserDTO user, AuthenticationResult result, OneStopAuthContext context) {
-        log.debug("[一键认证钩子] 登录后置处理: userId={}", user.userId());
+        log.debug("[OneStopAuthHook] Post-login processing — userId={}", user.userId());
     }
 
     /**
      * Hook invoked before registration.
      */
     protected void beforeRegister(OneStopAuthContext context) {
-        log.debug("[一键认证钩子] 注册前置处理");
+        log.debug("[OneStopAuthHook] Pre-registration processing");
     }
 
     /**
      * Hook invoked after registration.
      */
     protected void afterRegister(UserDTO user, OneStopAuthContext context) {
-        log.debug("[一键认证钩子] 注册后置处理: userId={}", user.userId());
+        log.debug("[OneStopAuthHook] Post-registration processing — userId={}", user.userId());
     }
 
     /**

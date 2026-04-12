@@ -8,10 +8,10 @@ public class Email {
 
     public Email(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("邮箱地址不能为空");
+            throw new IllegalArgumentException("Email address must not be blank");
         }
         if (!isValidEmail(value)) {
-            throw new IllegalArgumentException("邮箱格式不正确: " + value);
+            throw new IllegalArgumentException("Invalid email address: " + value);
         }
         this.value = value.trim().toLowerCase();
     }

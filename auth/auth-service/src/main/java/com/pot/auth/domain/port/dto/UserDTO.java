@@ -9,13 +9,13 @@ import java.util.Set;
 
 @Builder
 public record UserDTO(
-                UserId userId, // 使用Long而不是UserId，简化转换
+                UserId userId, // using Long instead of UserId to simplify conversion
                 UserDomain userDomain,
                 String nickname,
                 String email,
-                String phone, // 统一字段名为phone
+                String phone, // unified field name: phone
                 String status,
-                Set<String> permissions, // 添加权限集合
+                Set<String> permissions, // add permission set
                 LocalDateTime emailVerifiedAt,
                 LocalDateTime phoneVerifiedAt,
                 LocalDateTime lastLoginAt,

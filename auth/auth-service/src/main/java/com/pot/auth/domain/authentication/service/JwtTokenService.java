@@ -53,7 +53,7 @@ public class JwtTokenService {
             String nickname,
             Set<String> permissions) {
         Set<String> safePermissions = permissions != null ? permissions : Set.of();
-        log.info("[Token] 生成Token对: userId={}, userDomain={}, nickname={}, permCount={}",
+        log.info("[Token] Generating token pair — userId={}, userDomain={}, nickname={}, permCount={}",
                 userId, userDomain, nickname, safePermissions.size());
 
         try {
@@ -62,7 +62,7 @@ public class JwtTokenService {
                     userDomain,
                     safePermissions);
 
-            log.debug("[Token] 权限已缓存: userId={}, version={}, digest={}",
+            log.debug("[Token] Permissions cached — userId={}, version={}, digest={}",
                     userId, metadata.version(), metadata.digest());
 
             TokenPair tokenPair = tokenManagementPort.generateTokenPair(
@@ -74,37 +74,37 @@ public class JwtTokenService {
 
             storeRefreshToken(tokenPair.refreshToken());
 
-            log.info("[Token] Token对生成成功: userId={}, accessTokenId={}, refreshTokenId={}",
+            log.info("[Token] Token pair generated — userId={}, accessTokenId={}, refreshTokenId={}",
                     userId, tokenPair.accessToken().tokenId(), tokenPair.refreshToken().tokenId());
 
             return tokenPair;
 
         } catch (Exception e) {
-            log.error("[Token] Token生成失败: userId={}, error={}", userId, e.getMessage(), e);
+            log.error("[Token] Failed to generate token pair — userId={}, error={}", userId, e.getMessage(), e);
             throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
         }
     }
 
     public JwtToken validateAccessToken(String tokenString) {
-        log.debug("[Token] 验证AccessToken");
+        log.debug("[Token] Validating AccessToken");
 
         JwtToken token = tokenManagementPort.parseAccessToken(tokenString);
 
         if (token.isExpired()) {
-            log.warn("[Token] AccessToken已过期: tokenId={}", token.tokenId());
-            throw new TokenExpiredException("AccessToken已过期");
+            log.warn("[Token] AccessToken has expired: tokenId={}", token.tokenId());
+            throw new TokenExpiredException("AccessToken has expired");
         }
 
         if (isInBlacklist(token.tokenId())) {
-            log.warn("[Token] AccessToken在黑名单中: tokenId={}", token.tokenId());
-            throw new TokenInvalidException("Token已失效");
+            log.warn("[Token] AccessToken is blacklisted — tokenId={}", token.tokenId());
+            throw new TokenInvalidException("Token has been revoked");
         }
 
         if (permissionVersionEnabled) {
             validatePermissionVersion(token);
         }
 
-        log.debug("[Token] AccessToken验证成功: tokenId={}", token.tokenId());
+        log.debug("[Token] AccessToken validation passed — tokenId={}", token.tokenId());
         return token;
     }
 
@@ -112,7 +112,7 @@ public class JwtTokenService {
         try {
             Long tokenPermVersion = token.getClaim("perm_version", Long.class);
             if (tokenPermVersion == null) {
-                log.debug("[权限验证] Token无版本号（旧Token），跳过验证: tokenId={}", token.tokenId());
+                log.debug("[PermVerify] Token has no version (legacy token), skipping verification — tokenId={}", token.tokenId());
                 return;
             }
 
@@ -122,35 +122,35 @@ public class JwtTokenService {
 
             PermissionVersion tokenVersion = new PermissionVersion(tokenPermVersion);
             if (tokenVersion.isOlderThan(currentVersion)) {
-                log.warn("[权限验证] Token权限版本过期: userId={}, tokenVersion={}, currentVersion={}",
+                log.warn("[PermVerify] Token permission version stale — userId={}, tokenVersion={}, currentVersion={}",
                         token.userId(), tokenVersion, currentVersion);
-                throw new TokenInvalidException("权限已变更，请重新登录");
+                throw new TokenInvalidException("Permissions have changed, please sign in again");
             }
 
-            log.debug("[权限验证] 权限版证通过: userId={}, version={}",
+            log.debug("[PermVerify] Permission version verified — userId={}, version={}",
                     token.userId(), tokenVersion);
 
         } catch (TokenInvalidException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[权限验证] 版本验证失败（降级放行）: error={}", e.getMessage());
+            log.error("[PermVerify] Version verification failed (degraded, allowing through) — error={}", e.getMessage());
         }
     }
 
     public TokenPair refreshToken(String refreshTokenString) {
-        log.info("[Token] 开始刷新Token");
+        log.info("[Token] Refreshing token");
 
         RefreshToken oldRefreshToken = tokenManagementPort.parseRefreshToken(refreshTokenString);
 
         if (oldRefreshToken.isExpired()) {
-            log.warn("[Token] RefreshToken已过期: tokenId={}", oldRefreshToken.tokenId());
-            throw new TokenExpiredException("RefreshToken已过期，请重新登录");
+            log.warn("[Token] RefreshToken has expired: tokenId={}", oldRefreshToken.tokenId());
+            throw new TokenExpiredException("Refresh token has expired, please sign in again");
         }
 
         String cacheKey = "auth:refresh:" + oldRefreshToken.tokenId().value();
         if (!cachePort.exists(cacheKey)) {
-            log.warn("[Token] RefreshToken不存在或已被撤销: tokenId={}", oldRefreshToken.tokenId());
-            throw new TokenInvalidException("RefreshToken已失效，请重新登录");
+            log.warn("[Token] RefreshToken does not exist or has been revoked — tokenId={}", oldRefreshToken.tokenId());
+            throw new TokenInvalidException("Refresh token has been revoked, please sign in again");
         }
 
         Set<String> authorities = userModulePortFactory
@@ -172,39 +172,39 @@ public class JwtTokenService {
         cachePort.delete(cacheKey);
 
         if (oldRefreshToken.isWithinSlidingWindow(refreshTokenSlidingWindow)) {
-            log.info("[Token] RefreshToken在滑动窗口内，已续期: tokenId={}", oldRefreshToken.tokenId());
+            log.info("[Token] RefreshToken renewed within sliding window — tokenId={}", oldRefreshToken.tokenId());
             storeRefreshToken(newTokenPair.refreshToken());
         } else {
-            log.info("[Token] RefreshToken不在滑动窗口内，复用旧Token: tokenId={}", oldRefreshToken.tokenId());
+            log.info("[Token] RefreshToken outside sliding window, reusing existing token — tokenId={}", oldRefreshToken.tokenId());
             storeRefreshToken(oldRefreshToken);
         }
 
-        log.info("[Token] Token刷新成功: userId={}", oldRefreshToken.userId());
+        log.info("[Token] Token refreshed — userId={}", oldRefreshToken.userId());
         return newTokenPair;
     }
 
     public void addToBlacklist(TokenId tokenId, long remainingSeconds) {
-        log.info("[Token] 将Token加入黑名单: tokenId={}, ttl={}s", tokenId, remainingSeconds);
+        log.info("[Token] Blacklisting token — tokenId={}, ttl={}s", tokenId, remainingSeconds);
 
         String blacklistKey = "auth:blacklist:" + tokenId.value();
         cachePort.set(blacklistKey, "1", Duration.ofSeconds(remainingSeconds));
     }
 
     public void logout(String accessTokenStr, String refreshTokenStr) {
-        log.info("[Token] 执行登出");
+        log.info("[Token] Processing logout");
 
         try {
             JwtToken token = tokenManagementPort.parseAccessToken(accessTokenStr);
             long remaining = token.getRemainingSeconds();
             if (remaining > 0) {
                 addToBlacklist(token.tokenId(), remaining);
-                log.info("[Token] AccessToken 已加入黑名单: tokenId={}, ttl={}s",
+                log.info("[Token] AccessToken blacklisted — tokenId={}, ttl={}s",
                         token.tokenId(), remaining);
             } else {
-                log.debug("[Token] AccessToken 已自然过期，无需加入黑名单");
+                log.debug("[Token] AccessToken already expired naturally, blacklist not required");
             }
         } catch (Exception e) {
-            log.warn("[Token] 登出时 AccessToken 解析失败（忽略）: {}", e.getMessage());
+            log.warn("[Token] Failed to parse AccessToken during logout (ignored): {}", e.getMessage());
         }
 
         if (refreshTokenStr != null && !refreshTokenStr.isBlank()) {
@@ -212,13 +212,13 @@ public class JwtTokenService {
                 RefreshToken refreshToken = tokenManagementPort.parseRefreshToken(refreshTokenStr);
                 String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
                 cachePort.delete(cacheKey);
-                log.info("[Token] RefreshToken 缓存已删除: tokenId={}", refreshToken.tokenId());
+                log.info("[Token] RefreshToken cache entry removed — tokenId={}", refreshToken.tokenId());
             } catch (Exception e) {
-                log.warn("[Token] 登出时 RefreshToken 解析失败（忽略）: {}", e.getMessage());
+                log.warn("[Token] Failed to parse RefreshToken during logout (ignored): {}", e.getMessage());
             }
         }
 
-        log.info("[Token] 登出完成");
+        log.info("[Token] Logout complete");
     }
 
     private boolean isInBlacklist(TokenId tokenId) {

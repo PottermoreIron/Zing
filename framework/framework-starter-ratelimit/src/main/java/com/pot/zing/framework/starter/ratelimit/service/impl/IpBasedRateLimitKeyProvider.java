@@ -69,7 +69,7 @@ public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
 
             return request.getRemoteAddr();
         } catch (Exception e) {
-            log.warn("获取客户端IP失败", e);
+            log.warn("[RateLimit] Failed to resolve client IP address", e);
             return null;
         }
     }

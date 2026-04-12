@@ -1,5 +1,5 @@
 ---
-description: "Use when building or changing REST controllers, public APIs, or OpenAPI contracts in Zing. Covers transport-only controllers, unified Result<T>, request validation, standard errors, API security, and contract documentation. Trigger words: REST, controller, OpenAPI, facade, operationId, tags, Result<T>, 控制器, 接口, 契约, 文档."
+description: "Use when building or changing REST controllers, public APIs, or OpenAPI contracts in Zing. Covers transport-only controllers, unified Result<T>, request validation, standard errors, API security, and contract documentation. Trigger words: REST, controller, OpenAPI, facade, operationId, tags, Result<T>, controller, API contract, response schema."
 name: "Zing API And OpenAPI Rules"
 applyTo: "**/interfaces/rest/**/*.java, **/*Controller.java"
 ---

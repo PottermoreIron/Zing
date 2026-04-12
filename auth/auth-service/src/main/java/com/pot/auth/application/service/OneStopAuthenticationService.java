@@ -32,7 +32,7 @@ public class OneStopAuthenticationService {
                         String ipAddress,
                         String userAgent) {
 
-                log.info("[一键认证服务] 开始处理认证请求: authType={}, userDomain={}",
+                log.info("[OneStopAuth] Processing authentication request — authType={}, userDomain={}",
                                 command.authType(), command.userDomain());
 
                 OneStopAuthContext context = OneStopAuthContext.builder()
@@ -48,7 +48,7 @@ public class OneStopAuthenticationService {
 
                 OneStopAuthResponse response = OneStopAuthResponse.from(result);
 
-                log.info("[一键认证服务] 认证成功: userId={}, authType={}",
+                log.info("[OneStopAuth] Authentication successful — userId={}, authType={}",
                                 result.userId(), command.authType());
 
                 return response;

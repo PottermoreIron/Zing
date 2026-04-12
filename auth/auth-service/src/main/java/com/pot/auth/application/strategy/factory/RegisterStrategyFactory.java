@@ -21,22 +21,22 @@ public class RegisterStrategyFactory {
     private final Map<RegisterType, RegisterStrategy> strategyMap = new ConcurrentHashMap<>();
 
     public RegisterStrategyFactory(List<RegisterStrategy> strategies) {
-        log.info("[注册策略工厂] 开始初始化，共有 {} 个策略", strategies.size());
+        log.info("[RegisterStrategyFactory] Initializing with {} strategies", strategies.size());
         for (RegisterStrategy strategy : strategies) {
             RegisterType registerType = strategy.getSupportedRegisterType();
             strategyMap.put(registerType, strategy);
-            log.info("[注册策略工厂] 注册策略: {} -> {}", registerType, strategy.getClass().getSimpleName());
+            log.info("[RegisterStrategyFactory] Mapped strategy: {} -> {}", registerType, strategy.getClass().getSimpleName());
         }
-        log.info("[注册策略工厂] 初始化完成，已注册策略: {}", strategyMap.keySet());
+        log.info("[RegisterStrategyFactory] Initialization complete, strategies: {}", strategyMap.keySet());
     }
 
     public RegisterStrategy getStrategy(RegisterType registerType) {
         RegisterStrategy strategy = strategyMap.get(registerType);
         if (strategy == null) {
-            log.error("[注册策略工厂] 未找到注册策略: registerType={}", registerType);
+            log.error("[RegisterStrategyFactory] No strategy found — registerType={}", registerType);
             throw new DomainException(AuthResultCode.UNSUPPORTED_REGISTER_TYPE);
         }
-        log.debug("[注册策略工厂] 找到注册策略: {} -> {}", registerType, strategy.getClass().getSimpleName());
+        log.debug("[RegisterStrategyFactory] Strategy resolved: {} -> {}", registerType, strategy.getClass().getSimpleName());
         return strategy;
     }
 

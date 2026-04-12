@@ -4,7 +4,7 @@ public record PermissionId(Long value) {
 
     public PermissionId {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("权限ID不能为空且必须为正数");
+            throw new IllegalArgumentException("Permission ID must not be null and must be a positive number");
         }
     }
 

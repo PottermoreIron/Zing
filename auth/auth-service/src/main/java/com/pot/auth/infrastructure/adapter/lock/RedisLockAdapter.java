@@ -33,7 +33,7 @@ public class RedisLockAdapter implements DistributedLockPort {
             locked = tryLock(fullLockKey, leaseTime, timeUnit);
 
             if (!locked) {
-                log.warn("[分布式锁] 获取锁失败: key={}", lockKey);
+                log.warn("[DistributedLock] Failed to acquire lock — key={}", lockKey);
                 return null;
             }
 
@@ -59,7 +59,7 @@ public class RedisLockAdapter implements DistributedLockPort {
             locked = tryLock(fullLockKey, leaseTime, timeUnit);
 
             if (!locked) {
-                log.warn("[分布式锁] 获取锁失败: key={}", lockKey);
+                log.warn("[DistributedLock] Failed to acquire lock — key={}", lockKey);
                 return false;
             }
 
@@ -79,7 +79,7 @@ public class RedisLockAdapter implements DistributedLockPort {
                     .setIfAbsent(lockKey, "1", leaseTime, timeUnit);
             return Boolean.TRUE.equals(success);
         } catch (Exception e) {
-            log.error("[分布式锁] 获取锁异常: key={}", lockKey, e);
+            log.error("[DistributedLock] Exception while acquiring lock — key={}", lockKey, e);
             return false;
         }
     }
@@ -89,7 +89,7 @@ public class RedisLockAdapter implements DistributedLockPort {
         try {
             redisTemplate.delete(lockKey);
         } catch (Exception e) {
-            log.error("[分布式锁] 释放锁异常: key={}", lockKey, e);
+            log.error("[DistributedLock] Exception while releasing lock — key={}", lockKey, e);
         }
     }
 }

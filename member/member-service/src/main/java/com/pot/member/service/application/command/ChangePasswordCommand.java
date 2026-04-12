@@ -5,6 +5,6 @@ import jakarta.validation.constraints.Size;
 
 public record ChangePasswordCommand(
         Long memberId,
-        @NotBlank(message = "原密码不能为空") String oldPassword,
-        @NotBlank(message = "新密码不能为空") @Size(min = 8, max = 128, message = "密码长度必须在8-128个字符之间") String newPassword) {
+        @NotBlank(message = "Current password must not be blank") String oldPassword,
+        @NotBlank(message = "New password must not be blank") @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters") String newPassword) {
 }

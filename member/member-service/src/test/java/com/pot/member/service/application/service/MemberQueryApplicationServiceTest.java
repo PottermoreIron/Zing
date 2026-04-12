@@ -71,7 +71,7 @@ class MemberQueryApplicationServiceTest {
     class GetMember {
 
         @Test
-        @DisplayName("按 memberId 查询成功时返回 DTO")
+        @DisplayName("Query by memberId returns DTO on success")
         void getMember_byMemberId_returnsDto() {
             MemberAggregate aggregate = memberAggregate(1L);
             MemberDTO expected = MemberDTO.builder().memberId(1L).nickname("member1").build();
@@ -90,7 +90,7 @@ class MemberQueryApplicationServiceTest {
     class Exists {
 
         @Test
-        @DisplayName("按邮箱存在性查询直接委托仓储")
+        @DisplayName("Email existence query delegates directly to repository")
         void existsByEmail_delegatesToRepository() {
             given(memberRepository.existsByEmail(Email.of("member@test.com"))).willReturn(true);
 
@@ -106,7 +106,7 @@ class MemberQueryApplicationServiceTest {
     class GetProfile {
 
         @Test
-        @DisplayName("会员存在时返回 profile DTO")
+        @DisplayName("Returns profile DTO when member exists")
         void getProfile_memberExists_returnsProfileDto() {
             MemberAggregate aggregate = memberAggregate(2L);
             given(memberRepository.findById(MemberId.of(2L))).willReturn(Optional.of(aggregate));
@@ -119,7 +119,7 @@ class MemberQueryApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("会员不存在时抛出 MemberException")
+        @DisplayName("Throws MemberException when member not found")
         void getProfile_memberMissing_throwsMemberException() {
             given(memberRepository.findById(MemberId.of(99L))).willReturn(Optional.empty());
 
@@ -135,7 +135,7 @@ class MemberQueryApplicationServiceTest {
     class GetDevices {
 
         @Test
-        @DisplayName("设备聚合映射为 facade DTO")
+        @DisplayName("Device aggregate is mapped to facade DTO")
         void getDevices_mapsAggregatesToFacadeDtos() {
             DeviceAggregate device = DeviceAggregate.reconstitute(
                     10L,

@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or refactoring Java in the Zing repo. Covers field design, null handling, Optional, generics, exceptions, records, Lombok, and logging. Trigger words: Java, Optional, record, exception, Lombok, logging, 空值, 异常, 日志."
+description: "Use when writing or refactoring Java in the Zing repo. Covers field design, null handling, Optional, generics, exceptions, records, Lombok, and logging. Trigger words: Java, Optional, record, exception, Lombok, logging, null handling, exception, logging."
 name: "Zing Java Rules"
 applyTo: "**/*.java"
 ---

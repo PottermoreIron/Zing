@@ -47,13 +47,13 @@ public class WeChatOneStopAuthStrategy
             UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
             return userModulePort.findUserByWeChat(weChatUserInfo.getOpenId()).orElse(null);
         } catch (Exception e) {
-            throw new DomainException("获取微信用户信息失败: " + e.getMessage(), e);
+            throw new DomainException("Failed to fetch WeChat user info: " + e.getMessage(), e);
         }
     }
 
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
-        log.debug("[微信认证] 用户已绑定，直接登录: userId={}", user.userId());
+        log.debug("[WeChatAuth] User already bound, executing login — userId={}", user.userId());
     }
 
     @Override

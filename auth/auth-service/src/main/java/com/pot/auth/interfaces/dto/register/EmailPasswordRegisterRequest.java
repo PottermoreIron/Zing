@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
  * Register request for email and password.
  */
 public record EmailPasswordRegisterRequest(
-                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+                @NotNull(message = "Register type must not be null") @JsonProperty("registerType") RegisterType registerType,
 
                 @ValidEmail String email,
 

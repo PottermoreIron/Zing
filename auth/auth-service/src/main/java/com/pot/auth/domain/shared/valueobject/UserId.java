@@ -7,7 +7,7 @@ public record UserId(Long value) {
 
     public UserId {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("UserId必须是正整数");
+            throw new IllegalArgumentException("UserId must be a positive integer");
         }
     }
 
@@ -19,7 +19,7 @@ public record UserId(Long value) {
         try {
             return new UserId(Long.parseLong(value));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("无效的UserId格式: " + value, e);
+            throw new IllegalArgumentException("Invalid UserId format: " + value, e);
         }
     }
 }

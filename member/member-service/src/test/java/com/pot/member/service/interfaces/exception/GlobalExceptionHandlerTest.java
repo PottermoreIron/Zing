@@ -15,7 +15,7 @@ class GlobalExceptionHandlerTest {
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    @DisplayName("业务异常沿用 member 结果码")
+    @DisplayName("Business exception uses member result code")
     void handleBusinessException_usesMemberResultCode() {
         R<?> response = handler.handleBusinessException(new MemberException(MemberResultCode.MEMBER_NOT_FOUND));
 
@@ -24,11 +24,11 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("参数异常映射为 PARAM_ERROR")
+    @DisplayName("Illegal argument exception maps to PARAM_ERROR")
     void handleIllegalArgument_returnsParamError() {
-        R<Void> response = handler.handleIllegalArgument(new IllegalArgumentException("昵称不能为空"));
+        R<Void> response = handler.handleIllegalArgument(new IllegalArgumentException("Nickname must not be blank"));
 
         assertThat(response.getCode()).isEqualTo(ResultCode.PARAM_ERROR.getCode());
-        assertThat(response.getMsg()).isEqualTo("昵称不能为空");
+        assertThat(response.getMsg()).isEqualTo("Nickname must not be blank");
     }
 }

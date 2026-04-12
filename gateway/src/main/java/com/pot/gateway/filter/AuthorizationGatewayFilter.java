@@ -60,7 +60,7 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
 
         if (isInternalPath(path)) {
-            log.warn("[鉴权] 禁止访问内部路径: path={}", path);
+            log.warn("[Auth] Access to internal path is forbidden — path={}", path);
             return reject(exchange, HttpStatus.FORBIDDEN);
         }
 
@@ -70,7 +70,7 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
 
         String token = extractToken(exchange);
         if (token == null) {
-            log.warn("[鉴权] 未提供 Token: path={}", path);
+            log.warn("[Auth] Token not provided — path={}", path);
             return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
@@ -78,23 +78,23 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         try {
             principal = authenticate(token);
         } catch (JwtException | IllegalArgumentException ex) {
-            log.warn("[鉴权] Token 验证失败: path={}, error={}", path, ex.getMessage());
+            log.warn("[Auth] Token validation failed — path={}, error={}", path, ex.getMessage());
             return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
         if (isBlacklisted(principal.tokenId())) {
-            log.warn("[鉴权] Token 已被吊销（黑名单）: tokenId={}", principal.tokenId());
+            log.warn("[Auth] Token has been revoked (blacklisted) — tokenId={}", principal.tokenId());
             return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
         if (!isPermVersionValid(principal.userId(), principal.userDomain(), principal.permVersion())) {
-            log.warn("[鉴权] 权限版本已过期，请重新登录: userId={}, tokenVersion={}", principal.userId(),
+            log.warn("[Auth] Permission version expired, please sign in again — userId={}, tokenVersion={}", principal.userId(),
                     principal.permVersion());
             return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
         ServerWebExchange enrichedExchange = injectUserHeaders(exchange, principal);
-        log.debug("[鉴权] 验证通过: userId={}, domain={}, path={}", principal.userId(), principal.userDomain(), path);
+        log.debug("[Auth] Validation passed — userId={}, domain={}, path={}", principal.userId(), principal.userDomain(), path);
         return chain.filter(enrichedExchange);
     }
 

@@ -16,17 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GlobalExceptionHandlerTest {
 
     @Test
-    @DisplayName("权限拒绝异常映射为 403 和 PERMISSION_DENIED")
+    @DisplayName("Permission denied exception maps to 403 and PERMISSION_DENIED")
     void handlePermissionDenied_mapsToForbidden() throws NoSuchMethodException {
         GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-        R<Void> response = handler.handlePermissionDenied(new PermissionDeniedException("权限不足"));
+        R<Void> response = handler.handlePermissionDenied(new PermissionDeniedException("Insufficient permissions"));
         Method method = GlobalExceptionHandler.class.getMethod(
                 "handlePermissionDenied", PermissionDeniedException.class);
         ResponseStatus responseStatus = method.getAnnotation(ResponseStatus.class);
 
         assertThat(response.getCode()).isEqualTo(AuthResultCode.PERMISSION_DENIED.getCode());
-        assertThat(response.getMsg()).isEqualTo("权限不足");
+        assertThat(response.getMsg()).isEqualTo("Insufficient permissions");
         assertThat(responseStatus.value()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 }

@@ -26,7 +26,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
     public final AuthenticationResult execute(RegistrationContext context) {
         var request = context.request();
 
-        log.info("[注册策略] 开始执行注册: type={}, userDomain={}, ip={}",
+        log.info("[RegisterStrategy] Executing registration — type={}, userDomain={}, ip={}",
                 request.registerType(), request.userDomain(), context.ipAddress().value());
 
         try {
@@ -36,7 +36,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
             afterRegister(user, context);
             AuthenticationResult result = generateAuthenticationResult(user, context);
 
-            log.info("[注册策略] 注册成功: userId={}, nickname={}, type={}",
+            log.info("[RegisterStrategy] Registration successful — userId={}, nickname={}, type={}",
                     user.userId(), user.nickname(), request.registerType());
 
             return result;
@@ -61,14 +61,14 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
      * Hook invoked before user creation.
      */
     protected void beforeRegister(RegistrationContext context) {
-        log.debug("[注册钩子] 注册前置处理");
+        log.debug("[RegisterHook] Pre-registration processing");
     }
 
     /**
      * Hook invoked after user creation.
      */
     protected void afterRegister(UserDTO user, RegistrationContext context) {
-        log.debug("[注册钩子] 注册后置处理: userId={}", user.userId());
+        log.debug("[RegisterHook] Post-registration processing — userId={}", user.userId());
     }
 
     /**
@@ -103,7 +103,7 @@ public abstract class AbstractRegisterStrategyImpl implements RegisterStrategy {
      * Handles a failed register attempt.
      */
     protected void handleRegisterFailure(RegistrationContext context, Exception e) {
-        log.error("[注册策略] 注册失败: type={}, ip={}, error={}",
+        log.error("[RegisterStrategy] Registration failed — type={}, ip={}, error={}",
                 context.request().registerType(),
                 context.ipAddress().value(),
                 e.getMessage());

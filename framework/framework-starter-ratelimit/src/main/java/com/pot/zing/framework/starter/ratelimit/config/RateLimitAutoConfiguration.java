@@ -32,7 +32,7 @@ public class RateLimitAutoConfiguration {
     @ConditionalOnMissingBean(RateLimitManager.class)
     @ConditionalOnProperty(prefix = "pot.ratelimit", name = "provider", havingValue = "guava", matchIfMissing = true)
     public RateLimitManager guavaRateLimitManager(RateLimitProperties properties) {
-        log.info("初始化Pot Guava限流管理器 - expireAfterAccess: {} 小时", properties.getExpireAfterAccess());
+        log.info("Initializing Guava rate-limit manager — expireAfterAccess: {} h", properties.getExpireAfterAccess());
         return new GuavaRateLimitManager(properties);
     }
 
@@ -44,7 +44,7 @@ public class RateLimitAutoConfiguration {
     @ConditionalOnProperty(prefix = "pot.ratelimit", name = "provider", havingValue = "redis")
     @ConditionalOnBean(RedisService.class)
     public RateLimitManager redisRateLimitManager(RedisService redisService, RateLimitProperties properties) {
-        log.info("初始化Pot Redis限流管理器 - expireAfterAccess: {} 小时", properties.getExpireAfterAccess());
+        log.info("Initializing Redis rate-limit manager — expireAfterAccess: {} h", properties.getExpireAfterAccess());
         return new RedisRateLimitManager(redisService, properties);
     }
 
@@ -54,7 +54,7 @@ public class RateLimitAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "potFixedRateLimitKeyProvider")
     public RateLimitKeyProvider potFixedRateLimitKeyProvider() {
-        log.debug("注册Pot固定限流Key提供者");
+        log.debug("Registering fixed-key rate-limit provider");
         return new FixedRateLimitKeyProvider();
     }
 
@@ -65,7 +65,7 @@ public class RateLimitAutoConfiguration {
     @ConditionalOnMissingBean(name = "potIpBasedRateLimitKeyProvider")
     @ConditionalOnProperty(prefix = "pot.ratelimit", name = "ip-based-enabled", havingValue = "true", matchIfMissing = true)
     public RateLimitKeyProvider potIpBasedRateLimitKeyProvider() {
-        log.debug("注册Pot IP限流Key提供者");
+        log.debug("Registering IP-based rate-limit key provider");
         return new IpBasedRateLimitKeyProvider();
     }
 
@@ -76,7 +76,7 @@ public class RateLimitAutoConfiguration {
     @ConditionalOnMissingBean(name = "potUserBasedRateLimitKeyProvider")
     @ConditionalOnProperty(prefix = "pot.ratelimit", name = "user-based-enabled", havingValue = "true", matchIfMissing = true)
     public RateLimitKeyProvider potUserBasedRateLimitKeyProvider() {
-        log.debug("注册Pot用户限流Key提供者");
+        log.debug("Registering user-based rate-limit key provider");
         return new UserBasedRateLimitKeyProvider();
     }
 
@@ -89,7 +89,7 @@ public class RateLimitAutoConfiguration {
             RateLimitManager rateLimitManager,
             List<RateLimitKeyProvider> keyProviders,
             RateLimitProperties properties) {
-        log.info("初始化Pot限流切面 - 管理器类型: {}, Key提供者数量: {}",
+        log.info("Initializing rate-limit aspect — manager: {}, key providers: {}",
                 rateLimitManager.getType(), keyProviders.size());
         return new RateLimitAspect(rateLimitManager, keyProviders, properties);
     }

@@ -185,9 +185,9 @@ public class Member implements Serializable {
 
     @Getter
     public enum Gender {
-        UNKNOWN(0, "未知"),
-        MALE(1, "男"),
-        FEMALE(2, "女");
+        UNKNOWN(0, "Unknown"),
+        MALE(1, "Male"),
+        FEMALE(2, "Female");
 
         private final Integer code;
         private final String description;
@@ -203,16 +203,16 @@ public class Member implements Serializable {
                     return gender;
                 }
             }
-            throw new IllegalArgumentException("未知的性别类型: " + code);
+            throw new IllegalArgumentException("Unknown gender type: " + code);
         }
     }
 
     @Getter
     public enum AccountStatus {
-        ACTIVE("active", "活跃"),
-        INACTIVE("inactive", "非活跃"),
-        SUSPENDED("suspended", "暂停"),
-        PENDING_VERIFICATION("pending_verification", "待验证");
+        ACTIVE("active", "Active"),
+        INACTIVE("inactive", "Inactive"),
+        SUSPENDED("suspended", "Suspended"),
+        PENDING_VERIFICATION("pending_verification", "Pending Verification");
 
         private final String code;
         private final String description;
@@ -228,7 +228,7 @@ public class Member implements Serializable {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("未知的账户状态: " + code);
+            throw new IllegalArgumentException("Unknown account status: " + code);
         }
     }
 }

@@ -21,7 +21,7 @@ public class PermissionChangedEventListener implements MessageConsumer<Permissio
 
     @Override
     public void consume(PermissionChangedEvent event) {
-        log.info("[权限变更监听] 收到权限变更事件: changeType={}, affectedMembers={}, roleId={}, permissionId={}",
+        log.info("[PermissionEvent] Permission change event received — changeType={}, affectedMembers={}, roleId={}, permissionId={}",
                 event.getChangeType(), event.getAffectedMemberIds().size(),
                 event.getRoleId(), event.getPermissionId());
 
@@ -32,9 +32,9 @@ public class PermissionChangedEventListener implements MessageConsumer<Permissio
                         UserDomain.MEMBER);
             }
 
-            log.info("[权限变更监听] 成功清除{}个会员的权限缓存", event.getAffectedMemberIds().size());
+            log.info("[PermissionEvent] Permission cache cleared for {} member(s)", event.getAffectedMemberIds().size());
         } catch (Exception e) {
-            log.error("[权限变更监听] 处理权限变更事件失败: eventId={}, error={}",
+            log.error("[PermissionEvent] Failed to process permission change event — eventId={}, error={}",
                     event.getEventId(), e.getMessage(), e);
             // Cache invalidation is best-effort and should not trigger message retries.
         }

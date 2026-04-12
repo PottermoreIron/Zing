@@ -35,7 +35,7 @@ class JwtConfigTest {
     private JwtConfig jwtConfig;
 
     @Test
-    @DisplayName("优先从内联公钥加载")
+    @DisplayName("Inline public key takes priority over file location")
     void jwtPublicKey_loadsInlinePublicKey() throws Exception {
         KeyPair keyPair = generateKeyPair();
         given(jwtProperties.getPublicKey()).willReturn(toPem(keyPair.getPublic()));
@@ -46,7 +46,7 @@ class JwtConfigTest {
     }
 
     @Test
-    @DisplayName("从资源流加载公钥，兼容打包后的 classpath 资源")
+    @DisplayName("Loads public key from resource stream, compatible with packaged classpath resources")
     void jwtPublicKey_loadsFromResourceStream() throws Exception {
         KeyPair keyPair = generateKeyPair();
         String pem = toPem(keyPair.getPublic());
@@ -63,7 +63,7 @@ class JwtConfigTest {
     }
 
     @Test
-    @DisplayName("资源不存在时抛出明确配置异常")
+    @DisplayName("Missing resource throws a clear configuration exception")
     void jwtPublicKey_missingResource_throwsConfigurationException() {
         given(jwtProperties.getPublicKey()).willReturn(null);
         given(jwtProperties.getPublicKeyLocation()).willReturn("classpath:missing.pem");
@@ -72,7 +72,7 @@ class JwtConfigTest {
 
         assertThatThrownBy(() -> jwtConfig.jwtPublicKey())
                 .isInstanceOf(GatewayConfigurationException.class)
-                .hasMessageContaining("无法加载JWT公钥");
+                .hasMessageContaining("Failed to load JWT public key");
     }
 
     private KeyPair generateKeyPair() throws Exception {

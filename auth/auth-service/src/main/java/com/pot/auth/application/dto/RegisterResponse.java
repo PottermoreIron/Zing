@@ -38,6 +38,6 @@ public record RegisterResponse(
                                 refreshToken,
                                 accessTokenExpiresAt,
                                 refreshTokenExpiresAt,
-                                "注册成功");
+                                "Registration successful");
         }
 }

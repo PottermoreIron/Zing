@@ -5,19 +5,19 @@ import lombok.Getter;
 @Getter
 public enum AuthType {
 
-        USERNAME_PASSWORD("username_password", "用户名密码认证"),
+        USERNAME_PASSWORD("username_password", "Username-password authentication"),
 
-        PHONE_PASSWORD("phone_password", "手机号密码认证"),
+        PHONE_PASSWORD("phone_password", "Phone-password authentication"),
 
-        PHONE_CODE("phone_code", "手机号验证码认证"),
+        PHONE_CODE("phone_code", "Phone verification code authentication"),
 
-        EMAIL_PASSWORD("email_password", "邮箱密码认证"),
+        EMAIL_PASSWORD("email_password", "Email-password authentication"),
 
-        EMAIL_CODE("email_code", "邮箱验证码认证"),
+        EMAIL_CODE("email_code", "Email verification code authentication"),
 
-        OAUTH2("oauth2", "OAuth2认证"),
+        OAUTH2("oauth2", "OAuth2 authentication"),
 
-        WECHAT("wechat", "微信认证");
+        WECHAT("wechat", "WeChat authentication");
 
     private final String code;
     private final String description;
@@ -33,6 +33,6 @@ public enum AuthType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("未知的认证类型: " + code);
+        throw new IllegalArgumentException("Unknown authentication type: " + code);
     }
 }

@@ -19,7 +19,7 @@ public abstract class AbstractEmailChannelImpl extends AbstractTouchChannelImpl 
     @Override
     protected void validateRequest(TouchRequest request) {
         if (!ValidationUtils.isValidEmail(request.getTarget())) {
-            throw new TouchException("邮箱格式错误: " + request.getTarget());
+            throw new TouchException("Invalid email address format: " + request.getTarget());
         }
     }
 

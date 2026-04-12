@@ -9,12 +9,12 @@ import java.io.Serializable;
 
 @Builder
 public record BindSocialAccountRequest(
-        @NotNull(message = "用户ID不能为空") Long memberId,
-        @NotBlank(message = "平台提供商不能为空") String provider,
-        @NotBlank(message = "第三方平台用户ID不能为空") String providerMemberId,
+        @NotNull(message = "Member ID must not be null") Long memberId,
+        @NotBlank(message = "Provider must not be blank") String provider,
+        @NotBlank(message = "Provider member ID must not be blank") String providerMemberId,
         String providerUsername,
         String providerEmail,
-        @NotBlank(message = "访问令牌不能为空") String accessToken,
+        @NotBlank(message = "Access token must not be blank") String accessToken,
         String refreshToken,
         Long tokenExpiresAt,
         String scope,

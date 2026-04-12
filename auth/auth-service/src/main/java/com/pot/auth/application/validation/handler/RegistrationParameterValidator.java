@@ -15,7 +15,7 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
     @Override
     public void validate(RegistrationContext context) {
         RegisterCommand request = context.request();
-        log.debug("[参数校验] 开始校验注册请求: type={}", request.registerType());
+        log.debug("[ParamValidator] Validating registration request — type={}", request.registerType());
 
         switch (request.registerType()) {
             case USERNAME_PASSWORD -> validateNicknamePassword(request);
@@ -24,43 +24,43 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
             case PHONE_CODE -> validatePhoneCode(request);
             case OAUTH2, WECHAT -> {
             }
-            default -> throw new DomainException("不支持的注册类型: " + request.registerType());
+            default -> throw new DomainException("Unsupported registration type: " + request.registerType());
         }
     }
 
     private void validateNicknamePassword(RegisterCommand request) {
         if (!ValidationUtils.isValidNickname(request.nickname())) {
-            throw new DomainException("昵称不合法");
+            throw new DomainException("Nickname is invalid");
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("密码不合法");
+            throw new DomainException("Password is invalid");
         }
     }
 
     private void validateEmailPassword(RegisterCommand request) {
         if (!ValidationUtils.isValidEmail(request.email())) {
-            throw new DomainException("邮箱格式不正确");
+            throw new DomainException("Invalid email format");
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("密码不合法");
+            throw new DomainException("Password is invalid");
         }
     }
 
     private void validateEmailCode(RegisterCommand request) {
         if (!ValidationUtils.isValidEmail(request.email())) {
-            throw new DomainException("邮箱格式不正确");
+            throw new DomainException("Invalid email format");
         }
         if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
-            throw new DomainException("验证码格式不正确");
+            throw new DomainException("Invalid verification code format");
         }
     }
 
     private void validatePhoneCode(RegisterCommand request) {
         if (!ValidationUtils.isValidPhone(request.phone())) {
-            throw new DomainException("手机号格式不正确");
+            throw new DomainException("Invalid phone number format");
         }
         if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
-            throw new DomainException("验证码格式不正确");
+            throw new DomainException("Invalid verification code format");
         }
     }
 

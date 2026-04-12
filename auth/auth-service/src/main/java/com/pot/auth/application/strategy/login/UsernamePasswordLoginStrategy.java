@@ -33,14 +33,14 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyImpl {
     @Override
     protected void validateCredential(AuthenticationContext context) {
         var request = context.request();
-        log.debug("[昵称密码登录] 验证凭证: nickname={}", request.nickname());
+        log.debug("[UsernamePasswordLogin] Verifying credentials — nickname={}", request.nickname());
 
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
         UserDTO user = port.authenticateWithPassword(request.nickname(), request.password())
                 .orElseThrow(() -> new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
 
         context.withExtraAttribute(AUTHENTICATED_USER_KEY, user);
-        log.debug("[昵称密码登录] 凭证验证通过: nickname={}", request.nickname());
+        log.debug("[UsernamePasswordLogin] Credentials verified — nickname={}", request.nickname());
     }
 
     @Override

@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
  * One-stop authentication request for email and verification code.
  */
 public record EmailCodeAuthRequest(
-                @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
+                @NotNull(message = "Auth type must not be null") @JsonProperty("authType") AuthType authType,
 
                 @ValidEmail String email,
 

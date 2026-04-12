@@ -42,7 +42,7 @@ public class RoleApplicationService {
 
     @Transactional
     public void assignRole(AssignRoleCommand command) {
-        log.info("为会员分配角色: memberId={}, roleId={}", command.memberId(), command.roleId());
+        log.info("[Member] Assigning role — memberId={}, roleId={}", command.memberId(), command.roleId());
 
         permissionDomainService.assignRoleToMember(
                 command.memberId(),
@@ -52,7 +52,7 @@ public class RoleApplicationService {
 
     @Transactional
     public void revokeRole(Long memberId, Long roleId, String operator) {
-        log.info("撤销会员角色: memberId={}, roleId={}", memberId, roleId);
+        log.info("[Member] Revoking role — memberId={}, roleId={}", memberId, roleId);
 
         permissionDomainService.revokeRoleFromMember(memberId, roleId, operator);
     }

@@ -21,22 +21,22 @@ public class LoginStrategyFactory {
     private final Map<LoginType, LoginStrategy> strategyMap = new ConcurrentHashMap<>();
 
     public LoginStrategyFactory(List<LoginStrategy> strategies) {
-        log.info("[登录策略工厂] 开始初始化，共有 {} 个策略", strategies.size());
+        log.info("[LoginStrategyFactory] Initializing with {} strategies", strategies.size());
         for (LoginStrategy strategy : strategies) {
             LoginType loginType = strategy.getSupportedLoginType();
             strategyMap.put(loginType, strategy);
-            log.info("[登录策略工厂] 注册策略: {} -> {}", loginType, strategy.getClass().getSimpleName());
+            log.info("[LoginStrategyFactory] Mapped strategy: {} -> {}", loginType, strategy.getClass().getSimpleName());
         }
-        log.info("[登录策略工厂] 初始化完成，已注册策略: {}", strategyMap.keySet());
+        log.info("[LoginStrategyFactory] Initialization complete, strategies: {}", strategyMap.keySet());
     }
 
     public LoginStrategy getStrategy(LoginType loginType) {
         LoginStrategy strategy = strategyMap.get(loginType);
         if (strategy == null) {
-            log.error("[登录策略工厂] 未找到登录策略: loginType={}", loginType);
+            log.error("[LoginStrategyFactory] No strategy found — loginType={}", loginType);
             throw new DomainException(AuthResultCode.UNSUPPORTED_LOGIN_TYPE);
         }
-        log.debug("[登录策略工厂] 找到登录策略: {} -> {}", loginType, strategy.getClass().getSimpleName());
+        log.debug("[LoginStrategyFactory] Strategy resolved: {} -> {}", loginType, strategy.getClass().getSimpleName());
         return strategy;
     }
 

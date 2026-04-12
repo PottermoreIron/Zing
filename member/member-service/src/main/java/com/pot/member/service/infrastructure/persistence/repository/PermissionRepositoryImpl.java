@@ -31,10 +31,10 @@ public class PermissionRepositoryImpl implements PermissionRepository {
 
         if (entity.getId() == null) {
             permissionMapper.insert(entity);
-            log.debug("新增权限: {}", entity.getId());
+            log.debug("[Permission] Inserting permission — id={}", entity.getId());
         } else {
             permissionMapper.updateById(entity);
-            log.debug("更新权限: {}", entity.getId());
+            log.debug("[Permission] Updating permission — id={}", entity.getId());
         }
 
         return toAggregate(entity);
@@ -107,7 +107,7 @@ public class PermissionRepositoryImpl implements PermissionRepository {
         rolePermissionMapper.delete(wrapper);
 
         permissionMapper.deleteById(permissionId.value());
-        log.debug("删除权限: {}", permissionId.value());
+        log.debug("[Permission] Deleting permission — id={}", permissionId.value());
     }
 
     private PermissionAggregate toAggregate(Permission entity) {

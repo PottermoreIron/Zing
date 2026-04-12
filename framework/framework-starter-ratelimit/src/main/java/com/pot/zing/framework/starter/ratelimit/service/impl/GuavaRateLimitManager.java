@@ -30,7 +30,7 @@ public class GuavaRateLimitManager implements RateLimitManager {
 
     @Override
     public boolean tryAcquire(String key, double rate, long timeout, TimeUnit timeUnit) {
-        log.debug("Guava限流尝试获取令牌 - key: {}, rate: {}, timeout: {}", key, rate, timeout);
+        log.debug("Guava rate-limiter: acquiring permit — key: {}, rate: {}, timeout: {}", key, rate, timeout);
 
         rate = rate * properties.getGlobalRateFactor();
 
@@ -53,7 +53,7 @@ public class GuavaRateLimitManager implements RateLimitManager {
                 return rateLimiter.tryAcquire();
             }
         } catch (Exception e) {
-            log.error("Guava限流异常 - key: {}", key, e);
+            log.error("Guava rate-limiter exception — key: {}", key, e);
             return true;
         }
     }

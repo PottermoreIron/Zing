@@ -38,7 +38,7 @@ class RabbitMQEventPublisherAdapterTest {
     class Publish {
 
         @Test
-        @DisplayName("正常发布：调用 MessageProducer.send 并传入正确的 topic/routingKey/event")
+        @DisplayName("Normal publish: calls MessageProducer.send with correct topic/routingKey/event")
         void publish_delegatesToMessageProducer() {
             MemberDomainEvent event = testEvent("member-42");
 
@@ -51,7 +51,7 @@ class RabbitMQEventPublisherAdapterTest {
         }
 
         @Test
-        @DisplayName("MessageProducer 抛出异常 → 包裹为 MemberInfrastructureException 并重新抛出")
+        @DisplayName("MessageProducer exception is wrapped as MemberInfrastructureException and re-thrown")
         void publish_producerThrows_wrapsInMemberInfrastructureException() {
             MemberDomainEvent event = testEvent("member-99");
             willThrow(new RuntimeException("RabbitMQ down"))
@@ -59,7 +59,7 @@ class RabbitMQEventPublisherAdapterTest {
 
             assertThatThrownBy(() -> adapter.publish(event))
                     .isInstanceOf(MemberInfrastructureException.class)
-                    .hasMessageContaining("领域事件发布失败")
+                    .hasMessageContaining("Failed to publish domain event")
                     .hasCauseInstanceOf(RuntimeException.class);
         }
     }

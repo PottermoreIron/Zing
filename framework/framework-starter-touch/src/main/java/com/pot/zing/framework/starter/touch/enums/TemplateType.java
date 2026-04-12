@@ -9,11 +9,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TemplateType {
-    VERIFICATION_CODE("VERIFICATION_CODE", "验证码"),
+    VERIFICATION_CODE("VERIFICATION_CODE", "Verification Code"),
 
-    NOTIFICATION("NOTIFICATION", "通知"),
+    NOTIFICATION("NOTIFICATION", "Notification"),
 
-    MARKETING("MARKETING", "营销");
+    MARKETING("MARKETING", "Marketing");
 
     private final String code;
     private final String description;

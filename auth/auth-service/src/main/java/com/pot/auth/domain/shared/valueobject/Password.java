@@ -9,27 +9,27 @@ public record Password(String value) {
 
         public Password {
         if (value == null || value.isBlank()) {
-            throw new WeakPasswordException("密码不能为空");
+            throw new WeakPasswordException("Password must not be blank");
         }
 
         if (value.length() < MIN_LENGTH) {
-            throw new WeakPasswordException("密码至少" + MIN_LENGTH + "位");
+            throw new WeakPasswordException("Password must be at least " + MIN_LENGTH + " characters");
         }
 
         if (value.length() > MAX_LENGTH) {
-            throw new WeakPasswordException("密码最多" + MAX_LENGTH + "位");
+            throw new WeakPasswordException("Password must not exceed " + MAX_LENGTH + " characters");
         }
 
         if (!hasUpperCase(value)) {
-            throw new WeakPasswordException("密码必须包含大写字母");
+            throw new WeakPasswordException("Password must contain at least one uppercase letter");
         }
 
         if (!hasLowerCase(value)) {
-            throw new WeakPasswordException("密码必须包含小写字母");
+            throw new WeakPasswordException("Password must contain at least one lowercase letter");
         }
 
         if (!hasDigit(value)) {
-            throw new WeakPasswordException("密码必须包含数字");
+            throw new WeakPasswordException("Password must contain at least one digit");
         }
     }
 

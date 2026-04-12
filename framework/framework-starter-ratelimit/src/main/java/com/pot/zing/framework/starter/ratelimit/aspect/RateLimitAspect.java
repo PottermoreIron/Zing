@@ -69,10 +69,10 @@ public class RateLimitAspect {
         boolean acquired = tryAcquireToken(rateLimitKey, rateLimit);
 
         if (acquired) {
-            log.debug("限流检查通过 - key: {}", rateLimitKey);
+            log.debug("[RateLimit] Check passed — key: {}", rateLimitKey);
             return joinPoint.proceed();
         } else {
-            log.warn("限流触发 - key: {}, rate: {}", rateLimitKey, rateLimit.rate());
+            log.warn("[RateLimit] Triggered — key: {}, rate: {}", rateLimitKey, rateLimit.rate());
             throw new RateLimitException(rateLimit.message());
         }
     }
@@ -127,11 +127,11 @@ public class RateLimitAspect {
 
             Object evaluated = SPEL_PARSER.parseExpression(keyExpression).getValue(evaluationContext);
             if (evaluated == null || !StringUtils.hasText(evaluated.toString())) {
-                throw new IllegalStateException("限流SpEL表达式返回空值: " + keyExpression);
+                throw new IllegalStateException("Rate limit SpEL expression returned null value: " + keyExpression);
             }
             return evaluated.toString();
         } catch (Exception e) {
-            throw new IllegalStateException("解析限流key表达式失败: " + keyExpression, e);
+            throw new IllegalStateException("Failed to evaluate rate limit key expression: " + keyExpression, e);
         }
     }
 
@@ -165,7 +165,7 @@ public class RateLimitAspect {
                 .orElseGet(() -> keyProviders.stream()
                         .filter(provider -> provider.getSupportedType() == RateLimitMethodEnum.FIXED)
                         .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("未找到限流key提供者")));
+                        .orElseThrow(() -> new IllegalStateException("No rate limit key provider found")));
     }
 
     /**

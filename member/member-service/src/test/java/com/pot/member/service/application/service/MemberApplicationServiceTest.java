@@ -84,11 +84,11 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("注册成功：校验唯一性、调用领域服务、保存、返回 DTO")
+        @DisplayName("Registration success: uniqueness checked, domain service called, persisted, DTO returned")
         void register_happyPath() {
             MemberAggregate created = MemberAggregate.create(
                     Nickname.of("newuser"), Email.of("new@test.com"), "$hash");
-            MemberAggregate saved = persistedMember(1L); // 模拟 save 后返回带有 memberId 的聚合
+            MemberAggregate saved = persistedMember(1L); // simulates save returning aggregate with assigned memberId
             MemberDTO expected = MemberDTO.builder().nickname("newuser").build();
 
             given(memberRepository.existsByNickname(any())).willReturn(false);
@@ -106,7 +106,7 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("昵称已存在 → 抛出 MemberException")
+        @DisplayName("Duplicate nickname throws MemberException")
         void register_duplicateNickname_throws() {
             given(memberRepository.existsByNickname(any())).willReturn(true);
 
@@ -119,7 +119,7 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("手机号已注册 → 抛出 MemberException")
+        @DisplayName("Duplicate phone number throws MemberException")
         void register_duplicatePhone_throws() {
             cmd = RegisterMemberCommand.builder()
                     .nickname(cmd.nickname())
@@ -139,7 +139,7 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("唯一键冲突 → 转换为 MemberException")
+        @DisplayName("Unique key conflict is converted to MemberException")
         void register_duplicateKeyFromPersistence_throwsMemberException() {
             MemberAggregate created = MemberAggregate.create(
                     Nickname.of("newuser"), Email.of("new@test.com"), "$hash");
@@ -162,7 +162,7 @@ class MemberApplicationServiceTest {
     class CreateMember {
 
         @Test
-        @DisplayName("仅昵称和密码也能创建会员")
+        @DisplayName("Nickname and password alone are sufficient to create a member")
         void createMember_nicknameOnly_happyPath() {
             CreateMemberCommand command = CreateMemberCommand.builder()
                     .nickname("nickname_only")
@@ -192,7 +192,7 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("手机号注册路径允许邮箱为空")
+        @DisplayName("Phone-based registration allows a blank email")
         void createMember_phoneOnly_happyPath() {
             CreateMemberCommand command = CreateMemberCommand.builder()
                     .nickname("phone_only")
@@ -228,7 +228,7 @@ class MemberApplicationServiceTest {
     class BindOAuth2 {
 
         @Test
-        @DisplayName("新绑定：创建社交连接")
+        @DisplayName("New binding: creates social connection")
         void bindOAuth2_newBinding_createsSocialConnection() {
             MemberAggregate member = persistedMember(1L);
             given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));
@@ -254,7 +254,7 @@ class MemberApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("已有绑定：更新 token")
+        @DisplayName("Existing binding: updates token")
         void bindOAuth2_existingBinding_updatesTokens() {
             MemberAggregate member = persistedMember(1L);
             SocialConnectionAggregate existing = SocialConnectionAggregate.create(
@@ -286,7 +286,7 @@ class MemberApplicationServiceTest {
     class RecordDeviceLogin {
 
         @Test
-        @DisplayName("新设备：创建设备记录")
+        @DisplayName("New device: creates device record")
         void recordDeviceLogin_newDevice_creates() {
             MemberAggregate member = persistedMember(1L);
             given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));

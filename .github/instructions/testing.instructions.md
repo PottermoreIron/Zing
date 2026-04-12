@@ -1,5 +1,5 @@
 ---
-description: "Use when writing or refactoring tests in Zing. Covers unit tests, @WebMvcTest, @DataJpaTest, mocking external systems, and behavior-focused assertions. Trigger words: unit test, integration test, Mockito, AssertJ, @WebMvcTest, @DataJpaTest, 单元测试, 集成测试, Mock, 断言."
+description: "Use when writing or refactoring tests in Zing. Covers unit tests, @WebMvcTest, @DataJpaTest, mocking external systems, and behavior-focused assertions. Trigger words: unit test, integration test, Mockito, AssertJ, @WebMvcTest, @DataJpaTest, unit test, integration test, mock, assertion."
 name: "Zing Testing Rules"
 applyTo: "**/src/test/**/*.java"
 ---

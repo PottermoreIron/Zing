@@ -41,7 +41,7 @@ public class RequireRoleAspect extends AuthorizationAspectSupport {
         };
         if (!hasRole) {
             Method method = resolveMethod(joinPoint);
-            log.warn("[权限拒绝] 用户 {} 缺少角色: {}, 方法: {}",
+            log.warn("[Access Denied] User {} lacks required role: {}, method: {}",
                     securityAccessor.getCurrentUserId(), Arrays.toString(annotation.value()), method.getName());
             throw new PermissionDeniedException(annotation.message());
         }

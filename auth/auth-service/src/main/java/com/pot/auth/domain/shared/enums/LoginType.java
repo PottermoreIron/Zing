@@ -5,17 +5,17 @@ import lombok.Getter;
 @Getter
 public enum LoginType {
 
-        USERNAME_PASSWORD("username_password", "用户名密码登录"),
+        USERNAME_PASSWORD("username_password", "Username-password login"),
 
-        EMAIL_PASSWORD("email_password", "邮箱密码登录"),
+        EMAIL_PASSWORD("email_password", "Email-password login"),
 
-        EMAIL_CODE("email_code", "邮箱验证码登录"),
+        EMAIL_CODE("email_code", "Email verification code login"),
 
-        PHONE_CODE("phone_code", "手机号验证码登录"),
+        PHONE_CODE("phone_code", "Phone verification code login"),
 
-        OAUTH2("oauth2", "OAuth2登录"),
+        OAUTH2("oauth2", "OAuth2 login"),
 
-        WECHAT("wechat", "微信登录");
+        WECHAT("wechat", "WeChat login");
 
     private final String code;
     private final String description;
@@ -31,6 +31,6 @@ public enum LoginType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("未知的登录类型: " + code);
+        throw new IllegalArgumentException("Unknown login type: " + code);
     }
 }

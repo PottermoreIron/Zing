@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
  * Register request for phone and verification code.
  */
 public record PhoneCodeRegisterRequest(
-                @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+                @NotNull(message = "Register type must not be null") @JsonProperty("registerType") RegisterType registerType,
 
                 @ValidPhone String phone,
 

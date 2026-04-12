@@ -40,18 +40,18 @@ public class LocalCachePermissionQueryAdapter implements PermissionQueryPort {
 
         Set<String> l1Permissions = localCache.getIfPresent(cacheKey);
         if (l1Permissions != null) {
-            log.debug("[权限查询] L1命中: userId={}, userDomain={}", userId, userDomain);
+            log.debug("[Permission] L1 hit — userId={}, userDomain={}", userId, userDomain);
             return l1Permissions;
         }
 
         Set<String> permissions = permissionDomainService.getCachedPermissions(userId, userDomain);
         if (permissions.isEmpty()) {
-            log.warn("[权限查询] 缓存未命中（降级）: userId={}, userDomain={}", userId, userDomain);
+            log.warn("[Permission] L2 fallback (no cache) — userId={}, userDomain={}", userId, userDomain);
             return Set.of();
         }
 
         localCache.put(cacheKey, permissions);
-        log.debug("[权限查询] L2命中并写入L1: userId={}, userDomain={}, permCount={}",
+        log.debug("[Permission] L2 hit, promoting to L1 — userId={}, userDomain={}, permCount={}",
                 userId, userDomain, permissions.size());
         return permissions;
     }

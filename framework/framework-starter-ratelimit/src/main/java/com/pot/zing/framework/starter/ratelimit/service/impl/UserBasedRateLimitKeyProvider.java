@@ -58,7 +58,7 @@ public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
                 .map(this::getUserIdFromRequest)
                 .filter(StringUtils::hasText)
                 .orElseGet(() -> {
-                    log.debug("无法获取用户ID,使用匿名用户标识");
+                    log.debug("Failed to resolve user ID, falling back to anonymous key");
                     return ANONYMOUS_USER;
                 });
     }
@@ -72,7 +72,7 @@ public class UserBasedRateLimitKeyProvider implements RateLimitKeyProvider {
                     .getRequestAttributes();
             return attributes != null ? attributes.getRequest() : null;
         } catch (Exception e) {
-            log.warn("获取当前请求失败: {}", e.getMessage());
+            log.warn("Failed to retrieve current request: {}", e.getMessage());
             return null;
         }
     }

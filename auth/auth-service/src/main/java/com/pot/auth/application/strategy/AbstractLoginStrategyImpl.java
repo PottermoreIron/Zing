@@ -24,7 +24,7 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
     public final AuthenticationResult execute(AuthenticationContext context) {
         var request = context.request();
 
-        log.info("[登录策略] 开始执行登录: type={}, userDomain={}, ip={}",
+        log.info("[LoginStrategy] Executing login — type={}, userDomain={}, ip={}",
                 request.loginType(), request.userDomain(), context.ipAddress().value());
 
         try {
@@ -35,7 +35,7 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
             AuthenticationResult result = generateAuthenticationResult(user, context);
             afterLogin(user, result, context);
 
-            log.info("[登录策略] 登录成功: userId={}, nickname={}, type={}",
+            log.info("[LoginStrategy] Login successful — userId={}, nickname={}, type={}",
                     user.userId(), user.nickname(), request.loginType());
 
             return result;
@@ -60,7 +60,7 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
      * Hook invoked before token generation.
      */
     protected void beforeLogin(UserDTO user, AuthenticationContext context) {
-        log.debug("[登录钩子] 登录前置处理: userId={}", user.userId());
+        log.debug("[LoginHook] Pre-login processing — userId={}", user.userId());
     }
 
     /**
@@ -95,14 +95,14 @@ public abstract class AbstractLoginStrategyImpl implements LoginStrategy {
      * Hook invoked after a successful login.
      */
     protected void afterLogin(UserDTO user, AuthenticationResult result, AuthenticationContext context) {
-        log.debug("[登录钩子] 登录后置处理: userId={}", user.userId());
+        log.debug("[LoginHook] Post-login processing — userId={}", user.userId());
     }
 
     /**
      * Handles a failed login attempt.
      */
     protected void handleLoginFailure(AuthenticationContext context, Exception e) {
-        log.error("[登录策略] 登录失败: type={}, ip={}, error={}",
+        log.error("[LoginStrategy] Login failed — type={}, ip={}, error={}",
                 context.request().loginType(),
                 context.ipAddress().value(),
                 e.getMessage());

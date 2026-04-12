@@ -22,7 +22,7 @@ public class MessageTemplate {
         String topic = buildTopicName(event);
         String routingKey = buildRoutingKey(event);
 
-        log.info("[MQ] 发布领域事件: topic={}, routingKey={}, eventType={}",
+        log.info("[MQ] Publishing domain event — topic={}, routingKey={}, eventType={}",
                 topic, routingKey, event.getClass().getSimpleName());
 
         messageProducer.send(topic, routingKey, event);
@@ -34,7 +34,7 @@ public class MessageTemplate {
     public void publishDomainEventWithConfirm(DomainEvent event, PublishCallback callback) {
         String topic = buildTopicName(event);
 
-        log.info("[MQ] 发布领域事件（带确认）: topic={}, eventType={}",
+        log.info("[MQ] Publishing domain event with confirm — topic={}, eventType={}",
                 topic, event.getClass().getSimpleName());
 
         messageProducer.sendWithConfirm(topic, event, callback);
@@ -44,7 +44,7 @@ public class MessageTemplate {
      * Sends a message without an explicit routing key.
      */
     public void send(String topic, Object message) {
-        log.debug("[MQ] 发送消息: topic={}, messageType={}", topic, message.getClass().getSimpleName());
+        log.debug("[MQ] Sending message — topic={}, messageType={}", topic, message.getClass().getSimpleName());
         messageProducer.send(topic, message);
     }
 
@@ -52,7 +52,7 @@ public class MessageTemplate {
      * Sends a message with an explicit routing key.
      */
     public void send(String topic, String routingKey, Object message) {
-        log.debug("[MQ] 发送消息: topic={}, routingKey={}, messageType={}",
+        log.debug("[MQ] Sending message — topic={}, routingKey={}, messageType={}",
                 topic, routingKey, message.getClass().getSimpleName());
         messageProducer.send(topic, routingKey, message);
     }

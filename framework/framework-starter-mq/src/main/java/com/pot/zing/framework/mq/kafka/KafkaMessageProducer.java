@@ -39,11 +39,11 @@ public class KafkaMessageProducer implements MessageProducer {
                 kafkaTemplate.send(topic, jsonMessage);
             }
 
-            log.debug("[Kafka] 消息发送成功: topic={}, partitionKey={}, message={}",
+            log.debug("[Kafka] Message published — topic={}, partitionKey={}, type={}",
                     topic, routingKey, message.getClass().getSimpleName());
 
         } catch (Exception e) {
-            log.error("[Kafka] 消息发送失败: topic={}, partitionKey={}", topic, routingKey, e);
+            log.error("[Kafka] Failed to publish message — topic={}, partitionKey={}", topic, routingKey, e);
             throw new RuntimeException("Failed to send message to Kafka", e);
         }
     }
@@ -57,10 +57,10 @@ public class KafkaMessageProducer implements MessageProducer {
 
             future.whenComplete((result, ex) -> {
                 if (ex != null) {
-                    log.error("[Kafka] 消息发送确认失败: topic={}", topic, ex);
+                    log.error("[Kafka] Publish confirmation failed — topic={}", topic, ex);
                     callback.onFailure(ex);
                 } else {
-                    log.debug("[Kafka] 消息发送确认成功: topic={}, partition={}, offset={}",
+                    log.debug("[Kafka] Publish confirmed — topic={}, partition={}, offset={}",
                             topic,
                             result.getRecordMetadata().partition(),
                             result.getRecordMetadata().offset());
@@ -69,7 +69,7 @@ public class KafkaMessageProducer implements MessageProducer {
             });
 
         } catch (Exception e) {
-            log.error("[Kafka] 消息发送失败: topic={}", topic, e);
+            log.error("[Kafka] Failed to publish message — topic={}", topic, e);
             callback.onFailure(e);
         }
     }

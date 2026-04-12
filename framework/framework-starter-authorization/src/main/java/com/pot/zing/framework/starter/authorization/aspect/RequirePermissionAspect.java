@@ -44,7 +44,7 @@ public class RequirePermissionAspect extends AuthorizationAspectSupport {
         PermissionExpression expression = expressionParser.parseMultiple(annotation.value(), operator);
         if (!expression.evaluate(context)) {
             Method method = resolveMethod(joinPoint);
-            log.warn("[权限拒绝] 用户 {} 缺少权限: {}, 方法: {}",
+            log.warn("[Access Denied] User {} lacks required permission: {}, method: {}",
                     securityAccessor.getCurrentUserId(), expression.getExpression(), method.getName());
             throw new PermissionDeniedException(annotation.message());
         }

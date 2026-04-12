@@ -31,7 +31,7 @@ public class MemberDomainService {
             String rawPassword) {
 
         if (email == null) {
-            throw new IllegalArgumentException("邮箱不能为空");
+            throw new IllegalArgumentException("Email must not be blank");
         }
 
         return createMember(nickname, email, rawPassword);
@@ -46,7 +46,7 @@ public class MemberDomainService {
             String rawPassword) {
 
         if (email != null && memberRepository.existsByEmail(email)) {
-            throw new IllegalStateException("邮箱已被注册: " + email.getValue());
+            throw new IllegalStateException("Email already registered: " + email.getValue());
         }
 
         String passwordHash = passwordEncoder.encode(rawPassword);
@@ -70,7 +70,7 @@ public class MemberDomainService {
             String newRawPassword) {
 
         if (!verifyPassword(member, oldRawPassword)) {
-            throw new IllegalArgumentException("原密码不正确");
+            throw new IllegalArgumentException("Current password is incorrect");
         }
 
         String newPasswordHash = passwordEncoder.encode(newRawPassword);
@@ -83,7 +83,7 @@ public class MemberDomainService {
      */
     public void bindPhoneNumber(MemberAggregate member, PhoneNumber phoneNumber) {
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new IllegalStateException("手机号已被绑定: " + phoneNumber.getValue());
+            throw new IllegalStateException("Phone number already bound: " + phoneNumber.getValue());
         }
 
         member.updatePhoneNumber(phoneNumber);
@@ -94,7 +94,7 @@ public class MemberDomainService {
      */
     public void changeEmail(MemberAggregate member, Email newEmail) {
         if (memberRepository.existsByEmail(newEmail)) {
-            throw new IllegalStateException("邮箱已被使用: " + newEmail.getValue());
+            throw new IllegalStateException("Email already in use: " + newEmail.getValue());
         }
 
         member.updateEmail(newEmail);

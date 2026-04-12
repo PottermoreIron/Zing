@@ -19,12 +19,12 @@ public class RabbitMQEventPublisherAdapter implements DomainEventPublisher {
     public void publish(MemberDomainEvent event) {
         try {
             messageProducer.send(event.getTopic(), event.getRoutingKey(), event);
-            log.info("领域事件已发布: eventType={}, aggregateId={}, topic={}, routingKey={}",
+            log.info("[Event] Domain event published — eventType={}, aggregateId={}, topic={}, routingKey={}",
                     event.getEventType(), event.getAggregateId(), event.getTopic(), event.getRoutingKey());
         } catch (Exception e) {
-            log.error("领域事件发布失败: eventType={}, aggregateId={}, error={}",
+            log.error("[Event] Failed to publish domain event — eventType={}, aggregateId={}, error={}",
                     event.getEventType(), event.getAggregateId(), e.getMessage(), e);
-            throw new MemberInfrastructureException("领域事件发布失败: " + event.getEventType(), e);
+            throw new MemberInfrastructureException("Failed to publish domain event: " + event.getEventType(), e);
         }
     }
 }

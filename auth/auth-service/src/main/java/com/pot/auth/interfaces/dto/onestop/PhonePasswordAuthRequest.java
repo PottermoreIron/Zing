@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotNull;
  * One-stop authentication request for phone and password.
  */
 public record PhonePasswordAuthRequest(
-                @NotNull(message = "认证类型不能为空") @JsonProperty("authType") AuthType authType,
+                @NotNull(message = "Auth type must not be null") @JsonProperty("authType") AuthType authType,
 
                 @ValidPhone String phone,
 

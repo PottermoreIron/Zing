@@ -73,13 +73,13 @@ class MemberPermissionApplicationServiceTest {
     class GetMemberPermissions {
 
         @Test
-        @DisplayName("查询权限成功：调用领域服务并装配 DTO")
+        @DisplayName("Permission query success: domain service called and DTO assembled")
         void getMemberPermissions_returnsAssembledPermissions() {
             GetMemberPermissionsQuery query = GetMemberPermissionsQuery.ofMemberId(1L);
             PermissionAggregate permission = PermissionAggregate.reconstitute(
                     PermissionId.of(10L),
                     "member.read",
-                    "查看会员",
+                    "View Member",
                     "member",
                     "read",
                     "desc",
@@ -103,14 +103,14 @@ class MemberPermissionApplicationServiceTest {
     class GetMemberRoles {
 
         @Test
-        @DisplayName("查询角色成功：返回 facade DTO 列表")
+        @DisplayName("Role query success: returns list of facade DTOs")
         void getMemberRoles_returnsFacadeRoles() {
             MemberAggregate member = persistedMember(1L, Set.of(20L));
             RoleAggregate role = RoleAggregate.reconstitute(
                     RoleId.of(20L),
-                    RoleName.of("管理员"),
+                    RoleName.of("Administrator"),
                     "ADMIN",
-                    "系统管理员",
+                    "System Administrator",
                     Set.of(100L),
                     LocalDateTime.now(),
                     LocalDateTime.now());
@@ -125,7 +125,7 @@ class MemberPermissionApplicationServiceTest {
                     .satisfies(roleDTO -> {
                         assertThat(roleDTO.roleId()).isEqualTo(20L);
                         assertThat(roleDTO.roleCode()).isEqualTo("ADMIN");
-                        assertThat(roleDTO.roleName()).isEqualTo("管理员");
+                        assertThat(roleDTO.roleName()).isEqualTo("Administrator");
                     });
         }
     }
@@ -135,7 +135,7 @@ class MemberPermissionApplicationServiceTest {
     class GetPermissionsBatch {
 
         @Test
-        @DisplayName("批量查询成功：直接复用领域层批量结果")
+        @DisplayName("Batch query success: directly reuses domain-layer batch result")
         void getPermissionsBatch_returnsDomainBatchResult() {
             List<Long> memberIds = List.of(1L, 2L);
             Map<Long, Set<String>> expected = Map.of(

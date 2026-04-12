@@ -70,10 +70,10 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyDecoded);
                         this.publicKey = keyFactory.generatePublic(publicKeySpec);
 
-                        log.info("[JWT] RSA密钥对加载成功");
+                        log.info("[JWT] RSA key pair loaded");
                 } catch (Exception e) {
-                        log.error("[JWT] RSA密钥对加载失败", e);
-                        throw new AuthInfrastructureException("RSA密钥对加载失败", e);
+                        log.error("[JWT] Failed to load RSA key pair", e);
+                        throw new AuthInfrastructureException("Failed to load RSA key pair", e);
                 }
         }
 
@@ -181,8 +181,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                                         tokenString,
                                         new HashMap<>(claims));
                 } catch (Exception e) {
-                        log.error("[JWT] AccessToken解析失败", e);
-                        throw new AuthInfrastructureException("Token解析失败", e);
+                        log.error("[JWT] Failed to parse AccessToken", e);
+                        throw new AuthInfrastructureException("Failed to parse token", e);
                 }
         }
 
@@ -212,8 +212,8 @@ public class SpringSecurityJwtAdapter implements TokenManagementPort {
                                         expiresAt,
                                         tokenString);
                 } catch (Exception e) {
-                        log.error("[JWT] RefreshToken解析失败", e);
-                        throw new AuthInfrastructureException("Token解析失败", e);
+                        log.error("[JWT] Failed to parse RefreshToken", e);
+                        throw new AuthInfrastructureException("Failed to parse token", e);
                 }
         }
 }

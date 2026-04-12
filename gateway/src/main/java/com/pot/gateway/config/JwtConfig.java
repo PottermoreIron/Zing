@@ -36,25 +36,25 @@ public class JwtConfig {
     public PublicKey jwtPublicKey() {
         try {
             if (hasInlinePublicKey()) {
-                log.info("[JWT配置] 从配置属性加载公钥");
+                log.info("[JwtConfig] Loading public key from configuration property");
                 return loadPublicKeyFromString(jwtProperties.getPublicKey());
             }
 
             String location = jwtProperties.getPublicKeyLocation();
-            log.info("[JWT配置] 从文件加载公钥: {}", location);
+            log.info("[JwtConfig] Loading public key from file — location={}", location);
 
             Resource resource = resourceLoader.getResource(location);
             if (!resource.exists()) {
-                throw new GatewayConfigurationException("JWT公钥文件不存在: " + location);
+                throw new GatewayConfigurationException("JWT public key file not found: " + location);
             }
 
             String keyContent = readKeyContent(resource);
             return loadPublicKeyFromString(keyContent);
 
         } catch (Exception e) {
-            log.error("[JWT配置] 加载公钥失败", e);
+            log.error("[JwtConfig] Failed to load public key", e);
             throw new GatewayConfigurationException(
-                    "无法加载JWT公钥，请检查配置: gateway.jwt.publicKeyLocation 或 gateway.jwt.publicKey",
+                    "Failed to load JWT public key. Check configuration: gateway.jwt.publicKeyLocation or gateway.jwt.publicKey",
                     e);
         }
     }
@@ -81,7 +81,7 @@ public class JwtConfig {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
         PublicKey publicKey = keyFactory.generatePublic(spec);
-        log.info("[JWT配置] 公钥加载成功");
+        log.info("[JwtConfig] Public key loaded successfully");
 
         return publicKey;
     }

@@ -27,7 +27,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
-@Tag(name = "注册", description = "用户注册，支持昵称密码 / 邮箱 / 手机号 / OAuth2 / 微信等多种方式")
+@Tag(name = "Registration", description = "User registration supporting username-password, email, phone, OAuth2, WeChat, and more")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -38,11 +38,11 @@ public class RegistrationController {
     private final RegistrationApplicationService registrationApplicationService;
     private final AuthCommandAssembler authCommandAssembler;
 
-    @Operation(operationId = "authRegister", summary = "注册", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT 六种注册方式")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "注册请求过于频繁，请稍后再试")
+    @Operation(operationId = "authRegister", summary = "Register", description = "Supports USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT registration methods")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "Too many registration requests, please try again later")
     @PostMapping("/api/v1/register")
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
-        log.info("注册请求: registerType={}", request.registerType());
+        log.info("Registration request — registerType={}", request.registerType());
 
         RegisterResponse response = registrationApplicationService.register(authCommandAssembler.toCommand(request),
                 getClientIp(httpRequest),

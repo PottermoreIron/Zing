@@ -1,41 +1,41 @@
 # Zing AI Customization Guide
 
-## 目标
+## Purpose
 
-这个目录存放 Zing 仓库的 Copilot 定制文件。目标不是把所有知识堆进一个文件，而是把常驻上下文、文件级规则和任务级工作流分层管理，降低冲突、重复和上下文污染。
+This directory holds Copilot customization files for the Zing repository. The goal is not to dump all knowledge into one file, but to layer persistent context, file-scoped rules, and task-level workflows — reducing conflicts, duplication, and context pollution.
 
-## 结构约定
+## Structure
 
-| 路径                             | 类型                  | 作用                                   | 使用时机                       |
-| -------------------------------- | --------------------- | -------------------------------------- | ------------------------------ |
-| `copilot-instructions.md`        | Workspace instruction | 唯一的仓库级常驻指令                   | 所有任务默认生效               |
-| `instructions/*.instructions.md` | File instructions     | 面向文件类型或关注点的局部规则         | 修改匹配文件或命中描述触发词时 |
-| `skills/*/SKILL.md`              | Skills                | 面向可复用任务流的步骤、模板和参考资料 | 遇到重复性工作流时             |
-| `agents/*.agent.md`              | Custom agents         | 面向专门角色、工具边界和子代理委派     | 只有需要专门 agent 时          |
+| Path                             | Type                  | Role                                                             | When active                               |
+| -------------------------------- | --------------------- | ---------------------------------------------------------------- | ----------------------------------------- |
+| `copilot-instructions.md`        | Workspace instruction | The single repository-wide persistent instruction                | Always active for every task              |
+| `instructions/*.instructions.md` | File instructions     | Scoped rules for specific file types or focal areas              | When matching files are edited or trigger words are hit |
+| `skills/*/SKILL.md`              | Skills                | Step-by-step workflows, templates, and reference material        | When a repeatable workflow arises         |
+| `agents/*.agent.md`              | Custom agents         | Specialized roles, tool boundaries, and sub-agent delegation     | Only when a dedicated agent is needed     |
 
-## 重要决策
+## Key Decisions
 
-- 当前仓库使用 `copilot-instructions.md` 作为唯一 workspace-wide instruction。
-- 不同时引入 `AGENTS.md` 作为第二份 workspace instruction，避免优先级冲突和上下文重复。
-- 如果未来需要按目录覆盖默认规则，例如 `auth/` 和 `im/` 形成明显不同的默认开发方式，应整体迁移到 `AGENTS.md` 体系，而不是与 `copilot-instructions.md` 并存。
-- `.agent.md` 是“定制代理”，不是“索引页”或“目录页”。索引应维护在当前文件，agent 只用于专门角色与受限工作流。
+- This repository uses `copilot-instructions.md` as the single workspace-wide instruction.
+- `AGENTS.md` is not introduced as a second workspace instruction to avoid priority conflicts and context duplication.
+- If per-directory rule overrides become necessary — for example `auth/` and `im/` adopting distinctly different default development styles — migrate entirely to the `AGENTS.md` model rather than coexisting with `copilot-instructions.md`.
+- `.agent.md` is a "custom agent", not an index page or table of contents. Indexes belong in this file; agents are reserved for specialized roles and constrained workflows.
 
-## 项目概览
+## Project Overview
 
-### 项目做什么
+### What the Project Does
 
-- Zing 是一个多模块 Java 后端平台，覆盖认证授权、会员域、即时通讯、管理后台和 API 网关。
-- `framework` 提供基础能力封装，包括公共组件、分布式 ID、Redis、消息队列、限流、触达和代码生成。
-- `auth`、`member` 是当前 DDD/六边形架构实践最核心的业务模块，`im`、`admin`、`gateway` 分别承载实时通信、运营后台和统一流量入口。
+- Zing is a multi-module Java backend platform covering authentication and authorization, the member domain, instant messaging, administration, and an API gateway.
+- `framework` provides foundational capability wrappers including common components, distributed ID, Redis, message queues, rate limiting, notification delivery, and code generation.
+- `auth` and `member` are the two core business modules where DDD/Hexagonal architecture is applied most rigorously. `im`, `admin`, and `gateway` handle real-time communication, operations back-office, and unified traffic ingress respectively.
 
-### 核心架构
+### Core Architecture
 
-- 形态：Maven 多模块 monorepo。
-- 风格：Spring Boot 微服务 + DDD/Hexagonal + MyBatis-Plus + 事件驱动协作。
-- 默认分层：`interfaces -> application -> domain <- infrastructure`。
-- 跨模块协作：优先 facade 或事件，不做跨模块持久化耦合。
+- Shape: Maven multi-module monorepo.
+- Style: Spring Boot microservices + DDD/Hexagonal + MyBatis-Plus + event-driven collaboration.
+- Default layering: `interfaces -> application -> domain <- infrastructure`.
+- Cross-module collaboration: prefer facades or events; no cross-module persistence coupling.
 
-### 已验证技术栈
+### Verified Technology Stack
 
 - Java 21
 - Spring Boot 3.4.2
@@ -43,65 +43,63 @@
 - Spring Cloud Alibaba Nacos Discovery 2023.0.3.3
 - MyBatis-Plus 3.5.12
 - MySQL + Redis + Flyway
-- RabbitMQ/Kafka 抽象 starter
+- RabbitMQ/Kafka abstraction starter
 - Netty 4.2.3.Final
 - JJWT 0.12.6
 - SpringDoc OpenAPI 2.8.9
 - Leaf 1.0.1-RELEASE
 - weixin-java-mp 4.7.7.B
 
-## 模块地图
+## Module Map
 
-| 模块            | 角色                                   |
-| --------------- | -------------------------------------- |
-| `dependencies/` | 统一 BOM 与版本管理                    |
-| `framework/`    | 公共基础设施与通用 starter             |
-| `auth/`         | 认证、授权、Token、权限缓存与鉴权协作  |
-| `member/`       | 会员、RBAC、设备、社交账号等领域能力   |
-| `im/`           | 即时通讯协议、连接管理、消息与会话领域 |
-| `admin/`        | 管理后台能力                           |
-| `gateway/`      | API 网关与统一流量入口                 |
+| Module          | Role                                                              |
+| --------------- | ----------------------------------------------------------------- |
+| `dependencies/` | Unified BOM and version management                               |
+| `framework/`    | Shared infrastructure and general-purpose starters               |
+| `auth/`         | Authentication, authorization, tokens, permission cache, and auth collaboration |
+| `member/`       | Member domain, RBAC, devices, social accounts                    |
+| `im/`           | Instant messaging protocol, connection management, messages, and sessions |
+| `admin/`        | Administration back-office capabilities                          |
+| `gateway/`      | API gateway and unified traffic ingress                          |
 
-## 当前 Instructions 目录
+## Instructions Directory
 
-| 文件                                        | 关注点                                      | 典型触发词                                        |
-| ------------------------------------------- | ------------------------------------------- | ------------------------------------------------- |
-| `instructions/api-openapi.instructions.md`  | REST 控制器、OpenAPI 契约、统一响应         | `REST`、`controller`、`OpenAPI`、`接口`、`控制器` |
-| `instructions/architecture.instructions.md` | DDD 分层、模块边界、assembler、port、facade | `DDD`、`aggregate`、`repository`、`聚合`、`仓储`  |
-| `instructions/coding.instructions.md`       | 仓库级编码优先级、命名、变更粒度            | `coding standard`、`规范`、`命名`、`重构`         |
-| `instructions/commenting.instructions.md`   | 注释策略、Javadoc、英文注释、失效注释治理   | `comment`、`Javadoc`、`注释`、`文档注释`          |
-| `instructions/java.instructions.md`         | Java 语言约束、异常、Optional、日志         | `Java`、`Optional`、`record`、`异常`、`日志`      |
-| `instructions/persistence.instructions.md`  | MyBatis、SQL、安全性、性能                  | `MyBatis`、`mapper XML`、`SQL`、`持久化`          |
-| `instructions/spring-boot.instructions.md`  | Spring Boot 组件、校验、事务、配置          | `@Service`、`@Transactional`、`配置`、`事务`      |
-| `instructions/testing.instructions.md`      | 测试分层、Mock、行为断言                    | `unit test`、`Mockito`、`单元测试`、`断言`        |
+| File                                        | Focal Area                                                   | Typical Trigger Words                                               |
+| ------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `instructions/api-openapi.instructions.md`  | REST controllers, OpenAPI contracts, unified response        | `REST`, `controller`, `OpenAPI`, `facade`, `Result<T>`              |
+| `instructions/architecture.instructions.md` | DDD layering, module boundaries, assembler, port, facade     | `DDD`, `aggregate`, `repository`, `value object`, `application service` |
+| `instructions/coding.instructions.md`       | Repo-wide coding priorities, naming, change scope            | `coding standard`, `convention`, `naming`, `refactor`, `config`    |
+| `instructions/commenting.instructions.md`   | Comment policy, Javadoc, English-only comments, stale comment governance | `comment`, `Javadoc`, `doc comment`                    |
+| `instructions/java.instructions.md`         | Java language constraints, exceptions, Optional, logging     | `Java`, `Optional`, `record`, `exception`, `logging`               |
+| `instructions/persistence.instructions.md`  | MyBatis, SQL, safety, performance                            | `MyBatis`, `mapper XML`, `SQL`, `persistence`                       |
+| `instructions/spring-boot.instructions.md`  | Spring Boot components, validation, transactions, config     | `@Service`, `@Transactional`, `config`, `transaction`              |
+| `instructions/testing.instructions.md`      | Test layering, mocking, behavior assertions                  | `unit test`, `Mockito`, `AssertJ`, `integration test`               |
 
-## 当前 Skills 目录
+## Skills Directory
 
-| Skill                    | 用途                                           | 典型触发词                                       |
-| ------------------------ | ---------------------------------------------- | ------------------------------------------------ |
-| `skills/ddd-java/`       | 新增聚合、值对象、仓储接口、应用服务、DDD 重构 | `DDD`、`aggregate`、`聚合`、`值对象`、`领域事件` |
-| `skills/java-testing/`   | 领域模型、应用服务、基础设施测试编写           | `test`、`Mockito`、`AssertJ`、`单元测试`         |
-| `skills/mybatis-mapper/` | Mapper XML、PO、Mapper 接口与 `resultMap` 修复 | `Mapper XML`、`resultMap`、`PO`、`xml映射`       |
+| Skill                    | Purpose                                                              | Typical Trigger Words                                     |
+| ------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------- |
+| `skills/api-integration-test/` | API integration tests: endpoint discovery, curl, DB/cache/MQ verification, report | `API test`, `curl testing`, `integration test` |
 
-## 何时新增 .agent.md
+## When to Add a .agent.md
 
-满足以下任一条件时，再考虑在 `.github/agents/` 下新增 custom agent：
+Consider adding a custom agent under `.github/agents/` only when all of the following apply:
 
-- 需要稳定的专门角色，例如“DDD 设计评审”“只读架构巡检”“Mapper XML 修复代理”。
-- 需要明确工具边界，例如只允许 `read/search`，或禁止 terminal/edit。
-- 需要被主 agent 反复委派，且输出格式相对固定。
+- A stable specialized role is needed, for example "DDD design review", "read-only architecture inspection", or "Mapper XML repair agent".
+- Explicit tool boundaries are required, for example allowing only `read/search` or prohibiting terminal/edit.
+- The agent is repeatedly delegated to by the main agent with a relatively fixed output format.
 
-以下场景不要使用 `.agent.md`：
+Do **not** use `.agent.md` for:
 
-- 项目概览或目录索引
-- 通用编码规范
-- 简单模板收纳
-- 只是为了给现有 instruction/skill 做导航
+- Project overviews or directory indexes
+- General coding conventions
+- Simple template storage
+- Navigation aids for existing instructions or skills
 
-## 维护规则
+## Maintenance Rules
 
-- `copilot-instructions.md` 只放所有任务都依赖的事实与不变量，不复制 skill 模板和细节规范。
-- `description` 统一使用 “Use when...” 风格，并尽量包含中英文触发词，方便双语工作流发现。
-- `applyTo` 只匹配真正需要自动注入的文件，不要为了省事放大到过宽范围。
-- instruction 保持单关注点、短而准；skill 保持可执行步骤、模板和参考资料。
-- 技术版本、模块职责、架构边界发生变化时，同时更新本文件与 `copilot-instructions.md`。
+- `copilot-instructions.md` contains only facts and invariants that every task depends on; it does not duplicate skill templates or detailed conventions.
+- `description` fields consistently use the "Use when..." style and should include representative trigger words to support discoverability.
+- `applyTo` should match only files that genuinely need automatic injection; do not widen the scope for convenience.
+- Instructions stay single-focus, short and precise; skills stay executable with steps, templates, and reference material.
+- When technology versions, module responsibilities, or architecture boundaries change, update both this file and `copilot-instructions.md`.

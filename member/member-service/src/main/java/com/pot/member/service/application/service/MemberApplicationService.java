@@ -50,7 +50,7 @@ public class MemberApplicationService {
 
     @Transactional
     public MemberDTO register(RegisterMemberCommand command) {
-        log.info("注册新会员: {}", command.email());
+        log.info("[Member] Registering new member — email={}", command.email());
 
         Nickname nickname = requireAvailableNickname(command.nickname());
         PhoneNumber phoneNumber = resolveAvailablePhone(command.phoneNumber());
@@ -62,12 +62,12 @@ public class MemberApplicationService {
             member.updatePhoneNumber(phoneNumber);
         }
 
-        return persistNewMember(member, "会员注册成功");
+        return persistNewMember(member, "member registered successfully");
     }
 
     @Transactional
     public MemberDTO createMember(CreateMemberCommand command) {
-        log.info("内部创建会员: nickname={}", command.nickname());
+        log.info("[Member] Creating member internally — nickname={}", command.nickname());
 
         Nickname nickname = requireAvailableNickname(command.nickname());
         PhoneNumber phoneNumber = resolveAvailablePhone(command.phoneNumber());
@@ -79,7 +79,7 @@ public class MemberApplicationService {
             member.updatePhoneNumber(phoneNumber);
         }
 
-        return persistNewMember(member, "内部创建会员成功");
+        return persistNewMember(member, "member created successfully");
     }
 
     private MemberDTO persistNewMember(MemberAggregate member, String successLogMessage) {
@@ -132,7 +132,7 @@ public class MemberApplicationService {
     public MemberDTO createFromOAuth2(String provider, String openId,
             String email, String nickname, String avatarUrl,
             String accessToken, String refreshToken, Long tokenExpiresAt) {
-        log.info("OAuth2 创建会员: provider={}, openId={}", provider, openId);
+        log.info("[Member] Creating member via OAuth2 — provider={}, openId={}", provider, openId);
 
         Email emailVo = email != null ? Email.of(email) : null;
         // Prefer the provider nickname when present; otherwise derive a stable
@@ -153,13 +153,13 @@ public class MemberApplicationService {
         socialConnectionRepository.save(social);
 
         publishAndClearEvents(member);
-        log.info("OAuth2 会员创建成功: memberId={}", member.getMemberId().value());
+        log.info("[Member] OAuth2 member created — memberId={}", member.getMemberId().value());
         return memberAssembler.toDTO(member);
     }
 
     @Transactional
     public MemberDTO updateProfile(UpdateMemberProfileCommand command) {
-        log.info("更新会员资料: memberId={}", command.memberId());
+        log.info("[Member] Updating member profile — memberId={}", command.memberId());
         MemberAggregate member = requireMember(command.memberId());
 
         MemberProfile newProfile = MemberProfile.builder()
@@ -210,7 +210,7 @@ public class MemberApplicationService {
     @Transactional
     public void kickDevice(Long memberId, Long deviceId) {
         deviceRepository.deleteById(deviceId);
-        log.info("踢出设备: memberId={}, deviceId={}", memberId, deviceId);
+        log.info("[Member] Kicking device — memberId={}, deviceId={}", memberId, deviceId);
     }
 
     @Transactional
@@ -232,12 +232,12 @@ public class MemberApplicationService {
                     request.tokenExpiresAt(), request.scope(), null);
             socialConnectionRepository.save(sc);
         }
-        log.info("绑定社交账号: memberId={}, provider={}", memberId, request.provider());
+        log.info("[Member] Binding social account — memberId={}, provider={}", memberId, request.provider());
     }
 
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
-                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "会员不存在: " + memberId));
+                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "Member not found: " + memberId));
     }
 
     private MemberException mapRegistrationConflict(RuntimeException ex) {

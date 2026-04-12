@@ -24,20 +24,20 @@ public class OneStopAuthStrategyFactory {
 
     @PostConstruct
     public void init() {
-        log.info("[一键认证策略工厂] 开始初始化...");
+        log.info("[OneStopAuthStrategyFactory] Initializing...");
         for (OneStopAuthStrategy strategy : strategies) {
             AuthType authType = strategy.getSupportedAuthType();
             strategyCache.put(authType, strategy);
-            log.info("[一键认证策略工厂] 注册策略: authType={}, strategy={}", authType, strategy.getClass().getSimpleName());
+            log.info("[OneStopAuthStrategyFactory] Mapped strategy: authType={}, strategy={}", authType, strategy.getClass().getSimpleName());
         }
-        log.info("[一键认证策略工厂] 初始化完成，共注册 {} 个策略", strategyCache.size());
+        log.info("[OneStopAuthStrategyFactory] Initialization complete, {} strategies registered", strategyCache.size());
     }
 
     public OneStopAuthStrategy getStrategy(AuthType authType) {
         OneStopAuthStrategy strategy = strategyCache.get(authType);
         if (strategy == null) {
-            log.error("[一键认证策略工厂] 未找到策略: authType={}", authType);
-            throw new IllegalArgumentException("不支持的认证类型: " + authType);
+            log.error("[OneStopAuthStrategyFactory] No strategy found — authType={}", authType);
+            throw new IllegalArgumentException("Unsupported authentication type: " + authType);
         }
         return strategy;
     }

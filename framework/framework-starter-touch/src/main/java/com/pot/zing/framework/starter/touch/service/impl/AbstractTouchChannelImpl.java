@@ -33,13 +33,13 @@ public abstract class AbstractTouchChannelImpl implements TouchChannel {
             return R.success(response);
 
         } catch (TouchException e) {
-            log.error("消息发送失败: channel={}, target={}, error={}",
+            log.error("[Touch] Message delivery failed — channel={}, target={}, error={}",
                     getChannelType(), request.getTarget(), e.getMessage());
             return R.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("消息发送异常: channel={}, target={}",
+            log.error("[Touch] Message delivery error — channel={}, target={}",
                     getChannelType(), request.getTarget(), e);
-            return R.fail("消息发送失败: " + e.getMessage());
+            return R.fail("Message delivery failed: " + e.getMessage());
         }
     }
 

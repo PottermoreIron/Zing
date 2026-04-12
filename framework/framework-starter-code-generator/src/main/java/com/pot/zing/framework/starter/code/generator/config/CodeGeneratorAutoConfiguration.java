@@ -22,7 +22,7 @@ public class CodeGeneratorAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CodeGenerationService potCodeGenerationService(CodeGeneratorProperties properties) {
-        log.info("🚀 初始化代码生成器服务 - 数据库: {}, 包名: {}",
+        log.info("Initializing code generator — datasource: {}, base package: {}",
                 properties.getDatabase(), properties.getBasePackage());
         return new DefaultCodeGenerationService(properties);
     }

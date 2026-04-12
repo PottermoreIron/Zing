@@ -27,7 +27,7 @@ public class TouchModuleAdapter implements NotificationPort {
 
     @Override
     public boolean sendEmailVerificationCode(String email, String code) {
-        log.info("[通知] 发送邮件验证码: email={}", email);
+        log.info("[Notification] Sending email verification code — email={}", email);
         try {
             TouchRequest request = TouchRequest.builder()
                     .target(email)
@@ -40,18 +40,18 @@ public class TouchModuleAdapter implements NotificationPort {
             var response = touchService.send(request);
             boolean success = response != null && Boolean.TRUE.equals(response.isSuccess());
             if (!success) {
-                log.warn("[通知] 邮件验证码发送失败: email={}, response={}", email, response);
+                log.warn("[Notification] Failed to send email code — email={}, response={}", email, response);
             }
             return success;
         } catch (Exception e) {
-            log.error("[通知] 发送邮件验证码异常: email={}", email, e);
+            log.error("[Notification] Email code send exception — email={}", email, e);
             return false;
         }
     }
 
     @Override
     public boolean sendSmsVerificationCode(String phoneNumber, String code) {
-        log.info("[通知] 发送短信验证码: phone={}", phoneNumber);
+        log.info("[Notification] Sending SMS verification code — phone={}", phoneNumber);
         try {
             TouchRequest request = TouchRequest.builder()
                     .target(phoneNumber)
@@ -64,18 +64,18 @@ public class TouchModuleAdapter implements NotificationPort {
             var response = touchService.send(request);
             boolean success = response != null && Boolean.TRUE.equals(response.isSuccess());
             if (!success) {
-                log.warn("[通知] 短信验证码发送失败: phone={}, response={}", phoneNumber, response);
+                log.warn("[Notification] Failed to send SMS code — phone={}, response={}", phoneNumber, response);
             }
             return success;
         } catch (Exception e) {
-            log.error("[通知] 发送短信验证码异常: phone={}", phoneNumber, e);
+            log.error("[Notification] SMS code send exception — phone={}", phoneNumber, e);
             return false;
         }
     }
 
     @Override
     public boolean sendLoginNotification(String email, String nickname, String ipAddress, String deviceInfo) {
-        log.info("[通知] 发送登录通知: email={}, nickname={}", email, nickname);
+        log.info("[Notification] Sending login notification — email={}, nickname={}", email, nickname);
         try {
             TouchRequest request = TouchRequest.builder()
                     .target(email)
@@ -93,18 +93,18 @@ public class TouchModuleAdapter implements NotificationPort {
             var response = touchService.sendWithFallback(request);
             boolean success = response != null && Boolean.TRUE.equals(response.isSuccess());
             if (!success) {
-                log.warn("[通知] 登录通知发送失败: email={}", email);
+                log.warn("[Notification] Login notification failed — email={}", email);
             }
             return success;
         } catch (Exception e) {
-            log.error("[通知] 发送登录通知异常: email={}", email, e);
+            log.error("[Notification] Login notification exception — email={}", email, e);
             return false;
         }
     }
 
     @Override
     public boolean sendAbnormalLoginAlert(String email, String nickname, String ipAddress, String deviceInfo) {
-        log.warn("[通知] 发送异地登录告警: email={}, nickname={}, ip={}", email, nickname, ipAddress);
+        log.warn("[Notification] Sending unusual-location login alert — email={}, nickname={}, ip={}", email, nickname, ipAddress);
         try {
             TouchRequest request = TouchRequest.builder()
                     .target(email)
@@ -122,11 +122,11 @@ public class TouchModuleAdapter implements NotificationPort {
             var response = touchService.sendWithFallback(request);
             boolean success = response != null && Boolean.TRUE.equals(response.isSuccess());
             if (!success) {
-                log.error("[通知] 异地登录告警发送失败: email={}, ip={}", email, ipAddress);
+                log.error("[Notification] Unusual-location alert failed — email={}, ip={}", email, ipAddress);
             }
             return success;
         } catch (Exception e) {
-            log.error("[通知] 发送异地登录告警异常: email={}, ip={}", email, ipAddress, e);
+            log.error("[Notification] Unusual-location alert exception — email={}, ip={}", email, ipAddress, e);
             return false;
         }
     }

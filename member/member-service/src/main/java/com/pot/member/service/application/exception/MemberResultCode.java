@@ -10,13 +10,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum MemberResultCode implements IResultCode {
-    MEMBER_NOT_FOUND("MEMBER_0001", "会员不存在", false),
-    NICKNAME_ALREADY_EXISTS("MEMBER_0002", "昵称已被使用", false),
-    EMAIL_ALREADY_EXISTS("MEMBER_0003", "邮箱已被注册", false),
-    PHONE_ALREADY_EXISTS("MEMBER_0004", "手机号已被注册", false),
-    PASSWORD_INCORRECT("MEMBER_0005", "密码不正确", false),
-    ACCOUNT_UNAVAILABLE("MEMBER_0006", "账户已被禁用或锁定", false),
-    REGISTRATION_CONFLICT("MEMBER_0007", "注册信息冲突，请检查后重试", false);
+    MEMBER_NOT_FOUND("MEMBER_0001", "Member not found", false),
+    NICKNAME_ALREADY_EXISTS("MEMBER_0002", "Nickname already in use", false),
+    EMAIL_ALREADY_EXISTS("MEMBER_0003", "Email already registered", false),
+    PHONE_ALREADY_EXISTS("MEMBER_0004", "Phone number already registered", false),
+    PASSWORD_INCORRECT("MEMBER_0005", "Incorrect password", false),
+    ACCOUNT_UNAVAILABLE("MEMBER_0006", "Account is disabled or locked", false),
+    REGISTRATION_CONFLICT("MEMBER_0007", "Registration conflict, please check your details and try again", false);
 
     private final String code;
     private final String msg;

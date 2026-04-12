@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 public class CommonAutoConfiguration {
 
     public CommonAutoConfiguration() {
-        log.info("加载 Common 自动配置");
+        log.info("Loading common auto-configuration");
     }
 
     /**
@@ -34,7 +34,7 @@ public class CommonAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "pot.jwt", name = "enabled", havingValue = "true", matchIfMissing = true)
     public JwtUtils jwtUtils(JwtProperties jwtProperties) {
-        log.info("初始化 JwtUtils, issuer: {}", jwtProperties.getIssuer());
+        log.info("Initializing JwtUtils — issuer: {}", jwtProperties.getIssuer());
         return new JwtUtils(jwtProperties);
     }
 
@@ -43,7 +43,7 @@ public class CommonAutoConfiguration {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnMissingBean(BaseGlobalExceptionHandler.class)
     public DefaultGlobalExceptionHandler defaultGlobalExceptionHandler() {
-        log.info("初始化默认全局异常处理器");
+        log.info("Initializing default global exception handler");
         return new DefaultGlobalExceptionHandler();
     }
 }

@@ -5,10 +5,10 @@ public record PermissionCacheMetadata(
         String digest) {
         public PermissionCacheMetadata {
         if (version < 0) {
-            throw new IllegalArgumentException("权限版本号不能为负数");
+            throw new IllegalArgumentException("Permission version must not be negative");
         }
         if (digest == null || digest.isBlank()) {
-            throw new IllegalArgumentException("权限摘要不能为空");
+            throw new IllegalArgumentException("Permission digest must not be blank");
         }
     }
 

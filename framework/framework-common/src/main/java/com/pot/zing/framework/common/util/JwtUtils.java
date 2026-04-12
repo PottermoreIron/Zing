@@ -81,7 +81,7 @@ public class JwtUtils {
      */
     public Claims parseToken(String token) {
         if (token == null || token.isBlank()) {
-            throw new JwtException("Token不能为空");
+            throw new JwtException("Token must not be blank");
         }
 
         try {
@@ -91,20 +91,20 @@ public class JwtUtils {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (MalformedJwtException e) {
-            log.error("JWT令牌格式不正确: {}", e.getMessage());
-            throw new JwtException("JWT令牌格式不正确", e);
+            log.error("[JWT] Invalid token format: {}", e.getMessage());
+            throw new JwtException("Invalid JWT token format", e);
         } catch (ExpiredJwtException e) {
-            log.error("JWT令牌已过期: {}", e.getMessage());
-            throw new JwtException("JWT令牌已过期", e);
+            log.error("[JWT] Token expired: {}", e.getMessage());
+            throw new JwtException("JWT token has expired", e);
         } catch (UnsupportedJwtException e) {
-            log.error("不支持的JWT令牌格式: {}", e.getMessage());
-            throw new JwtException("不支持的JWT令牌格式", e);
+            log.error("[JWT] Unsupported token format: {}", e.getMessage());
+            throw new JwtException("Unsupported JWT token format", e);
         } catch (IllegalArgumentException e) {
-            log.error("JWT令牌参数无效: {}", e.getMessage());
-            throw new JwtException("JWT令牌参数无效", e);
+            log.error("[JWT] Invalid token arguments: {}", e.getMessage());
+            throw new JwtException("Invalid JWT token arguments", e);
         } catch (Exception e) {
-            log.error("JWT令牌解析失败: {}", e.getMessage());
-            throw new JwtException("JWT令牌解析失败", e);
+            log.error("[JWT] Failed to parse token: {}", e.getMessage());
+            throw new JwtException("Failed to parse JWT token", e);
         }
     }
 
@@ -123,12 +123,12 @@ public class JwtUtils {
         return getClaimFromToken(token, claims -> {
             Object uidObj = claims.get("uid");
             if (uidObj == null) {
-                throw new JwtException("令牌中不包含uid信息");
+                throw new JwtException("Token does not contain uid claim");
             }
             try {
                 return Long.parseLong(uidObj.toString());
             } catch (NumberFormatException e) {
-                throw new JwtException("令牌中uid格式无效", e);
+                throw new JwtException("Token uid claim has invalid format", e);
             }
         });
     }
@@ -160,7 +160,7 @@ public class JwtUtils {
             parseToken(token);
             return true;
         } catch (JwtException e) {
-            log.debug("令牌验证失败: {}", e.getMessage());
+            log.debug("[JWT] Token validation failed: {}", e.getMessage());
             return false;
         }
     }

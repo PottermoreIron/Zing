@@ -34,7 +34,7 @@ import java.util.Set;
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
 @Validated
-@Tag(name = "会员", description = "会员资料、密码与权限管理")
+@Tag(name = "Member", description = "Member profile, password, and role management")
 public class MemberController {
 
     private final MemberAccountApplicationService memberAccountApplicationService;
@@ -45,7 +45,7 @@ public class MemberController {
     /**
      * Get member details.
      */
-    @Operation(summary = "查询会员详情")
+    @Operation(summary = "Get member details")
     @GetMapping("/{memberId}")
     public R<MemberDTO> getMember(@PathVariable Long memberId) {
         GetMemberQuery query = GetMemberQuery.byMemberId(memberId);
@@ -56,7 +56,7 @@ public class MemberController {
     /**
      * Get the current member.
      */
-    @Operation(summary = "查询当前会员")
+    @Operation(summary = "Get current member")
     @GetMapping("/me")
     public R<MemberDTO> getCurrentMember(@RequestAttribute("memberId") Long memberId) {
         GetMemberQuery query = GetMemberQuery.byMemberId(memberId);
@@ -67,7 +67,7 @@ public class MemberController {
     /**
      * Update the member profile.
      */
-    @Operation(summary = "更新会员资料")
+    @Operation(summary = "Update member profile")
     @PutMapping("/{memberId}/profile")
     public R<MemberDTO> updateProfile(
             @PathVariable Long memberId,
@@ -93,7 +93,7 @@ public class MemberController {
     /**
      * Change the member password.
      */
-    @Operation(summary = "修改会员密码")
+    @Operation(summary = "Change member password")
     @PutMapping("/{memberId}/password")
     public R<Void> changePassword(
             @PathVariable Long memberId,
@@ -109,7 +109,7 @@ public class MemberController {
     /**
      * Get member permissions.
      */
-    @Operation(summary = "查询会员权限")
+    @Operation(summary = "Get member permissions")
     @GetMapping("/{memberId}/permissions")
     public R<Set<PermissionDTO>> getMemberPermissions(@PathVariable Long memberId) {
         GetMemberPermissionsQuery query = GetMemberPermissionsQuery.ofMemberId(memberId);
@@ -120,7 +120,7 @@ public class MemberController {
     /**
      * Lock a member.
      */
-    @Operation(summary = "锁定会员")
+    @Operation(summary = "Lock member")
     @PostMapping("/{memberId}/lock")
     public R<Void> lockMember(@PathVariable Long memberId) {
         memberAccountApplicationService.lockMember(memberId);
@@ -130,7 +130,7 @@ public class MemberController {
     /**
      * Unlock a member.
      */
-    @Operation(summary = "解锁会员")
+    @Operation(summary = "Unlock member")
     @PostMapping("/{memberId}/unlock")
     public R<Void> unlockMember(@PathVariable Long memberId) {
         memberAccountApplicationService.unlockMember(memberId);

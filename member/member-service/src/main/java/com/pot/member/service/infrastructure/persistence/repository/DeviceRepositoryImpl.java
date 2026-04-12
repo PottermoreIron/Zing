@@ -25,10 +25,10 @@ public class DeviceRepositoryImpl implements DeviceRepository {
         Device entity = toEntity(domain);
         if (domain.getId() == null) {
             deviceMapper.insert(entity);
-            log.debug("新增设备记录: memberId={}, deviceToken={}", domain.getMemberId(), domain.getDeviceToken());
+            log.debug("[Device] Inserting device record — memberId={}, deviceToken={}", domain.getMemberId(), domain.getDeviceToken());
         } else {
             deviceMapper.updateById(entity);
-            log.debug("更新设备记录: id={}", domain.getId());
+            log.debug("[Device] Updating device record — id={}", domain.getId());
         }
         return toDomain(entity);
     }
@@ -61,7 +61,7 @@ public class DeviceRepositoryImpl implements DeviceRepository {
             device.setGmtDeletedAt(java.time.LocalDateTime.now());
             device.setIsActive(0);
             deviceMapper.updateById(device);
-            log.debug("软删除设备: id={}", deviceId);
+            log.debug("[Device] Soft-deleting device — id={}", deviceId);
         }
     }
 

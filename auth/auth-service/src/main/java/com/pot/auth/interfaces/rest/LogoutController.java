@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author pot
  * @since 2025-12-14
  */
-@Tag(name = "登出", description = "吊销 AccessToken 和 RefreshToken，防止已登出 Token 继续使用")
+@Tag(name = "Logout", description = "Revoke the AccessToken and RefreshToken to prevent continued use after sign-out")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -31,7 +31,7 @@ public class LogoutController {
 
     private final LogoutApplicationService logoutApplicationService;
 
-    @Operation(operationId = "authLogout", summary = "登出", description = "将当前 AccessToken 加入黑名单，可选同步删除 RefreshToken")
+    @Operation(operationId = "authLogout", summary = "Logout", description = "Blacklist the current AccessToken and optionally remove the RefreshToken")
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/api/v1/logout")
     public R<Void> logout(
@@ -40,7 +40,7 @@ public class LogoutController {
 
         String authorization = httpRequest.getHeader("Authorization");
         if (!StringUtils.hasText(authorization)) {
-            log.warn("[登出] 缺少 Authorization 请求头");
+            log.warn("[Logout] Missing Authorization header");
             return R.fail(AuthResultCode.TOKEN_INVALID);
         }
 

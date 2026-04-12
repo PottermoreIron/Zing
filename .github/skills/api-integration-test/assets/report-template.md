@@ -54,5 +54,5 @@
 DELETE FROM member.member_member WHERE member_id = {MEMBER_ID};
 ```
 
-- **RabbitMQ 消息**：消费者可能在检查前已消费消息；若 MQ 验证标记为 not found，建议检查消费者日志
+- **RabbitMQ messages**: consumers may have already consumed the message before inspection; if MQ verification shows "not found", check consumer logs
 - **密码修改后的旧密码登录验证**：Step 9b 后建议手动使用旧密码尝试登录，确认返回 401

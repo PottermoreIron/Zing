@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.nacos.discovery.enabled=false",
         "pot.ratelimit.enabled=false"
 })
-@DisplayName("LogoutController 切片测试")
+@DisplayName("LogoutController slice test")
 class LogoutControllerTest {
 
     @Autowired
@@ -47,7 +47,7 @@ class LogoutControllerTest {
     class Logout {
 
         @Test
-        @DisplayName("提供合法Bearer Token，返回200成功")
+        @DisplayName("Valid Bearer token returns 200 success")
         void whenBearerTokenProvided_thenReturn200() throws Exception {
             doNothing().when(logoutApplicationService).logout(anyString(), isNull());
 
@@ -61,7 +61,7 @@ class LogoutControllerTest {
         }
 
         @Test
-        @DisplayName("缺少Authorization请求头，返回400并携带TOKEN_INVALID错误码")
+        @DisplayName("Missing Authorization header returns 400 with TOKEN_INVALID error code")
         void whenAuthorizationHeaderMissing_thenReturn400WithTokenInvalidCode() throws Exception {
             mockMvc.perform(post(LOGOUT_URL)
                     .contentType(MediaType.APPLICATION_JSON))
@@ -71,7 +71,7 @@ class LogoutControllerTest {
         }
 
         @Test
-        @DisplayName("同时提供refreshToken，两者均传递给服务层")
+        @DisplayName("Providing both tokens passes both to the service layer")
         void whenBothTokensProvided_thenPassBothToService() throws Exception {
             doNothing().when(logoutApplicationService).logout(anyString(), anyString());
 
@@ -93,7 +93,7 @@ class LogoutControllerTest {
         }
 
         @Test
-        @DisplayName("Authorization头无Bearer前缀（裸token），正常解析")
+        @DisplayName("Authorization header without Bearer prefix (bare token) is parsed normally")
         void whenAuthorizationHeaderWithoutBearerPrefix_thenParseAsRawToken() throws Exception {
             doNothing().when(logoutApplicationService).logout(anyString(), isNull());
 

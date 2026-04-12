@@ -5,17 +5,17 @@ import lombok.Getter;
 @Getter
 public enum RegisterType {
 
-        USERNAME_PASSWORD("username_password", "用户名密码注册"),
+        USERNAME_PASSWORD("username_password", "Username-password registration"),
 
-        EMAIL_PASSWORD("email_password", "邮箱密码注册"),
+        EMAIL_PASSWORD("email_password", "Email-password registration"),
 
-        EMAIL_CODE("email_code", "邮箱验证码注册"),
+        EMAIL_CODE("email_code", "Email verification code registration"),
 
-        PHONE_CODE("phone_code", "手机号验证码注册"),
+        PHONE_CODE("phone_code", "Phone verification code registration"),
 
-        OAUTH2("oauth2", "OAuth2注册"),
+        OAUTH2("oauth2", "OAuth2 registration"),
 
-        WECHAT("wechat", "微信注册");
+        WECHAT("wechat", "WeChat registration");
 
     private final String code;
     private final String description;
@@ -31,6 +31,6 @@ public enum RegisterType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("未知的注册类型: " + code);
+        throw new IllegalArgumentException("Unknown registration type: " + code);
     }
 }

@@ -41,10 +41,10 @@ public class PermissionDomainService {
         public void assignRoleToMember(Long memberId, Long roleId, String operator) {
                 MemberAggregate member = memberRepository
                                 .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
-                                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
                 roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
-                                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
                 member.assignRole(roleId);
                 memberRepository.save(member);
@@ -55,7 +55,7 @@ public class PermissionDomainService {
                                 PermissionChangedEvent.ChangeType.MEMBER_ROLE_ASSIGNED,
                                 roleId, null, operator));
 
-                log.info("为会员{}分配角色{}", memberId, roleId);
+                log.info("[Permission] Assigning role — memberId={}, roleId={}", memberId, roleId);
         }
 
         /**
@@ -64,7 +64,7 @@ public class PermissionDomainService {
         public void revokeRoleFromMember(Long memberId, Long roleId, String operator) {
                 MemberAggregate member = memberRepository
                                 .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
-                                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
                 member.revokeRole(roleId);
                 memberRepository.save(member);
@@ -75,7 +75,7 @@ public class PermissionDomainService {
                                 PermissionChangedEvent.ChangeType.MEMBER_ROLE_REVOKED,
                                 roleId, null, operator));
 
-                log.info("撤销会员{}的角色{}", memberId, roleId);
+                log.info("[Permission] Revoking role — memberId={}, roleId={}", memberId, roleId);
         }
 
         /**
@@ -83,11 +83,11 @@ public class PermissionDomainService {
          */
         public void addPermissionToRole(Long roleId, Long permissionId, String operator) {
                 RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
-                                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
                 permissionRepository
                                 .findById(com.pot.member.service.domain.model.permission.PermissionId.of(permissionId))
-                                .orElseThrow(() -> new IllegalArgumentException("权限不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Permission not found"));
 
                 role.addPermission(permissionId);
                 roleRepository.save(role);
@@ -102,7 +102,7 @@ public class PermissionDomainService {
                                         roleId, permissionId, operator));
                 }
 
-                log.info("为角色{}添加权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
+                log.info("[Permission] Adding permission to role — roleId={}, permissionId={}, affectedMembers={}", roleId, permissionId, affectedMemberIds.size());
         }
 
         /**
@@ -110,7 +110,7 @@ public class PermissionDomainService {
          */
         public void removePermissionFromRole(Long roleId, Long permissionId, String operator) {
                 RoleAggregate role = roleRepository.findById(com.pot.member.service.domain.model.role.RoleId.of(roleId))
-                                .orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
                 role.removePermission(permissionId);
                 roleRepository.save(role);
@@ -125,7 +125,7 @@ public class PermissionDomainService {
                                         roleId, permissionId, operator));
                 }
 
-                log.info("从角色{}移除权限{}，影响{}个会员", roleId, permissionId, affectedMemberIds.size());
+                log.info("[Permission] Removing permission from role — roleId={}, permissionId={}, affectedMembers={}", roleId, permissionId, affectedMemberIds.size());
         }
 
         /**
@@ -134,7 +134,7 @@ public class PermissionDomainService {
         public Set<PermissionAggregate> getMemberPermissions(Long memberId) {
                 MemberAggregate member = memberRepository
                                 .findById(com.pot.member.service.domain.model.member.MemberId.of(memberId))
-                                .orElseThrow(() -> new IllegalArgumentException("会员不存在"));
+                                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
                 Map<Long, Set<Long>> permissionIdsByRole = roleRepository
                                 .findPermissionIdsByRoleIds(member.getRoleIds());

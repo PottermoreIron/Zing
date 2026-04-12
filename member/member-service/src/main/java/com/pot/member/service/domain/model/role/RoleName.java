@@ -8,11 +8,11 @@ public class RoleName {
 
     public RoleName(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("角色名称不能为空");
+            throw new IllegalArgumentException("Role name must not be blank");
         }
         String trimmed = value.trim();
         if (trimmed.length() > 50) {
-            throw new IllegalArgumentException("角色名称不能超过50个字符");
+            throw new IllegalArgumentException("Role name must not exceed 50 characters");
         }
         this.value = trimmed;
     }

@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
  * Register request for nickname and password.
  */
 public record UsernamePasswordRegisterRequest(
-        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+        @NotNull(message = "Register type must not be null") @JsonProperty("registerType") RegisterType registerType,
 
         @ValidUsername String nickname,
 

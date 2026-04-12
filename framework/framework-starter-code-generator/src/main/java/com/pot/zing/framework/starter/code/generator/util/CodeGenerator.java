@@ -214,16 +214,16 @@ public final class CodeGenerator {
      */
     private static void validateConfig(GeneratorConfig config) {
         if (!StringUtils.hasText(config.url())) {
-            throw new IllegalArgumentException("❌ 数据库连接URL不能为空");
+            throw new IllegalArgumentException("❌ Database connection URL must not be blank");
         }
         if (!StringUtils.hasText(config.username())) {
-            throw new IllegalArgumentException("❌ 数据库用户名不能为空");
+            throw new IllegalArgumentException("❌ Database username must not be blank");
         }
         if (config.password() == null) {
-            throw new IllegalArgumentException("❌ 数据库密码不能为null");
+            throw new IllegalArgumentException("❌ Database password must not be null");
         }
         if (!StringUtils.hasText(config.basePackage())) {
-            throw new IllegalArgumentException("❌ 基础包名不能为空");
+            throw new IllegalArgumentException("❌ Base package name must not be blank");
         }
     }
 

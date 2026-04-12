@@ -41,5 +41,5 @@ public @interface RateLimit {
     /**
      * Error message returned when the limit is exceeded.
      */
-    String message() default "请求过于频繁，请稍后再试";
+    String message() default "Too many requests, please try again later";
 }

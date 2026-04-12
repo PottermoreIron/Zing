@@ -13,18 +13,18 @@ public class CodeGeneratorUtil {
     private final CodeGenerationService codeGenerationService;
 
         public void generate() {
-        log.info("开始执行代码生成...");
+        log.info("Starting code generation...");
         try {
             codeGenerationService.generateFromProperties();
-            log.info("✅ 代码生成完成");
+            log.info("Code generation complete");
         } catch (Exception e) {
-            log.error("❌ 代码生成失败", e);
+            log.error("Code generation failed", e);
             throw e;
         }
     }
 
         public void generateTables(String... tables) {
-        log.info("开始生成指定表的代码: {}", String.join(", ", tables));
+        log.info("Starting code generation for tables: {}", String.join(", ", tables));
         generate();
     }
 }

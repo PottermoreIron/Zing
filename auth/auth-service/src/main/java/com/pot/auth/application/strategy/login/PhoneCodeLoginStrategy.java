@@ -36,7 +36,7 @@ public class PhoneCodeLoginStrategy extends AbstractLoginStrategyImpl {
     @Override
     protected void validateCredential(AuthenticationContext context) {
         var request = context.request();
-        log.debug("[手机验证码登录] 验证凭证: phone={}", request.phone());
+        log.debug("[PhoneCodeLogin] Verifying credentials — phone={}", request.phone());
 
         if (!verificationCodeService.verifyCode(request.phone(), request.verificationCode())) {
             throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);

@@ -47,9 +47,9 @@ public class MQAutoConfiguration {
             if (mqProperties.getRabbitmq().isPublisherConfirms()) {
                 rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
                     if (ack) {
-                        log.debug("[RabbitMQ] 消息发送确认: correlationData={}", correlationData);
+                        log.debug("[RabbitMQ] Publish ack — correlationData={}", correlationData);
                     } else {
-                        log.error("[RabbitMQ] 消息发送失败: correlationData={}, cause={}", correlationData, cause);
+                        log.error("[RabbitMQ] Publish nack — correlationData={}, cause={}", correlationData, cause);
                     }
                 });
             }
@@ -57,7 +57,8 @@ public class MQAutoConfiguration {
             if (mqProperties.getRabbitmq().isPublisherReturns()) {
                 rabbitTemplate.setMandatory(true);
                 rabbitTemplate.setReturnsCallback(returned -> {
-                    log.warn("[RabbitMQ] 消息无法路由: message={}, replyCode={}, replyText={}, exchange={}, routingKey={}",
+                    log.warn(
+                            "[RabbitMQ] Message returned (unroutable) — message={}, replyCode={}, replyText={}, exchange={}, routingKey={}",
                             returned.getMessage(),
                             returned.getReplyCode(),
                             returned.getReplyText(),
@@ -66,14 +67,14 @@ public class MQAutoConfiguration {
                 });
             }
 
-            log.info("[MQ] RabbitTemplate配置完成");
+            log.info("[MQ] RabbitTemplate configured");
             return rabbitTemplate;
         }
 
         @Bean
         @ConditionalOnMissingBean
         public MessageProducer rabbitMQMessageProducer(RabbitTemplate rabbitTemplate, ObjectMapper objectMapper) {
-            log.info("[MQ] 使用RabbitMQ作为消息队列");
+            log.info("[MQ] Broker: RabbitMQ");
             return new RabbitMQMessageProducer(rabbitTemplate, objectMapper);
         }
     }
@@ -90,7 +91,7 @@ public class MQAutoConfiguration {
         @ConditionalOnMissingBean
         public MessageProducer kafkaMessageProducer(KafkaTemplate<String, String> kafkaTemplate,
                 ObjectMapper objectMapper) {
-            log.info("[MQ] 使用Kafka作为消息队列");
+            log.info("[MQ] Broker: Kafka");
             return new KafkaMessageProducer(kafkaTemplate, objectMapper);
         }
     }
@@ -102,7 +103,7 @@ public class MQAutoConfiguration {
     @ConditionalOnMissingBean
     @ConditionalOnBean(MessageProducer.class)
     public MessageTemplate messageTemplate(MessageProducer messageProducer) {
-        log.info("[MQ] MessageTemplate配置完成");
+        log.info("[MQ] MessageTemplate configured");
         return new MessageTemplate(messageProducer);
     }
 

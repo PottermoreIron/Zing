@@ -22,7 +22,7 @@ public class TokenRefreshApplicationService {
      * Refreshes an access token with a refresh token.
      */
     public LoginResponse refreshToken(String refreshTokenString) {
-        log.info("[应用服务] 刷新Token");
+        log.info("[AppService] Refreshing token");
 
         TokenPair tokenPair = jwtTokenService.refreshToken(refreshTokenString);
 
@@ -38,7 +38,7 @@ public class TokenRefreshApplicationService {
                 accessToken.expiresAt(),
                 tokenPair.refreshToken().expiresAt());
 
-        log.info("[应用服务] Token刷新成功: userId={}", accessToken.userId());
+        log.info("[AppService] Token refreshed — userId={}", accessToken.userId());
         return response;
     }
 
@@ -46,7 +46,7 @@ public class TokenRefreshApplicationService {
      * Validates an access token.
      */
     public JwtToken validateAccessToken(String accessTokenString) {
-        log.debug("[应用服务] 验证AccessToken");
+        log.debug("[AppService] Validating AccessToken");
         return jwtTokenService.validateAccessToken(accessTokenString);
     }
 
@@ -54,11 +54,11 @@ public class TokenRefreshApplicationService {
      * Revokes the current access token by blacklisting it.
      */
     public void logout(String accessTokenString) {
-        log.info("[应用服务] 用户登出");
+        log.info("[AppService] User logout");
 
         JwtToken token = jwtTokenService.validateAccessToken(accessTokenString);
         jwtTokenService.addToBlacklist(token.tokenId(), token.getRemainingSeconds());
 
-        log.info("[应用服务] 用户登出成功: userId={}", token.userId());
+        log.info("[AppService] Logout successful — userId={}", token.userId());
     }
 }

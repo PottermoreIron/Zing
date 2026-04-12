@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("RegistrationApplicationService 单元测试")
+@DisplayName("RegistrationApplicationService unit test")
 class RegistrationApplicationServiceTest {
 
         private static final UserId USER_ID = UserId.of(10001L);
@@ -56,11 +56,11 @@ class RegistrationApplicationServiceTest {
         private RegistrationApplicationService service;
 
         @Nested
-        @DisplayName("传统注册（用户名密码）")
+        @DisplayName("Traditional registration (username-password)")
         class TraditionalRegister {
 
                 @Test
-                @DisplayName("用户名密码注册：委托给策略，返回RegisterResponse且字段正确")
+                @DisplayName("Username-password registration: delegates to strategy and returns correct RegisterResponse fields")
                 void whenUsernamePasswordRegister_thenDelegateAndReturnResponse() {
                         RegisterCommand command = new RegisterRequestCommand(
                                         RegisterType.USERNAME_PASSWORD,
@@ -88,7 +88,7 @@ class RegistrationApplicationServiceTest {
                         assertThat(response.nickname()).isEqualTo(USERNAME);
                         assertThat(response.accessToken()).isEqualTo(ACCESS_TOKEN);
                         assertThat(response.refreshToken()).isEqualTo(REFRESH_TOKEN);
-                        assertThat(response.message()).isEqualTo("注册成功");
+                        assertThat(response.message()).isEqualTo("Registration successful");
 
                         verify(registerStrategyFactory).getStrategy(RegisterType.USERNAME_PASSWORD);
                         verify(registrationValidationChain).validate(any(RegistrationContext.class));
@@ -96,7 +96,7 @@ class RegistrationApplicationServiceTest {
                 }
 
                 @Test
-                @DisplayName("userAgent为null时，使用默认值'Unknown'，不抛出NPE")
+                @DisplayName("Null userAgent uses default value 'Unknown' without throwing NPE")
                 void whenUserAgentNull_thenUseDefaultValue() {
                         RegisterCommand command = new RegisterRequestCommand(
                                         RegisterType.USERNAME_PASSWORD,
@@ -119,7 +119,7 @@ class RegistrationApplicationServiceTest {
                 }
 
                 @Test
-                @DisplayName("策略抛出DomainException，异常向上传播")
+                @DisplayName("Strategy throws DomainException which propagates upward")
                 void whenStrategyThrows_thenPropagateException() {
                         RegisterCommand command = new RegisterRequestCommand(
                                         RegisterType.USERNAME_PASSWORD,
@@ -144,11 +144,11 @@ class RegistrationApplicationServiceTest {
         }
 
         @Nested
-        @DisplayName("OAuth2 注册（委托给 OneStopAuthenticationService）")
+        @DisplayName("OAuth2 registration (delegated to OneStopAuthenticationService)")
         class OAuth2Register {
 
                 @Test
-                @DisplayName("OAuth2注册：委托给OneStopAuth，将响应转换为RegisterResponse")
+                @DisplayName("OAuth2 registration: delegates to OneStopAuth and converts response to RegisterResponse")
                 void whenOAuth2Register_thenDelegateToOneStopAuth() {
                         RegisterCommand command = new RegisterRequestCommand(
                                         RegisterType.OAUTH2,
@@ -190,11 +190,11 @@ class RegistrationApplicationServiceTest {
         }
 
         @Nested
-        @DisplayName("微信注册（委托给 OneStopAuthenticationService）")
+        @DisplayName("WeChat registration (delegated to OneStopAuthenticationService)")
         class WeChatRegister {
 
                 @Test
-                @DisplayName("微信注册：委托给OneStopAuth，将响应转换为RegisterResponse")
+                @DisplayName("WeChat registration: delegates to OneStopAuth and converts response to RegisterResponse")
                 void whenWeChatRegister_thenDelegateToOneStopAuth() {
                         RegisterCommand command = new RegisterRequestCommand(
                                         RegisterType.WECHAT,

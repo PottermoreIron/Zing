@@ -18,7 +18,7 @@ public class ValidationChain<T> {
 
     public void validate(T context) {
         if (handlers.isEmpty()) {
-            log.warn("[校验链] 未配置任何校验器");
+            log.warn("[ValidationChain] No validators configured");
             return;
         }
 

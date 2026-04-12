@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
  * Login request for email and verification code.
  */
 public record EmailCodeLoginRequest(
-                @NotNull(message = "登录类型不能为空") @JsonProperty("loginType") LoginType loginType,
+                @NotNull(message = "Login type must not be null") @JsonProperty("loginType") LoginType loginType,
 
                 @ValidEmail String email,
 

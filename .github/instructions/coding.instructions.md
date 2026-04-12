@@ -1,5 +1,5 @@
 ---
-description: "Use when modifying code or configuration across the Zing repo and you need repo-wide coding priorities, simplicity rules, naming rules, and commit hygiene. Trigger words: coding standard, convention, naming, refactor, config, 规范, 约定, 命名, 重构, 配置."
+description: "Use when modifying code or configuration across the Zing repo and you need repo-wide coding priorities, simplicity rules, naming rules, and commit hygiene. Trigger words: coding standard, convention, naming, refactor, config, convention, naming, refactoring, config."
 name: "Zing Core Rules"
 applyTo: "**/*.java, **/*.xml, **/*.yml, **/*.yaml, **/*.properties, **/*.sql, **/pom.xml"
 ---

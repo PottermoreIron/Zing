@@ -10,10 +10,10 @@ public record PermissionDigest(String value) {
 
         public PermissionDigest {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("权限摘要不能为空");
+            throw new IllegalArgumentException("Permission digest must not be blank");
         }
         if (!value.matches("^[a-f0-9]{32}$")) {
-            throw new IllegalArgumentException("权限摘要格式错误，必须为32位MD5 Hex字符串");
+            throw new IllegalArgumentException("Permission digest format error, must be a 32-character MD5 hex string");
         }
     }
 

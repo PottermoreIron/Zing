@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("LogoutApplicationService 单元测试")
+@DisplayName("LogoutApplicationService unit test")
 class LogoutApplicationServiceTest {
 
     @Mock
@@ -23,7 +23,7 @@ class LogoutApplicationServiceTest {
     private LogoutApplicationService logoutApplicationService;
 
     @Test
-    @DisplayName("提供AccessToken和RefreshToken，两者均委托给JwtTokenService")
+    @DisplayName("Providing both AccessToken and RefreshToken delegates both to JwtTokenService")
     void whenBothTokensProvided_thenDelegateToBothRevocations() {
         logoutApplicationService.logout(TestFixtures.FAKE_ACCESS_TOKEN, TestFixtures.FAKE_REFRESH_TOKEN);
 
@@ -31,7 +31,7 @@ class LogoutApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("仅提供AccessToken（RefreshToken为null），委托时RefreshToken为null")
+    @DisplayName("Providing only AccessToken (null RefreshToken) passes null RefreshToken to delegate")
     void whenOnlyAccessToken_thenDelegateWithNullRefresh() {
         logoutApplicationService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 

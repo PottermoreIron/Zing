@@ -1,5 +1,5 @@
 ---
-description: "Use when working on Spring Boot controllers, services, application services, configuration, validation, transactions, async execution, or REST response models in Zing. Trigger words: @Service, @RestController, @Valid, @Transactional, @ConfigurationProperties, @Async, Result<T>, Spring Boot, 配置, 校验, 事务, 控制器."
+description: "Use when working on Spring Boot controllers, services, application services, configuration, validation, transactions, async execution, or REST response models in Zing. Trigger words: @Service, @RestController, @Valid, @Transactional, @ConfigurationProperties, @Async, Result<T>, Spring Boot, config, validation, transaction, controller."
 name: "Zing Spring Boot Rules"
 applyTo: "**/application/**/*.java, **/interfaces/**/*.java, **/*Controller.java, **/*Service.java, **/*AppService.java, **/*Config.java, **/*Configuration.java, **/*Properties.java, **/*.yml, **/*.yaml, **/*.properties"
 ---

@@ -27,22 +27,22 @@ class BaseGlobalExceptionHandlerTest {
     private final BaseGlobalExceptionHandler handler = new DefaultGlobalExceptionHandler();
 
     @Test
-    @DisplayName("业务异常使用调用方结果码")
+    @DisplayName("Business exception uses caller-provided result code")
     void handleBusinessException_usesCustomResultCode() {
-        BusinessException exception = new BusinessException(ResultCode.FORBIDDEN, "禁止访问测试");
+        BusinessException exception = new BusinessException(ResultCode.FORBIDDEN, "Access forbidden (test)");
 
         R<?> response = handler.handleBusinessException(exception);
 
         assertThat(response.getCode()).isEqualTo(ResultCode.FORBIDDEN.getCode());
-        assertThat(response.getMsg()).isEqualTo("禁止访问测试");
+        assertThat(response.getMsg()).isEqualTo("Access forbidden (test)");
     }
 
     @Test
-    @DisplayName("参数校验异常合并字段错误消息")
+    @DisplayName("Validation exception concatenates field error messages")
     void handleValidationException_combinesFieldMessages() throws NoSuchMethodException {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new SampleRequest(), "sampleRequest");
-        bindingResult.addError(new FieldError("sampleRequest", "nickname", "昵称不能为空"));
-        bindingResult.addError(new FieldError("sampleRequest", "email", "邮箱格式不正确"));
+        bindingResult.addError(new FieldError("sampleRequest", "nickname", "Nickname is required"));
+        bindingResult.addError(new FieldError("sampleRequest", "email", "Invalid email format"));
         Method method = SampleController.class.getDeclaredMethod("create", SampleRequest.class);
         MethodParameter methodParameter = new MethodParameter(method, 0);
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(methodParameter, bindingResult);
@@ -50,11 +50,11 @@ class BaseGlobalExceptionHandlerTest {
         R<?> response = handler.handleValidationException(exception);
 
         assertThat(response.getCode()).isEqualTo(ResultCode.PARAM_ERROR.getCode());
-        assertThat(response.getMsg()).isEqualTo("昵称不能为空; 邮箱格式不正确");
+        assertThat(response.getMsg()).isEqualTo("Nickname is required; Invalid email format");
     }
 
     @Test
-    @DisplayName("约束异常映射为参数错误")
+    @DisplayName("Constraint violation maps to parameter error")
     void handleConstraintViolationException_returnsParamError() {
         ConstraintViolationException exception = new ConstraintViolationException(Set.of());
 
@@ -65,23 +65,23 @@ class BaseGlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("请求体不可读映射为参数错误")
+    @DisplayName("Unreadable request body maps to parameter error")
     void handleHttpMessageNotReadableException_returnsParamError() {
         R<?> response = handler.handleHttpMessageNotReadableException(
                 new HttpMessageNotReadableException("bad body", unreadableInputMessage()));
 
         assertThat(response.getCode()).isEqualTo(ResultCode.PARAM_ERROR.getCode());
-        assertThat(response.getMsg()).isEqualTo("请求参数格式错误");
+        assertThat(response.getMsg()).isEqualTo("Malformed request body");
     }
 
     @Test
-    @DisplayName("缺少请求参数映射为参数错误")
+    @DisplayName("Missing request parameter maps to parameter error")
     void handleMissingServletRequestParameterException_returnsParamError() {
         R<?> response = handler.handleMissingServletRequestParameterException(
                 new MissingServletRequestParameterException("memberId", "Long"));
 
         assertThat(response.getCode()).isEqualTo(ResultCode.PARAM_ERROR.getCode());
-        assertThat(response.getMsg()).isEqualTo("缺少必填参数: memberId");
+        assertThat(response.getMsg()).isEqualTo("Missing required parameter: memberId");
     }
 
     private static final class SampleController {

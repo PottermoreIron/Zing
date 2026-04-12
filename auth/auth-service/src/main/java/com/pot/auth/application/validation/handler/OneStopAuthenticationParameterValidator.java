@@ -17,7 +17,7 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
     @Override
     public void validate(OneStopAuthContext context) {
         OneStopAuthCommand request = context.request();
-        log.debug("[参数校验] 开始校验一键认证请求: type={}", request.authType());
+        log.debug("[ParamValidator] Validating one-stop authentication request — type={}", request.authType());
 
         switch (request.authType()) {
             case USERNAME_PASSWORD -> validateNicknamePassword(request);
@@ -33,10 +33,10 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
 
     private void validateNicknamePassword(OneStopAuthCommand request) {
         if (!ValidationUtils.isValidNickname(request.nickname())) {
-            throw new DomainException("昵称不合法");
+            throw new DomainException("Nickname is invalid");
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("密码不合法");
+            throw new DomainException("Password is invalid");
         }
     }
 
@@ -45,10 +45,10 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
             throw new DomainException(AuthResultCode.INVALID_PHONE);
         }
         if (!StringUtils.hasText(request.password()) && !StringUtils.hasText(request.verificationCode())) {
-            throw new DomainException("手机号一键认证至少需要密码或验证码之一");
+            throw new DomainException("Phone one-stop authentication requires at least a password or a verification code");
         }
         if (StringUtils.hasText(request.password()) && !ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("密码不合法");
+            throw new DomainException("Password is invalid");
         }
         if (StringUtils.hasText(request.verificationCode())
                 && !ValidationUtils.isValidVerificationCode(request.verificationCode())) {
@@ -70,10 +70,10 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
             throw new DomainException(AuthResultCode.INVALID_EMAIL);
         }
         if (!StringUtils.hasText(request.password()) && !StringUtils.hasText(request.verificationCode())) {
-            throw new DomainException("邮箱一键认证至少需要密码或验证码之一");
+            throw new DomainException("Email one-stop authentication requires at least a password or a verification code");
         }
         if (StringUtils.hasText(request.password()) && !ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("密码不合法");
+            throw new DomainException("Password is invalid");
         }
         if (StringUtils.hasText(request.verificationCode())
                 && !ValidationUtils.isValidVerificationCode(request.verificationCode())) {

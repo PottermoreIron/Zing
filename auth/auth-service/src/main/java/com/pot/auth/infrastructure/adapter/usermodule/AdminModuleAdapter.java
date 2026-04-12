@@ -30,38 +30,38 @@ public class AdminModuleAdapter implements UserModulePort {
 
     @Override
     public Optional<UserDTO> authenticateWithPassword(String identifier, String password) {
-        log.warn("⚠️ AdminModuleAdapter未实现：authenticateWithPassword");
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        log.warn("AdminModuleAdapter not implemented: authenticateWithPassword");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public Optional<UserDTO> findById(UserId userId) {
-        log.warn("⚠️ AdminModuleAdapter未实现：findById");
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        log.warn("AdminModuleAdapter not implemented: findById");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public Optional<UserDTO> findByIdentifier(String identifier) {
-        log.warn("⚠️ AdminModuleAdapter未实现：findByIdentifier");
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        log.warn("AdminModuleAdapter not implemented: findByIdentifier");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public Optional<UserDTO> findByEmail(String email) {
-        log.warn("⚠️ AdminModuleAdapter未实现：findByEmail");
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        log.warn("AdminModuleAdapter not implemented: findByEmail");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public Optional<UserDTO> findByPhone(String phone) {
-        log.warn("⚠️ AdminModuleAdapter未实现：findByPhone");
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        log.warn("AdminModuleAdapter not implemented: findByPhone");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public UserId createUser(CreateUserCommand command) {
-        log.warn("⚠️ AdminModuleAdapter未实现：createUser");
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        log.warn("AdminModuleAdapter not implemented: createUser");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
@@ -81,17 +81,17 @@ public class AdminModuleAdapter implements UserModulePort {
 
     @Override
     public void updatePassword(UserId userId, Password newPassword) {
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public void lockAccount(UserId userId) {
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public void unlockAccount(UserId userId) {
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
@@ -126,23 +126,23 @@ public class AdminModuleAdapter implements UserModulePort {
 
     @Override
     public void kickDevice(UserId userId, DeviceId deviceId) {
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
-        throw new UnsupportedOperationException("Admin域暂未实现");
+        throw new UnsupportedOperationException("Admin domain not yet implemented");
     }
 
     @Override
     public Optional<UserDTO> findUserByOAuth2(String provider, String openId) {
-        log.debug("Admin域不支持OAuth2登录: provider={}, openId={}", provider, openId);
+        log.debug("Admin domain does not support OAuth2 login — provider={}, openId={}", provider, openId);
         return Optional.empty();
     }
 
     @Override
     public Optional<UserDTO> findUserByWeChat(String weChatOpenId) {
-        log.debug("Admin域不支持微信登录: weChatOpenId={}", weChatOpenId);
+        log.debug("Admin domain does not support WeChat login — weChatOpenId={}", weChatOpenId);
         return Optional.empty();
     }
 }

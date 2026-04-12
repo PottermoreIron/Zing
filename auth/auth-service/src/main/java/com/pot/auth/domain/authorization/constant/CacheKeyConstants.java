@@ -26,7 +26,7 @@ public final class CacheKeyConstants {
     public static final String PERMISSION_BLOOM = "perms:bloom";
 
     private CacheKeyConstants() {
-        throw new UnsupportedOperationException("工具类不允许实例化");
+        throw new UnsupportedOperationException("Utility class, do not instantiate");
     }
 
     /**

@@ -8,17 +8,17 @@ import java.security.SecureRandom;
 @Builder
 public record VerificationCode(String value) {
 
-    public static final int TTL_SECONDS = 300; // 5分钟
+    public static final int TTL_SECONDS = 300; // 5 minutes
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int CODE_LENGTH = 6;
     private static final int MAX_ATTEMPTS = 3;
 
         public VerificationCode {
         if (value == null || value.isBlank()) {
-            throw new InvalidVerificationCodeException("验证码不能为空");
+            throw new InvalidVerificationCodeException("Verification code must not be blank");
         }
         if (!value.matches("^\\d{" + CODE_LENGTH + "}$")) {
-            throw new InvalidVerificationCodeException("验证码必须是" + CODE_LENGTH + "位数字");
+            throw new InvalidVerificationCodeException("Verification code must be " + CODE_LENGTH + " digits");
         }
     }
 

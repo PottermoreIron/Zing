@@ -3,15 +3,15 @@ package com.pot.auth.domain.shared.valueobject;
 public record DeviceInfo(
         String deviceType,    // MOBILE, DESKTOP, TABLET, UNKNOWN
         String osName,        // iOS, Android, Windows, macOS, Linux
-        String osVersion,     // 操作系统版本
+        String osVersion,     // OS version
         String browserName,   // Chrome, Safari, Firefox, Edge
-        String browserVersion, // 浏览器版本
-        String userAgent      // 完整的User-Agent
+        String browserVersion, // browser version
+        String userAgent      // complete User-Agent string
 ) {
 
         public DeviceInfo {
         if (userAgent == null || userAgent.isBlank()) {
-            throw new IllegalArgumentException("User-Agent不能为空");
+            throw new IllegalArgumentException("User-Agent must not be blank");
         }
         deviceType = deviceType != null ? deviceType : "UNKNOWN";
         osName = osName != null ? osName : "Unknown";

@@ -11,11 +11,11 @@ import jakarta.validation.constraints.NotNull;
  * Register request used by legacy OAuth2 flows.
  */
 public record OAuth2RegisterRequest(
-        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+        @NotNull(message = "Register type must not be null") @JsonProperty("registerType") RegisterType registerType,
 
-        @NotNull(message = "OAuth2提供商不能为空") OAuth2Provider provider,
+        @NotNull(message = "OAuth2 provider must not be null") OAuth2Provider provider,
 
-        @NotBlank(message = "授权码不能为空") String code,
+        @NotBlank(message = "Authorization code must not be blank") String code,
 
         String state,
 

@@ -17,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
         "spring.data.redis.host=localhost",
         "spring.data.redis.port=6379"
 })
-@DisplayName("Spring上下文加载测试")
+@DisplayName("Spring context load test")
 class AuthServiceApplicationTests {
 
     // Avoid creating TouchModuleAdapter during context startup.
@@ -37,7 +37,7 @@ class AuthServiceApplicationTests {
     private WeChatPort weChatPort;
 
     @Test
-    @DisplayName("Spring上下文正常启动，无Bean配置错误")
+    @DisplayName("Spring context starts normally with no bean configuration errors")
     void contextLoads() {
     }
 }

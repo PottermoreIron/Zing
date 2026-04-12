@@ -12,12 +12,12 @@ public record Email(String value) {
 
         public Email {
         if (value == null || value.isBlank()) {
-            throw new InvalidEmailException("邮箱不能为空");
+            throw new InvalidEmailException("Email address must not be blank");
         }
 
         String trimmed = value.trim().toLowerCase();
         if (!EMAIL_PATTERN.matcher(trimmed).matches()) {
-            throw new InvalidEmailException("邮箱格式不正确: " + value);
+            throw new InvalidEmailException("Invalid email address format: " + value);
         }
 
         value = trimmed;

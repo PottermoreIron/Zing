@@ -19,8 +19,8 @@ public class OpenApiConfig {
         public OpenAPI customOpenAPI() {
                 return new OpenAPI()
                                 .info(new Info()
-                                                .title("Zing API 文档")
-                                                .description("Zing 项目 API 接口文档")
+                                                .title("Zing API Documentation")
+                                                .description("Zing Project REST API Reference")
                                                 .version("2025-12-14")
                                                 .contact(new Contact()
                                                                 .name("pot")

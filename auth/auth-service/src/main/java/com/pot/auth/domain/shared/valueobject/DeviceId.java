@@ -4,7 +4,7 @@ public record DeviceId(Long value) {
 
     public DeviceId {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("DeviceId必须是正整数");
+            throw new IllegalArgumentException("DeviceId must be a positive integer");
         }
     }
 
@@ -16,7 +16,7 @@ public record DeviceId(Long value) {
         try {
             return new DeviceId(Long.parseLong(value));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("无效的DeviceId格式: " + value, e);
+            throw new IllegalArgumentException("Invalid DeviceId format: " + value, e);
         }
     }
 }

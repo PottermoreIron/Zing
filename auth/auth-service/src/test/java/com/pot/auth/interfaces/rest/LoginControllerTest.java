@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "spring.cloud.nacos.discovery.enabled=false",
                 "pot.ratelimit.enabled=false"
 })
-@DisplayName("LoginController 切片测试")
+@DisplayName("LoginController slice test")
 class LoginControllerTest {
 
         @Autowired
@@ -56,7 +56,7 @@ class LoginControllerTest {
                 private static final String LOGIN_URL = "/auth/api/v1/login";
 
                 @Test
-                @DisplayName("用户名密码登录请求合法，返回200和LoginResponse")
+                @DisplayName("Valid username-password login request returns 200 with LoginResponse")
                 void whenValidUsernamePasswordRequest_thenReturn200WithLoginResponse() throws Exception {
                         LoginResponse loginResponse = TestFixtures.loginResponse();
                         when(loginApplicationService.login(any(), any(), any()))
@@ -84,7 +84,7 @@ class LoginControllerTest {
                 }
 
                 @Test
-                @DisplayName("未知loginType，Jackson反序列化失败返回400")
+                @DisplayName("Unknown loginType fails Jackson deserialization and returns 400")
                 void whenUsernameMissing_thenReturn400ValidationError() throws Exception {
                         String requestBody = """
                                         {
@@ -101,7 +101,7 @@ class LoginControllerTest {
                 }
 
                 @Test
-                @DisplayName("密码格式不合法（太短），返回400")
+                @DisplayName("Invalid password format (too short) returns 400")
                 void whenPasswordTooShort_thenReturn400() throws Exception {
                         String requestBody = """
                                         {
@@ -119,7 +119,7 @@ class LoginControllerTest {
                 }
 
                 @Test
-                @DisplayName("服务抛出AUTHENTICATION_FAILED，返回400并携带AUTH_0001错误码")
+                @DisplayName("Service throws AUTHENTICATION_FAILED returns 400 with AUTH_0001 error code")
                 void whenServiceThrowsAuthFailed_thenReturn400WithAuthErrorCode() throws Exception {
                         when(loginApplicationService.login(any(), any(), any()))
                                         .thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
@@ -142,7 +142,7 @@ class LoginControllerTest {
                 }
 
                 @Test
-                @DisplayName("邮箱验证码登录请求合法，返回200")
+                @DisplayName("Valid email verification code login request returns 200")
                 void whenValidEmailCodeRequest_thenReturn200() throws Exception {
                         when(loginApplicationService.login(any(), any(), any()))
                                         .thenReturn(TestFixtures.loginResponse());
@@ -171,7 +171,7 @@ class LoginControllerTest {
                 private static final String REFRESH_URL = "/auth/api/v1/refresh";
 
                 @Test
-                @DisplayName("有效refreshToken，返回200和新的TokenPair")
+                @DisplayName("Valid refreshToken returns 200 with new TokenPair")
                 void whenValidRefreshToken_thenReturn200() throws Exception {
                         when(tokenRefreshApplicationService.refreshToken(anyString()))
                                         .thenReturn(TestFixtures.loginResponse());
@@ -192,7 +192,7 @@ class LoginControllerTest {
                 }
 
                 @Test
-                @DisplayName("refreshToken为空，返回400")
+                @DisplayName("Blank refreshToken returns 400")
                 void whenRefreshTokenBlank_thenReturn400() throws Exception {
                         String requestBody = """
                                         {

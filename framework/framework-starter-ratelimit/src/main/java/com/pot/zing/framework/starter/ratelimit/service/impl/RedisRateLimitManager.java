@@ -33,7 +33,7 @@ public class RedisRateLimitManager implements RateLimitManager {
 
     @Override
     public boolean tryAcquire(String key, double rate, long timeout, TimeUnit timeUnit) {
-        log.debug("Redis限流尝试获取令牌 - key: {}, rate: {}, timeout: {}", key, rate, timeout);
+        log.debug("[RateLimit] Attempting to acquire token — key: {}, rate: {}, timeout: {}", key, rate, timeout);
 
         rate = rate * properties.getGlobalRateFactor();
 
@@ -56,7 +56,7 @@ public class RedisRateLimitManager implements RateLimitManager {
                 return tryAcquireImmediately(key, tokensKey, lastRefillKey, rate, capacity, now, ttl);
             }
         } catch (Exception e) {
-            log.error("Redis限流异常 - key: {}", key, e);
+            log.error("[RateLimit] Redis rate limit error — key: {}", key, e);
             // Fail open to avoid blocking business traffic on infrastructure errors.
             return true;
         }
@@ -109,7 +109,7 @@ public class RedisRateLimitManager implements RateLimitManager {
                     keys,
                     rate, capacity, now, requested, ttl);
         } catch (Exception e) {
-            log.error("执行限流Lua脚本失败 - keys: {}", keys, e);
+            log.error("[RateLimit] Failed to execute Lua script — keys: {}", keys, e);
             // Fail open to avoid blocking business traffic on script errors.
             return 1L;
         }
@@ -126,7 +126,7 @@ public class RedisRateLimitManager implements RateLimitManager {
             script.setResultType(Long.class);
             log.info("限流Lua脚本加载成功: {}", LUA_SCRIPT_PATH);
         } catch (Exception e) {
-            log.error("限流Lua脚本加载失败: {}", LUA_SCRIPT_PATH, e);
+            log.error("[RateLimit] Failed to load Lua script: {}", LUA_SCRIPT_PATH, e);
             throw new IllegalStateException("Failed to load rate limit script", e);
         }
         return script;

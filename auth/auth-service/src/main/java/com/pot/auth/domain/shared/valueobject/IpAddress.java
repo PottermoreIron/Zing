@@ -25,13 +25,13 @@ public record IpAddress(String value) {
      */
     public IpAddress {
         if (value == null || value.isBlank()) {
-            throw new InvalidIpAddressException("IP地址不能为空");
+            throw new InvalidIpAddressException("IP address must not be null");
         }
 
         String trimmed = value.trim();
 
         if (!isValidIpAddress(trimmed)) {
-            throw new InvalidIpAddressException("IP地址格式不正确: " + value);
+            throw new InvalidIpAddressException("Invalid IP address format: " + value);
         }
 
         value = trimmed;
@@ -67,9 +67,9 @@ public record IpAddress(String value) {
      */
     public String getRegion() {
         if (isPrivateIP()) {
-            return "内网";
+            return "LAN";
         }
-        return "未知地域";
+        return "Unknown region";
     }
 
     /** Returns whether the address is in a private IPv4 range. */

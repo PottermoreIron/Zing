@@ -4,7 +4,7 @@ public record RoleId(Long value) {
 
     public RoleId {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("角色ID不能为空且必须为正数");
+            throw new IllegalArgumentException("Role ID must not be null and must be a positive number");
         }
     }
 

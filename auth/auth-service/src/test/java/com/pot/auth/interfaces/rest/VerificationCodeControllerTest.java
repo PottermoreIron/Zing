@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.cloud.nacos.discovery.enabled=false",
         "pot.ratelimit.enabled=false"
 })
-@DisplayName("VerificationCodeController 切片测试")
+@DisplayName("VerificationCodeController slice test")
 class VerificationCodeControllerTest {
 
     @Autowired
@@ -44,7 +44,7 @@ class VerificationCodeControllerTest {
         private static final String EMAIL_CODE_URL = "/auth/code/email";
 
         @Test
-        @DisplayName("合法邮箱地址，返回200成功")
+        @DisplayName("Valid email address returns 200 success")
         void whenValidEmail_thenReturn200() throws Exception {
             when(verificationCodeApplicationService.sendEmailCode(anyString())).thenReturn(true);
 
@@ -55,7 +55,7 @@ class VerificationCodeControllerTest {
         }
 
         @Test
-        @DisplayName("邮箱格式不合法，返回400")
+        @DisplayName("Invalid email format returns 400")
         void whenInvalidEmailFormat_thenReturn400() throws Exception {
             mockMvc.perform(post(EMAIL_CODE_URL)
                     .param("email", "not-an-email"))
@@ -63,7 +63,7 @@ class VerificationCodeControllerTest {
         }
 
         @Test
-        @DisplayName("email参数为空，返回400")
+        @DisplayName("Blank email parameter returns 400")
         void whenEmailBlank_thenReturn400() throws Exception {
             mockMvc.perform(post(EMAIL_CODE_URL)
                     .param("email", ""))
@@ -71,17 +71,17 @@ class VerificationCodeControllerTest {
         }
 
         @Test
-        @DisplayName("email参数缺失，返回400")
+        @DisplayName("Missing email parameter returns 400")
         void whenEmailParamMissing_thenReturn400() throws Exception {
             mockMvc.perform(post(EMAIL_CODE_URL))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
-        @DisplayName("发送频率限制触发，返回400并携带AUTH_0200错误码")
+        @DisplayName("Rate limit triggered returns 400 with AUTH_0200 error code")
         void whenCodeSendTooFrequent_thenReturn400WithCode0200() throws Exception {
             when(verificationCodeApplicationService.sendEmailCode(anyString()))
-                    .thenThrow(new CodeSendTooFrequentException("发送过于频繁"));
+                    .thenThrow(new CodeSendTooFrequentException("Verification code sent too frequently, please try again later"));
 
             mockMvc.perform(post(EMAIL_CODE_URL)
                     .param("email", "test@example.com"))
@@ -91,7 +91,7 @@ class VerificationCodeControllerTest {
         }
 
         @Test
-        @DisplayName("服务返回false，接口返回失败响应")
+        @DisplayName("Service returns false, API returns failure response")
         void whenServiceReturnsFalse_thenReturnFailResponse() throws Exception {
             when(verificationCodeApplicationService.sendEmailCode(anyString())).thenReturn(false);
 
@@ -109,7 +109,7 @@ class VerificationCodeControllerTest {
         private static final String SMS_CODE_URL = "/auth/code/sms";
 
         @Test
-        @DisplayName("合法手机号，返回200成功")
+        @DisplayName("Valid phone number returns 200 success")
         void whenValidPhone_thenReturn200() throws Exception {
             when(verificationCodeApplicationService.sendSmsCode(anyString())).thenReturn(true);
 
@@ -120,7 +120,7 @@ class VerificationCodeControllerTest {
         }
 
         @Test
-        @DisplayName("手机号格式不合法，返回400")
+        @DisplayName("Invalid phone number format returns 400")
         void whenInvalidPhoneFormat_thenReturn400() throws Exception {
             mockMvc.perform(post(SMS_CODE_URL)
                     .param("phone", "not-a-phone"))
@@ -128,7 +128,7 @@ class VerificationCodeControllerTest {
         }
 
         @Test
-        @DisplayName("phone参数缺失，返回400")
+        @DisplayName("Missing phone parameter returns 400")
         void whenPhoneParamMissing_thenReturn400() throws Exception {
             mockMvc.perform(post(SMS_CODE_URL))
                     .andExpect(status().isBadRequest());

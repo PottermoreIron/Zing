@@ -14,7 +14,7 @@ class MemberProfileTest {
     class Empty {
 
         @Test
-        @DisplayName("所有字段均为 null")
+        @DisplayName("All fields are null")
         void empty_allFieldsNull() {
             MemberProfile profile = MemberProfile.empty();
 
@@ -37,37 +37,37 @@ class MemberProfileTest {
     class Builder {
 
         @Test
-        @DisplayName("builder 设置全部字段")
+        @DisplayName("Builder sets all fields")
         void builder_allFields() {
             MemberProfile profile = MemberProfile.builder()
-                    .nickname("昵称")
-                    .firstName("三")
-                    .lastName("张")
+                    .nickname("TestNickname")
+                    .firstName("San")
+                    .lastName("Zhang")
                     .gender(1)
                     .birthDate("1990-01-01")
-                    .bio("简介")
+                    .bio("A brief bio")
                     .countryCode("CN")
-                    .region("上海市")
-                    .city("上海")
+                    .region("Shanghai")
+                    .city("Shanghai")
                     .timezone("Asia/Shanghai")
                     .locale("zh-CN")
                     .build();
 
-            assertThat(profile.getNickname()).isEqualTo("昵称");
-            assertThat(profile.getFirstName()).isEqualTo("三");
-            assertThat(profile.getLastName()).isEqualTo("张");
+            assertThat(profile.getNickname()).isEqualTo("TestNickname");
+            assertThat(profile.getFirstName()).isEqualTo("San");
+            assertThat(profile.getLastName()).isEqualTo("Zhang");
             assertThat(profile.getGender()).isEqualTo(1);
             assertThat(profile.getBirthDate()).isEqualTo("1990-01-01");
-            assertThat(profile.getBio()).isEqualTo("简介");
+            assertThat(profile.getBio()).isEqualTo("A brief bio");
             assertThat(profile.getCountryCode()).isEqualTo("CN");
-            assertThat(profile.getRegion()).isEqualTo("上海市");
-            assertThat(profile.getCity()).isEqualTo("上海");
+            assertThat(profile.getRegion()).isEqualTo("Shanghai");
+            assertThat(profile.getCity()).isEqualTo("Shanghai");
             assertThat(profile.getTimezone()).isEqualTo("Asia/Shanghai");
             assertThat(profile.getLocale()).isEqualTo("zh-CN");
         }
 
         @Test
-        @DisplayName("builder 只设置部分字段，其余为 null")
+        @DisplayName("Builder with partial fields, others are null")
         void builder_partialFields() {
             MemberProfile profile = MemberProfile.builder()
                     .nickname("test")
@@ -83,35 +83,35 @@ class MemberProfileTest {
     class WithNickname {
 
         @Test
-        @DisplayName("返回新实例，不修改原实例（不可变）")
+        @DisplayName("Returns new instance and does not modify original (immutable)")
         void withNickname_immutable() {
             MemberProfile original = MemberProfile.builder()
-                    .nickname("原昵称")
-                    .city("北京")
+                    .nickname("OriginalNickname")
+                    .city("Beijing")
                     .build();
 
-            MemberProfile updated = original.withNickname("新昵称");
+            MemberProfile updated = original.withNickname("NewNickname");
 
-            assertThat(updated.getNickname()).isEqualTo("新昵称");
-            assertThat(updated.getCity()).isEqualTo("北京");
-            assertThat(original.getNickname()).isEqualTo("原昵称");
+            assertThat(updated.getNickname()).isEqualTo("NewNickname");
+            assertThat(updated.getCity()).isEqualTo("Beijing");
+            assertThat(original.getNickname()).isEqualTo("OriginalNickname");
         }
 
         @Test
-        @DisplayName("withNickname(null) 返回 nickname 为 null 的新实例")
+        @DisplayName("withNickname(null) returns new instance with null nickname")
         void withNickname_null() {
-            MemberProfile profile = MemberProfile.builder().nickname("昵称").build();
+            MemberProfile profile = MemberProfile.builder().nickname("TestNickname").build();
             MemberProfile updated = profile.withNickname(null);
             assertThat(updated.getNickname()).isNull();
         }
     }
 
     @Nested
-    @DisplayName("不可变性")
+    @DisplayName("Immutability")
     class Immutability {
 
         @Test
-        @DisplayName("MemberProfile 是 final 类，不可被继承")
+        @DisplayName("MemberProfile is a final class and cannot be extended")
         void isFinalClass() {
             assertThat(MemberProfile.class).isFinal();
         }

@@ -4,7 +4,7 @@ public record PermissionVersion(long value) {
 
         public PermissionVersion {
         if (value < 0) {
-            throw new IllegalArgumentException("权限版本号不能为负数");
+            throw new IllegalArgumentException("Permission version must not be negative");
         }
     }
 

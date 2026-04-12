@@ -29,7 +29,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
 
     @Override
     public WeChatUserInfo getUserInfo(String code, String state) {
-        log.info("[微信] 授权码换取用户信息");
+        log.info("[WeChat] Exchanging authorization code for user info");
 
         validateProperties();
 
@@ -40,14 +40,14 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[微信] 获取用户信息失败: {}", e.getMessage(), e);
-            throw new DomainException("微信认证失败: " + e.getMessage(), e);
+            log.error("[WeChat] Failed to fetch user info: {}", e.getMessage(), e);
+            throw new DomainException("WeChat authentication failed: " + e.getMessage(), e);
         }
     }
 
     @Override
     public String refreshAccessToken(String refreshToken) {
-        log.info("[微信] 刷新 Access Token");
+        log.info("[WeChat] Refreshing access token");
 
         validateProperties();
 
@@ -65,17 +65,17 @@ public class HttpWeChatPortAdapter implements WeChatPort {
 
             String newAccessToken = json.path("access_token").asText(null);
             if (newAccessToken == null || newAccessToken.isBlank()) {
-                throw new DomainException("微信刷新 Token 响应缺少 access_token");
+                throw new DomainException("WeChat token refresh response missing access_token");
             }
 
-            log.debug("[微信] Access Token 刷新成功");
+            log.debug("[WeChat] Access token refreshed");
             return newAccessToken;
 
         } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[微信] 刷新 Token 失败: {}", e.getMessage(), e);
-            throw new DomainException("微信 Token 刷新失败: " + e.getMessage(), e);
+            log.error("[WeChat] Failed to refresh token: {}", e.getMessage(), e);
+            throw new DomainException("WeChat token refresh failed: " + e.getMessage(), e);
         }
     }
 
@@ -85,7 +85,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         if (accessToken == null || accessToken.isBlank()) {
             return false;
         }
-        log.debug("[微信] validateAccessToken 调用（简化实现，Token 非空即通过）");
+        log.debug("[WeChat] validateAccessToken called (simplified: non-null token passes)");
         return true;
     }
 
@@ -109,7 +109,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         String openId = json.path("openid").asText(null);
 
         if (accessToken == null || openId == null) {
-            throw new DomainException("微信授权码无效或已过期");
+            throw new DomainException("WeChat authorization code is invalid or expired");
         }
 
         long expiresIn = json.path("expires_in").asLong(7200);
@@ -158,10 +158,10 @@ public class HttpWeChatPortAdapter implements WeChatPort {
     private void checkWeChatError(JsonNode json) {
         int errCode = json.path("errcode").asInt(0);
         if (errCode != 0) {
-            String errMsg = json.path("errmsg").asText("未知错误");
-            log.error("[微信] API 返回错误: errcode={}, errmsg={}", errCode, errMsg);
+            String errMsg = json.path("errmsg").asText("unknown error");
+            log.error("[WeChat] API error — errcode={}, errmsg={}", errCode, errMsg);
             throw new DomainException(
-                    String.format("微信 API 错误 [%d]: %s", errCode, errMsg));
+                    String.format("WeChat API error [%d]: %s", errCode, errMsg));
         }
     }
 
@@ -170,8 +170,8 @@ public class HttpWeChatPortAdapter implements WeChatPort {
      */
     private void validateProperties() {
         if (!properties.isConfigured()) {
-            log.error("[微信] AppID 或 AppSecret 未配置");
-            throw new DomainException("微信登录功能未配置，请联系管理员");
+            log.error("[WeChat] AppID or AppSecret not configured");
+            throw new DomainException("WeChat login is not configured, please contact your administrator");
         }
     }
 

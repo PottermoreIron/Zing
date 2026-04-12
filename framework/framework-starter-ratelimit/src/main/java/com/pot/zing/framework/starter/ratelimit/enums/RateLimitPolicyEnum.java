@@ -7,9 +7,9 @@ import lombok.Getter;
  */
 @Getter
 public enum RateLimitPolicyEnum {
-    REJECT("reject", "拒绝请求"),
+    REJECT("reject", "Reject request"),
 
-    WAIT("wait", "等待获取令牌");
+    WAIT("wait", "Wait for token acquisition");
 
     private final String code;
     private final String description;

@@ -31,13 +31,13 @@ public class VerificationCodeService {
     }
 
         public boolean sendEmailVerificationCode(Email email) {
-        log.info("[验证码] 发送邮件验证码: email={}", email.value());
+        log.info("[Code] Sending email verification code — email={}", email.value());
 
         String recipient = email.value();
         String sendLimitKey = policy.sendLimitKey(recipient);
         if (cachePort.exists(sendLimitKey)) {
-            log.warn("[验证码] 发送过于频繁: email={}", email.value());
-            throw new CodeSendTooFrequentException("验证码发送过于频繁，请稍后再试");
+            log.warn("[Code] Send rate exceeded — email={}", email.value());
+            throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
         }
 
         String lockKey = policy.lockKey(recipient);
@@ -60,9 +60,9 @@ public class VerificationCodeService {
                     boolean sent = notificationPort.sendEmailVerificationCode(email.value(), code.value());
 
                     if (sent) {
-                        log.info("[验证码] 邮件验证码发送成功: email={}", email.value());
+                        log.info("[Code] Email code sent — email={}", email.value());
                     } else {
-                        log.error("[验证码] 邮件验证码发送失败: email={}", email.value());
+                        log.error("[Code] Failed to send email code — email={}", email.value());
                     }
 
                     return sent;
@@ -70,13 +70,13 @@ public class VerificationCodeService {
     }
 
         public boolean sendSmsVerificationCode(Phone phoneNumber) {
-        log.info("[验证码] 发送短信验证码: phone={}", phoneNumber.value());
+        log.info("[Code] Sending SMS verification code — phone={}", phoneNumber.value());
 
         String recipient = phoneNumber.value();
         String sendLimitKey = policy.sendLimitKey(recipient);
         if (cachePort.exists(sendLimitKey)) {
-            log.warn("[验证码] 发送过于频繁: phone={}", phoneNumber.value());
-            throw new CodeSendTooFrequentException("验证码发送过于频繁，请稍后再试");
+            log.warn("[Code] Send rate exceeded — phone={}", phoneNumber.value());
+            throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
         }
 
         String lockKey = policy.lockKey(recipient);
@@ -99,9 +99,9 @@ public class VerificationCodeService {
                     boolean sent = notificationPort.sendSmsVerificationCode(phoneNumber.value(), code.value());
 
                     if (sent) {
-                        log.info("[验证码] 短信验证码发送成功: phone={}", phoneNumber.value());
+                        log.info("[Code] SMS code sent — phone={}", phoneNumber.value());
                     } else {
-                        log.error("[验证码] 短信验证码发送失败: phone={}", phoneNumber.value());
+                        log.error("[Code] Failed to send SMS code — phone={}", phoneNumber.value());
                     }
 
                     return sent;
@@ -109,14 +109,14 @@ public class VerificationCodeService {
     }
 
         public boolean verifyCode(String recipient, String inputCode) {
-        log.info("[验证码] 验证验证码: recipient={}", recipient);
+        log.info("[Code] Verifying code — recipient={}", recipient);
 
         String codeKey = policy.codeKey(recipient);
         String storedCode = cachePort.get(codeKey, String.class).orElse(null);
 
         if (storedCode == null) {
-            log.warn("[验证码] 验证码不存在或已过期: recipient={}", recipient);
-            throw new CodeNotFoundException("验证码不存在或已过期");
+            log.warn("[Code] Code not found or expired — recipient={}", recipient);
+            throw new CodeNotFoundException("Verification code not found or expired");
         }
 
         String attemptsKey = policy.attemptsKey(recipient);
@@ -124,24 +124,24 @@ public class VerificationCodeService {
         int attempts = attemptsStr != null ? Integer.parseInt(attemptsStr) : 0;
 
         if (attempts >= policy.maxAttempts()) {
-            log.warn("[验证码] 验证次数超限: recipient={}, attempts={}", recipient, attempts);
+            log.warn("[Code] Verification attempt limit reached — recipient={}, attempts={}", recipient, attempts);
             cachePort.delete(codeKey);
             cachePort.delete(attemptsKey);
-            throw new CodeVerificationExceededException("验证次数超限，请重新获取验证码");
+            throw new CodeVerificationExceededException("Verification attempt limit exceeded, please request a new code");
         }
 
         VerificationCode code = new VerificationCode(storedCode);
         boolean isValid = code.matches(inputCode);
 
         if (isValid) {
-            log.info("[验证码] 验证成功: recipient={}", recipient);
+            log.info("[Code] Verification passed — recipient={}", recipient);
             cachePort.delete(codeKey);
             cachePort.delete(attemptsKey);
             return true;
         } else {
-            log.warn("[验证码] 验证失败: recipient={}, attempts={}", recipient, attempts + 1);
+            log.warn("[Code] Verification failed — recipient={}, attempts={}", recipient, attempts + 1);
             cachePort.set(attemptsKey, String.valueOf(attempts + 1), policy.codeTtl());
-            throw new CodeMismatchException("验证码错误");
+            throw new CodeMismatchException("Incorrect verification code");
         }
     }
 
@@ -154,7 +154,7 @@ public class VerificationCodeService {
         String attemptsKey = policy.attemptsKey(recipient);
         cachePort.delete(codeKey);
         cachePort.delete(attemptsKey);
-        log.info("[验证码] 已删除验证码: recipient={}", recipient);
+        log.info("[Code] Code deleted — recipient={}", recipient);
     }
 
         public static class CodeSendTooFrequentException extends DomainException {

@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
 @ActiveProfiles("test")
-@DisplayName("VerificationCodeService 集成测试 (Redis)")
+@DisplayName("VerificationCodeService integration test (Redis)")
 class VerificationCodeServiceIT {
 
     // Share one Redis container across the test JVM.
@@ -70,13 +70,13 @@ class VerificationCodeServiceIT {
     }
 
     @Nested
-    @DisplayName("邮件验证码 - 完整流程")
+    @DisplayName("Email verification code - full flow")
     class EmailCodeFlow {
 
         private static final String EMAIL = "integration@example.com";
 
         @Test
-        @DisplayName("发送验证码 → 从缓存读取 → 验证成功 → 缓存已清除")
+        @DisplayName("Send code > read from cache > verify success > cache cleared")
         void fullSendAndVerifyFlow() {
             when(notificationPort.sendEmailVerificationCode(anyString(), anyString())).thenReturn(true);
             boolean sent = verificationCodeApplicationService.sendEmailCode(EMAIL);
@@ -92,7 +92,7 @@ class VerificationCodeServiceIT {
         }
 
         @Test
-        @DisplayName("1分钟内重复发送，抛出CodeSendTooFrequentException")
+        @DisplayName("Resending within 1 minute throws CodeSendTooFrequentException")
         void whenSendTwiceInOneMinnute_thenThrowFrequentException() {
             when(notificationPort.sendEmailVerificationCode(anyString(), anyString())).thenReturn(true);
             verificationCodeApplicationService.sendEmailCode(EMAIL);
@@ -102,14 +102,14 @@ class VerificationCodeServiceIT {
         }
 
         @Test
-        @DisplayName("验证码不存在（从未发送），抛出CodeNotFoundException")
+        @DisplayName("Code not found (never sent) throws CodeNotFoundException")
         void whenCodeNeverSent_thenThrowCodeNotFoundException() {
             assertThatThrownBy(() -> verificationCodeApplicationService.verifyCode("nosend@example.com", "123456"))
                     .isInstanceOf(CodeNotFoundException.class);
         }
 
         @Test
-        @DisplayName("连续输入错误验证码3次后，抛出CodeVerificationExceededException")
+        @DisplayName("3 consecutive wrong codes throws CodeVerificationExceededException")
         void whenExceedMaxAttempts_thenThrowExceededException() {
             when(notificationPort.sendEmailVerificationCode(anyString(), anyString())).thenReturn(true);
             verificationCodeApplicationService.sendEmailCode(EMAIL);
@@ -126,7 +126,7 @@ class VerificationCodeServiceIT {
         }
 
         @Test
-        @DisplayName("验证码TTL写入正确（key存在且TTL > 0）")
+        @DisplayName("Verification code TTL is written correctly (key exists and TTL > 0)")
         void whenCodeSent_thenTtlSetCorrectly() {
             when(notificationPort.sendEmailVerificationCode(anyString(), anyString())).thenReturn(true);
 

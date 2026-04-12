@@ -21,7 +21,7 @@ public class UserModulePortFactory {
         public UserModulePort getPort(UserDomain domain) {
         UserModulePort adapter = adapters.get(domain);
         if (adapter == null) {
-            throw new UnsupportedUserDomainException("不支持的用户域: " + domain);
+            throw new UnsupportedUserDomainException("Unsupported user domain: " + domain);
         }
         return adapter;
     }

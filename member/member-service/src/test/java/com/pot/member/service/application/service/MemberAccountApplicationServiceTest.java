@@ -68,7 +68,7 @@ class MemberAccountApplicationServiceTest {
     class ChangePassword {
 
         @Test
-        @DisplayName("修改密码成功：委托领域服务并保存聚合")
+        @DisplayName("Password change success: delegates to domain service and saves aggregate")
         void changePassword_savesMemberAfterDomainChange() {
             MemberAggregate member = persistedMember(1L);
             ChangePasswordCommand command = new ChangePasswordCommand(1L, "oldPassword", "newPassword");
@@ -88,7 +88,7 @@ class MemberAccountApplicationServiceTest {
     class AuthenticateWithPassword {
 
         @Test
-        @DisplayName("正确密码 + 账户可用 → 返回 DTO")
+        @DisplayName("Correct password and active account returns DTO")
         void authenticate_correctPassword_returnsDTO() {
             MemberAggregate member = persistedMember(1L);
             MemberDTO dto = MemberDTO.builder().memberId(1L).build();
@@ -103,7 +103,7 @@ class MemberAccountApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("用户不存在 → 抛出 MemberException")
+        @DisplayName("User not found throws MemberException")
         void authenticate_memberNotFound_throws() {
             given(memberRepository.findByEmail(any())).willReturn(Optional.empty());
 
@@ -114,7 +114,7 @@ class MemberAccountApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("密码错误 → 抛出 MemberException")
+        @DisplayName("Wrong password throws MemberException")
         void authenticate_wrongPassword_throws() {
             MemberAggregate member = persistedMember(1L);
             given(memberRepository.findByEmail(any())).willReturn(Optional.of(member));
@@ -127,7 +127,7 @@ class MemberAccountApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("账户被锁定 → 抛出 MemberException")
+        @DisplayName("Locked account throws MemberException")
         void authenticate_lockedAccount_throws() {
             MemberAggregate member = persistedMember(1L);
             member.lock();
@@ -146,7 +146,7 @@ class MemberAccountApplicationServiceTest {
     class LockUnlock {
 
         @Test
-        @DisplayName("lockMember() 保存聚合")
+        @DisplayName("lockMember() saves the aggregate")
         void lockMember_savesMember() {
             MemberAggregate member = persistedMember(1L);
             given(memberRepository.findById(MemberId.of(1L))).willReturn(Optional.of(member));
@@ -159,7 +159,7 @@ class MemberAccountApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("lockMember() 会员不存在 → 抛出 MemberException")
+        @DisplayName("lockMember() throws MemberException when member not found")
         void lockMember_memberNotFound_throws() {
             given(memberRepository.findById(any())).willReturn(Optional.empty());
 
@@ -170,7 +170,7 @@ class MemberAccountApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("unlockMember() 解锁并保存")
+        @DisplayName("unlockMember() unlocks and saves")
         void unlockMember_savesAfterUnlock() {
             MemberAggregate member = persistedMember(2L);
             member.lock();
@@ -189,7 +189,7 @@ class MemberAccountApplicationServiceTest {
     class RecordLoginAttempt {
 
         @Test
-        @DisplayName("登录成功时更新最后登录时间并保存")
+        @DisplayName("Successful login updates last login time and saves")
         void recordLoginAttempt_success_savesMember() {
             MemberAggregate member = persistedMember(3L);
             given(memberRepository.findById(MemberId.of(3L))).willReturn(Optional.of(member));
@@ -201,7 +201,7 @@ class MemberAccountApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("登录失败时不保存会员")
+        @DisplayName("Failed login does not save member")
         void recordLoginAttempt_failure_doesNotSaveMember() {
             MemberAggregate member = persistedMember(4L);
             given(memberRepository.findById(MemberId.of(4L))).willReturn(Optional.of(member));

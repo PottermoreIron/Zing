@@ -14,16 +14,16 @@ public record VerificationCodePolicy(
 
     public VerificationCodePolicy {
         if (ttlSeconds <= 0) {
-            throw new IllegalArgumentException("验证码TTL必须大于0");
+            throw new IllegalArgumentException("Verification code TTL must be greater than 0");
         }
         if (maxAttempts <= 0) {
-            throw new IllegalArgumentException("验证码最大尝试次数必须大于0");
+            throw new IllegalArgumentException("Max verification attempts must be greater than 0");
         }
         if (sendCooldownSeconds <= 0) {
-            throw new IllegalArgumentException("验证码发送冷却时间必须大于0");
+            throw new IllegalArgumentException("Verification code send cooldown must be greater than 0");
         }
         if (lockWaitSeconds <= 0 || lockLeaseSeconds <= 0) {
-            throw new IllegalArgumentException("验证码分布式锁参数必须大于0");
+            throw new IllegalArgumentException("Verification code distributed lock parameter must be greater than 0");
         }
     }
 

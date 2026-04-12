@@ -21,7 +21,7 @@ public class VerificationCodeApplicationService {
      * Sends an email verification code.
      */
     public boolean sendEmailCode(String email) {
-        log.info("[应用服务] 发送邮件验证码: email={}", email);
+        log.info("[AppService] Sending email verification code — email={}", email);
 
         Email emailObj = new Email(email);
         return verificationCodeService.sendEmailVerificationCode(emailObj);
@@ -31,7 +31,7 @@ public class VerificationCodeApplicationService {
      * Sends an SMS verification code.
      */
     public boolean sendSmsCode(String phoneNumber) {
-        log.info("[应用服务] 发送短信验证码: phone={}", phoneNumber);
+        log.info("[AppService] Sending SMS verification code — phone={}", phoneNumber);
 
         Phone phoneObj = new Phone(phoneNumber);
         return verificationCodeService.sendSmsVerificationCode(phoneObj);
@@ -41,7 +41,7 @@ public class VerificationCodeApplicationService {
      * Verifies a code for the given recipient.
      */
     public boolean verifyCode(String recipient, String code) {
-        log.info("[应用服务] 验证验证码: recipient={}", recipient);
+        log.info("[AppService] Verifying code — recipient={}", recipient);
         return verificationCodeService.verifyCode(recipient, code);
     }
 }

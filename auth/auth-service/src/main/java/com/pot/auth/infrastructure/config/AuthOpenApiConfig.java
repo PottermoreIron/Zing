@@ -25,16 +25,16 @@ public class AuthOpenApiConfig {
                                 .info(new Info()
                                                 .title("Auth Service API")
                                                 .description("""
-                                                                认证授权服务接口文档。
+                                                                Authentication and authorization service API documentation.
 
-                                                                **鉴权说明：**
-                                                                登录/注册接口无需 Token。
-                                                                其他接口需在 Header 中携带：`Authorization: Bearer {accessToken}`
+                                                                **Authentication:**
+                                                                Login and registration endpoints do not require a token.
+                                                                All other endpoints require the header: `Authorization: Bearer {accessToken}`
 
-                                                                **快速开始：**
-                                                                1. 调用 `POST /auth/api/v1/login` 获取 accessToken
-                                                                2. 点击右上角 `Authorize`，在 `bearerAuth` 栏粘贴 accessToken
-                                                                3. 后续接口请求将自动携带 Bearer Token
+                                                                **Quick start:**
+                                                                1. Call `POST /auth/api/v1/login` to obtain an accessToken
+                                                                2. Click `Authorize` (top-right), paste the accessToken into `bearerAuth`
+                                                                3. Subsequent requests will automatically carry the Bearer token
                                                                 """)
                                                 .version("1.0.0")
                                                 .contact(new Contact()
@@ -47,7 +47,7 @@ public class AuthOpenApiConfig {
                                                                 .scheme("bearer")
                                                                 .bearerFormat("JWT")
                                                                 .name("Authorization")
-                                                                .description("粘贴登录接口返回的 accessToken，无需加 Bearer 前缀")))
+                                                                .description("Paste the accessToken from the login response; no Bearer prefix required")))
                                 // Public endpoints can still opt out through their own annotations.
                                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
         }

@@ -33,10 +33,11 @@ public class SpelPermissionExpression implements PermissionExpression {
 
             Expression spelExpression = parser.parseExpression(expression);
             Boolean result = spelExpression.getValue(spelContext, Boolean.class);
-            log.debug("[权限评估] SpEL表达式: expression={}, result={}", expression, result);
+            log.debug("[Permission] SpEL expression evaluated — expression={}, result={}", expression, result);
             return Boolean.TRUE.equals(result);
         } catch (Exception exception) {
-            log.error("[权限评估] SpEL表达式评估失败: expression={}, error={}", expression, exception.getMessage(), exception);
+            log.error("[Permission] SpEL expression evaluation failed — expression={}, error={}", expression,
+                    exception.getMessage(), exception);
             return false;
         }
     }

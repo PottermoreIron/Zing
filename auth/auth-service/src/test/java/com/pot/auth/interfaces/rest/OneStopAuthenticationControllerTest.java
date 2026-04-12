@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "spring.cloud.nacos.discovery.enabled=false",
                 "pot.ratelimit.enabled=false"
 })
-@DisplayName("OneStopAuthenticationController 切片测试")
+@DisplayName("OneStopAuthenticationController slice test")
 class OneStopAuthenticationControllerTest {
 
         @Autowired
@@ -47,11 +47,11 @@ class OneStopAuthenticationControllerTest {
         private static final String AUTH_URL = "/auth/api/v1/authenticate";
 
         @Nested
-        @DisplayName("用户名密码一键认证")
+        @DisplayName("One-stop authentication with username and password")
         class UsernamePasswordAuth {
 
                 @Test
-                @DisplayName("合法的用户名密码请求，返回200和OneStopAuthResponse")
+                @DisplayName("Valid username-password request returns 200 with OneStopAuthResponse")
                 void whenValidRequest_thenReturn200WithResponse() throws Exception {
                         long now = System.currentTimeMillis() / 1000;
                         OneStopAuthResponse authResponse = OneStopAuthResponse.builder()
@@ -88,7 +88,7 @@ class OneStopAuthenticationControllerTest {
                 }
 
                 @Test
-                @DisplayName("密码格式不合法，返回400")
+                @DisplayName("Invalid password format returns 400")
                 void whenInvalidPassword_thenReturn400() throws Exception {
                         String requestBody = """
                                         {
@@ -106,7 +106,7 @@ class OneStopAuthenticationControllerTest {
                 }
 
                 @Test
-                @DisplayName("未知的 authType，反序列化失败返回400")
+                @DisplayName("Unknown authType fails deserialization and returns 400")
                 void whenUnknownAuthType_thenReturn400() throws Exception {
                         String requestBody = """
                                         {
@@ -124,7 +124,7 @@ class OneStopAuthenticationControllerTest {
                 }
 
                 @Test
-                @DisplayName("服务抛出 AUTHENTICATION_FAILED，返回400并携带 AUTH_0001 错误码")
+                @DisplayName("Service throws AUTHENTICATION_FAILED returns 400 with AUTH_0001 error code")
                 void whenAuthFailed_thenReturn400WithErrorCode() throws Exception {
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
                                         .thenThrow(new DomainException(AuthResultCode.AUTHENTICATION_FAILED));
@@ -148,11 +148,11 @@ class OneStopAuthenticationControllerTest {
         }
 
         @Nested
-        @DisplayName("手机验证码一键认证")
+        @DisplayName("One-stop authentication with phone verification code")
         class PhoneCodeAuth {
 
                 @Test
-                @DisplayName("合法手机验证码请求，返回200")
+                @DisplayName("Valid phone verification code request returns 200")
                 void whenValidPhoneCodeRequest_thenReturn200() throws Exception {
                         long now = System.currentTimeMillis() / 1000;
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))
@@ -184,11 +184,11 @@ class OneStopAuthenticationControllerTest {
         }
 
         @Nested
-        @DisplayName("邮箱验证码一键认证")
+        @DisplayName("One-stop authentication with email verification code")
         class EmailCodeAuth {
 
                 @Test
-                @DisplayName("合法邮箱验证码请求，返回200")
+                @DisplayName("Valid email verification code request returns 200")
                 void whenValidEmailCodeRequest_thenReturn200() throws Exception {
                         long now = System.currentTimeMillis() / 1000;
                         when(oneStopAuthenticationService.authenticate(any(), any(), any()))

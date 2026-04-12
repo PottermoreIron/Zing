@@ -36,7 +36,7 @@ public class EmailCodeLoginStrategy extends AbstractLoginStrategyImpl {
     @Override
     protected void validateCredential(AuthenticationContext context) {
         var request = context.request();
-        log.debug("[邮箱验证码登录] 验证凭证: email={}", request.email());
+        log.debug("[EmailCodeLogin] Verifying credentials — email={}", request.email());
 
         if (!verificationCodeService.verifyCode(request.email(), request.verificationCode())) {
             throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);

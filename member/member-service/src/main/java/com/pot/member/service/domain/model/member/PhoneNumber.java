@@ -8,11 +8,11 @@ public class PhoneNumber {
 
     public PhoneNumber(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("手机号不能为空");
+            throw new IllegalArgumentException("Phone number must not be blank");
         }
         String cleanedPhone = value.trim().replaceAll("\\s+", "");
         if (!isValidPhone(cleanedPhone)) {
-            throw new IllegalArgumentException("手机号格式不正确: " + value);
+            throw new IllegalArgumentException("Invalid phone number format: " + value);
         }
         this.value = cleanedPhone;
     }

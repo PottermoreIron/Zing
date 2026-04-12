@@ -9,12 +9,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TouchChannelType {
-    SMS("sms", "短信"),
-    EMAIL("email", "邮件"),
-    PUSH("push", "App推送"),
-    WECHAT("wechat", "微信消息"),
-    WEBSOCKET("websocket", "站内信"),
-    FEISHU("feishu", "飞书");
+    SMS("sms", "SMS"),
+    EMAIL("email", "Email"),
+    PUSH("push", "App Push"),
+    WECHAT("wechat", "WeChat Message"),
+    WEBSOCKET("websocket", "In-App Message"),
+    FEISHU("feishu", "Feishu");
 
     private final String code;
     private final String desc;

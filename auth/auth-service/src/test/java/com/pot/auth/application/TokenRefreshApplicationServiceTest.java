@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("TokenRefreshApplicationService 单元测试")
+@DisplayName("TokenRefreshApplicationService unit test")
 class TokenRefreshApplicationServiceTest {
 
     @Mock
@@ -37,7 +37,7 @@ class TokenRefreshApplicationServiceTest {
     class RefreshToken {
 
         @Test
-        @DisplayName("有效的RefreshToken字符串，返回正确的LoginResponse")
+        @DisplayName("Valid RefreshToken string returns correct LoginResponse")
         void whenValidRefreshToken_thenReturnLoginResponse() {
             TokenPair tokenPair = TestFixtures.validTokenPair();
             when(jwtTokenService.refreshToken(TestFixtures.FAKE_REFRESH_TOKEN))
@@ -59,7 +59,7 @@ class TokenRefreshApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("JwtTokenService 抛出 DomainException，异常向上传播")
+        @DisplayName("JwtTokenService throws DomainException which propagates upward")
         void whenJwtServiceThrows_thenPropagateException() {
             when(jwtTokenService.refreshToken(any()))
                     .thenThrow(new DomainException(AuthResultCode.TOKEN_EXPIRED));
@@ -76,7 +76,7 @@ class TokenRefreshApplicationServiceTest {
     class ValidateAccessToken {
 
         @Test
-        @DisplayName("有效Token，直接委托给JwtTokenService并返回JwtToken")
+        @DisplayName("Valid token delegates directly to JwtTokenService and returns JwtToken")
         void whenValidToken_thenDelegateAndReturn() {
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
@@ -89,7 +89,7 @@ class TokenRefreshApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("Token已过期，抛出DomainException")
+        @DisplayName("Expired token throws DomainException")
         void whenExpiredToken_thenThrowDomainException() {
             when(jwtTokenService.validateAccessToken(any()))
                     .thenThrow(new DomainException(AuthResultCode.TOKEN_EXPIRED));
@@ -106,7 +106,7 @@ class TokenRefreshApplicationServiceTest {
     class Logout {
 
         @Test
-        @DisplayName("有效AccessToken，先验证Token，再将Token加入黑名单")
+        @DisplayName("Valid AccessToken: token validated then blacklisted")
         void whenValidAccessToken_thenValidateAndBlacklist() {
             JwtToken accessToken = TestFixtures.validAccessToken();
             when(jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
@@ -122,7 +122,7 @@ class TokenRefreshApplicationServiceTest {
         }
 
         @Test
-        @DisplayName("AccessToken验证失败，不调用addToBlacklist，异常上传")
+        @DisplayName("AccessToken validation failure does not call addToBlacklist and propagates exception")
         void whenInvalidToken_thenNoBlacklistAndPropagateException() {
             when(jwtTokenService.validateAccessToken(any()))
                     .thenThrow(new DomainException(AuthResultCode.TOKEN_INVALID));

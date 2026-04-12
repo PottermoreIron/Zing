@@ -28,7 +28,7 @@ class DefaultPermissionExpressionParserTest {
     @DisplayName("simple expressions")
     class SimplePermission {
 
-        @ParameterizedTest(name = "表达式: {0}")
+        @ParameterizedTest(name = "expression: {0}")
         @ValueSource(strings = {
                 "user.read",
                 "member:read",
@@ -47,14 +47,14 @@ class DefaultPermissionExpressionParserTest {
     class ComplexPermission {
 
         @Test
-        @DisplayName("带括号的复杂表达式仍按复杂表达式解析")
+        @DisplayName("Parenthesised expression is still parsed as a complex expression")
         void whenParenthesizedExpression_thenReturnComplexExpression() {
             PermissionExpression expr = parser.parse("(member:read AND member:write) OR admin:read");
             assertThat(expr).isInstanceOf(ComplexPermissionExpression.class);
         }
 
         @Test
-        @DisplayName("多表达式 AND 逻辑全部满足时返回 true")
+        @DisplayName("AND expression returns true when all sub-expressions are satisfied")
         void whenMultipleAndAllPresent_thenReturnTrue() {
             PermissionExpression expr = parser.parseMultiple(
                     new String[] { "member:read", "member:write" }, Logical.AND);
@@ -70,14 +70,14 @@ class DefaultPermissionExpressionParserTest {
     class SpelPermission {
 
         @Test
-        @DisplayName("角色函数表达式解析为 SpEL")
+        @DisplayName("Role function expression is parsed as SpEL")
         void whenRoleFunction_thenReturnSpelExpression() {
             PermissionExpression expression = parser.parse("hasRole('ROLE_ADMIN')");
             assertThat(expression).isInstanceOf(SpelPermissionExpression.class);
         }
 
         @Test
-        @DisplayName("SpEL 可使用方法参数拼装资源级权限")
+        @DisplayName("SpEL expression can assemble resource-level permission from method arguments")
         void whenSpelUsesMethodParameter_thenEvaluateTrue() {
             PermissionExpression expression = parser.parse("hasPermission(#articleId, 'article', 'edit')");
             PermissionExpression.EvaluationContext context = StandardPermissionEvaluationContext.builder()

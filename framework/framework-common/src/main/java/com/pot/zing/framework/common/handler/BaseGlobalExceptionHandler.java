@@ -59,13 +59,13 @@ public abstract class BaseGlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         log.warn("Request body parse error: {}", ex.getMessage());
-        return R.fail(ResultCode.PARAM_ERROR, "请求参数格式错误");
+        return R.fail(ResultCode.PARAM_ERROR, "Malformed request body");
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<?> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
-        return R.fail(ResultCode.PARAM_ERROR, "缺少必填参数: " + ex.getParameterName());
+        return R.fail(ResultCode.PARAM_ERROR, "Missing required parameter: " + ex.getParameterName());
     }
 
     @ExceptionHandler(Exception.class)
@@ -73,7 +73,7 @@ public abstract class BaseGlobalExceptionHandler {
     public R<?> handleGeneralException(Exception ex) {
         log.error("System error: {}", ex.getMessage(), ex);
         boolean isProduction = false;
-        String message = isProduction ? "系统繁忙，请稍后重试" : ex.getMessage();
+        String message = isProduction ? "Service temporarily unavailable, please try again later" : ex.getMessage();
         return R.fail(ResultCode.INTERNAL_ERROR, message);
     }
 }

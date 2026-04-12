@@ -21,15 +21,15 @@ public class JwtProperties {
     /**
      * Access-token time to live in seconds.
      */
-    private long accessTokenTtl = 3600; // 1小时
+    private long accessTokenTtl = 3600; // 1 hour
 
     /**
      * Refresh-token time to live in seconds.
      */
-    private long refreshTokenTtl = 2592000; // 30天
+    private long refreshTokenTtl = 2592000; // 30 days
 
     /**
      * Sliding refresh window in seconds.
      */
-    private long refreshTokenSlidingWindow = 604800; // 7天
+    private long refreshTokenSlidingWindow = 604800; // 7 days
 }

@@ -30,7 +30,7 @@ public class LoginApplicationService {
      * Executes a login command with the matching strategy.
      */
     public LoginResponse login(LoginCommand command, String ipAddress, String userAgent) {
-        log.info("[登录服务] 登录请求: loginType={}, userDomain={}",
+        log.info("[LoginService] Login request — loginType={}, userDomain={}",
                 command.loginType(), command.userDomain());
 
         AuthenticationContext context = AuthenticationContext.builder()
@@ -56,7 +56,7 @@ public class LoginApplicationService {
                 result.accessTokenExpiresAt(),
                 result.refreshTokenExpiresAt());
 
-        log.info("[登录服务] 登录成功: userId={}, loginType={}", result.userId(), command.loginType());
+        log.info("[LoginService] Login successful — userId={}, loginType={}", result.userId(), command.loginType());
         return response;
     }
 

@@ -46,10 +46,10 @@ public class UserDefaultsGenerator {
         this.includeSpecial = includeSpecial;
 
         if (passwordLength < 8) {
-            throw new IllegalArgumentException("默认密码长度不能小于8位");
+            throw new IllegalArgumentException("Default password length must be at least 8 characters");
         }
         if (!includeUppercase && !includeLowercase && !includeDigits && !includeSpecial) {
-            throw new IllegalArgumentException("默认密码规则至少需要启用一种字符类型");
+            throw new IllegalArgumentException("Default password policy must enable at least one character type");
         }
     }
 
@@ -58,7 +58,7 @@ public class UserDefaultsGenerator {
         String random = randomAlphanumeric(4).toLowerCase();
         String nickname = nicknamePrefix + timestamp + "_" + random;
 
-        log.debug("[用户默认值生成] 基于手机号生成昵称: phone={}, nickname={}", phone, nickname);
+        log.debug("[UserDefaults] Nickname generated from phone — phone={}, nickname={}", phone, nickname);
         return nickname;
     }
 
@@ -67,7 +67,7 @@ public class UserDefaultsGenerator {
         String random = randomAlphanumeric(4).toLowerCase();
         String nickname = prefix + "_" + random;
 
-        log.debug("[用户默认值生成] 基于邮箱生成昵称: email={}, nickname={}", email, nickname);
+        log.debug("[UserDefaults] Nickname generated from email — email={}, nickname={}", email, nickname);
         return nickname;
     }
 
@@ -76,7 +76,7 @@ public class UserDefaultsGenerator {
         String random = randomAlphanumeric(6).toLowerCase();
         String nickname = nicknamePrefix + timestamp + "_" + random;
 
-        log.debug("[用户默认值生成] 生成通用昵称: nickname={}", nickname);
+        log.debug("[UserDefaults] Generic nickname generated — nickname={}", nickname);
         return nickname;
     }
 
@@ -107,7 +107,7 @@ public class UserDefaultsGenerator {
 
         String password = shuffleCharacters(passwordChars);
 
-        log.debug("[用户默认值生成] 生成随机密码: length={}", password.length());
+        log.debug("[UserDefaults] Random password generated — length={}", password.length());
         return password;
     }
 

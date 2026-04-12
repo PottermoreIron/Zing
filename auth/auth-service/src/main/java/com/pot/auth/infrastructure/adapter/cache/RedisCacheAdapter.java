@@ -26,10 +26,10 @@ public class RedisCacheAdapter implements CachePort {
         String fullKey = buildAuthKey(key);
         Boolean success = redisService.set(fullKey, value, ttl);
         if (Boolean.FALSE.equals(success)) {
-            log.error("缓存设置失败: key={}", fullKey);
-            throw new CacheException("缓存设置失败: " + fullKey);
+            log.error("Cache write failed — key={}", fullKey);
+            throw new CacheException("Cache write failed: " + fullKey);
         }
-        log.debug("缓存设置成功: key={}, ttl={}", fullKey, ttl);
+        log.debug("Cache set — key={}, ttl={}", fullKey, ttl);
     }
 
     @Override
@@ -37,10 +37,10 @@ public class RedisCacheAdapter implements CachePort {
         String fullKey = buildAuthKey(key);
         T value = redisService.get(fullKey, type);
         if (value == null) {
-            log.debug("缓存未命中: key={}", fullKey);
+            log.debug("Cache miss — key={}", fullKey);
             return Optional.empty();
         }
-        log.debug("缓存命中: key={}", fullKey);
+        log.debug("Cache hit — key={}", fullKey);
         return Optional.of(value);
     }
 
@@ -48,7 +48,7 @@ public class RedisCacheAdapter implements CachePort {
     public void delete(String key) {
         String fullKey = buildAuthKey(key);
         redisService.delete(fullKey);
-        log.debug("缓存删除: key={}", fullKey);
+        log.debug("Cache evicted — key={}", fullKey);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class RedisCacheAdapter implements CachePort {
                 .map(this::buildAuthKey)
                 .collect(Collectors.toSet());
         Long deleted = redisService.delete(fullKeys);
-        log.debug("批量删除缓存: count={}", deleted);
+        log.debug("Bulk cache eviction — count={}", deleted);
     }
 
     @Override
@@ -75,14 +75,14 @@ public class RedisCacheAdapter implements CachePort {
         String fullKey = buildAuthKey(key);
         redisService.sAdd(fullKey, value);
         redisService.expire(fullKey, ttl);
-        log.debug("集合添加元素: key={}, value={}", fullKey, value);
+        log.debug("Set member added — key={}, value={}", fullKey, value);
     }
 
     @Override
     public <T> void removeFromSet(String key, T value) {
         String fullKey = buildAuthKey(key);
         redisService.sRemove(fullKey, value);
-        log.debug("集合删除元素: key={}, value={}", fullKey, value);
+        log.debug("Set member removed — key={}, value={}", fullKey, value);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class RedisCacheAdapter implements CachePort {
         String fullKey = buildAuthKey(key);
         redisService.hSet(fullKey, field, value);
         redisService.expire(fullKey, ttl);
-        log.debug("Hash设置字段: key={}, field={}", fullKey, field);
+        log.debug("Hash field set — key={}, field={}", fullKey, field);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class RedisCacheAdapter implements CachePort {
     public void deleteHash(String key, String field) {
         String fullKey = buildAuthKey(key);
         redisService.hDelete(fullKey, field);
-        log.debug("Hash删除字段: key={}, field={}", fullKey, field);
+        log.debug("Hash field deleted — key={}, field={}", fullKey, field);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class RedisCacheAdapter implements CachePort {
     public void expire(String key, Duration ttl) {
         String fullKey = buildAuthKey(key);
         redisService.expire(fullKey, ttl);
-        log.debug("设置过期时间: key={}, ttl={}", fullKey, ttl);
+        log.debug("TTL updated — key={}, ttl={}", fullKey, ttl);
     }
 
     @Override
@@ -180,9 +180,9 @@ public class RedisCacheAdapter implements CachePort {
         String fullKey = buildAuthKey(key);
         Boolean success = redisService.persist(fullKey);
         if (Boolean.TRUE.equals(success)) {
-            log.debug("持久化成功: key={}", fullKey);
+            log.debug("Key persisted — key={}", fullKey);
         } else {
-            log.warn("持久化失败: key={}", fullKey);
+            log.warn("Key persist failed — key={}", fullKey);
         }
     }
 

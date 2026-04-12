@@ -20,5 +20,5 @@ public @interface RequirePermission {
 
     Logical logical() default Logical.AND;
 
-    String message() default "权限不足";
+    String message() default "Insufficient permissions";
 }

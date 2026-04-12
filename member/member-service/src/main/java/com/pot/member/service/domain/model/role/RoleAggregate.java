@@ -60,7 +60,7 @@ public class RoleAggregate {
 
         public void addPermission(Long permissionId) {
         if (permissionId == null || permissionId <= 0) {
-            throw new IllegalArgumentException("权限ID无效");
+            throw new IllegalArgumentException("Invalid permission ID");
         }
         this.permissionIds.add(permissionId);
         this.updatedAt = LocalDateTime.now();

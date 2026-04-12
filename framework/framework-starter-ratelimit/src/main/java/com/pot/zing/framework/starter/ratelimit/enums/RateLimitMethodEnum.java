@@ -8,11 +8,11 @@ import lombok.Getter;
 @Getter
 public enum RateLimitMethodEnum {
 
-    FIXED("fixed", "固定限流"),
+    FIXED("fixed", "Fixed rate"),
 
-    IP_BASED("ip", "IP限流"),
+    IP_BASED("ip", "IP-based"),
 
-    USER_BASED("user", "用户限流");
+    USER_BASED("user", "User-based");
 
     private final String code;
     private final String description;

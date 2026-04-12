@@ -10,9 +10,9 @@ import jakarta.validation.constraints.NotNull;
  * Register request used by legacy WeChat flows.
  */
 public record WeChatRegisterRequest(
-        @NotNull(message = "注册类型不能为空") @JsonProperty("registerType") RegisterType registerType,
+        @NotNull(message = "Register type must not be null") @JsonProperty("registerType") RegisterType registerType,
 
-        @NotBlank(message = "微信授权码不能为空") String code,
+        @NotBlank(message = "WeChat authorization code must not be blank") String code,
 
         String state,
 

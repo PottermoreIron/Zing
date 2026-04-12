@@ -1,5 +1,5 @@
 ---
-description: "Use when adding, editing, or reviewing comments, Javadoc, or config notes in Zing. Covers English-only comments, when to comment, public API Javadoc, inline comment style, and stale comment removal. Trigger words: comment, Javadoc, inline comment, doc comment, 注释, 文档注释, 注解说明."
+description: "Use when adding, editing, or reviewing comments, Javadoc, or config notes in Zing. Covers English-only comments, when to comment, public API Javadoc, inline comment style, and stale comment removal. Trigger words: comment, Javadoc, inline comment, doc comment, comment, doc comment, annotation comment."
 name: "Zing Commenting Rules"
 applyTo: "**/*.java, **/*.xml, **/*.yml, **/*.yaml, **/*.properties, **/*.sql"
 ---

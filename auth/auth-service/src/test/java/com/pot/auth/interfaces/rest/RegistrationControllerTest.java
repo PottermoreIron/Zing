@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "spring.cloud.nacos.discovery.enabled=false",
                 "pot.ratelimit.enabled=false"
 })
-@DisplayName("RegistrationController 切片测试")
+@DisplayName("RegistrationController slice test")
 class RegistrationControllerTest {
 
         @Autowired
@@ -47,11 +47,11 @@ class RegistrationControllerTest {
         private static final String REGISTER_URL = "/auth/api/v1/register";
 
         @Nested
-        @DisplayName("用户名密码注册")
+        @DisplayName("Username-password registration")
         class UsernamePasswordRegister {
 
                 @Test
-                @DisplayName("合法的用户名密码注册请求，返回200和RegisterResponse")
+                @DisplayName("Valid username-password registration request returns 200 with RegisterResponse")
                 void whenValidRequest_thenReturn200WithResponse() throws Exception {
                         long now = System.currentTimeMillis() / 1000;
                         RegisterResponse response = RegisterResponse.success(
@@ -85,11 +85,11 @@ class RegistrationControllerTest {
                                         .andExpect(jsonPath("$.data.refreshToken")
                                                         .value(TestFixtures.FAKE_REFRESH_TOKEN))
                                         .andExpect(jsonPath("$.data.userId").value(TestFixtures.USER_ID.value()))
-                                        .andExpect(jsonPath("$.data.message").value("注册成功"));
+                                        .andExpect(jsonPath("$.data.message").value("Registration successful"));
                 }
 
                 @Test
-                @DisplayName("密码格式不合法（太短），返回400")
+                @DisplayName("Invalid password format (too short) returns 400")
                 void whenPasswordTooShort_thenReturn400() throws Exception {
                         String requestBody = """
                                         {
@@ -107,7 +107,7 @@ class RegistrationControllerTest {
                 }
 
                 @Test
-                @DisplayName("未知的 registerType，反序列化失败返回400")
+                @DisplayName("Unknown registerType fails deserialization and returns 400")
                 void whenUnknownRegisterType_thenReturn400() throws Exception {
                         String requestBody = """
                                         {
@@ -125,7 +125,7 @@ class RegistrationControllerTest {
                 }
 
                 @Test
-                @DisplayName("服务抛出 USERNAME_ALREADY_EXISTS，返回400并携带错误码")
+                @DisplayName("Service throws USERNAME_ALREADY_EXISTS returns 400 with error code")
                 void whenUsernameAlreadyExists_thenReturn400WithErrorCode() throws Exception {
                         when(registrationApplicationService.register(any(), any(), any()))
                                         .thenThrow(new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS));
@@ -149,11 +149,11 @@ class RegistrationControllerTest {
         }
 
         @Nested
-        @DisplayName("邮箱验证码注册")
+        @DisplayName("Email verification code registration")
         class EmailCodeRegister {
 
                 @Test
-                @DisplayName("合法的邮箱验证码注册请求，返回200")
+                @DisplayName("Valid email verification code registration request returns 200")
                 void whenValidEmailCodeRequest_thenReturn200() throws Exception {
                         long now = System.currentTimeMillis() / 1000;
                         when(registrationApplicationService.register(any(), any(), any()))

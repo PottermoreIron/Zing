@@ -29,7 +29,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
-@Tag(name = "登录", description = "传统登录（昵称密码 / 邮箱密码 / 验证码）和 Token 刷新")
+@Tag(name = "Login", description = "Traditional login (username-password / email-password / verification code) and token refresh")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -41,11 +41,11 @@ public class LoginController {
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
     private final AuthCommandAssembler authCommandAssembler;
 
-    @Operation(operationId = "authLogin", summary = "传统登录", description = "支持 USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE 四种登录方式")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "登录请求过于频繁，请稍后再试")
+    @Operation(operationId = "authLogin", summary = "Login", description = "Supports USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE login methods")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "Too many login requests, please try again later")
     @PostMapping("/api/v1/login")
     public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
-        log.info("[登录] 传统登录请求: loginType={}, userDomain={}",
+        log.info("[Login] Login request — loginType={}, userDomain={}",
                 request.loginType(), request.userDomain());
 
         LoginResponse response = loginApplicationService.login(authCommandAssembler.toCommand(request),
@@ -55,11 +55,11 @@ public class LoginController {
         return R.success(response);
     }
 
-    @Operation(operationId = "authRefreshToken", summary = "刷新 Token", description = "使用 refreshToken 换取新的 accessToken，refreshToken 在滑动窗口内自动续期")
-    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 10.0, message = "Token刷新请求过于频繁，请稍后再试")
+    @Operation(operationId = "authRefreshToken", summary = "Refresh token", description = "Exchange a refreshToken for a new accessToken; the refreshToken auto-renews within its sliding window")
+    @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 10.0, message = "Too many token refresh requests, please try again later")
     @PostMapping("/api/v1/refresh")
     public R<LoginResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        log.info("[登录] 刷新Token请求");
+        log.info("[Login] Token refresh request");
 
         LoginResponse response = tokenRefreshApplicationService.refreshToken(request.refreshToken());
 
