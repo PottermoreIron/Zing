@@ -124,7 +124,7 @@ public class RedisRateLimitManager implements RateLimitManager {
             script.setScriptSource(new ResourceScriptSource(
                     new ClassPathResource(LUA_SCRIPT_PATH)));
             script.setResultType(Long.class);
-            log.info("限流Lua脚本加载成功: {}", LUA_SCRIPT_PATH);
+            log.info("[RateLimit] Lua script loaded successfully: {}", LUA_SCRIPT_PATH);
         } catch (Exception e) {
             log.error("[RateLimit] Failed to load Lua script: {}", LUA_SCRIPT_PATH, e);
             throw new IllegalStateException("Failed to load rate limit script", e);

@@ -86,7 +86,7 @@ public final class JacksonUtils {
             return MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize object to JSON: {}", obj.getClass().getSimpleName(), e);
-            throw new JsonSerializationException("JSON序列化失败", e);
+            throw new JsonSerializationException("JSON serialization failed", e);
         }
     }
 

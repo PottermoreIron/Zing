@@ -1,36 +1,36 @@
 
 CREATE TABLE `member_member`
 (
-    `id`                    BIGINT UNSIGNED                                                  NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at`        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at`        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at`        TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`                    BIGINT UNSIGNED                                                  NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at`        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at`        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at`        TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `member_id`             BIGINT UNSIGNED                                                  NOT NULL COMMENT '用户唯一标识符',
-    `nickname`              VARCHAR(30)  NOT NULL COMMENT '用户名',
-    `email`                 VARCHAR(255) NULL COMMENT '邮箱地址',
-    `phone`                 VARCHAR(20) NULL COMMENT '手机号码',
-    `password_hash`         VARCHAR(255) NOT NULL COMMENT '密码哈希值',
+    `member_id`             BIGINT UNSIGNED                                                  NOT NULL COMMENT 'Member unique identifier',
+    `nickname`              VARCHAR(30)  NOT NULL COMMENT 'Display name (nickname)',
+    `email`                 VARCHAR(255) NULL COMMENT 'Email address',
+    `phone`                 VARCHAR(20) NULL COMMENT 'Phone number',
+    `password_hash`         VARCHAR(255) NOT NULL COMMENT 'BCrypt password hash',
 
-    `first_name`            VARCHAR(50) NULL COMMENT '名',
-    `last_name`             VARCHAR(50) NULL COMMENT '姓',
-    `gender`                TINYINT               DEFAULT 0 COMMENT '性别：0-未知，1-男，2-女',
-    `birth`                 DATE NULL COMMENT '出生日期',
-    `avatar_url`            VARCHAR(500) NULL COMMENT '头像URL',
+    `first_name`            VARCHAR(50) NULL COMMENT 'First name',
+    `last_name`             VARCHAR(50) NULL COMMENT 'Last name',
+    `gender`                TINYINT               DEFAULT 0 COMMENT 'Gender: 0=unknown, 1=male, 2=female',
+    `birth`                 DATE NULL COMMENT 'Date of birth',
+    `avatar_url`            VARCHAR(500) NULL COMMENT 'Avatar image URL',
 
-    `country_code`          CHAR(2) NULL COMMENT 'ISO 3166-1 alpha-2 国家代码',
-    `region`                VARCHAR(100) NULL COMMENT '省/州/地区',
-    `city`                  VARCHAR(100) NULL COMMENT '城市',
-    `timezone`              VARCHAR(30) NULL COMMENT '时区',
-    `locale`                VARCHAR(10) NULL     DEFAULT 'en_US' COMMENT '语言区域设置',
+    `country_code`          CHAR(2) NULL COMMENT 'ISO 3166-1 alpha-2 country code',
+    `region`                VARCHAR(100) NULL COMMENT 'Province / state / region',
+    `city`                  VARCHAR(100) NULL COMMENT 'City',
+    `timezone`              VARCHAR(30) NULL COMMENT 'Timezone identifier (IANA)',
+    `locale`                VARCHAR(10) NULL     DEFAULT 'en_US' COMMENT 'BCP 47 locale tag',
 
-    `status`                ENUM ('active', 'inactive', 'suspended', 'pending_verification') NOT NULL DEFAULT 'pending_verification' COMMENT '账户状态',
-    `gmt_email_verified_at` TIMESTAMP NULL COMMENT '邮箱验证时间',
-    `gmt_phone_verified_at` TIMESTAMP NULL COMMENT '手机验证时间',
-    `gmt_last_login_at`     TIMESTAMP NULL COMMENT '最后登录时间',
-    `last_login_ip`         VARCHAR(45) NULL COMMENT '最后登录IP地址',
+    `status`                ENUM ('active', 'inactive', 'suspended', 'pending_verification') NOT NULL DEFAULT 'pending_verification' COMMENT 'Account status',
+    `gmt_email_verified_at` TIMESTAMP NULL COMMENT 'Email verification timestamp',
+    `gmt_phone_verified_at` TIMESTAMP NULL COMMENT 'Phone verification timestamp',
+    `gmt_last_login_at`     TIMESTAMP NULL COMMENT 'Last login timestamp',
+    `last_login_ip`         VARCHAR(45) NULL COMMENT 'Last login IP address',
 
-    `extend_json`           JSON NULL COMMENT '扩展元数据',
+    `extend_json`           JSON NULL COMMENT 'Extension metadata (JSON)',
 
     PRIMARY KEY (`id`),
 
@@ -50,24 +50,24 @@ CREATE TABLE `member_member`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='会员基础信息表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Member profile table';
 
 CREATE TABLE `member_device`
 (
-    `id`               BIGINT UNSIGNED                                           NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at`   TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`               BIGINT UNSIGNED                                           NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at`   TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `member_id`        BIGINT UNSIGNED                                           NOT NULL COMMENT '用户ID',
-    `device_id`        VARCHAR(128) NOT NULL COMMENT '设备唯一标识',
-    `device_type`      ENUM ('mobile', 'tablet', 'desktop', 'smart_tv', 'other') NOT NULL COMMENT '设备类型',
-    `platform`         VARCHAR(30) NULL COMMENT '操作系统平台',
-    `browser`          VARCHAR(60) NULL COMMENT '浏览器信息',
-    `app_version`      VARCHAR(20) NULL COMMENT '应用版本',
-    `push_token`       VARCHAR(255) NULL COMMENT '推送令牌',
-    `is_active`        BOOLEAN      NOT NULL DEFAULT TRUE COMMENT '是否活跃设备',
-    `gmt_last_used_at` TIMESTAMP NULL COMMENT '最后使用时间',
+    `member_id`        BIGINT UNSIGNED                                           NOT NULL COMMENT 'Member ID',
+    `device_id`        VARCHAR(128) NOT NULL COMMENT 'Device unique identifier',
+    `device_type`      ENUM ('mobile', 'tablet', 'desktop', 'smart_tv', 'other') NOT NULL COMMENT 'Device type',
+    `platform`         VARCHAR(30) NULL COMMENT 'Operating system platform',
+    `browser`          VARCHAR(60) NULL COMMENT 'Browser information',
+    `app_version`      VARCHAR(20) NULL COMMENT 'Application version',
+    `push_token`       VARCHAR(255) NULL COMMENT 'Push notification token',
+    `is_active`        BOOLEAN      NOT NULL DEFAULT TRUE COMMENT 'Whether the device is active',
+    `gmt_last_used_at` TIMESTAMP NULL COMMENT 'Last used timestamp',
 
     PRIMARY KEY (`id`),
 
@@ -86,30 +86,30 @@ CREATE TABLE `member_device`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='用户设备信息表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Member device table';
 
 CREATE TABLE `member_social_connection`
 (
-    `id`                   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at`       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at`       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at`       TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`                   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at`       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at`       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at`       TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `member_id`            BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-    `provider`             VARCHAR(255) NOT NULL COMMENT '第三方平台提供商',
-    `provider_member_id`   VARCHAR(128) NOT NULL COMMENT '第三方平台用户ID',
-    `provider_username`    VARCHAR(100) NULL COMMENT '第三方平台用户名',
-    `provider_email`       VARCHAR(255) NULL COMMENT '第三方平台邮箱',
+    `member_id`            BIGINT UNSIGNED NOT NULL COMMENT 'Member ID',
+    `provider`             VARCHAR(255) NOT NULL COMMENT 'OAuth provider identifier',
+    `provider_member_id`   VARCHAR(128) NOT NULL COMMENT 'Provider-side user ID',
+    `provider_username`    VARCHAR(100) NULL COMMENT 'Provider-side username',
+    `provider_email`       VARCHAR(255) NULL COMMENT 'Provider-side email address',
 
-    `access_token`         TEXT NULL COMMENT '访问令牌',
-    `refresh_token`        TEXT NULL COMMENT '刷新令牌',
-    `gmt_token_expires_at` TIMESTAMP NULL COMMENT '令牌过期时间',
-    `scope`                VARCHAR(500) NULL COMMENT '授权范围',
+    `access_token`         TEXT NULL COMMENT 'OAuth access token',
+    `refresh_token`        TEXT NULL COMMENT 'OAuth refresh token',
+    `gmt_token_expires_at` TIMESTAMP NULL COMMENT 'Token expiration timestamp',
+    `scope`                VARCHAR(500) NULL COMMENT 'OAuth scopes granted',
 
-    `is_active`            BOOLEAN      NOT NULL DEFAULT TRUE COMMENT '连接是否活跃',
-    `gmt_last_sync_at`     TIMESTAMP NULL COMMENT '最后同步时间',
+    `is_active`            BOOLEAN      NOT NULL DEFAULT TRUE COMMENT 'Whether the connection is active',
+    `gmt_last_sync_at`     TIMESTAMP NULL COMMENT 'Last synchronization timestamp',
 
-    `extend_json`          JSON NULL COMMENT '第三方平台原始数据',
+    `extend_json`          JSON NULL COMMENT 'Raw provider payload (JSON)',
 
     PRIMARY KEY (`id`),
 
@@ -128,23 +128,23 @@ CREATE TABLE `member_social_connection`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='用户第三方平台连接表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Social account connection table';
 
 CREATE TABLE `member_role`
 (
-    `id`               BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at`   TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`               BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at`   TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `role_code`        VARCHAR(50)  NOT NULL COMMENT '角色编码，如：admin、editor、viewer',
-    `role_name`        VARCHAR(100) NOT NULL COMMENT '角色名称',
-    `role_description` TEXT NULL COMMENT '角色描述',
-    `role_level`       TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '角色级别，数字越大权限越高',
-    `is_system_role`   BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '是否为系统内置角色',
-    `is_active`        BOOLEAN      NOT NULL DEFAULT TRUE COMMENT '是否启用',
+    `role_code`        VARCHAR(50)  NOT NULL COMMENT 'Role code, e.g. admin, editor, viewer',
+    `role_name`        VARCHAR(100) NOT NULL COMMENT 'Role display name',
+    `role_description` TEXT NULL COMMENT 'Role description',
+    `role_level`       TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Role level; higher value means higher privilege',
+    `is_system_role`   BOOLEAN      NOT NULL DEFAULT FALSE COMMENT 'Whether this is a built-in system role',
+    `is_active`        BOOLEAN      NOT NULL DEFAULT TRUE COMMENT 'Whether the record is active',
 
-    `extend_json`      JSON NULL COMMENT '角色扩展配置',
+    `extend_json`      JSON NULL COMMENT 'Role extension configuration (JSON)',
 
     PRIMARY KEY (`id`),
 
@@ -158,26 +158,26 @@ CREATE TABLE `member_role`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='角色表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Role table';
 
 CREATE TABLE `member_permission`
 (
-    `id`                     BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at`         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at`         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at`         TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`                     BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at`         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at`         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at`         TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `permission_code`        VARCHAR(100) NOT NULL COMMENT '权限编码，如：user.create、content.edit',
-    `permission_name`        VARCHAR(100) NOT NULL COMMENT '权限名称',
-    `permission_description` TEXT NULL COMMENT '权限描述',
-    `resource_type`          VARCHAR(50)  NOT NULL COMMENT '资源类型，如：user、content、system',
-    `action_type`            VARCHAR(50)  NOT NULL COMMENT '操作类型，如：create、read、update、delete',
-    `parent_id`              BIGINT UNSIGNED  NULL COMMENT '父权限ID，支持权限分组',
-    `permission_level`       TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '权限层级',
-    `is_system_permission`   BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '是否为系统内置权限',
-    `is_active`              BOOLEAN      NOT NULL DEFAULT TRUE COMMENT '是否启用',
+    `permission_code`        VARCHAR(100) NOT NULL COMMENT 'Permission code, e.g. user.create, content.edit',
+    `permission_name`        VARCHAR(100) NOT NULL COMMENT 'Permission display name',
+    `permission_description` TEXT NULL COMMENT 'Permission description',
+    `resource_type`          VARCHAR(50)  NOT NULL COMMENT 'Resource type, e.g. user, content, system',
+    `action_type`            VARCHAR(50)  NOT NULL COMMENT 'Action type, e.g. create, read, update, delete',
+    `parent_id`              BIGINT UNSIGNED  NULL COMMENT 'Parent permission ID for grouping',
+    `permission_level`       TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Permission hierarchy level',
+    `is_system_permission`   BOOLEAN      NOT NULL DEFAULT FALSE COMMENT 'Whether this is a built-in system permission',
+    `is_active`              BOOLEAN      NOT NULL DEFAULT TRUE COMMENT 'Whether the record is active',
 
-    `extend_json`            JSON NULL COMMENT '权限扩展配置',
+    `extend_json`            JSON NULL COMMENT 'Permission extension configuration (JSON)',
 
     PRIMARY KEY (`id`),
 
@@ -194,17 +194,17 @@ CREATE TABLE `member_permission`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='权限表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Permission table';
 
 CREATE TABLE `member_role_permission`
 (
-    `id`             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at` TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at` TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `role_id`        BIGINT UNSIGNED NOT NULL COMMENT '角色ID',
-    `permission_id`  BIGINT UNSIGNED NOT NULL COMMENT '权限ID',
+    `role_id`        BIGINT UNSIGNED NOT NULL COMMENT 'Role ID',
+    `permission_id`  BIGINT UNSIGNED NOT NULL COMMENT 'Permission ID',
 
     PRIMARY KEY (`id`),
 
@@ -217,22 +217,22 @@ CREATE TABLE `member_role_permission`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='角色权限关联表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Role-permission association table';
 
 CREATE TABLE `member_member_role`
 (
-    `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `gmt_created_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `gmt_updated_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `gmt_deleted_at`  TIMESTAMP NULL     DEFAULT NULL COMMENT '软删除时间',
+    `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `gmt_created_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+    `gmt_updated_at`  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',
+    `gmt_deleted_at`  TIMESTAMP NULL     DEFAULT NULL COMMENT 'Soft-delete timestamp',
 
-    `member_id`       BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-    `role_id`         BIGINT UNSIGNED NOT NULL COMMENT '角色ID',
-    `gmt_expires_at`  TIMESTAMP NULL COMMENT '过期时间，NULL表示永久有效',
-    `is_active`       BOOLEAN   NOT NULL DEFAULT TRUE COMMENT '是否启用',
+    `member_id`       BIGINT UNSIGNED NOT NULL COMMENT 'Member ID',
+    `role_id`         BIGINT UNSIGNED NOT NULL COMMENT 'Role ID',
+    `gmt_expires_at`  TIMESTAMP NULL COMMENT 'Expiration timestamp; NULL means permanent',
+    `is_active`       BOOLEAN   NOT NULL DEFAULT TRUE COMMENT 'Whether the record is active',
 
-    `assignment_note` VARCHAR(500) NULL COMMENT '分配备注',
-    `extend_json`     JSON NULL COMMENT '分配扩展信息',
+    `assignment_note` VARCHAR(500) NULL COMMENT 'Assignment note',
+    `extend_json`     JSON NULL COMMENT 'Assignment extension data (JSON)',
 
     PRIMARY KEY (`id`),
 
@@ -251,4 +251,4 @@ CREATE TABLE `member_member_role`
 
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='用户角色关联表';
+  COLLATE = utf8mb4_unicode_ci COMMENT = 'Member-role association table';

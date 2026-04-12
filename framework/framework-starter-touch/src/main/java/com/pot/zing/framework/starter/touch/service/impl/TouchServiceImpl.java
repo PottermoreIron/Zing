@@ -64,7 +64,7 @@ public class TouchServiceImpl implements TouchService {
             List<TouchChannelType> fallbackChannels = selectionStrategy.selectFallbackChannels(request);
 
             if (!fallbackChannels.isEmpty()) {
-                log.warn("主渠道发送失败,尝试降级: {} -> {}",
+                log.warn("[Touch] Primary channel failed, attempting fallback: {} -> {}",
                         request.getChannelType(), fallbackChannels);
 
                 for (TouchChannelType fallback : fallbackChannels) {

@@ -105,9 +105,9 @@ public final class CodeGenerator {
                 .templateEngine(new VelocityTemplateEngine())
                 .execute();
 
-        System.out.println("✅ 代码生成完成");
-        System.out.println("📁 Java输出目录: " + outputDir);
-        System.out.println("📁 XML输出目录: " + xmlOutputDir);
+        System.out.println("✅ Code generation complete");
+        System.out.println("📁 Java output directory: " + outputDir);
+        System.out.println("📁 XML output directory: " + xmlOutputDir);
     }
 
     /**
