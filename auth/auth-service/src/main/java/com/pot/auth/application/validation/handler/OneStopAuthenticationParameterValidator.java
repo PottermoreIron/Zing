@@ -33,10 +33,10 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
 
     private void validateNicknamePassword(OneStopAuthCommand request) {
         if (!ValidationUtils.isValidNickname(request.nickname())) {
-            throw new DomainException("Nickname is invalid");
+            throw new DomainException(AuthResultCode.INVALID_USERNAME);
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("Password is invalid");
+            throw new DomainException(AuthResultCode.INVALID_PASSWORD);
         }
     }
 
@@ -45,10 +45,10 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
             throw new DomainException(AuthResultCode.INVALID_PHONE);
         }
         if (!StringUtils.hasText(request.password()) && !StringUtils.hasText(request.verificationCode())) {
-            throw new DomainException("Phone one-stop authentication requires at least a password or a verification code");
+            throw new DomainException(AuthResultCode.CREDENTIAL_REQUIRED);
         }
         if (StringUtils.hasText(request.password()) && !ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("Password is invalid");
+            throw new DomainException(AuthResultCode.INVALID_PASSWORD);
         }
         if (StringUtils.hasText(request.verificationCode())
                 && !ValidationUtils.isValidVerificationCode(request.verificationCode())) {
@@ -70,10 +70,10 @@ public class OneStopAuthenticationParameterValidator implements ValidationHandle
             throw new DomainException(AuthResultCode.INVALID_EMAIL);
         }
         if (!StringUtils.hasText(request.password()) && !StringUtils.hasText(request.verificationCode())) {
-            throw new DomainException("Email one-stop authentication requires at least a password or a verification code");
+            throw new DomainException(AuthResultCode.CREDENTIAL_REQUIRED);
         }
         if (StringUtils.hasText(request.password()) && !ValidationUtils.isValidPassword(request.password())) {
-            throw new DomainException("Password is invalid");
+            throw new DomainException(AuthResultCode.INVALID_PASSWORD);
         }
         if (StringUtils.hasText(request.verificationCode())
                 && !ValidationUtils.isValidVerificationCode(request.verificationCode())) {

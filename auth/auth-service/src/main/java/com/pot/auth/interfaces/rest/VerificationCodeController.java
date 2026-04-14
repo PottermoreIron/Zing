@@ -1,6 +1,7 @@
 package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.interfaces.validation.annotations.ValidEmail;
 import com.pot.auth.interfaces.validation.annotations.ValidPhone;
 import com.pot.zing.framework.common.model.R;
@@ -45,7 +46,7 @@ public class VerificationCodeController {
         if (sent) {
             return R.success();
         }
-        return R.fail("Failed to send verification code");
+        return R.fail(AuthResultCode.CODE_SEND_FAILED);
     }
 
     @Operation(operationId = "authSendSmsCode", summary = "Send SMS verification code", description = "Send a 6-digit verification code to the specified phone number; rate-limiting and throttle policy are configuration-driven")
@@ -60,6 +61,6 @@ public class VerificationCodeController {
         if (sent) {
             return R.success();
         }
-        return R.fail("Failed to send verification code");
+        return R.fail(AuthResultCode.CODE_SEND_FAILED);
     }
 }

@@ -7,6 +7,7 @@ import com.pot.auth.domain.oauth2.valueobject.OAuth2AuthorizationCode;
 import com.pot.auth.domain.oauth2.valueobject.OAuth2OpenId;
 import com.pot.auth.domain.oauth2.valueobject.OAuth2Provider;
 import com.pot.auth.domain.port.OAuth2Port;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.infrastructure.config.OAuth2ProviderProperties;
 import com.pot.auth.infrastructure.config.OAuth2ProviderProperties.ProviderConfig;
@@ -75,8 +76,9 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[OAuth2] Failed to fetch user info — provider={}, error={}", provider.getCode(), e.getMessage(), e);
-            throw new DomainException("OAuth2 authentication failed: " + e.getMessage(), e);
+            log.error("[OAuth2] Failed to fetch user info — provider={}, error={}", provider.getCode(), e.getMessage(),
+                    e);
+            throw new DomainException(AuthResultCode.OAUTH2_CODE_INVALID, e);
         }
     }
 
@@ -109,7 +111,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
             return json.path("access_token").asText();
         } catch (Exception e) {
             log.error("[OAuth2] Failed to refresh token — provider={}", provider.getCode(), e);
-            throw new DomainException("OAuth2 token refresh failed: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.OAUTH2_REFRESH_FAILED, e);
         }
     }
 
@@ -144,12 +146,12 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
 
         if (json.has("error")) {
             String errorDesc = json.path("error_description").asText(json.path("error").asText());
-            throw new DomainException("OAuth2 authorization code invalid: " + errorDesc);
+            throw new DomainException(AuthResultCode.OAUTH2_CODE_INVALID);
         }
 
         String accessToken = json.path("access_token").asText(null);
         if (accessToken == null || accessToken.isBlank()) {
-            throw new DomainException("OAuth2 provider did not return an access token");
+            throw new DomainException(AuthResultCode.OAUTH2_TOKEN_MISSING);
         }
 
         log.debug("[OAuth2] Access token acquired — provider={}", provider.getCode());
@@ -258,7 +260,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         // endpoint.
         String[] parts = idToken.split("\\.");
         if (parts.length < 2) {
-            throw new DomainException("Apple id_token format is invalid");
+            throw new DomainException(AuthResultCode.OAUTH2_TOKEN_INVALID);
         }
 
         byte[] payloadBytes = java.util.Base64.getUrlDecoder().decode(
@@ -281,7 +283,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
     private ProviderConfig getConfig(OAuth2Provider provider) {
         ProviderConfig config = properties.getProvider(provider.getCode());
         if (config == null) {
-            throw new DomainException("OAuth2 provider configuration not found: " + provider.getCode());
+            throw new DomainException(AuthResultCode.OAUTH2_NOT_CONFIGURED);
         }
         return config;
     }
@@ -293,7 +295,7 @@ public class HttpOAuth2PortAdapter implements OAuth2Port {
         if (!config.isConfigured()) {
             log.error("[OAuth2] Provider configuration incomplete, missing clientId or clientSecret — provider={}",
                     provider.getCode());
-            throw new DomainException("OAuth2 provider [" + provider.getDisplayName() + "] is not configured, please contact your administrator");
+            throw new DomainException(AuthResultCode.OAUTH2_NOT_CONFIGURED);
         }
     }
 }

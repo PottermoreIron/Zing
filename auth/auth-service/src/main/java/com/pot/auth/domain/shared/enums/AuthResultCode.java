@@ -8,7 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AuthResultCode implements IResultCode {
 
-
         AUTHENTICATION_FAILED("AUTH_0001", "Invalid username or password", false),
 
         ACCOUNT_LOCKED("AUTH_0002", "Account is locked, please contact your administrator", false),
@@ -19,6 +18,7 @@ public enum AuthResultCode implements IResultCode {
 
         PASSWORD_RETRY_LIMIT_EXCEEDED("AUTH_0005", "Too many failed attempts, account has been locked", false),
 
+        ACCOUNT_STATUS_ABNORMAL("AUTH_0006", "Account status is abnormal, please contact support", false),
 
         TOKEN_EXPIRED("AUTH_0100", "Token has expired", false),
 
@@ -32,21 +32,22 @@ public enum AuthResultCode implements IResultCode {
 
         REFRESH_TOKEN_INVALID("AUTH_0105", "Refresh token is invalid, please sign in again", false),
 
-
         CODE_SEND_TOO_FREQUENT("AUTH_0200", "Verification code sent too frequently, please try again later", false),
 
         CODE_NOT_FOUND("AUTH_0201", "Verification code not found or expired", false),
 
         CODE_MISMATCH("AUTH_0202", "Incorrect verification code", false),
 
-        CODE_VERIFICATION_EXCEEDED("AUTH_0203", "Verification attempt limit exceeded, please request a new code", false),
+        CODE_VERIFICATION_EXCEEDED("AUTH_0203", "Verification attempt limit exceeded, please request a new code",
+                        false),
 
         CODE_FORMAT_INVALID("AUTH_0204", "Invalid verification code format", false),
 
         CODE_SEND_FAILED("AUTH_0205", "Failed to send verification code, please try again later", false),
 
-        VERIFICATION_CODE_INVALID("AUTH_0206", "Verification code is invalid or expired", false),
+        CODE_REQUIRED("AUTH_0207", "Verification code is required", false),
 
+        VERIFICATION_CODE_INVALID("AUTH_0206", "Verification code is invalid or expired", false),
 
         USERNAME_ALREADY_EXISTS("AUTH_0300", "Username already taken", false),
 
@@ -70,16 +71,38 @@ public enum AuthResultCode implements IResultCode {
 
         INVALID_LOGIN_REQUEST("AUTH_0310", "Invalid login request", false),
 
+        INVALID_USERNAME("AUTH_0311", "Invalid username format", false),
+
+        INVALID_PASSWORD("AUTH_0312", "Invalid password format", false),
+
+        CREDENTIAL_REQUIRED("AUTH_0313", "At least a password or verification code is required", false),
 
         PERMISSION_DENIED("AUTH_0400", "Access denied", false),
 
         ROLE_NOT_FOUND("AUTH_0401", "Role not found", false),
 
-
         INVALID_PARAMETER("AUTH_0500", "Invalid parameter", false),
 
         UNSUPPORTED_USER_DOMAIN("AUTH_0501", "Unsupported user domain", false),
 
+        WECHAT_NOT_CONFIGURED("AUTH_0600", "WeChat login is not configured, please contact your administrator", false),
+
+        WECHAT_CODE_INVALID("AUTH_0601", "WeChat authorization code is invalid or expired", false),
+
+        WECHAT_TOKEN_REFRESH_FAILED("AUTH_0602", "WeChat token refresh failed", false),
+
+        WECHAT_API_ERROR("AUTH_0603", "WeChat API returned an error", false),
+
+        OAUTH2_CODE_INVALID("AUTH_0700", "OAuth2 authorization code is invalid or expired", false),
+
+        OAUTH2_TOKEN_MISSING("AUTH_0701", "OAuth2 provider did not return an access token", false),
+
+        OAUTH2_TOKEN_INVALID("AUTH_0702", "OAuth2 token format is invalid", false),
+
+        OAUTH2_REFRESH_FAILED("AUTH_0703", "OAuth2 token refresh failed", false),
+
+        OAUTH2_NOT_CONFIGURED("AUTH_0704", "OAuth2 provider is not configured, please contact your administrator",
+                        false),
 
         SYSTEM_ERROR("AUTH_0900", "System error, please try again later", false);
 
@@ -89,4 +112,3 @@ public enum AuthResultCode implements IResultCode {
 
         private final boolean success;
 }
-

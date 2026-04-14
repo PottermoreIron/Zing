@@ -53,14 +53,15 @@ public class OAuth2OneStopAuthStrategy
                     request.oauth2ProviderCode(),
                     oauth2UserInfo.openId().value()).orElse(null);
         } catch (Exception e) {
-            throw new DomainException("Failed to fetch OAuth2 user info: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.OAUTH2_CODE_INVALID, e);
         }
     }
 
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
         var request = context.request();
-        log.debug("[OAuth2Auth] User already bound, executing login — userId={}, provider={}", user.userId(), request.oauth2ProviderCode());
+        log.debug("[OAuth2Auth] User already bound, executing login — userId={}, provider={}", user.userId(),
+                request.oauth2ProviderCode());
     }
 
     @Override

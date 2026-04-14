@@ -47,7 +47,7 @@ public class WeChatOneStopAuthStrategy
             UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
             return userModulePort.findUserByWeChat(weChatUserInfo.getOpenId()).orElse(null);
         } catch (Exception e) {
-            throw new DomainException("Failed to fetch WeChat user info: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.WECHAT_CODE_INVALID, e);
         }
     }
 

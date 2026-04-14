@@ -3,6 +3,7 @@ package com.pot.auth.infrastructure.adapter.wechat;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pot.auth.domain.port.WeChatPort;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.wechat.entity.WeChatUserInfo;
 import com.pot.auth.infrastructure.config.WeChatProperties;
@@ -41,7 +42,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
             throw e;
         } catch (Exception e) {
             log.error("[WeChat] Failed to fetch user info: {}", e.getMessage(), e);
-            throw new DomainException("WeChat authentication failed: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.WECHAT_CODE_INVALID, e);
         }
     }
 
@@ -65,7 +66,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
 
             String newAccessToken = json.path("access_token").asText(null);
             if (newAccessToken == null || newAccessToken.isBlank()) {
-                throw new DomainException("WeChat token refresh response missing access_token");
+                throw new DomainException(AuthResultCode.WECHAT_TOKEN_REFRESH_FAILED);
             }
 
             log.debug("[WeChat] Access token refreshed");
@@ -75,7 +76,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
             throw e;
         } catch (Exception e) {
             log.error("[WeChat] Failed to refresh token: {}", e.getMessage(), e);
-            throw new DomainException("WeChat token refresh failed: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.WECHAT_TOKEN_REFRESH_FAILED, e);
         }
     }
 
@@ -109,7 +110,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         String openId = json.path("openid").asText(null);
 
         if (accessToken == null || openId == null) {
-            throw new DomainException("WeChat authorization code is invalid or expired");
+            throw new DomainException(AuthResultCode.WECHAT_CODE_INVALID);
         }
 
         long expiresIn = json.path("expires_in").asLong(7200);
@@ -160,8 +161,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
         if (errCode != 0) {
             String errMsg = json.path("errmsg").asText("unknown error");
             log.error("[WeChat] API error — errcode={}, errmsg={}", errCode, errMsg);
-            throw new DomainException(
-                    String.format("WeChat API error [%d]: %s", errCode, errMsg));
+            throw new DomainException(AuthResultCode.WECHAT_API_ERROR);
         }
     }
 
@@ -171,7 +171,7 @@ public class HttpWeChatPortAdapter implements WeChatPort {
     private void validateProperties() {
         if (!properties.isConfigured()) {
             log.error("[WeChat] AppID or AppSecret not configured");
-            throw new DomainException("WeChat login is not configured, please contact your administrator");
+            throw new DomainException(AuthResultCode.WECHAT_NOT_CONFIGURED);
         }
     }
 
