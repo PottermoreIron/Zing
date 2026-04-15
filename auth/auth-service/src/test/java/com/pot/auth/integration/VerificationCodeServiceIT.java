@@ -1,13 +1,10 @@
 package com.pot.auth.integration;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeMismatchException;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeNotFoundException;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeSendTooFrequentException;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeVerificationExceededException;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.port.NotificationPort;
 import com.pot.auth.domain.port.UserModulePort;
-import com.pot.auth.domain.shared.valueobject.VerificationCode;
+import com.pot.auth.infrastructure.config.AuthVerificationCodeProperties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -61,6 +58,9 @@ class VerificationCodeServiceIT {
     @MockitoBean
     private UserModulePort userModulePort;
 
+    @Autowired
+    private AuthVerificationCodeProperties verificationCodeProperties;
+
     @AfterEach
     void cleanRedis() {
         var keys = redisTemplate.keys("auth:*");
@@ -98,14 +98,14 @@ class VerificationCodeServiceIT {
             verificationCodeApplicationService.sendEmailCode(EMAIL);
 
             assertThatThrownBy(() -> verificationCodeApplicationService.sendEmailCode(EMAIL))
-                    .isInstanceOf(CodeSendTooFrequentException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
         @DisplayName("Code not found (never sent) throws CodeNotFoundException")
         void whenCodeNeverSent_thenThrowCodeNotFoundException() {
             assertThatThrownBy(() -> verificationCodeApplicationService.verifyCode("nosend@example.com", "123456"))
-                    .isInstanceOf(CodeNotFoundException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
@@ -114,14 +114,14 @@ class VerificationCodeServiceIT {
             when(notificationPort.sendEmailVerificationCode(anyString(), anyString())).thenReturn(true);
             verificationCodeApplicationService.sendEmailCode(EMAIL);
 
-            int maxAttempts = VerificationCode.getMaxAttempts();
+            int maxAttempts = verificationCodeProperties.getMaxAttempts();
             for (int i = 0; i < maxAttempts - 1; i++) {
                 assertThatThrownBy(() -> verificationCodeApplicationService.verifyCode(EMAIL, "000000"))
-                        .isInstanceOf(CodeMismatchException.class);
+                        .isInstanceOf(DomainException.class);
             }
 
             assertThatThrownBy(() -> verificationCodeApplicationService.verifyCode(EMAIL, "000000"))
-                    .isInstanceOf(CodeVerificationExceededException.class);
+                    .isInstanceOf(DomainException.class);
             assertThat(redisTemplate.hasKey("auth:code:" + EMAIL)).isFalse();
         }
 
@@ -133,7 +133,8 @@ class VerificationCodeServiceIT {
             verificationCodeApplicationService.sendEmailCode(EMAIL);
 
             Long ttl = redisTemplate.getExpire("auth:code:" + EMAIL);
-            assertThat(ttl).isNotNull().isGreaterThan(0L).isLessThanOrEqualTo(VerificationCode.TTL_SECONDS);
+            assertThat(ttl).isNotNull().isGreaterThan(0L)
+                    .isLessThanOrEqualTo(verificationCodeProperties.getTtlSeconds());
 
             // The send-cooldown key should keep a short TTL in Redis.
             Long sendLimitTtl = redisTemplate.getExpire("auth:code:send:" + EMAIL);

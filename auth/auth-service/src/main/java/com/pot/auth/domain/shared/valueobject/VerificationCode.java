@@ -1,5 +1,6 @@
 package com.pot.auth.domain.shared.valueobject;
 
+import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import lombok.Builder;
 
@@ -13,10 +14,11 @@ public record VerificationCode(String value) {
 
     public VerificationCode {
         if (value == null || value.isBlank()) {
-            throw new InvalidVerificationCodeException("Verification code must not be blank");
+            throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID, "Verification code must not be blank");
         }
         if (!value.matches("^\\d{" + CODE_LENGTH + "}$")) {
-            throw new InvalidVerificationCodeException("Verification code must be " + CODE_LENGTH + " digits");
+            throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID,
+                    "Verification code must be " + CODE_LENGTH + " digits");
         }
     }
 
@@ -33,11 +35,5 @@ public record VerificationCode(String value) {
 
     public boolean matches(String inputCode) {
         return this.value.equals(inputCode);
-    }
-
-    public static class InvalidVerificationCodeException extends DomainException {
-        public InvalidVerificationCodeException(String message) {
-            super(message);
-        }
     }
 }

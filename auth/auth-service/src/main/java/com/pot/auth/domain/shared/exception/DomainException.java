@@ -6,18 +6,15 @@ import lombok.Getter;
 @Getter
 public class DomainException extends RuntimeException {
 
-    private AuthResultCode resultCode;
-
-    public DomainException(String message) {
-        super(message);
-    }
-
-    public DomainException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    private final AuthResultCode resultCode;
 
     public DomainException(AuthResultCode resultCode) {
         super(resultCode.getMsg());
+        this.resultCode = resultCode;
+    }
+
+    public DomainException(AuthResultCode resultCode, String message) {
+        super(message);
         this.resultCode = resultCode;
     }
 
@@ -25,5 +22,8 @@ public class DomainException extends RuntimeException {
         super(resultCode.getMsg(), cause);
         this.resultCode = resultCode;
     }
-}
 
+    public int getHttpStatus() {
+        return resultCode.getHttpStatus();
+    }
+}

@@ -1,11 +1,8 @@
 package com.pot.auth.domain;
 
 import com.pot.auth.domain.authentication.service.VerificationCodeService;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeMismatchException;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeNotFoundException;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeSendTooFrequentException;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeVerificationExceededException;
 import com.pot.auth.domain.authentication.service.VerificationCodePolicy;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.DistributedLockPort;
 import com.pot.auth.domain.port.NotificationPort;
@@ -83,7 +80,7 @@ class VerificationCodeServiceTest {
             when(cachePort.exists(sendLimitKey)).thenReturn(true);
 
             assertThatThrownBy(() -> verificationCodeService.sendEmailVerificationCode(new Email(email)))
-                    .isInstanceOf(CodeSendTooFrequentException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("frequently");
             verifyNoInteractions(distributedLockPort, notificationPort);
         }
@@ -130,7 +127,7 @@ class VerificationCodeServiceTest {
             when(cachePort.exists(sendLimitKey)).thenReturn(true);
 
             assertThatThrownBy(() -> verificationCodeService.sendSmsVerificationCode(new Phone(phone)))
-                    .isInstanceOf(CodeSendTooFrequentException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
@@ -174,7 +171,7 @@ class VerificationCodeServiceTest {
             when(cachePort.get(codeKey, String.class)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))
-                    .isInstanceOf(CodeNotFoundException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("expired");
         }
 
@@ -185,7 +182,7 @@ class VerificationCodeServiceTest {
             when(cachePort.get(attemptsKey, String.class)).thenReturn(Optional.of("1"));
 
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, "999999"))
-                    .isInstanceOf(CodeMismatchException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("Incorrect");
 
             verify(cachePort).set(eq(attemptsKey), eq("2"), any(Duration.class));
@@ -199,7 +196,7 @@ class VerificationCodeServiceTest {
                     .thenReturn(Optional.of(String.valueOf(POLICY.maxAttempts())));
 
             assertThatThrownBy(() -> verificationCodeService.verifyCode(recipient, storedCode))
-                    .isInstanceOf(CodeVerificationExceededException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("limit");
 
             verify(cachePort).delete(codeKey);

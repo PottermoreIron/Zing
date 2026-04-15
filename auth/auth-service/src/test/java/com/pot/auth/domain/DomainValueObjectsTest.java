@@ -1,10 +1,8 @@
 package com.pot.auth.domain;
 
 import com.pot.auth.domain.authorization.valueobject.PermissionDigest;
-import com.pot.auth.domain.shared.exception.InvalidEmailException;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.exception.InvalidIpAddressException;
-import com.pot.auth.domain.shared.exception.InvalidPhoneException;
-import com.pot.auth.domain.shared.exception.WeakPasswordException;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.IpAddress;
 import com.pot.auth.domain.shared.valueobject.Password;
@@ -50,17 +48,17 @@ class DomainValueObjectsTest {
                 "user @example.com",
                 "",
         })
-        @DisplayName("Invalid email format throws InvalidEmailException")
+        @DisplayName("Invalid email format throws DomainException")
         void whenInvalidEmail_thenThrowException(String email) {
             assertThatThrownBy(() -> Email.of(email))
-                    .isInstanceOf(InvalidEmailException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
-        @DisplayName("Null email throws InvalidEmailException")
+        @DisplayName("Null email throws DomainException")
         void whenNullEmail_thenThrowException() {
             assertThatThrownBy(() -> Email.of(null))
-                    .isInstanceOf(InvalidEmailException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
@@ -114,17 +112,17 @@ class DomainValueObjectsTest {
                 "abcdefghijk",
                 "00000000000",
         })
-        @DisplayName("Invalid phone number format throws InvalidPhoneException")
+        @DisplayName("Invalid phone number format throws DomainException")
         void whenInvalidPhone_thenThrowException(String phone) {
             assertThatThrownBy(() -> Phone.of(phone))
-                    .isInstanceOf(InvalidPhoneException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
-        @DisplayName("Null phone number throws InvalidPhoneException")
+        @DisplayName("Null phone number throws DomainException")
         void whenNullPhone_thenThrowException() {
             assertThatThrownBy(() -> Phone.of(null))
-                    .isInstanceOf(InvalidPhoneException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
@@ -169,50 +167,50 @@ class DomainValueObjectsTest {
         }
 
         @Test
-        @DisplayName("Password shorter than 8 characters throws WeakPasswordException")
+        @DisplayName("Password shorter than 8 characters throws DomainException")
         void whenTooShort_thenThrowException() {
             assertThatThrownBy(() -> Password.of("Aa1!"))
-                    .isInstanceOf(WeakPasswordException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("8");
         }
 
         @Test
-        @DisplayName("Password exceeding 64 characters throws WeakPasswordException")
+        @DisplayName("Password exceeding 64 characters throws DomainException")
         void whenTooLong_thenThrowException() {
             String longPwd = "Aa1!" + "a".repeat(65);
             assertThatThrownBy(() -> Password.of(longPwd))
-                    .isInstanceOf(WeakPasswordException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test
-        @DisplayName("Password without uppercase letter throws WeakPasswordException")
+        @DisplayName("Password without uppercase letter throws DomainException")
         void whenNoUppercase_thenThrowException() {
             assertThatThrownBy(() -> Password.of("password123!"))
-                    .isInstanceOf(WeakPasswordException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("uppercase");
         }
 
         @Test
-        @DisplayName("Password without lowercase letter throws WeakPasswordException")
+        @DisplayName("Password without lowercase letter throws DomainException")
         void whenNoLowercase_thenThrowException() {
             assertThatThrownBy(() -> Password.of("PASSWORD123!"))
-                    .isInstanceOf(WeakPasswordException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("lowercase");
         }
 
         @Test
-        @DisplayName("Password without digit throws WeakPasswordException")
+        @DisplayName("Password without digit throws DomainException")
         void whenNoDigit_thenThrowException() {
             assertThatThrownBy(() -> Password.of("PasswordABC!"))
-                    .isInstanceOf(WeakPasswordException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("digit");
         }
 
         @Test
-        @DisplayName("Null password throws WeakPasswordException")
+        @DisplayName("Null password throws DomainException")
         void whenNull_thenThrowException() {
             assertThatThrownBy(() -> Password.of(null))
-                    .isInstanceOf(WeakPasswordException.class);
+                    .isInstanceOf(DomainException.class);
         }
 
         @Test

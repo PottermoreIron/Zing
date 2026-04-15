@@ -3,6 +3,7 @@ package com.pot.auth.domain.authentication.service;
 import com.pot.auth.domain.port.CachePort;
 import com.pot.auth.domain.port.DistributedLockPort;
 import com.pot.auth.domain.port.NotificationPort;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.valueobject.Email;
 import com.pot.auth.domain.shared.valueobject.Phone;
@@ -44,8 +45,7 @@ public class VerificationCodeService {
                     String sendLimitKey = policy.sendLimitKey(recipient);
                     if (cachePort.exists(sendLimitKey)) {
                         log.warn("[Code] Send rate exceeded — email={}", email.value());
-                        throw new CodeSendTooFrequentException(
-                                "Verification code sent too frequently, please try again later");
+                        throw new DomainException(AuthResultCode.CODE_SEND_TOO_FREQUENT);
                     }
 
                     VerificationCode code = VerificationCode.generate();
@@ -84,8 +84,7 @@ public class VerificationCodeService {
                     String sendLimitKey = policy.sendLimitKey(recipient);
                     if (cachePort.exists(sendLimitKey)) {
                         log.warn("[Code] Send rate exceeded — phone={}", phoneNumber.value());
-                        throw new CodeSendTooFrequentException(
-                                "Verification code sent too frequently, please try again later");
+                        throw new DomainException(AuthResultCode.CODE_SEND_TOO_FREQUENT);
                     }
 
                     VerificationCode code = VerificationCode.generate();
@@ -125,7 +124,7 @@ public class VerificationCodeService {
 
                     if (storedCode == null) {
                         log.warn("[Code] Code not found or expired — recipient={}", recipient);
-                        throw new CodeNotFoundException("Verification code not found or expired");
+                        throw new DomainException(AuthResultCode.CODE_NOT_FOUND);
                     }
 
                     String attemptsKey = policy.attemptsKey(recipient);
@@ -137,8 +136,7 @@ public class VerificationCodeService {
                                 attempts);
                         cachePort.delete(codeKey);
                         cachePort.delete(attemptsKey);
-                        throw new CodeVerificationExceededException(
-                                "Verification attempt limit exceeded, please request a new code");
+                        throw new DomainException(AuthResultCode.CODE_VERIFICATION_EXCEEDED);
                     }
 
                     VerificationCode code = new VerificationCode(storedCode);
@@ -152,7 +150,7 @@ public class VerificationCodeService {
                     } else {
                         log.warn("[Code] Verification failed — recipient={}, attempts={}", recipient, attempts + 1);
                         cachePort.set(attemptsKey, String.valueOf(attempts + 1), policy.codeTtl());
-                        throw new CodeMismatchException("Incorrect verification code");
+                        throw new DomainException(AuthResultCode.CODE_MISMATCH);
                     }
                 });
     }
@@ -167,29 +165,5 @@ public class VerificationCodeService {
         cachePort.delete(codeKey);
         cachePort.delete(attemptsKey);
         log.info("[Code] Code deleted — recipient={}", recipient);
-    }
-
-    public static class CodeSendTooFrequentException extends DomainException {
-        public CodeSendTooFrequentException(String message) {
-            super(message);
-        }
-    }
-
-    public static class CodeNotFoundException extends DomainException {
-        public CodeNotFoundException(String message) {
-            super(message);
-        }
-    }
-
-    public static class CodeMismatchException extends DomainException {
-        public CodeMismatchException(String message) {
-            super(message);
-        }
-    }
-
-    public static class CodeVerificationExceededException extends DomainException {
-        public CodeVerificationExceededException(String message) {
-            super(message);
-        }
     }
 }

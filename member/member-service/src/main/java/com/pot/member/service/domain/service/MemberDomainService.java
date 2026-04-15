@@ -4,6 +4,8 @@ import com.pot.member.service.domain.model.member.Email;
 import com.pot.member.service.domain.model.member.MemberAggregate;
 import com.pot.member.service.domain.model.member.Nickname;
 import com.pot.member.service.domain.model.member.PhoneNumber;
+import com.pot.member.service.application.exception.MemberException;
+import com.pot.member.service.application.exception.MemberResultCode;
 import com.pot.member.service.domain.port.PasswordEncoder;
 import com.pot.member.service.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class MemberDomainService {
             String rawPassword) {
 
         if (email != null && memberRepository.existsByEmail(email)) {
-            throw new IllegalStateException("Email already registered: " + email.getValue());
+            throw new MemberException(MemberResultCode.EMAIL_ALREADY_EXISTS);
         }
 
         String passwordHash = passwordEncoder.encode(rawPassword);
@@ -70,7 +72,7 @@ public class MemberDomainService {
             String newRawPassword) {
 
         if (!verifyPassword(member, oldRawPassword)) {
-            throw new IllegalArgumentException("Current password is incorrect");
+            throw new MemberException(MemberResultCode.PASSWORD_INCORRECT);
         }
 
         String newPasswordHash = passwordEncoder.encode(newRawPassword);
@@ -83,7 +85,7 @@ public class MemberDomainService {
      */
     public void bindPhoneNumber(MemberAggregate member, PhoneNumber phoneNumber) {
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new IllegalStateException("Phone number already bound: " + phoneNumber.getValue());
+            throw new MemberException(MemberResultCode.PHONE_ALREADY_EXISTS);
         }
 
         member.updatePhoneNumber(phoneNumber);
@@ -94,7 +96,7 @@ public class MemberDomainService {
      */
     public void changeEmail(MemberAggregate member, Email newEmail) {
         if (memberRepository.existsByEmail(newEmail)) {
-            throw new IllegalStateException("Email already in use: " + newEmail.getValue());
+            throw new MemberException(MemberResultCode.EMAIL_ALREADY_EXISTS);
         }
 
         member.updateEmail(newEmail);

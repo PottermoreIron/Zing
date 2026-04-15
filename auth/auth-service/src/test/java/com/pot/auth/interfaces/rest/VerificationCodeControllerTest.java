@@ -1,8 +1,8 @@
 package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.VerificationCodeApplicationService;
-import com.pot.auth.domain.authentication.service.VerificationCodeService.CodeSendTooFrequentException;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.interfaces.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -81,7 +81,7 @@ class VerificationCodeControllerTest {
         @DisplayName("Rate limit triggered returns 400 with AUTH_0200 error code")
         void whenCodeSendTooFrequent_thenReturn400WithCode0200() throws Exception {
             when(verificationCodeApplicationService.sendEmailCode(anyString()))
-                    .thenThrow(new CodeSendTooFrequentException("Verification code sent too frequently, please try again later"));
+                    .thenThrow(new DomainException(AuthResultCode.CODE_SEND_TOO_FREQUENT));
 
             mockMvc.perform(post(EMAIL_CODE_URL)
                     .param("email", "test@example.com"))

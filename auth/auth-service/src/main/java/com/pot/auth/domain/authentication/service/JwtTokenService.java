@@ -92,12 +92,12 @@ public class JwtTokenService {
 
         if (token.isExpired()) {
             log.warn("[Token] AccessToken has expired: tokenId={}", token.tokenId());
-            throw new TokenExpiredException("AccessToken has expired");
+            throw new DomainException(AuthResultCode.TOKEN_EXPIRED);
         }
 
         if (isInBlacklist(token.tokenId())) {
             log.warn("[Token] AccessToken is blacklisted — tokenId={}", token.tokenId());
-            throw new TokenInvalidException("Token has been revoked");
+            throw new DomainException(AuthResultCode.TOKEN_REVOKED);
         }
 
         if (permissionVersionEnabled) {
@@ -112,7 +112,8 @@ public class JwtTokenService {
         try {
             Long tokenPermVersion = token.getClaim("perm_version", Long.class);
             if (tokenPermVersion == null) {
-                log.debug("[PermVerify] Token has no version (legacy token), skipping verification — tokenId={}", token.tokenId());
+                log.debug("[PermVerify] Token has no version (legacy token), skipping verification — tokenId={}",
+                        token.tokenId());
                 return;
             }
 
@@ -124,16 +125,17 @@ public class JwtTokenService {
             if (tokenVersion.isOlderThan(currentVersion)) {
                 log.warn("[PermVerify] Token permission version stale — userId={}, tokenVersion={}, currentVersion={}",
                         token.userId(), tokenVersion, currentVersion);
-                throw new TokenInvalidException("Permissions have changed, please sign in again");
+                throw new DomainException(AuthResultCode.TOKEN_INVALID);
             }
 
             log.debug("[PermVerify] Permission version verified — userId={}, version={}",
                     token.userId(), tokenVersion);
 
-        } catch (TokenInvalidException e) {
+        } catch (DomainException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[PermVerify] Version verification failed (degraded, allowing through) — error={}", e.getMessage());
+            log.error("[PermVerify] Version verification failed (degraded, allowing through) — error={}",
+                    e.getMessage());
         }
     }
 
@@ -144,13 +146,13 @@ public class JwtTokenService {
 
         if (oldRefreshToken.isExpired()) {
             log.warn("[Token] RefreshToken has expired: tokenId={}", oldRefreshToken.tokenId());
-            throw new TokenExpiredException("Refresh token has expired, please sign in again");
+            throw new DomainException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
         }
 
         String cacheKey = "auth:refresh:" + oldRefreshToken.tokenId().value();
         if (!cachePort.exists(cacheKey)) {
             log.warn("[Token] RefreshToken does not exist or has been revoked — tokenId={}", oldRefreshToken.tokenId());
-            throw new TokenInvalidException("Refresh token has been revoked, please sign in again");
+            throw new DomainException(AuthResultCode.REFRESH_TOKEN_INVALID);
         }
 
         Set<String> authorities = userModulePortFactory
@@ -175,7 +177,8 @@ public class JwtTokenService {
             log.info("[Token] RefreshToken renewed within sliding window — tokenId={}", oldRefreshToken.tokenId());
             storeRefreshToken(newTokenPair.refreshToken());
         } else {
-            log.info("[Token] RefreshToken outside sliding window, reusing existing token — tokenId={}", oldRefreshToken.tokenId());
+            log.info("[Token] RefreshToken outside sliding window, reusing existing token — tokenId={}",
+                    oldRefreshToken.tokenId());
             storeRefreshToken(oldRefreshToken);
         }
 
@@ -237,17 +240,5 @@ public class JwtTokenService {
                 .findById(refreshToken.userId())
                 .map(user -> user.nickname())
                 .orElse("unknown");
-    }
-
-    public static class TokenExpiredException extends DomainException {
-        public TokenExpiredException(String message) {
-            super(message);
-        }
-    }
-
-    public static class TokenInvalidException extends DomainException {
-        public TokenInvalidException(String message) {
-            super(message);
-        }
     }
 }

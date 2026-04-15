@@ -1,6 +1,7 @@
 package com.pot.auth.domain.shared.valueobject;
 
-import com.pot.auth.domain.shared.exception.InvalidPhoneException;
+import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.exception.DomainException;
 import lombok.Builder;
 
 import java.util.regex.Pattern;
@@ -11,30 +12,30 @@ public record Phone(String value) {
     private static final Pattern CHINA_MOBILE_PATTERN = Pattern.compile("^1[3-9]\\d{9}$");
     private static final Pattern INTERNATIONAL_PATTERN = Pattern.compile("^\\+?[1-9]\\d{1,14}$");
 
-        public Phone {
+    public Phone {
         if (value == null || value.isBlank()) {
-            throw new InvalidPhoneException("Phone number must not be blank");
+            throw new DomainException(AuthResultCode.INVALID_PHONE, "Phone number must not be blank");
         }
 
         String trimmed = value.trim().replaceAll("\\s+", "");
 
         if (!CHINA_MOBILE_PATTERN.matcher(trimmed).matches()
                 && !INTERNATIONAL_PATTERN.matcher(trimmed).matches()) {
-            throw new InvalidPhoneException("Invalid phone number format: " + value);
+            throw new DomainException(AuthResultCode.INVALID_PHONE, "Invalid phone number format: " + value);
         }
 
         value = trimmed;
     }
 
-        public static Phone of(String value) {
+    public static Phone of(String value) {
         return new Phone(value);
     }
 
-        public boolean isChinaMobile() {
+    public boolean isChinaMobile() {
         return CHINA_MOBILE_PATTERN.matcher(value).matches();
     }
 
-        public String toInternationalFormat() {
+    public String toInternationalFormat() {
         if (value.startsWith("+")) {
             return value;
         }
@@ -44,11 +45,10 @@ public record Phone(String value) {
         return value;
     }
 
-        public String toMasked() {
+    public String toMasked() {
         if (value.length() <= 7) {
             return value;
         }
         return value.substring(0, 3) + "****" + value.substring(value.length() - 4);
     }
 }
-

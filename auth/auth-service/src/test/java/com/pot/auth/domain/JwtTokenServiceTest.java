@@ -1,8 +1,7 @@
 package com.pot.auth.domain;
 
 import com.pot.auth.domain.authentication.service.JwtTokenService;
-import com.pot.auth.domain.authentication.service.JwtTokenService.TokenExpiredException;
-import com.pot.auth.domain.authentication.service.JwtTokenService.TokenInvalidException;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.authentication.valueobject.JwtToken;
 import com.pot.auth.domain.authentication.valueobject.TokenPair;
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
@@ -136,7 +135,7 @@ class JwtTokenServiceTest {
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(expiredToken);
 
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
-                    .isInstanceOf(TokenExpiredException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("expired");
         }
 
@@ -148,7 +147,7 @@ class JwtTokenServiceTest {
             when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(true);
 
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
-                    .isInstanceOf(TokenInvalidException.class)
+                    .isInstanceOf(DomainException.class)
                     .hasMessageContaining("revoked");
         }
     }
