@@ -30,7 +30,7 @@ public class VerificationCodeService {
         this.policy = policy;
     }
 
-        public boolean sendEmailVerificationCode(Email email) {
+    public boolean sendEmailVerificationCode(Email email) {
         log.info("[Code] Sending email verification code — email={}", email.value());
 
         String recipient = email.value();
@@ -44,7 +44,8 @@ public class VerificationCodeService {
                     String sendLimitKey = policy.sendLimitKey(recipient);
                     if (cachePort.exists(sendLimitKey)) {
                         log.warn("[Code] Send rate exceeded — email={}", email.value());
-                        throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
+                        throw new CodeSendTooFrequentException(
+                                "Verification code sent too frequently, please try again later");
                     }
 
                     VerificationCode code = VerificationCode.generate();
@@ -69,7 +70,7 @@ public class VerificationCodeService {
                 });
     }
 
-        public boolean sendSmsVerificationCode(Phone phoneNumber) {
+    public boolean sendSmsVerificationCode(Phone phoneNumber) {
         log.info("[Code] Sending SMS verification code — phone={}", phoneNumber.value());
 
         String recipient = phoneNumber.value();
@@ -83,7 +84,8 @@ public class VerificationCodeService {
                     String sendLimitKey = policy.sendLimitKey(recipient);
                     if (cachePort.exists(sendLimitKey)) {
                         log.warn("[Code] Send rate exceeded — phone={}", phoneNumber.value());
-                        throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
+                        throw new CodeSendTooFrequentException(
+                                "Verification code sent too frequently, please try again later");
                     }
 
                     VerificationCode code = VerificationCode.generate();
@@ -108,7 +110,7 @@ public class VerificationCodeService {
                 });
     }
 
-        public boolean verifyCode(String recipient, String inputCode) {
+    public boolean verifyCode(String recipient, String inputCode) {
         log.info("[Code] Verifying code — recipient={}", recipient);
 
         String lockKey = "lock:verify:code:" + recipient;
@@ -131,10 +133,12 @@ public class VerificationCodeService {
                     int attempts = attemptsStr != null ? Integer.parseInt(attemptsStr) : 0;
 
                     if (attempts >= policy.maxAttempts()) {
-                        log.warn("[Code] Verification attempt limit reached — recipient={}, attempts={}", recipient, attempts);
+                        log.warn("[Code] Verification attempt limit reached — recipient={}, attempts={}", recipient,
+                                attempts);
                         cachePort.delete(codeKey);
                         cachePort.delete(attemptsKey);
-                        throw new CodeVerificationExceededException("Verification attempt limit exceeded, please request a new code");
+                        throw new CodeVerificationExceededException(
+                                "Verification attempt limit exceeded, please request a new code");
                     }
 
                     VerificationCode code = new VerificationCode(storedCode);
@@ -153,11 +157,11 @@ public class VerificationCodeService {
                 });
     }
 
-        public boolean verifyCode(String recipient, VerificationCode inputCode) {
+    public boolean verifyCode(String recipient, VerificationCode inputCode) {
         return verifyCode(recipient, inputCode.value());
     }
 
-        public void deleteCode(String recipient) {
+    public void deleteCode(String recipient) {
         String codeKey = policy.codeKey(recipient);
         String attemptsKey = policy.attemptsKey(recipient);
         cachePort.delete(codeKey);
@@ -165,25 +169,25 @@ public class VerificationCodeService {
         log.info("[Code] Code deleted — recipient={}", recipient);
     }
 
-        public static class CodeSendTooFrequentException extends DomainException {
+    public static class CodeSendTooFrequentException extends DomainException {
         public CodeSendTooFrequentException(String message) {
             super(message);
         }
     }
 
-        public static class CodeNotFoundException extends DomainException {
+    public static class CodeNotFoundException extends DomainException {
         public CodeNotFoundException(String message) {
             super(message);
         }
     }
 
-        public static class CodeMismatchException extends DomainException {
+    public static class CodeMismatchException extends DomainException {
         public CodeMismatchException(String message) {
             super(message);
         }
     }
 
-        public static class CodeVerificationExceededException extends DomainException {
+    public static class CodeVerificationExceededException extends DomainException {
         public CodeVerificationExceededException(String message) {
             super(message);
         }

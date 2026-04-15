@@ -6,6 +6,7 @@ import com.pot.zing.framework.starter.touch.model.TouchRequest;
 import com.pot.zing.framework.starter.touch.service.TouchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
+@Profile("!dev")
 @RequiredArgsConstructor
 public class TouchModuleAdapter implements NotificationPort {
 
