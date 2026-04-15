@@ -34,12 +34,6 @@ public class VerificationCodeService {
         log.info("[Code] Sending email verification code — email={}", email.value());
 
         String recipient = email.value();
-        String sendLimitKey = policy.sendLimitKey(recipient);
-        if (cachePort.exists(sendLimitKey)) {
-            log.warn("[Code] Send rate exceeded — email={}", email.value());
-            throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
-        }
-
         String lockKey = policy.lockKey(recipient);
         return distributedLockPort.executeWithLock(
                 lockKey,
@@ -47,6 +41,12 @@ public class VerificationCodeService {
                 policy.lockLeaseSeconds(),
                 TimeUnit.SECONDS,
                 () -> {
+                    String sendLimitKey = policy.sendLimitKey(recipient);
+                    if (cachePort.exists(sendLimitKey)) {
+                        log.warn("[Code] Send rate exceeded — email={}", email.value());
+                        throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
+                    }
+
                     VerificationCode code = VerificationCode.generate();
 
                     String codeKey = policy.codeKey(recipient);
@@ -73,12 +73,6 @@ public class VerificationCodeService {
         log.info("[Code] Sending SMS verification code — phone={}", phoneNumber.value());
 
         String recipient = phoneNumber.value();
-        String sendLimitKey = policy.sendLimitKey(recipient);
-        if (cachePort.exists(sendLimitKey)) {
-            log.warn("[Code] Send rate exceeded — phone={}", phoneNumber.value());
-            throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
-        }
-
         String lockKey = policy.lockKey(recipient);
         return distributedLockPort.executeWithLock(
                 lockKey,
@@ -86,6 +80,12 @@ public class VerificationCodeService {
                 policy.lockLeaseSeconds(),
                 TimeUnit.SECONDS,
                 () -> {
+                    String sendLimitKey = policy.sendLimitKey(recipient);
+                    if (cachePort.exists(sendLimitKey)) {
+                        log.warn("[Code] Send rate exceeded — phone={}", phoneNumber.value());
+                        throw new CodeSendTooFrequentException("Verification code sent too frequently, please try again later");
+                    }
+
                     VerificationCode code = VerificationCode.generate();
 
                     String codeKey = policy.codeKey(recipient);
@@ -111,38 +111,46 @@ public class VerificationCodeService {
         public boolean verifyCode(String recipient, String inputCode) {
         log.info("[Code] Verifying code — recipient={}", recipient);
 
-        String codeKey = policy.codeKey(recipient);
-        String storedCode = cachePort.get(codeKey, String.class).orElse(null);
+        String lockKey = "lock:verify:code:" + recipient;
+        return distributedLockPort.executeWithLock(
+                lockKey,
+                policy.lockWaitSeconds(),
+                policy.lockLeaseSeconds(),
+                TimeUnit.SECONDS,
+                () -> {
+                    String codeKey = policy.codeKey(recipient);
+                    String storedCode = cachePort.get(codeKey, String.class).orElse(null);
 
-        if (storedCode == null) {
-            log.warn("[Code] Code not found or expired — recipient={}", recipient);
-            throw new CodeNotFoundException("Verification code not found or expired");
-        }
+                    if (storedCode == null) {
+                        log.warn("[Code] Code not found or expired — recipient={}", recipient);
+                        throw new CodeNotFoundException("Verification code not found or expired");
+                    }
 
-        String attemptsKey = policy.attemptsKey(recipient);
-        String attemptsStr = cachePort.get(attemptsKey, String.class).orElse(null);
-        int attempts = attemptsStr != null ? Integer.parseInt(attemptsStr) : 0;
+                    String attemptsKey = policy.attemptsKey(recipient);
+                    String attemptsStr = cachePort.get(attemptsKey, String.class).orElse(null);
+                    int attempts = attemptsStr != null ? Integer.parseInt(attemptsStr) : 0;
 
-        if (attempts >= policy.maxAttempts()) {
-            log.warn("[Code] Verification attempt limit reached — recipient={}, attempts={}", recipient, attempts);
-            cachePort.delete(codeKey);
-            cachePort.delete(attemptsKey);
-            throw new CodeVerificationExceededException("Verification attempt limit exceeded, please request a new code");
-        }
+                    if (attempts >= policy.maxAttempts()) {
+                        log.warn("[Code] Verification attempt limit reached — recipient={}, attempts={}", recipient, attempts);
+                        cachePort.delete(codeKey);
+                        cachePort.delete(attemptsKey);
+                        throw new CodeVerificationExceededException("Verification attempt limit exceeded, please request a new code");
+                    }
 
-        VerificationCode code = new VerificationCode(storedCode);
-        boolean isValid = code.matches(inputCode);
+                    VerificationCode code = new VerificationCode(storedCode);
+                    boolean isValid = code.matches(inputCode);
 
-        if (isValid) {
-            log.info("[Code] Verification passed — recipient={}", recipient);
-            cachePort.delete(codeKey);
-            cachePort.delete(attemptsKey);
-            return true;
-        } else {
-            log.warn("[Code] Verification failed — recipient={}, attempts={}", recipient, attempts + 1);
-            cachePort.set(attemptsKey, String.valueOf(attempts + 1), policy.codeTtl());
-            throw new CodeMismatchException("Incorrect verification code");
-        }
+                    if (isValid) {
+                        log.info("[Code] Verification passed — recipient={}", recipient);
+                        cachePort.delete(codeKey);
+                        cachePort.delete(attemptsKey);
+                        return true;
+                    } else {
+                        log.warn("[Code] Verification failed — recipient={}, attempts={}", recipient, attempts + 1);
+                        cachePort.set(attemptsKey, String.valueOf(attempts + 1), policy.codeTtl());
+                        throw new CodeMismatchException("Incorrect verification code");
+                    }
+                });
     }
 
         public boolean verifyCode(String recipient, VerificationCode inputCode) {

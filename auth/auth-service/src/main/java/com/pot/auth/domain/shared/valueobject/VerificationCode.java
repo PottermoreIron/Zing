@@ -8,10 +8,8 @@ import java.security.SecureRandom;
 @Builder
 public record VerificationCode(String value) {
 
-    public static final int TTL_SECONDS = 300; // 5 minutes
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int CODE_LENGTH = 6;
-    private static final int MAX_ATTEMPTS = 3;
 
         public VerificationCode {
         if (value == null || value.isBlank()) {
@@ -31,10 +29,6 @@ public record VerificationCode(String value) {
         int code = RANDOM.nextInt(bound);
         String codeStr = String.format("%0" + CODE_LENGTH + "d", code);
         return new VerificationCode(codeStr);
-    }
-
-        public static int getMaxAttempts() {
-        return MAX_ATTEMPTS;
     }
 
         public boolean matches(String inputCode) {

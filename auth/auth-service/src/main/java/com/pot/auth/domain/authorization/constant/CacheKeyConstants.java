@@ -9,8 +9,6 @@ public final class CacheKeyConstants {
 
     public static final String TOKEN = "token";
 
-    public static final String CAPTCHA = "captcha";
-
     public static final String BLACKLIST = "blacklist";
 
     public static final String SESSION = "session";
