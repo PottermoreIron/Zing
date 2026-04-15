@@ -24,6 +24,7 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
             case EMAIL_PASSWORD -> validateEmailPassword(request);
             case EMAIL_CODE -> validateEmailCode(request);
             case PHONE_CODE -> validatePhoneCode(request);
+            case PHONE_PASSWORD -> validatePhonePassword(request);
             case OAUTH2, WECHAT -> {
             }
             default -> throw new DomainException(AuthResultCode.UNSUPPORTED_REGISTER_TYPE);
@@ -66,6 +67,21 @@ public class RegistrationParameterValidator implements ValidationHandler<Registr
     private void validatePhoneCode(RegisterCommand request) {
         if (!ValidationUtils.isValidPhone(request.phone())) {
             throw new DomainException(AuthResultCode.INVALID_PHONE);
+        }
+        if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
+            throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID);
+        }
+    }
+
+    private void validatePhonePassword(RegisterCommand request) {
+        if (!ValidationUtils.isValidPhone(request.phone())) {
+            throw new DomainException(AuthResultCode.INVALID_PHONE);
+        }
+        if (!ValidationUtils.isValidPassword(request.password())) {
+            throw new DomainException(AuthResultCode.INVALID_PASSWORD);
+        }
+        if (!StringUtils.hasText(request.verificationCode())) {
+            throw new DomainException(AuthResultCode.CODE_REQUIRED);
         }
         if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
             throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID);

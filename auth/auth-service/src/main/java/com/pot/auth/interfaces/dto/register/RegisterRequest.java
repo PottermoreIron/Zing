@@ -14,6 +14,7 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
                 @JsonSubTypes.Type(value = EmailPasswordRegisterRequest.class, name = "EMAIL_PASSWORD"),
                 @JsonSubTypes.Type(value = EmailCodeRegisterRequest.class, name = "EMAIL_CODE"),
                 @JsonSubTypes.Type(value = PhoneCodeRegisterRequest.class, name = "PHONE_CODE"),
+                @JsonSubTypes.Type(value = PhonePasswordRegisterRequest.class, name = "PHONE_PASSWORD"),
                 @JsonSubTypes.Type(value = OAuth2RegisterRequest.class, name = "OAUTH2"),
                 @JsonSubTypes.Type(value = WeChatRegisterRequest.class, name = "WECHAT")
 })
@@ -22,6 +23,7 @@ public sealed interface RegisterRequest permits
                 EmailPasswordRegisterRequest,
                 EmailCodeRegisterRequest,
                 PhoneCodeRegisterRequest,
+                PhonePasswordRegisterRequest,
                 OAuth2RegisterRequest,
                 WeChatRegisterRequest {
 

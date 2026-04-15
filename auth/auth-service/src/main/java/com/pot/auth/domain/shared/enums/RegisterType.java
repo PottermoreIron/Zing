@@ -13,6 +13,8 @@ public enum RegisterType {
 
         PHONE_CODE("phone_code", "Phone verification code registration"),
 
+        PHONE_PASSWORD("phone_password", "Phone-password registration"),
+
         OAUTH2("oauth2", "OAuth2 registration"),
 
         WECHAT("wechat", "WeChat registration");

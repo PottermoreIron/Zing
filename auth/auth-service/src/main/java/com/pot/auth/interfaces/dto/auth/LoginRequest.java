@@ -13,13 +13,15 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
                 @JsonSubTypes.Type(value = UsernamePasswordLoginRequest.class, name = "USERNAME_PASSWORD"),
                 @JsonSubTypes.Type(value = EmailPasswordLoginRequest.class, name = "EMAIL_PASSWORD"),
                 @JsonSubTypes.Type(value = EmailCodeLoginRequest.class, name = "EMAIL_CODE"),
-                @JsonSubTypes.Type(value = PhoneCodeLoginRequest.class, name = "PHONE_CODE")
+                @JsonSubTypes.Type(value = PhoneCodeLoginRequest.class, name = "PHONE_CODE"),
+                @JsonSubTypes.Type(value = PhonePasswordLoginRequest.class, name = "PHONE_PASSWORD")
 })
 public sealed interface LoginRequest permits
                 UsernamePasswordLoginRequest,
                 EmailPasswordLoginRequest,
                 EmailCodeLoginRequest,
-                PhoneCodeLoginRequest {
+                PhoneCodeLoginRequest,
+                PhonePasswordLoginRequest {
 
         LoginType loginType();
 

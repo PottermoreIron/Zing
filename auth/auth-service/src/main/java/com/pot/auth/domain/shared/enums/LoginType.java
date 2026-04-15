@@ -13,6 +13,8 @@ public enum LoginType {
 
         PHONE_CODE("phone_code", "Phone verification code login"),
 
+        PHONE_PASSWORD("phone_password", "Phone-password login"),
+
         OAUTH2("oauth2", "OAuth2 login"),
 
         WECHAT("wechat", "WeChat login");

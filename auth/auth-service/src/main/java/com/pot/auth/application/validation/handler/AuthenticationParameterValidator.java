@@ -23,6 +23,7 @@ public class AuthenticationParameterValidator implements ValidationHandler<Authe
             case EMAIL_PASSWORD -> validateEmailPassword(request);
             case EMAIL_CODE -> validateEmailCode(request);
             case PHONE_CODE -> validatePhoneCode(request);
+            case PHONE_PASSWORD -> validatePhonePassword(request);
             default -> throw new DomainException(AuthResultCode.UNSUPPORTED_LOGIN_TYPE);
         }
     }
@@ -60,6 +61,15 @@ public class AuthenticationParameterValidator implements ValidationHandler<Authe
         }
         if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
             throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID);
+        }
+    }
+
+    private void validatePhonePassword(LoginCommand request) {
+        if (!ValidationUtils.isValidPhone(request.phone())) {
+            throw new DomainException(AuthResultCode.INVALID_PHONE);
+        }
+        if (!ValidationUtils.isValidPassword(request.password())) {
+            throw new DomainException(AuthResultCode.INVALID_PASSWORD);
         }
     }
 
