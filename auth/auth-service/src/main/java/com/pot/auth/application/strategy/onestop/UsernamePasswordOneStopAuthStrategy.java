@@ -5,11 +5,13 @@ import com.pot.auth.domain.authentication.service.JwtTokenService;
 import com.pot.auth.application.context.OneStopAuthContext;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
+import com.pot.auth.domain.port.dto.CreateUserCommand;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.AuthType;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.shared.generator.UserDefaultsGenerator;
+import com.pot.auth.domain.shared.valueobject.Password;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -47,12 +49,29 @@ public class UsernamePasswordOneStopAuthStrategy
 
     @Override
     protected void validateCredentialForRegister(OneStopAuthContext context) {
-        throw new DomainException(AuthResultCode.USER_NOT_FOUND);
+        Password.of(context.request().password());
+    }
+
+    @Override
+    protected void beforeRegister(OneStopAuthContext context) {
+        var request = context.request();
+        UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
+        if (userModulePort.existsByNickname(request.nickname())) {
+            throw new DomainException(AuthResultCode.USERNAME_ALREADY_EXISTS);
+        }
     }
 
     @Override
     protected UserDTO createUserWithDefaults(OneStopAuthContext context) {
-        throw new DomainException(AuthResultCode.USER_NOT_FOUND);
+        var request = context.request();
+        UserModulePort port = userModulePortFactory.getPort(request.userDomain());
+        var userId = port.createUser(CreateUserCommand.builder()
+                .nickname(request.nickname())
+                .password(Password.of(request.password()))
+                .avatarUrl(userDefaultsGenerator.getDefaultAvatarUrl())
+                .build());
+        return port.findById(userId)
+                .orElseThrow(() -> new DomainException(AuthResultCode.USER_NOT_FOUND));
     }
 
     @Override
