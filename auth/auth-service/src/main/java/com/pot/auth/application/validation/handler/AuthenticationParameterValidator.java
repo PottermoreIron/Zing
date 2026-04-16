@@ -44,6 +44,9 @@ public class AuthenticationParameterValidator implements ValidationHandler<Authe
         if (!ValidationUtils.isValidPassword(request.password())) {
             throw new DomainException(AuthResultCode.INVALID_PASSWORD);
         }
+        if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
+            throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID);
+        }
     }
 
     private void validateEmailCode(LoginCommand request) {
@@ -70,6 +73,9 @@ public class AuthenticationParameterValidator implements ValidationHandler<Authe
         }
         if (!ValidationUtils.isValidPassword(request.password())) {
             throw new DomainException(AuthResultCode.INVALID_PASSWORD);
+        }
+        if (!ValidationUtils.isValidVerificationCode(request.verificationCode())) {
+            throw new DomainException(AuthResultCode.CODE_FORMAT_INVALID);
         }
     }
 

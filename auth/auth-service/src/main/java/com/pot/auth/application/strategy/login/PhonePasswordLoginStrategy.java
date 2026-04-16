@@ -2,13 +2,16 @@ package com.pot.auth.application.strategy.login;
 
 import com.pot.auth.application.context.AuthenticationContext;
 import com.pot.auth.application.strategy.AbstractLoginStrategyImpl;
+import com.pot.auth.domain.authentication.entity.AuthenticationResult;
 import com.pot.auth.domain.authentication.service.JwtTokenService;
+import com.pot.auth.domain.authentication.service.VerificationCodeService;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.UserModulePortFactory;
 import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.exception.DomainException;
+import com.pot.auth.domain.shared.valueobject.VerificationCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +25,15 @@ public class PhonePasswordLoginStrategy extends AbstractLoginStrategyImpl {
     private static final String AUTHENTICATED_USER_KEY = "authenticatedUser";
 
     private final UserModulePortFactory userModulePortFactory;
+    private final VerificationCodeService verificationCodeService;
 
     public PhonePasswordLoginStrategy(
             JwtTokenService jwtTokenService,
-            UserModulePortFactory userModulePortFactory) {
+            UserModulePortFactory userModulePortFactory,
+            VerificationCodeService verificationCodeService) {
         super(jwtTokenService);
         this.userModulePortFactory = userModulePortFactory;
+        this.verificationCodeService = verificationCodeService;
     }
 
     /**
@@ -37,6 +43,10 @@ public class PhonePasswordLoginStrategy extends AbstractLoginStrategyImpl {
     protected void validateCredential(AuthenticationContext context) {
         var request = context.request();
         log.debug("[PhonePasswordLogin] Verifying credentials — phone={}", request.phone());
+
+        if (!verificationCodeService.verifyCode(request.phone(), VerificationCode.of(request.verificationCode()))) {
+            throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
+        }
 
         UserModulePort port = userModulePortFactory.getPort(request.userDomain());
         UserDTO user = port.authenticateWithPassword(request.phone(), request.password())
@@ -64,5 +74,10 @@ public class PhonePasswordLoginStrategy extends AbstractLoginStrategyImpl {
     @Override
     public LoginType getSupportedLoginType() {
         return LoginType.PHONE_PASSWORD;
+    }
+
+    @Override
+    protected void afterLogin(UserDTO user, AuthenticationResult result, AuthenticationContext context) {
+        verificationCodeService.deleteCode(context.request().phone());
     }
 }

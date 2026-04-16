@@ -6,6 +6,7 @@ import com.pot.auth.domain.shared.enums.LoginType;
 import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.interfaces.validation.annotations.ValidEmail;
 import com.pot.auth.interfaces.validation.annotations.ValidPassword;
+import com.pot.auth.interfaces.validation.annotations.ValidVerificationCode;
 import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import jakarta.validation.constraints.NotNull;
 
@@ -13,12 +14,14 @@ import jakarta.validation.constraints.NotNull;
  * Login request for email and password.
  */
 public record EmailPasswordLoginRequest(
-                @NotNull(message = "Login type must not be null") @JsonProperty("loginType") LoginType loginType,
+        @NotNull(message = "Login type must not be null") @JsonProperty("loginType") LoginType loginType,
 
-                @ValidEmail String email,
+        @ValidEmail String email,
 
-                @ValidPassword String password,
+        @ValidPassword String password,
 
-                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-                implements LoginRequest {
+        @ValidVerificationCode String verificationCode,
+
+        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+        implements LoginRequest {
 }

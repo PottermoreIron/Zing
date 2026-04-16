@@ -38,7 +38,7 @@ public class RegistrationController {
     private final RegistrationApplicationService registrationApplicationService;
     private final AuthCommandAssembler authCommandAssembler;
 
-    @Operation(operationId = "authRegister", summary = "Register", description = "Supports USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT registration methods")
+    @Operation(operationId = "authRegister", summary = "Register", description = "Supports USERNAME_PASSWORD / EMAIL_PASSWORD / PHONE_PASSWORD / EMAIL_CODE / PHONE_CODE / OAUTH2 / WECHAT registration methods")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 3.0, message = "Too many registration requests, please try again later")
     @PostMapping("/api/v1/register")
     public R<RegisterResponse> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {

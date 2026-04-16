@@ -29,7 +29,7 @@ import static com.pot.zing.framework.common.util.IpUtils.getClientIp;
  * @author pot
  * @since 2025-11-29
  */
-@Tag(name = "Login", description = "Traditional login (username-password / email-password / verification code) and token refresh")
+@Tag(name = "Login", description = "Traditional login (all login types require a verification code except USERNAME_PASSWORD) and token refresh")
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -41,7 +41,7 @@ public class LoginController {
     private final TokenRefreshApplicationService tokenRefreshApplicationService;
     private final AuthCommandAssembler authCommandAssembler;
 
-    @Operation(operationId = "authLogin", summary = "Login", description = "Supports USERNAME_PASSWORD / EMAIL_PASSWORD / EMAIL_CODE / PHONE_CODE login methods")
+    @Operation(operationId = "authLogin", summary = "Login", description = "Supports USERNAME_PASSWORD / EMAIL_PASSWORD / PHONE_PASSWORD / EMAIL_CODE / PHONE_CODE login methods. EMAIL_PASSWORD and PHONE_PASSWORD require a verification code in addition to the password")
     @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "Too many login requests, please try again later")
     @PostMapping("/api/v1/login")
     public R<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {

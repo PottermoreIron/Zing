@@ -7,18 +7,21 @@ import com.pot.auth.domain.shared.valueobject.UserDomain;
 import com.pot.auth.interfaces.dto.deserializer.UserDomainDeserializer;
 import com.pot.auth.interfaces.validation.annotations.ValidPassword;
 import com.pot.auth.interfaces.validation.annotations.ValidPhone;
+import com.pot.auth.interfaces.validation.annotations.ValidVerificationCode;
 import jakarta.validation.constraints.NotNull;
 
 /**
  * Login request for phone and password credentials.
  */
 public record PhonePasswordLoginRequest(
-                @NotNull(message = "Login type must not be null") @JsonProperty("loginType") LoginType loginType,
+        @NotNull(message = "Login type must not be null") @JsonProperty("loginType") LoginType loginType,
 
-                @ValidPhone String phone,
+        @ValidPhone String phone,
 
-                @ValidPassword String password,
+        @ValidPassword String password,
 
-                @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
-                implements LoginRequest {
+        @ValidVerificationCode String verificationCode,
+
+        @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
+        implements LoginRequest {
 }

@@ -8,7 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AuthResultCode implements IResultCode {
 
-        AUTHENTICATION_FAILED("AUTH_0001", "Invalid username or password", false, 401),
+        AUTHENTICATION_FAILED("AUTH_0001", "Incorrect username or password", false, 401),
+
+        AUTHENTICATION_FAILED_EMAIL("AUTH_0001", "Incorrect email or password", false, 401),
+
+        AUTHENTICATION_FAILED_PHONE("AUTH_0001", "Incorrect phone number or password", false, 401),
 
         ACCOUNT_LOCKED("AUTH_0002", "Account is locked, please contact your administrator", false, 401),
 

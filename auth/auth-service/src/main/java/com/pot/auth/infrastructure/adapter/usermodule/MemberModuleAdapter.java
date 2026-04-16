@@ -8,6 +8,7 @@ import com.pot.auth.domain.port.dto.UserDTO;
 import com.pot.auth.domain.shared.valueobject.*;
 import com.pot.auth.infrastructure.exception.AuthInfrastructureException;
 import com.pot.auth.infrastructure.client.MemberServiceClient;
+import feign.FeignException;
 import com.pot.member.facade.dto.MemberDTO;
 import com.pot.member.facade.dto.request.BindSocialAccountRequest;
 import com.pot.member.facade.dto.request.CreateMemberRequest;
@@ -53,6 +54,9 @@ public class MemberModuleAdapter implements UserModulePort {
 
             return Optional.of(convertToUserDTO(response.getData()));
 
+        } catch (FeignException.BadRequest e) {
+            log.warn("Password verification failed (wrong password) — identifier={}", identifier);
+            return Optional.empty();
         } catch (Exception e) {
             log.error("Password authentication error — identifier={}", identifier, e);
             return Optional.empty();

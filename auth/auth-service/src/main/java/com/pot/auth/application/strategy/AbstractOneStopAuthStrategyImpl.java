@@ -50,8 +50,12 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
 
                 return handleNewUser(context);
             }
+        } catch (DomainException e) {
+            log.warn("[OneStopAuth] Authentication failed — authType={}, error={}",
+                    request.authType(), e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("[OneStopAuth] Authentication failed — authType={}, error={}",
+            log.error("[OneStopAuth] Unexpected error — authType={}, error={}",
                     request.authType(), e.getMessage(), e);
             throw e;
         } finally {
@@ -83,7 +87,8 @@ public abstract class AbstractOneStopAuthStrategyImpl implements OneStopAuthStra
         afterRegister(user, context);
         AuthenticationResult result = generateAuthenticationResult(user, context);
 
-        log.info("[OneStopAuth] Registration and login successful — userId={}, nickname={}", user.userId(), user.nickname());
+        log.info("[OneStopAuth] Registration and login successful — userId={}, nickname={}", user.userId(),
+                user.nickname());
         return result;
     }
 

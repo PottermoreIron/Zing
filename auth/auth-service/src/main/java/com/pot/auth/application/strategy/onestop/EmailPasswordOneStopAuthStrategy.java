@@ -53,12 +53,18 @@ public class EmailPasswordOneStopAuthStrategy extends AbstractOneStopAuthStrateg
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
         var request = context.request();
+        if (!StringUtils.hasText(request.verificationCode())) {
+            throw new DomainException(AuthResultCode.CODE_REQUIRED);
+        }
+        if (!verificationCodeService.verifyCode(request.email(), VerificationCode.of(request.verificationCode()))) {
+            throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
+        }
         if (!StringUtils.hasText(request.password())) {
-            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
+            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED_EMAIL);
         }
         if (userModulePortFactory.getPort(request.userDomain())
                 .authenticateWithPassword(request.email(), request.password()).isEmpty()) {
-            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
+            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED_EMAIL);
         }
     }
 

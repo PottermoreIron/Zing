@@ -49,15 +49,20 @@ public class PhonePasswordOneStopAuthStrategy
     @Override
     protected void validateCredentialForLogin(OneStopAuthContext context, UserDTO user) {
         var request = context.request();
-        if (!StringUtils.hasText(request.password())) {
-            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
+        if (!StringUtils.hasText(request.verificationCode())) {
+            throw new DomainException(AuthResultCode.CODE_REQUIRED);
         }
-
+        if (!verificationCodeService.verifyCode(request.phone(), VerificationCode.of(request.verificationCode()))) {
+            throw new DomainException(AuthResultCode.VERIFICATION_CODE_INVALID);
+        }
+        if (!StringUtils.hasText(request.password())) {
+            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED_PHONE);
+        }
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
         Optional<UserDTO> authResult = userModulePort.authenticateWithPassword(
                 request.phone(), request.password());
         if (authResult.isEmpty()) {
-            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED);
+            throw new DomainException(AuthResultCode.AUTHENTICATION_FAILED_PHONE);
         }
     }
 

@@ -38,7 +38,7 @@ public class OneStopAuthenticationController {
         private final OneStopAuthenticationService oneStopAuthenticationService;
         private final AuthCommandAssembler authCommandAssembler;
 
-        @Operation(operationId = "authAuthenticateOneStop", summary = "Authenticate (auto-register or login)", description = "Supports USERNAME_PASSWORD / PHONE_CODE / EMAIL_CODE / OAUTH2 / WECHAT. Auto-registers if user not found")
+        @Operation(operationId = "authAuthenticateOneStop", summary = "Authenticate (auto-register or login)", description = "Supports EMAIL_PASSWORD / PHONE_PASSWORD / EMAIL_CODE / PHONE_CODE / USERNAME_PASSWORD / OAUTH2 / WECHAT. Auto-registers if user not found")
         @RateLimit(type = RateLimitMethodEnum.IP_BASED, rate = 5.0, message = "Too many authentication requests, please try again later")
         @PostMapping("/api/v1/authenticate")
         public R<OneStopAuthResponse> authenticate(
