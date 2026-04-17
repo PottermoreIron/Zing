@@ -5,6 +5,14 @@ spring:
   application:
     name: gateway
 
+  # Disable Spring Boot's default static-resource handler (catch-all "/**").
+  # Gateway routing (RoutePredicateHandlerMapping, order=1) must not be preempted
+  # by the static-resource RouterFunction (RouterFunctionMapping, order=-1).
+  # SpringDoc Swagger UI still works via its own /webjars/** and /swagger-ui/** handlers.
+  web:
+    resources:
+      add-mappings: false
+
   cloud:
     nacos:
       discovery:
@@ -99,9 +107,28 @@ gateway:
       - /auth/code/email
       - /auth/code/sms
       - /actuator/health
+      # OpenAPI aggregation endpoints.
+      - /swagger-ui
+      - /webjars
+      - /v3/api-docs
+      - /auth/v3/api-docs
+      - /member/v3/api-docs
     internal-path-prefixes:
       - /internal/
       - /member/internal/
+
+# SpringDoc OpenAPI aggregation across downstream services.
+springdoc:
+  swagger-ui:
+    # List downstream service API docs as separate tabs.
+    urls:
+      - name: auth-service
+        url: /auth/v3/api-docs
+      - name: member-service
+        url: /member/v3/api-docs
+    disable-swagger-default-url: true
+  # Expose gateway's own actuator/health in the API definition.
+  show-actuator: false
 
 # Circuit breaker settings for downstream services.
 resilience4j:

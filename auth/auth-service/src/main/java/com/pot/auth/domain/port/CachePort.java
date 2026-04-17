@@ -7,7 +7,6 @@ import java.util.Set;
 
 public interface CachePort {
 
-
         <T> void set(String key, T value, Duration ttl);
 
         <T> Optional<T> get(String key, Class<T> type);
@@ -18,7 +17,6 @@ public interface CachePort {
 
         boolean exists(String key);
 
-
         <T> void addToSet(String key, T value, Duration ttl);
 
         <T> void removeFromSet(String key, T value);
@@ -26,7 +24,6 @@ public interface CachePort {
         <T> Set<T> getSet(String key, Class<T> type);
 
         <T> boolean isMemberOfSet(String key, T value);
-
 
         <T> void setHash(String key, String field, T value, Duration ttl);
 
@@ -36,11 +33,9 @@ public interface CachePort {
 
         void deleteHash(String key, String field);
 
-
         long increment(String key, long delta, Duration ttl);
 
         long decrement(String key, long delta);
-
 
         <T> boolean setIfAbsent(String key, T value, Duration ttl);
 
@@ -49,5 +44,14 @@ public interface CachePort {
         Optional<Duration> getTtl(String key);
 
         void persist(String key);
-}
 
+        void zAdd(String key, String member, double score);
+
+        void zRemove(String key, String member);
+
+        Set<String> zRange(String key, long start, long end);
+
+        Set<String> zRangeByScore(String key, double min, double max);
+
+        long zSize(String key);
+}

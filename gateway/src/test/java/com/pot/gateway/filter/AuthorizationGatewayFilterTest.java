@@ -1,6 +1,7 @@
 package com.pot.gateway.filter;
 
 import com.pot.gateway.config.GatewayProperties;
+import com.pot.zing.framework.starter.redis.service.RedisService;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -34,9 +33,7 @@ import static org.mockito.BDDMockito.given;
 class AuthorizationGatewayFilterTest {
 
     @Mock
-    private RedisTemplate<String, Object> redisTemplate;
-    @Mock
-    private ValueOperations<String, Object> valueOperations;
+    private RedisService redisService;
 
     private AuthorizationGatewayFilter filter;
     private KeyPair keyPair;
@@ -49,7 +46,7 @@ class AuthorizationGatewayFilterTest {
 
         GatewayProperties gatewayProperties = new GatewayProperties();
 
-        filter = new AuthorizationGatewayFilter(redisTemplate, keyPair.getPublic(), gatewayProperties);
+        filter = new AuthorizationGatewayFilter(redisService, keyPair.getPublic(), gatewayProperties);
     }
 
     @Test
@@ -104,8 +101,7 @@ class AuthorizationGatewayFilterTest {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .build());
         AtomicReference<ServerWebExchange> forwardedExchange = new AtomicReference<>();
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
-        given(valueOperations.get("auth:perm:version:member:user-1")).willReturn(5L);
+        given(redisService.get("auth:perm:version:member:user-1", String.class)).willReturn("5");
 
         filter.filter(exchange, requestExchange -> {
             forwardedExchange.set(requestExchange);
@@ -127,8 +123,7 @@ class AuthorizationGatewayFilterTest {
                 MockServerHttpRequest.get("/member/api/v1/profile")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .build());
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
-        given(valueOperations.get("auth:perm:version:member:user-1")).willReturn(4L);
+        given(redisService.get("auth:perm:version:member:user-1", String.class)).willReturn("4");
 
         filter.filter(exchange, requestExchange -> Mono.empty()).block();
 
@@ -143,8 +138,7 @@ class AuthorizationGatewayFilterTest {
                 MockServerHttpRequest.get("/member/api/v1/profile")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .build());
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
-        given(valueOperations.get("auth:perm:version:member:user-1")).willReturn(5L);
+        given(redisService.get("auth:perm:version:member:user-1", String.class)).willReturn("5");
 
         GatewayFilterChain chain = requestExchange -> Mono.error(new IllegalStateException("downstream failed"));
 
@@ -163,7 +157,7 @@ class AuthorizationGatewayFilterTest {
                 MockServerHttpRequest.get("/member/api/v1/profile")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .build());
-        given(redisTemplate.hasKey("auth:blacklist:" + jti)).willReturn(true);
+        given(redisService.exists("auth:blacklist:" + jti)).willReturn(true);
 
         filter.filter(exchange, requestExchange -> Mono.empty()).block();
 

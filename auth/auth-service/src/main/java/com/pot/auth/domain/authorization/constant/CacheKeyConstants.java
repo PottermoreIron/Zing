@@ -5,13 +5,19 @@ package com.pot.auth.domain.authorization.constant;
  */
 public final class CacheKeyConstants {
 
+    public static final String SEP = ":";
+
     public static final String AUTH_PREFIX = "auth";
 
     public static final String TOKEN = "token";
 
+    public static final String REFRESH = "refresh";
+
     public static final String BLACKLIST = "blacklist";
 
     public static final String SESSION = "session";
+
+    public static final String SESSIONS = "sessions";
 
     public static final String RATE_LIMIT = "ratelimit";
 
@@ -34,7 +40,21 @@ public final class CacheKeyConstants {
         if (parts == null || parts.length == 0) {
             return AUTH_PREFIX;
         }
-        return AUTH_PREFIX + ":" + String.join(":", parts);
+        return AUTH_PREFIX + SEP + String.join(SEP, parts);
+    }
+
+    /**
+     * Builds the refresh token cache key for use with CachePort.
+     */
+    public static String buildRefreshKey(String tokenId) {
+        return REFRESH + SEP + tokenId;
+    }
+
+    /**
+     * Builds the blacklist cache key for use with CachePort.
+     */
+    public static String buildBlacklistKey(String tokenId) {
+        return BLACKLIST + SEP + tokenId;
     }
 
     /**
@@ -63,5 +83,15 @@ public final class CacheKeyConstants {
      */
     public static String buildPermissionBloomKey(String userDomain) {
         return buildKey(PERMISSION_BLOOM, userDomain);
+    }
+
+    /**
+     * Builds the session index key for a user.
+     * Returns the raw key segment (without the "auth:" prefix) for use with
+     * CachePort,
+     * which adds the prefix automatically via its adapter.
+     */
+    public static String buildSessionIndexKey(String userDomain, String userId) {
+        return SESSIONS + SEP + userDomain + SEP + userId;
     }
 }

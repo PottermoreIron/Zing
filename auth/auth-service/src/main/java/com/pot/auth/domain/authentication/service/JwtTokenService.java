@@ -3,6 +3,7 @@ package com.pot.auth.domain.authentication.service;
 import com.pot.auth.domain.authentication.valueobject.JwtToken;
 import com.pot.auth.domain.authentication.valueobject.RefreshToken;
 import com.pot.auth.domain.authentication.valueobject.TokenPair;
+import com.pot.auth.domain.authorization.constant.CacheKeyConstants;
 import com.pot.auth.domain.authorization.service.PermissionDomainService;
 import com.pot.auth.domain.authorization.valueobject.PermissionCacheMetadata;
 import com.pot.auth.domain.authorization.valueobject.PermissionVersion;
@@ -29,6 +30,7 @@ public class JwtTokenService {
     private final long refreshTokenTtl;
     private final long refreshTokenSlidingWindow;
     private final boolean permissionVersionEnabled;
+    private final int maxSessions;
 
     public JwtTokenService(
             TokenManagementPort tokenManagementPort,
@@ -37,7 +39,8 @@ public class JwtTokenService {
             PermissionDomainService permissionDomainService,
             long refreshTokenTtl,
             long refreshTokenSlidingWindow,
-            boolean permissionVersionEnabled) {
+            boolean permissionVersionEnabled,
+            int maxSessions) {
         this.tokenManagementPort = tokenManagementPort;
         this.cachePort = cachePort;
         this.userModulePortFactory = userModulePortFactory;
@@ -45,6 +48,7 @@ public class JwtTokenService {
         this.refreshTokenTtl = refreshTokenTtl;
         this.refreshTokenSlidingWindow = refreshTokenSlidingWindow;
         this.permissionVersionEnabled = permissionVersionEnabled;
+        this.maxSessions = maxSessions;
     }
 
     public TokenPair generateTokenPair(
@@ -73,6 +77,7 @@ public class JwtTokenService {
                     metadata);
 
             storeRefreshToken(tokenPair.refreshToken());
+            trackSession(tokenPair.refreshToken(), userId, userDomain);
 
             log.info("[Token] Token pair generated — userId={}, accessTokenId={}, refreshTokenId={}",
                     userId, tokenPair.accessToken().tokenId(), tokenPair.refreshToken().tokenId());
@@ -149,7 +154,7 @@ public class JwtTokenService {
             throw new DomainException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        String cacheKey = "auth:refresh:" + oldRefreshToken.tokenId().value();
+        String cacheKey = CacheKeyConstants.buildRefreshKey(oldRefreshToken.tokenId().value());
         if (!cachePort.exists(cacheKey)) {
             log.warn("[Token] RefreshToken does not exist or has been revoked — tokenId={}", oldRefreshToken.tokenId());
             throw new DomainException(AuthResultCode.REFRESH_TOKEN_INVALID);
@@ -176,6 +181,7 @@ public class JwtTokenService {
         if (oldRefreshToken.isWithinSlidingWindow(refreshTokenSlidingWindow)) {
             log.info("[Token] RefreshToken renewed within sliding window — tokenId={}", oldRefreshToken.tokenId());
             storeRefreshToken(newTokenPair.refreshToken());
+            rotateSessionEntry(oldRefreshToken, newTokenPair.refreshToken());
         } else {
             log.info("[Token] RefreshToken outside sliding window, reusing existing token — tokenId={}",
                     oldRefreshToken.tokenId());
@@ -189,8 +195,7 @@ public class JwtTokenService {
     public void addToBlacklist(TokenId tokenId, long remainingSeconds) {
         log.info("[Token] Blacklisting token — tokenId={}, ttl={}s", tokenId, remainingSeconds);
 
-        String blacklistKey = "auth:blacklist:" + tokenId.value();
-        cachePort.set(blacklistKey, "1", Duration.ofSeconds(remainingSeconds));
+        cachePort.set(CacheKeyConstants.buildBlacklistKey(tokenId.value()), "1", Duration.ofSeconds(remainingSeconds));
     }
 
     public void logout(String accessTokenStr, String refreshTokenStr) {
@@ -213,8 +218,9 @@ public class JwtTokenService {
         if (refreshTokenStr != null && !refreshTokenStr.isBlank()) {
             try {
                 RefreshToken refreshToken = tokenManagementPort.parseRefreshToken(refreshTokenStr);
-                String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
+                String cacheKey = CacheKeyConstants.buildRefreshKey(refreshToken.tokenId().value());
                 cachePort.delete(cacheKey);
+                removeFromSessionIndex(refreshToken);
                 log.info("[Token] RefreshToken cache entry removed — tokenId={}", refreshToken.tokenId());
             } catch (Exception e) {
                 log.warn("[Token] Failed to parse RefreshToken during logout (ignored): {}", e.getMessage());
@@ -225,14 +231,59 @@ public class JwtTokenService {
     }
 
     private boolean isInBlacklist(TokenId tokenId) {
-        String blacklistKey = "auth:blacklist:" + tokenId.value();
-        return cachePort.exists(blacklistKey);
+        return cachePort.exists(CacheKeyConstants.buildBlacklistKey(tokenId.value()));
     }
 
     private void storeRefreshToken(RefreshToken refreshToken) {
-        String cacheKey = "auth:refresh:" + refreshToken.tokenId().value();
+        String cacheKey = CacheKeyConstants.buildRefreshKey(refreshToken.tokenId().value());
         long ttl = Math.min(refreshToken.getRemainingSeconds(), refreshTokenTtl);
         cachePort.set(cacheKey, refreshToken.rawToken(), Duration.ofSeconds(ttl));
+    }
+
+    private void trackSession(RefreshToken refreshToken, UserId userId, UserDomain userDomain) {
+        String sessionKey = sessionIndexKey(userDomain, userId);
+        long now = System.currentTimeMillis() / 1000;
+
+        Set<String> expired = cachePort.zRangeByScore(sessionKey, 0, now);
+        expired.forEach(tokenId -> cachePort.zRemove(sessionKey, tokenId));
+
+        cachePort.zAdd(sessionKey, refreshToken.tokenId().value(), (double) refreshToken.expiresAt());
+        cachePort.expire(sessionKey, Duration.ofSeconds(refreshTokenTtl));
+
+        long size = cachePort.zSize(sessionKey);
+        if (size > maxSessions) {
+            long toEvict = size - maxSessions;
+            Set<String> oldest = cachePort.zRange(sessionKey, 0, toEvict - 1);
+            oldest.forEach(tokenId -> {
+                cachePort.delete(CacheKeyConstants.buildRefreshKey(tokenId));
+                cachePort.zRemove(sessionKey, tokenId);
+            });
+            log.info("[Session] Evicted {} oldest sessions — userId={}", oldest.size(), userId);
+        }
+    }
+
+    private void rotateSessionEntry(RefreshToken oldToken, RefreshToken newToken) {
+        String sessionKey = sessionIndexKey(oldToken.userDomain(), oldToken.userId());
+        cachePort.zRemove(sessionKey, oldToken.tokenId().value());
+        cachePort.zAdd(sessionKey, newToken.tokenId().value(), (double) newToken.expiresAt());
+    }
+
+    private void removeFromSessionIndex(RefreshToken refreshToken) {
+        String sessionKey = sessionIndexKey(refreshToken.userDomain(), refreshToken.userId());
+        cachePort.zRemove(sessionKey, refreshToken.tokenId().value());
+    }
+
+    public void revokeAllSessions(UserId userId, UserDomain userDomain) {
+        String sessionKey = sessionIndexKey(userDomain, userId);
+        Set<String> allTokenIds = cachePort.zRange(sessionKey, 0, -1);
+        allTokenIds.forEach(tokenId -> cachePort.delete(CacheKeyConstants.buildRefreshKey(tokenId)));
+        cachePort.delete(sessionKey);
+        log.info("[Session] All sessions revoked — userId={}, count={}", userId, allTokenIds.size());
+    }
+
+    private String sessionIndexKey(UserDomain userDomain, UserId userId) {
+        return CacheKeyConstants.buildSessionIndexKey(
+                userDomain.name().toLowerCase(), userId.value().toString());
     }
 
     private String getNicknameFromCache(RefreshToken refreshToken) {

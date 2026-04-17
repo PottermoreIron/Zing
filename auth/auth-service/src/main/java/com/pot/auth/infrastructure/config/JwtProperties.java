@@ -32,4 +32,9 @@ public class JwtProperties {
      * Sliding refresh window in seconds.
      */
     private long refreshTokenSlidingWindow = 604800; // 7 days
+
+    /**
+     * Maximum number of concurrent active sessions per user.
+     */
+    private int maxSessions = 5;
 }

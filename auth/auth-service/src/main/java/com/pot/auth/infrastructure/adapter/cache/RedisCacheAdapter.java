@@ -186,6 +186,47 @@ public class RedisCacheAdapter implements CachePort {
         }
     }
 
+    @Override
+    public void zAdd(String key, String member, double score) {
+        String fullKey = buildAuthKey(key);
+        redisService.zAdd(fullKey, member, score);
+        log.debug("ZSet member added — key={}, member={}, score={}", fullKey, member, score);
+    }
+
+    @Override
+    public void zRemove(String key, String member) {
+        String fullKey = buildAuthKey(key);
+        redisService.zRemove(fullKey, member);
+        log.debug("ZSet member removed — key={}, member={}", fullKey, member);
+    }
+
+    @Override
+    public Set<String> zRange(String key, long start, long end) {
+        String fullKey = buildAuthKey(key);
+        Set<Object> objects = redisService.zRange(fullKey, start, end);
+        if (objects == null || objects.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return objects.stream().map(Object::toString).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> zRangeByScore(String key, double min, double max) {
+        String fullKey = buildAuthKey(key);
+        Set<Object> objects = redisService.zRangeByScore(fullKey, min, max);
+        if (objects == null || objects.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return objects.stream().map(Object::toString).collect(Collectors.toSet());
+    }
+
+    @Override
+    public long zSize(String key) {
+        String fullKey = buildAuthKey(key);
+        Long size = redisService.zSize(fullKey);
+        return size != null ? size : 0;
+    }
+
     /**
      * Builds the auth-scoped cache key passed to the shared Redis service.
      */

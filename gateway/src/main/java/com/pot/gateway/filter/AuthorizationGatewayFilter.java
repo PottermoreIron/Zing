@@ -1,6 +1,10 @@
 package com.pot.gateway.filter;
 
 import com.pot.gateway.config.GatewayProperties;
+import com.pot.zing.framework.common.util.JacksonUtils;
+import com.pot.zing.framework.common.enums.ResultCode;
+import com.pot.zing.framework.common.model.R;
+import com.pot.zing.framework.starter.redis.service.RedisService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -9,9 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -45,7 +50,7 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
     private static final String CLAIM_PERMISSION_DIGEST = "perm_digest";
     private static final String CLAIM_USER_DOMAIN = "user_domain";
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
     private final PublicKey jwtPublicKey;
     private final GatewayProperties gatewayProperties;
 
@@ -88,13 +93,15 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         }
 
         if (!isPermVersionValid(principal.userId(), principal.userDomain(), principal.permVersion())) {
-            log.warn("[Auth] Permission version expired, please sign in again — userId={}, tokenVersion={}", principal.userId(),
+            log.warn("[Auth] Permission version expired, please sign in again — userId={}, tokenVersion={}",
+                    principal.userId(),
                     principal.permVersion());
             return reject(exchange, HttpStatus.UNAUTHORIZED);
         }
 
         ServerWebExchange enrichedExchange = injectUserHeaders(exchange, principal);
-        log.debug("[Auth] Validation passed — userId={}, domain={}, path={}", principal.userId(), principal.userDomain(), path);
+        log.debug("[Auth] Validation passed — userId={}, domain={}, path={}", principal.userId(),
+                principal.userDomain(), path);
         return chain.filter(enrichedExchange);
     }
 
@@ -147,7 +154,7 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         if (tokenId == null || tokenId.isBlank()) {
             return false;
         }
-        return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_KEY_PREFIX + tokenId));
+        return Boolean.TRUE.equals(redisService.exists(BLACKLIST_KEY_PREFIX + tokenId));
     }
 
     private boolean isPermVersionValid(String userId, String userDomain, Long tokenVersion) {
@@ -155,12 +162,12 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
             return true;
         }
         String key = PERM_VERSION_KEY_PREFIX + userDomain + ":" + userId;
-        Object currentVersionObj = redisTemplate.opsForValue().get(key);
-        if (currentVersionObj == null) {
+        String currentVersionStr = redisService.get(key, String.class);
+        if (currentVersionStr == null) {
             // Allow requests to continue when the cache has not been populated yet.
             return true;
         }
-        long currentVersion = Long.parseLong(currentVersionObj.toString());
+        long currentVersion = Long.parseLong(currentVersionStr);
         return currentVersion <= tokenVersion;
     }
 
@@ -183,8 +190,22 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
     }
 
     private Mono<Void> reject(ServerWebExchange exchange, HttpStatus status) {
-        exchange.getResponse().setStatusCode(status);
-        return exchange.getResponse().setComplete();
+        ResultCode resultCode = switch (status) {
+            case UNAUTHORIZED -> ResultCode.UNAUTHORIZED;
+            case FORBIDDEN -> ResultCode.FORBIDDEN;
+            default -> ResultCode.INTERNAL_ERROR;
+        };
+        try {
+            byte[] body = JacksonUtils.toBytes(R.fail(resultCode));
+            exchange.getResponse().setStatusCode(status);
+            exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(body);
+            return exchange.getResponse().writeWith(Mono.just(buffer));
+        } catch (Exception e) {
+            log.error("[Auth] Failed to write rejection response", e);
+            exchange.getResponse().setStatusCode(status);
+            return exchange.getResponse().setComplete();
+        }
     }
 
     private record AuthenticatedPrincipal(String userId, String userDomain, Long permVersion, String permDigest,

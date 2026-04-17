@@ -54,7 +54,8 @@ class JwtTokenServiceTest {
                 permissionDomainService,
                 2592000L,
                 604800L,
-                false);
+                false,
+                5);
     }
 
     // generateTokenPair
@@ -88,7 +89,7 @@ class JwtTokenServiceTest {
                     TestFixtures.PERMISSIONS);
 
             assertThat(result).isEqualTo(expected);
-            String expectedRefreshKey = "auth:refresh:" + TestFixtures.REFRESH_TOKEN_ID.value();
+            String expectedRefreshKey = "refresh:" + TestFixtures.REFRESH_TOKEN_ID.value();
             verify(cachePort).set(eq(expectedRefreshKey), eq(TestFixtures.FAKE_REFRESH_TOKEN), any(Duration.class));
         }
 
@@ -121,7 +122,7 @@ class JwtTokenServiceTest {
         void whenTokenValid_thenReturnJwtToken() {
             JwtToken validToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
-            when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(false);
+            when(cachePort.exists("blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(false);
 
             JwtToken result = jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN);
 
@@ -144,7 +145,7 @@ class JwtTokenServiceTest {
         void whenTokenInBlacklist_thenThrowTokenInvalidException() {
             JwtToken validToken = TestFixtures.validAccessToken();
             when(tokenManagementPort.parseAccessToken(TestFixtures.FAKE_ACCESS_TOKEN)).thenReturn(validToken);
-            when(cachePort.exists("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(true);
+            when(cachePort.exists("blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value())).thenReturn(true);
 
             assertThatThrownBy(() -> jwtTokenService.validateAccessToken(TestFixtures.FAKE_ACCESS_TOKEN))
                     .isInstanceOf(DomainException.class)
@@ -170,11 +171,11 @@ class JwtTokenServiceTest {
 
             ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
             verify(cachePort).set(
-                    eq("auth:blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value()),
+                    eq("blacklist:" + TestFixtures.ACCESS_TOKEN_ID.value()),
                     eq("1"),
                     ttlCaptor.capture());
             assertThat(ttlCaptor.getValue().getSeconds()).isGreaterThan(0);
-            verify(cachePort).delete("auth:refresh:" + TestFixtures.REFRESH_TOKEN_ID.value());
+            verify(cachePort).delete("refresh:" + TestFixtures.REFRESH_TOKEN_ID.value());
         }
 
         @Test
@@ -185,7 +186,7 @@ class JwtTokenServiceTest {
 
             jwtTokenService.logout(TestFixtures.FAKE_ACCESS_TOKEN, null);
 
-            verify(cachePort, never()).set(contains("auth:blacklist:"), any(), any(Duration.class));
+            verify(cachePort, never()).set(contains("blacklist:"), any(), any(Duration.class));
         }
 
         @Test
@@ -225,7 +226,7 @@ class JwtTokenServiceTest {
             jwtTokenService.addToBlacklist(tokenId, remainingSeconds);
 
             verify(cachePort).set(
-                    eq("auth:blacklist:" + tokenId.value()),
+                    eq("blacklist:" + tokenId.value()),
                     eq("1"),
                     eq(Duration.ofSeconds(remainingSeconds)));
         }

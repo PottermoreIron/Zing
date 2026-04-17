@@ -62,7 +62,8 @@ public class DomainServiceConfig {
                 permissionDomainService,
                 jwtProperties.getRefreshTokenTtl(),
                 jwtProperties.getRefreshTokenSlidingWindow(),
-                authPermissionProperties.getCache().isVersionEnabled());
+                authPermissionProperties.getCache().isVersionEnabled(),
+                jwtProperties.getMaxSessions());
     }
 
     @Bean

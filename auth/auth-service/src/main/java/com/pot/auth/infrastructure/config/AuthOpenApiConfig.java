@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -18,10 +20,16 @@ public class AuthOpenApiConfig {
 
         private static final String BEARER_SCHEME = "bearerAuth";
 
+        /** Gateway base URL — override at deploy time via GATEWAY_URL env var. */
+        @Value("${GATEWAY_URL:http://localhost:8090}")
+        private String gatewayUrl;
+
         @Bean
         @Primary
         public OpenAPI authOpenAPI() {
                 return new OpenAPI()
+                                // Route all Swagger "Try it out" requests through the gateway.
+                                .addServersItem(new Server().url(gatewayUrl).description("Gateway"))
                                 .info(new Info()
                                                 .title("Auth Service API")
                                                 .description("""

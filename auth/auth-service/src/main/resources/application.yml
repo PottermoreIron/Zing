@@ -146,10 +146,10 @@ auth:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
+    # Gateway routes /auth/** to auth-service without stripping the /auth prefix,
+    # so the api-docs path must include /auth to be reachable via /auth/v3/api-docs.
+    path: /auth/v3/api-docs
   swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
     # Expand operations by default.
     doc-expansion: list
     # Show request duration in the UI.
