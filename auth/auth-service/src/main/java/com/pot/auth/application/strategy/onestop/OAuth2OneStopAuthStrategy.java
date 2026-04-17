@@ -132,7 +132,7 @@ public class OAuth2OneStopAuthStrategy
         }
         OAuth2Provider provider = OAuth2Provider.fromCode(request.oauth2ProviderCode());
         OAuth2AuthorizationCode code = OAuth2AuthorizationCode.of(request.code());
-        OAuth2UserInfo oauth2UserInfo = oauth2Port.getUserInfo(provider, code, request.state());
+        OAuth2UserInfo oauth2UserInfo = oauth2Port.getUserInfo(provider, code, request.redirectUri());
         USER_INFO_CACHE.set(oauth2UserInfo);
         return oauth2UserInfo;
     }

@@ -53,6 +53,7 @@ public class AuthCommandAssembler {
                 request.verificationCode(),
                 request.code(),
                 request.state(),
+                request.redirectUri(),
                 request.oauth2ProviderCode());
     }
 }

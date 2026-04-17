@@ -52,6 +52,10 @@ public interface OneStopAuthRequest {
                 return null;
         }
 
+        default String redirectUri() {
+                return null;
+        }
+
         default String oauth2ProviderCode() {
                 if (this instanceof OAuth2AuthRequest request) {
                         return request.provider().getCode();

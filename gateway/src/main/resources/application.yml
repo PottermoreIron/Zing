@@ -104,6 +104,7 @@ gateway:
       - /auth/api/v1/register
       - /auth/api/v1/refresh
       - /auth/api/v1/authenticate
+      - /auth/api/v1/oauth2/authorization-url
       - /auth/code/email
       - /auth/code/sms
       - /actuator/health

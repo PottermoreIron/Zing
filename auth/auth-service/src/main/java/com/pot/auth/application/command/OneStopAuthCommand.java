@@ -37,6 +37,10 @@ public interface OneStopAuthCommand {
         return null;
     }
 
+    default String redirectUri() {
+        return null;
+    }
+
     default String oauth2ProviderCode() {
         return null;
     }

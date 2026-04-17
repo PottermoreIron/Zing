@@ -20,6 +20,8 @@ public record OAuth2AuthRequest(
 
         @JsonProperty("state") String state,
 
+        @JsonProperty("redirectUri") String redirectUri,
+
         @NotNull(message = "User domain must not be null") @JsonProperty("userDomain") @JsonDeserialize(using = UserDomainDeserializer.class) UserDomain userDomain)
         implements OneStopAuthRequest {
 
