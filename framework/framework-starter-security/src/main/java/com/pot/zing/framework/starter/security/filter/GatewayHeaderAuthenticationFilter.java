@@ -45,6 +45,7 @@ public class GatewayHeaderAuthenticationFilter extends OncePerRequestFilter {
     public static final String HEADER_USER_DOMAIN  = "X-User-Domain";
     public static final String HEADER_PERM_VERSION = "X-Perm-Version";
     public static final String HEADER_PERM_DIGEST  = "X-Perm-Digest";
+    public static final String HEADER_PERMISSIONS  = "X-User-Permissions";
 
     private final PermissionLoaderPort permissionLoader;
 
@@ -76,7 +77,13 @@ public class GatewayHeaderAuthenticationFilter extends OncePerRequestFilter {
         putIfPresent(details, "permVersion", permVersion);
         putIfPresent(details, "permDigest",  permDigest);
 
-        if (permissionLoader != null) {
+        String permissionsHeader = request.getHeader(HEADER_PERMISSIONS);
+        if (StringUtils.hasText(permissionsHeader)) {
+            // Primary path: trust permissions extracted from the JWT by the gateway.
+            Set<String> permissions = Set.of(permissionsHeader.split(",", -1));
+            details.put("permissions", permissions);
+        } else if (permissionLoader != null) {
+            // Fallback: for internal service-to-service calls that bypass the gateway.
             try {
                 Set<String> permissions = permissionLoader.loadPermissions(userId, userDomain, permVersion);
                 details.put("permissions", permissions);

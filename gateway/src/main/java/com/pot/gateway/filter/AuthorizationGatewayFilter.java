@@ -49,6 +49,8 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
     private static final String CLAIM_PERMISSION_VERSION = "perm_version";
     private static final String CLAIM_PERMISSION_DIGEST = "perm_digest";
     private static final String CLAIM_USER_DOMAIN = "user_domain";
+    private static final String CLAIM_AUTHORITIES = "authorities";
+    private static final String HEADER_PERMISSIONS = "X-User-Permissions";
 
     private final RedisService redisService;
     private final PublicKey jwtPublicKey;
@@ -152,7 +154,10 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         }
         String userDomain = normalizeUserDomain(claims.get(CLAIM_USER_DOMAIN, String.class));
         String tokenId = claims.getId();
-        return new AuthenticatedPrincipal(userId, userDomain, permVersion, permDigest, tokenId);
+        @SuppressWarnings("unchecked")
+        java.util.List<String> authList = (java.util.List<String>) claims.get(CLAIM_AUTHORITIES);
+        String permissions = authList != null ? String.join(",", authList) : "";
+        return new AuthenticatedPrincipal(userId, userDomain, permVersion, permDigest, tokenId, permissions);
     }
 
     private boolean isBlacklisted(String tokenId) {
@@ -195,11 +200,20 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
     private ServerWebExchange injectUserHeaders(ServerWebExchange exchange, AuthenticatedPrincipal principal) {
         return exchange.mutate()
                 .request(r -> r
+                        // Strip any client-sent identity headers to prevent privilege escalation.
+                        .headers(h -> {
+                            h.remove(HEADER_USER_ID);
+                            h.remove(HEADER_USER_DOMAIN);
+                            h.remove(HEADER_PERMISSION_VERSION);
+                            h.remove(HEADER_PERMISSION_DIGEST);
+                            h.remove(HEADER_PERMISSIONS);
+                        })
                         .header(HEADER_USER_ID, principal.userId())
                         .header(HEADER_USER_DOMAIN, principal.userDomain())
                         .header(HEADER_PERMISSION_VERSION,
                                 principal.permVersion() != null ? principal.permVersion().toString() : "")
-                        .header(HEADER_PERMISSION_DIGEST, principal.permDigest() != null ? principal.permDigest() : ""))
+                        .header(HEADER_PERMISSION_DIGEST, principal.permDigest() != null ? principal.permDigest() : "")
+                        .header(HEADER_PERMISSIONS, principal.permissions()))
                 .build();
     }
 
@@ -223,6 +237,6 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
     }
 
     private record AuthenticatedPrincipal(String userId, String userDomain, Long permVersion, String permDigest,
-            String tokenId) {
+            String tokenId, String permissions) {
     }
 }
