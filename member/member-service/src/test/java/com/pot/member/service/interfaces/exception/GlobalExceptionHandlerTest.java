@@ -5,6 +5,7 @@ import com.pot.member.service.application.exception.MemberResultCode;
 import com.pot.zing.framework.common.enums.ResultCode;
 import com.pot.zing.framework.common.model.R;
 import org.junit.jupiter.api.DisplayName;
+import org.springframework.http.ResponseEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,10 +18,11 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Business exception uses member result code")
     void handleBusinessException_usesMemberResultCode() {
-        R<?> response = handler.handleBusinessException(new MemberException(MemberResultCode.MEMBER_NOT_FOUND));
+        ResponseEntity<R<?>> response = handler
+                .handleBusinessException(new MemberException(MemberResultCode.MEMBER_NOT_FOUND));
 
-        assertThat(response.getCode()).isEqualTo(MemberResultCode.MEMBER_NOT_FOUND.getCode());
-        assertThat(response.getMsg()).isEqualTo(MemberResultCode.MEMBER_NOT_FOUND.getMsg());
+        assertThat(response.getBody().getCode()).isEqualTo(MemberResultCode.MEMBER_NOT_FOUND.getCode());
+        assertThat(response.getBody().getMsg()).isEqualTo(MemberResultCode.MEMBER_NOT_FOUND.getMsg());
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.pot.member.service.infrastructure.config;
+package com.pot.admin.service.infrastructure.config;
 
 import com.pot.zing.framework.starter.security.filter.GatewayHeaderAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Member-service security configuration.
+ * Admin-service security configuration.
  *
  * <p>
  * Trusts the gateway to have validated the JWT. The

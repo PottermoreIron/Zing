@@ -4,6 +4,7 @@ import com.pot.zing.framework.common.enums.ResultCode;
 import com.pot.zing.framework.common.excption.BusinessException;
 import com.pot.zing.framework.common.model.R;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.http.ResponseEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
@@ -31,10 +32,10 @@ class BaseGlobalExceptionHandlerTest {
     void handleBusinessException_usesCustomResultCode() {
         BusinessException exception = new BusinessException(ResultCode.FORBIDDEN, "Access forbidden (test)");
 
-        R<?> response = handler.handleBusinessException(exception);
+        ResponseEntity<R<?>> response = handler.handleBusinessException(exception);
 
-        assertThat(response.getCode()).isEqualTo(ResultCode.FORBIDDEN.getCode());
-        assertThat(response.getMsg()).isEqualTo("Access forbidden (test)");
+        assertThat(response.getBody().getCode()).isEqualTo(ResultCode.FORBIDDEN.getCode());
+        assertThat(response.getBody().getMsg()).isEqualTo("Access forbidden (test)");
     }
 
     @Test

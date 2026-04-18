@@ -25,7 +25,7 @@
         </dependency>
         <dependency>
             <groupId>com.pot</groupId>
-            <artifactId>framework-starter-authorization</artifactId>
+            <artifactId>framework-starter-security</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

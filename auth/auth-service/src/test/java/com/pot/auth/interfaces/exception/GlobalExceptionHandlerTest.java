@@ -2,7 +2,7 @@ package com.pot.auth.interfaces.exception;
 
 import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.zing.framework.common.model.R;
-import com.pot.zing.framework.starter.authorization.exception.PermissionDeniedException;
+import com.pot.zing.framework.starter.security.exception.PermissionDeniedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

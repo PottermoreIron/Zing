@@ -4,7 +4,7 @@ import com.pot.auth.domain.shared.enums.AuthResultCode;
 import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.zing.framework.common.handler.BaseGlobalExceptionHandler;
 import com.pot.zing.framework.common.model.R;
-import com.pot.zing.framework.starter.authorization.exception.PermissionDeniedException;
+import com.pot.zing.framework.starter.security.exception.PermissionDeniedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
