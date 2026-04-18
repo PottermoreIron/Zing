@@ -7,7 +7,9 @@ import com.pot.zing.framework.starter.security.aspect.RequireRoleAspect;
 import com.pot.zing.framework.starter.security.expression.DefaultPermissionExpressionParser;
 import com.pot.zing.framework.starter.security.expression.PermissionExpressionParser;
 import com.pot.zing.framework.starter.security.filter.GatewayHeaderAuthenticationFilter;
+import com.pot.zing.framework.starter.security.port.PermissionLoaderPort;
 import com.pot.zing.framework.starter.security.port.SecurityContextPort;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -68,8 +70,9 @@ public class SecurityAutoConfiguration {
     // avoid double-invocation.
     @Bean
     @ConditionalOnMissingBean(GatewayHeaderAuthenticationFilter.class)
-    public GatewayHeaderAuthenticationFilter gatewayHeaderAuthenticationFilter() {
-        return new GatewayHeaderAuthenticationFilter();
+    public GatewayHeaderAuthenticationFilter gatewayHeaderAuthenticationFilter(
+            ObjectProvider<PermissionLoaderPort> permissionLoaderProvider) {
+        return new GatewayHeaderAuthenticationFilter(permissionLoaderProvider.getIfAvailable());
     }
 
     @Bean
