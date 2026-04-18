@@ -11,15 +11,15 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 public class UserDefaultsGenerator {
 
-        private static final String SPECIAL_CHARS = "!@#$%^&*";
+    private static final String SPECIAL_CHARS = "!@#$%^&*";
 
-        private static final String ALPHANUMERIC_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String ALPHANUMERIC_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-        private static final String ALPHABETIC_CHARS = "abcdefghijklmnopqrstuvwxyz";
+    private static final String ALPHABETIC_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
-        private static final String NUMERIC_CHARS = "0123456789";
+    private static final String NUMERIC_CHARS = "0123456789";
 
-        private static final SecureRandom RANDOM = new SecureRandom();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final String avatarUrl;
     private final String nicknamePrefix;
@@ -53,7 +53,7 @@ public class UserDefaultsGenerator {
         }
     }
 
-        public String generateNicknameFromPhone(String phone) {
+    public String generateNicknameFromPhone(String phone) {
         long timestamp = System.currentTimeMillis();
         String random = randomAlphanumeric(4).toLowerCase();
         String nickname = nicknamePrefix + timestamp + "_" + random;
@@ -62,8 +62,9 @@ public class UserDefaultsGenerator {
         return nickname;
     }
 
-        public String generateNicknameFromEmail(String email) {
-        String prefix = email.substring(0, email.indexOf("@"));
+    public String generateNicknameFromEmail(String email) {
+        String raw = email.substring(0, email.indexOf("@"));
+        String prefix = raw.replaceAll("[^\\u4e00-\\u9fa5A-Za-z0-9\\-]", "_");
         String random = randomAlphanumeric(4).toLowerCase();
         String nickname = prefix + "_" + random;
 
@@ -71,7 +72,7 @@ public class UserDefaultsGenerator {
         return nickname;
     }
 
-        public String generateNickname() {
+    public String generateNickname() {
         long timestamp = System.currentTimeMillis();
         String random = randomAlphanumeric(6).toLowerCase();
         String nickname = nicknamePrefix + timestamp + "_" + random;
@@ -80,7 +81,7 @@ public class UserDefaultsGenerator {
         return nickname;
     }
 
-        public String generateRandomPassword() {
+    public String generateRandomPassword() {
         List<Character> passwordChars = new ArrayList<>();
         StringBuilder candidatePool = new StringBuilder();
 
@@ -111,11 +112,11 @@ public class UserDefaultsGenerator {
         return password;
     }
 
-        public String getDefaultAvatarUrl() {
+    public String getDefaultAvatarUrl() {
         return avatarUrl;
     }
 
-        private String shuffleCharacters(List<Character> input) {
+    private String shuffleCharacters(List<Character> input) {
         Collections.shuffle(input, RANDOM);
 
         StringBuilder result = new StringBuilder();
@@ -125,7 +126,7 @@ public class UserDefaultsGenerator {
         return result.toString();
     }
 
-        private String randomAlphanumeric(int length) {
+    private String randomAlphanumeric(int length) {
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             sb.append(ALPHANUMERIC_CHARS.charAt(RANDOM.nextInt(ALPHANUMERIC_CHARS.length())));
@@ -133,7 +134,7 @@ public class UserDefaultsGenerator {
         return sb.toString();
     }
 
-        private String randomAlphabetic(int length) {
+    private String randomAlphabetic(int length) {
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             sb.append(ALPHABETIC_CHARS.charAt(RANDOM.nextInt(ALPHABETIC_CHARS.length())));
@@ -141,7 +142,7 @@ public class UserDefaultsGenerator {
         return sb.toString();
     }
 
-        private String randomNumeric(int length) {
+    private String randomNumeric(int length) {
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             sb.append(NUMERIC_CHARS.charAt(RANDOM.nextInt(NUMERIC_CHARS.length())));

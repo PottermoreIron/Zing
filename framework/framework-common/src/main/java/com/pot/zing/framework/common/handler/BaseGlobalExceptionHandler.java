@@ -72,8 +72,6 @@ public abstract class BaseGlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<?> handleGeneralException(Exception ex) {
         log.error("System error: {}", ex.getMessage(), ex);
-        boolean isProduction = false;
-        String message = isProduction ? "Service temporarily unavailable, please try again later" : ex.getMessage();
-        return R.fail(ResultCode.INTERNAL_ERROR, message);
+        return R.fail(ResultCode.INTERNAL_ERROR, ResultCode.INTERNAL_ERROR.getMsg());
     }
 }

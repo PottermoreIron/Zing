@@ -79,6 +79,7 @@ public class RegistrationApplicationService {
                                 command.verificationCode(),
                                 command.code(),
                                 command.state(),
+                                null,
                                 command.oauth2ProviderCode());
         }
 

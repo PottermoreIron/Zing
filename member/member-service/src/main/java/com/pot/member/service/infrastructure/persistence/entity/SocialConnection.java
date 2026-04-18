@@ -29,13 +29,13 @@ public class SocialConnection implements Serializable {
     private Long id;
 
     @TableField("gmt_created_at")
-    private Long gmtCreatedAt;
+    private LocalDateTime gmtCreatedAt;
 
     @TableField("gmt_updated_at")
-    private Long gmtUpdatedAt;
+    private LocalDateTime gmtUpdatedAt;
 
     @TableField("gmt_deleted_at")
-    private Long gmtDeletedAt;
+    private LocalDateTime gmtDeletedAt;
 
     @TableField("member_id")
     private Long memberId;
@@ -59,7 +59,7 @@ public class SocialConnection implements Serializable {
     private String refreshToken;
 
     @TableField("gmt_token_expires_at")
-    private Long gmtTokenExpiresAt;
+    private LocalDateTime gmtTokenExpiresAt;
 
     @TableField("scope")
     private String scope;
@@ -85,7 +85,7 @@ public class SocialConnection implements Serializable {
         return this.provider != null ? Provider.fromCode(this.provider) : null;
     }
 
-    public void setProvider(Provider provider) {
+    public void setProviderEnum(Provider provider) {
         this.provider = provider != null ? provider.getCode() : null;
     }
 
@@ -110,7 +110,7 @@ public class SocialConnection implements Serializable {
         this.isActive = Status.INACTIVE.getCode();
     }
 
-    public void updateTokens(String accessToken, String refreshToken, Long expiresAt) {
+    public void updateTokens(String accessToken, String refreshToken, LocalDateTime expiresAt) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.gmtTokenExpiresAt = expiresAt;

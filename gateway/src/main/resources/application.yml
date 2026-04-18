@@ -133,6 +133,13 @@ springdoc:
 
 # Circuit breaker settings for downstream services.
 resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
+    instances:
+      auth-service-cb:
+        timeout-duration: 15s
   circuitbreaker:
     configs:
       # Shared defaults for all downstream services.

@@ -1,5 +1,7 @@
 package com.pot.auth.infrastructure.adapter.usermodule;
 
+import com.pot.auth.domain.shared.enums.AuthResultCode;
+import com.pot.auth.domain.shared.exception.DomainException;
 import com.pot.auth.domain.port.UserModulePort;
 import com.pot.auth.domain.port.dto.CreateUserCommand;
 import com.pot.auth.domain.port.dto.DeviceDTO;
@@ -160,13 +162,42 @@ public class MemberModuleAdapter implements UserModulePort {
             MemberDTO memberDTO = response.getData();
             log.info("User created — memberId={}, nickname={}", memberDTO.memberId(), memberDTO.nickname());
 
-            return UserId.of(memberDTO.memberId());
+            UserId userId = UserId.of(memberDTO.memberId());
+
+            if (command.oauth2Provider() != null && command.oauth2OpenId() != null) {
+                BindSocialAccountRequest bindRequest = BindSocialAccountRequest.builder()
+                        .memberId(userId.value())
+                        .provider(command.oauth2Provider())
+                        .providerMemberId(command.oauth2OpenId())
+                        .accessToken(command.oauth2AccessToken())
+                        .refreshToken(command.oauth2RefreshToken())
+                        .tokenExpiresAt(command.oauth2TokenExpiresAt())
+                        .build();
+                memberServiceClient.bindOAuth2(userId.value(), bindRequest);
+                log.debug("OAuth2 social connection bound — memberId={}, provider={}", userId.value(),
+                        command.oauth2Provider());
+            }
+
+            if (command.weChatOpenId() != null && command.weChatAccessToken() != null) {
+                BindSocialAccountRequest wechatBindRequest = BindSocialAccountRequest.builder()
+                        .memberId(userId.value())
+                        .provider("wechat")
+                        .providerMemberId(command.weChatOpenId())
+                        .accessToken(command.weChatAccessToken())
+                        .refreshToken(command.weChatRefreshToken())
+                        .tokenExpiresAt(command.weChatTokenExpiresAt())
+                        .build();
+                memberServiceClient.bindOAuth2(userId.value(), wechatBindRequest);
+                log.debug("WeChat social connection bound — memberId={}", userId.value());
+            }
+
+            return userId;
 
         } catch (UserCreationException e) {
             throw e;
         } catch (Exception e) {
             log.error("User creation failed — nickname={}", command.nickname(), e);
-            throw new UserCreationException("User creation failed: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -342,10 +373,14 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public void bindOAuth2(UserId userId, String provider, String providerId, Map<String, Object> userInfo) {
         try {
+            String accessToken = userInfo != null ? (String) userInfo.get("accessToken") : null;
+            String refreshToken = userInfo != null ? (String) userInfo.get("refreshToken") : null;
             BindSocialAccountRequest request = BindSocialAccountRequest.builder()
                     .memberId(userId.value())
                     .provider(provider)
                     .providerMemberId(providerId)
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
                     .build();
             R<Void> response = memberServiceClient.bindOAuth2(userId.value(), request);
 
@@ -359,7 +394,7 @@ public class MemberModuleAdapter implements UserModulePort {
             throw e;
         } catch (Exception e) {
             log.error("OAuth2 account binding failed: userId={}, provider={}", userId, provider, e);
-            throw new OAuth2BindException("OAuth2 account binding failed: " + e.getMessage(), e);
+            throw new DomainException(AuthResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -396,9 +431,12 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> findUserByOAuth2(String provider, String openId) {
         try {
-            // Member service does not expose OAuth2 social-connection lookup yet.
             log.debug("Querying OAuth2-bound user — provider={}, openId={}", provider, openId);
-            return Optional.empty();
+            R<MemberDTO> response = memberServiceClient.findByOAuth2(provider, openId);
+            if (response == null || !response.isSuccess() || response.getData() == null) {
+                return Optional.empty();
+            }
+            return Optional.of(convertToUserDTO(response.getData()));
         } catch (Exception e) {
             log.error("Failed to query OAuth2-bound user — provider={}, openId={}", provider, openId, e);
             return Optional.empty();
@@ -408,9 +446,12 @@ public class MemberModuleAdapter implements UserModulePort {
     @Override
     public Optional<UserDTO> findUserByWeChat(String weChatOpenId) {
         try {
-            // Member service does not expose WeChat social-connection lookup yet.
             log.debug("Querying WeChat-bound user — weChatOpenId={}", weChatOpenId);
-            return Optional.empty();
+            R<MemberDTO> response = memberServiceClient.findByWeChat(weChatOpenId);
+            if (response == null || !response.isSuccess() || response.getData() == null) {
+                return Optional.empty();
+            }
+            return Optional.of(convertToUserDTO(response.getData()));
         } catch (Exception e) {
             log.error("Failed to query WeChat-bound user — weChatOpenId={}", weChatOpenId, e);
             return Optional.empty();

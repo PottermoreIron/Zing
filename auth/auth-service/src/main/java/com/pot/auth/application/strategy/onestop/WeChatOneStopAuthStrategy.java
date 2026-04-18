@@ -79,6 +79,9 @@ public class WeChatOneStopAuthStrategy
                 .avatarUrl(avatarUrl)
                 .weChatOpenId(weChatUserInfo.getOpenId())
                 .weChatUnionId(weChatUserInfo.getUnionId())
+                .weChatAccessToken(weChatUserInfo.getAccessToken())
+                .weChatRefreshToken(weChatUserInfo.getRefreshToken())
+                .weChatTokenExpiresAt(weChatUserInfo.getExpiresAt())
                 .build();
 
         var userId = userModulePort.createUser(command);

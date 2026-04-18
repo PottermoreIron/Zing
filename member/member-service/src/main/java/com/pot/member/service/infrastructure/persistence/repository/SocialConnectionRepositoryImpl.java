@@ -46,7 +46,7 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
 
     @Override
     public Optional<SocialConnectionAggregate> findActiveByProviderAndProviderId(String provider,
-                                                                                 String providerMemberId) {
+            String providerMemberId) {
         LambdaQueryWrapper<SocialConnection> q = new LambdaQueryWrapper<>();
         q.eq(SocialConnection::getProvider, provider.toLowerCase())
                 .eq(SocialConnection::getProviderMemberId, providerMemberId)
@@ -87,18 +87,18 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
     }
 
     private SocialConnectionAggregate toDomain(SocialConnection e) {
+        Long tokenExpiresAt = e.getGmtTokenExpiresAt() != null
+                ? e.getGmtTokenExpiresAt().toEpochSecond(ZoneOffset.UTC)
+                : null;
         return SocialConnectionAggregate.reconstitute(
                 e.getId(), e.getMemberId(), e.getProvider(),
                 e.getProviderMemberId(), e.getProviderUsername(),
                 e.getProviderEmail(), e.getAccessToken(), e.getRefreshToken(),
-                e.getGmtTokenExpiresAt(), e.getScope(), e.getExtendJson(),
+                tokenExpiresAt, e.getScope(), e.getExtendJson(),
                 e.getIsActive() != null && e.getIsActive() == 1,
-                e.getGmtCreatedAt() != null ? LocalDateTime.ofEpochSecond(e.getGmtCreatedAt() / 1000, 0, ZoneOffset.UTC)
-                        : null,
-                e.getGmtUpdatedAt() != null ? LocalDateTime.ofEpochSecond(e.getGmtUpdatedAt() / 1000, 0, ZoneOffset.UTC)
-                        : null,
-                e.getGmtDeletedAt() != null ? LocalDateTime.ofEpochSecond(e.getGmtDeletedAt() / 1000, 0, ZoneOffset.UTC)
-                        : null);
+                e.getGmtCreatedAt(),
+                e.getGmtUpdatedAt(),
+                e.getGmtDeletedAt());
     }
 
     private SocialConnection toEntity(SocialConnectionAggregate d) {
@@ -107,26 +107,24 @@ public class SocialConnectionRepositoryImpl implements SocialConnectionRepositor
             e.setId(d.getId());
         e.setMemberId(d.getMemberId());
         if (d.getProvider() != null) {
-            e.setProvider(SocialConnection.Provider.fromCode(d.getProvider()));
+            e.setProviderEnum(SocialConnection.Provider.fromCode(d.getProvider()));
         }
         e.setProviderMemberId(d.getProviderMemberId());
         e.setProviderUsername(d.getProviderUsername());
         e.setProviderEmail(d.getProviderEmail());
         e.setAccessToken(d.getAccessToken());
         e.setRefreshToken(d.getRefreshToken());
-        e.setGmtTokenExpiresAt(d.getTokenExpiresAt());
+        e.setGmtTokenExpiresAt(d.getTokenExpiresAt() != null
+                ? LocalDateTime.ofEpochSecond(d.getTokenExpiresAt(), 0, ZoneOffset.UTC)
+                : null);
         e.setScope(d.getScope());
         e.setExtendJson(d.getExtendJson());
         e.setIsActive(d.isActive() ? 1 : 0);
-        long nowMs = System.currentTimeMillis();
-        if (d.getCreatedAt() != null) {
-            e.setGmtCreatedAt(d.getCreatedAt().toEpochSecond(ZoneOffset.UTC) * 1000);
-        } else {
-            e.setGmtCreatedAt(nowMs);
-        }
-        e.setGmtUpdatedAt(nowMs);
+        LocalDateTime now = LocalDateTime.now();
+        e.setGmtCreatedAt(d.getCreatedAt() != null ? d.getCreatedAt() : now);
+        e.setGmtUpdatedAt(now);
         if (d.getDeletedAt() != null) {
-            e.setGmtDeletedAt(d.getDeletedAt().toEpochSecond(ZoneOffset.UTC) * 1000);
+            e.setGmtDeletedAt(d.getDeletedAt());
         }
         return e;
     }

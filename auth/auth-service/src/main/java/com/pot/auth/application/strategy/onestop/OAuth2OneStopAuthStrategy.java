@@ -23,6 +23,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "auth.oauth2.enabled", havingValue = "true")
@@ -32,6 +36,7 @@ public class OAuth2OneStopAuthStrategy
     private final OAuth2Port oauth2Port;
     private final UserModulePortFactory userModulePortFactory;
     private static final ThreadLocal<OAuth2UserInfo> USER_INFO_CACHE = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> NEEDS_BINDING = new ThreadLocal<>();
 
     public OAuth2OneStopAuthStrategy(
             JwtTokenService jwtTokenService,
@@ -49,9 +54,26 @@ public class OAuth2OneStopAuthStrategy
         try {
             OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
             UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-            return userModulePort.findUserByOAuth2(
-                    request.oauth2ProviderCode(),
-                    oauth2UserInfo.openId().value()).orElse(null);
+
+            Optional<UserDTO> byOAuth2 = userModulePort.findUserByOAuth2(
+                    request.oauth2ProviderCode(), oauth2UserInfo.openId().value());
+            if (byOAuth2.isPresent()) {
+                return byOAuth2.get();
+            }
+
+            // Account linking: only link when the provider has verified the email,
+            // to prevent account takeover via unverified email claims.
+            if (StringUtils.hasText(oauth2UserInfo.email()) && Boolean.TRUE.equals(oauth2UserInfo.emailVerified())) {
+                Optional<UserDTO> byEmail = userModulePort.findByEmail(oauth2UserInfo.email());
+                if (byEmail.isPresent()) {
+                    NEEDS_BINDING.set(Boolean.TRUE);
+                    return byEmail.get();
+                }
+            }
+
+            return null;
+        } catch (DomainException e) {
+            throw e;
         } catch (Exception e) {
             throw new DomainException(AuthResultCode.OAUTH2_CODE_INVALID, e);
         }
@@ -65,19 +87,29 @@ public class OAuth2OneStopAuthStrategy
     }
 
     @Override
-    protected void validateCredentialForRegister(OneStopAuthContext context) {
-        getOrFetchOAuth2UserInfo(context.request());
-    }
-
-    @Override
-    protected void beforeRegister(OneStopAuthContext context) {
+    protected void beforeLogin(UserDTO user, OneStopAuthContext context) {
+        if (!Boolean.TRUE.equals(NEEDS_BINDING.get())) {
+            return;
+        }
         var request = context.request();
         OAuth2UserInfo oauth2UserInfo = getOrFetchOAuth2UserInfo(request);
         UserModulePort userModulePort = userModulePortFactory.getPort(request.userDomain());
-        if (StringUtils.hasText(oauth2UserInfo.email())
-                && userModulePort.existsByEmail(Email.of(oauth2UserInfo.email()))) {
-            throw new DomainException(AuthResultCode.EMAIL_ALREADY_EXISTS);
+        Map<String, Object> tokenInfo = new HashMap<>();
+        if (oauth2UserInfo.accessToken() != null) {
+            tokenInfo.put("accessToken", oauth2UserInfo.accessToken());
         }
+        if (oauth2UserInfo.refreshToken() != null) {
+            tokenInfo.put("refreshToken", oauth2UserInfo.refreshToken());
+        }
+        userModulePort.bindOAuth2(user.userId(), request.oauth2ProviderCode(),
+                oauth2UserInfo.openId().value(), tokenInfo);
+        log.info("[OAuth2Auth] Linked OAuth2 to existing account — userId={}, provider={}",
+                user.userId(), request.oauth2ProviderCode());
+    }
+
+    @Override
+    protected void validateCredentialForRegister(OneStopAuthContext context) {
+        getOrFetchOAuth2UserInfo(context.request());
     }
 
     @Override
@@ -103,6 +135,9 @@ public class OAuth2OneStopAuthStrategy
                 .emailVerified(oauth2UserInfo.emailVerified() != null && oauth2UserInfo.emailVerified())
                 .oauth2Provider(request.oauth2ProviderCode())
                 .oauth2OpenId(oauth2UserInfo.openId().value())
+                .oauth2AccessToken(oauth2UserInfo.accessToken())
+                .oauth2RefreshToken(oauth2UserInfo.refreshToken())
+                .oauth2TokenExpiresAt(oauth2UserInfo.expiresIn())
                 .build();
 
         var userId = userModulePort.createUser(command);
@@ -123,6 +158,7 @@ public class OAuth2OneStopAuthStrategy
     @Override
     protected void cleanupAfterAuthentication() {
         USER_INFO_CACHE.remove();
+        NEEDS_BINDING.remove();
     }
 
     private OAuth2UserInfo getOrFetchOAuth2UserInfo(OneStopAuthCommand request) {

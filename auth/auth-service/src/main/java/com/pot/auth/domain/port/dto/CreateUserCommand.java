@@ -7,21 +7,33 @@ import lombok.Builder;
 
 @Builder
 public record CreateUserCommand(
-        String nickname,
-        Email email,
-        Phone phone,
-        Password password,
-        String avatarUrl,
-        String firstName,
-        String lastName,
-        String displayName,
-        boolean emailVerified,
+                String nickname,
+                Email email,
+                Phone phone,
+                Password password,
+                String avatarUrl,
+                String firstName,
+                String lastName,
+                String displayName,
+                boolean emailVerified,
 
-        String oauth2Provider,
+                String oauth2Provider,
 
-        String oauth2OpenId,
+                String oauth2OpenId,
 
-        String weChatOpenId,
+                String oauth2AccessToken,
 
-        String weChatUnionId) {
+                String oauth2RefreshToken,
+
+                Long oauth2TokenExpiresAt,
+
+                String weChatOpenId,
+
+                String weChatUnionId,
+
+                String weChatAccessToken,
+
+                String weChatRefreshToken,
+
+                Long weChatTokenExpiresAt) {
 }

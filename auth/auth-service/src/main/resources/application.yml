@@ -86,24 +86,41 @@ auth:
 
   # Third-party OAuth2 login settings.
   oauth2:
-    enabled: false
+    enabled: ${AUTH_OAUTH2_ENABLED:false}
     providers:
       google:
         client-id: ${GOOGLE_CLIENT_ID:}
         client-secret: ${GOOGLE_CLIENT_SECRET:}
+        authorization-url: https://accounts.google.com/o/oauth2/v2/auth
+        scope: openid email profile
+        token-url: https://oauth2.googleapis.com/token
+        user-info-url: https://www.googleapis.com/oauth2/v3/userinfo
+        refresh-token-url: https://oauth2.googleapis.com/token
       github:
         client-id: ${GITHUB_CLIENT_ID:}
         client-secret: ${GITHUB_CLIENT_SECRET:}
+        authorization-url: https://github.com/login/oauth/authorize
+        scope: user:email
+        token-url: https://github.com/login/oauth/access_token
+        user-info-url: https://api.github.com/user
       facebook:
         client-id: ${FACEBOOK_CLIENT_ID:}
         client-secret: ${FACEBOOK_CLIENT_SECRET:}
+        authorization-url: https://www.facebook.com/v18.0/dialog/oauth
+        scope: email,public_profile
+        token-url: https://graph.facebook.com/v18.0/oauth/access_token
+        user-info-url: https://graph.facebook.com/v18.0/me?fields=id,name,email,picture
       apple:
         client-id: ${APPLE_CLIENT_ID:}
         client-secret: ${APPLE_CLIENT_SECRET:}
+        authorization-url: https://appleid.apple.com/auth/authorize
+        scope: name email
+        token-url: https://appleid.apple.com/auth/token
+        user-info-url: ""
 
   # WeChat login settings.
   wechat:
-    enabled: false
+    enabled: true
     app-id: ${WECHAT_APP_ID:}
     app-secret: ${WECHAT_APP_SECRET:}
 

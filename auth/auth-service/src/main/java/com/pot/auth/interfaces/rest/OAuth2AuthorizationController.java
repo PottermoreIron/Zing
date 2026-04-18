@@ -1,6 +1,7 @@
 package com.pot.auth.interfaces.rest;
 
 import com.pot.auth.application.service.OAuth2ApplicationService;
+import com.pot.zing.framework.common.enums.ResultCode;
 import com.pot.zing.framework.common.model.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +34,7 @@ public class OAuth2AuthorizationController {
             @NotBlank(message = "redirectUri must not be blank") @RequestParam String redirectUri,
             @RequestParam(required = false) String state) {
 
-        return R.success(oauth2ApplicationService.getAuthorizationUrl(provider, redirectUri, state));
+        String url = oauth2ApplicationService.getAuthorizationUrl(provider, redirectUri, state);
+        return R.of(ResultCode.SUCCESS, url, ResultCode.SUCCESS.getMsg());
     }
 }

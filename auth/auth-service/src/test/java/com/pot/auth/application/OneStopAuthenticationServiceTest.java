@@ -62,6 +62,7 @@ class OneStopAuthenticationServiceTest {
                 null,
                 null,
                 null,
+                null,
                 null);
 
         AuthenticationResult authResult = authResult();
@@ -104,6 +105,7 @@ class OneStopAuthenticationServiceTest {
                 null,
                 null,
                 null,
+                null,
                 null);
 
         OneStopAuthStrategy mockStrategy = mock(OneStopAuthStrategy.class);
@@ -125,6 +127,7 @@ class OneStopAuthenticationServiceTest {
                 null,
                 null,
                 PASSWORD,
+                null,
                 null,
                 null,
                 null,
