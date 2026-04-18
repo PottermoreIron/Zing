@@ -11,8 +11,10 @@ import java.util.Set;
 /**
  * Application service for querying cached user permissions.
  *
- * <p>Delegates to {@link PermissionQueryPort} which provides a two-level cache
- * (Caffeine L1 + Redis L2) populated at login time.</p>
+ * <p>
+ * Delegates to {@link PermissionQueryPort} which provides a two-level cache
+ * (Caffeine L1 + Redis L2) populated at login time.
+ * </p>
  */
 @Service
 @RequiredArgsConstructor

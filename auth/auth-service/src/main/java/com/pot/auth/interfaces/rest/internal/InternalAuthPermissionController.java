@@ -14,10 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Set;
 
 /**
- * Internal REST endpoint exposing cached user permissions to downstream services.
+ * Internal REST endpoint exposing cached user permissions to downstream
+ * services.
  *
- * <p>This path is <strong>not</strong> exposed through the public gateway; it is only
- * reachable by services on the same internal network (e.g. member-service via Feign).</p>
+ * <p>
+ * This path is <strong>not</strong> exposed through the public gateway; it is
+ * only
+ * reachable by services on the same internal network (e.g. member-service via
+ * Feign).
+ * </p>
  */
 @Validated
 @RestController

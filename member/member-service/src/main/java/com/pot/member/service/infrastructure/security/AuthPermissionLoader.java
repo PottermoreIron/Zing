@@ -17,10 +17,12 @@ import java.util.Set;
 /**
  * Loads user permissions from auth-service and caches them locally.
  *
- * <p>Uses Caffeine as a local in-process cache keyed by
+ * <p>
+ * Uses Caffeine as a local in-process cache keyed by
  * {@code domain:userId:permVersion}. When the gateway increments
  * {@code X-Perm-Version}, the cache key changes and the stale entry is
- * naturally evicted by the size-based eviction policy.</p>
+ * naturally evicted by the size-based eviction policy.
+ * </p>
  */
 @Slf4j
 @Component
