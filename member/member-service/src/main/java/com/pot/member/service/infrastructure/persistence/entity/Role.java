@@ -82,28 +82,12 @@ public class Role implements Serializable {
         return SystemFlag.SYSTEM_BUILTIN.getCode().equals(this.isSystemRole);
     }
 
-    public boolean isDeletable() {
-        return !isSystemBuiltin() && !isEnabled();
-    }
-
     public void enable() {
         this.isActive = Status.ENABLED.getCode();
     }
 
     public void disable() {
         this.isActive = Status.DISABLED.getCode();
-    }
-
-    public boolean hasHigherLevelThan(Role otherRole) {
-        if (this.roleLevel == null || otherRole.getRoleLevel() == null) {
-            return false;
-        }
-        return this.roleLevel > otherRole.getRoleLevel();
-    }
-
-    public boolean isAdminRole() {
-        return PredefinedRoles.ADMIN.getCode().equals(this.roleCode) ||
-                PredefinedRoles.SUPER_ADMIN.getCode().equals(this.roleCode);
     }
 
     @Getter

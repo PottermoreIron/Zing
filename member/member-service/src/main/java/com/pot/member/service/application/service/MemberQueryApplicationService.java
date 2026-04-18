@@ -38,7 +38,9 @@ public class MemberQueryApplicationService {
     public MemberDTO getMember(GetMemberQuery query) {
         MemberAggregate member = switch (query) {
             case GetMemberQuery.ByMemberId byMemberId ->
-                memberRepository.findById(MemberId.of(byMemberId.memberId())).orElse(null);
+                memberRepository.findById(MemberId.of(byMemberId.memberId()))
+                        .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND,
+                                "Member not found: " + byMemberId.memberId()));
             case GetMemberQuery.ByEmail byEmail ->
                 memberRepository.findByEmail(Email.of(byEmail.email())).orElse(null);
             case GetMemberQuery.ByPhoneNumber byPhoneNumber ->
@@ -46,6 +48,9 @@ public class MemberQueryApplicationService {
             case GetMemberQuery.ByNickname byNickname ->
                 memberRepository.findByNickname(Nickname.of(byNickname.nickname())).orElse(null);
         };
+        if (member == null) {
+            return null;
+        }
         return memberAssembler.toDTO(member);
     }
 
@@ -105,7 +110,8 @@ public class MemberQueryApplicationService {
 
     private MemberAggregate requireMember(Long memberId) {
         return memberRepository.findById(MemberId.of(memberId))
-                .orElseThrow(() -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "Member not found: " + memberId));
+                .orElseThrow(
+                        () -> new MemberException(MemberResultCode.MEMBER_NOT_FOUND, "Member not found: " + memberId));
     }
 
     private DeviceDTO toFacadeDeviceDTO(DeviceAggregate device) {

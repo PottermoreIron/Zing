@@ -13,6 +13,7 @@ public enum ResultCode implements IResultCode {
     UNAUTHORIZED("401", "Unauthorized access", false),
     FORBIDDEN("403", "Access forbidden", false),
     NOT_FOUND("404", "Resource not found", false),
+    RATE_LIMIT_EXCEEDED("429", "Too many requests, please try again later", false),
     INTERNAL_ERROR("500", "Internal server error", false),
     SERVICE_UNAVAILABLE("503", "Service unavailable", false),
 

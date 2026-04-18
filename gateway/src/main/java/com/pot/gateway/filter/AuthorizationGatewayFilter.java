@@ -145,6 +145,11 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
 
         Long permVersion = claims.get(CLAIM_PERMISSION_VERSION, Long.class);
         String permDigest = claims.get(CLAIM_PERMISSION_DIGEST, String.class);
+        // Reject tokens that carry a permission version but no digest; they are
+        // structurally inconsistent and should not be trusted.
+        if (permVersion != null && (permDigest == null || permDigest.isBlank())) {
+            throw new JwtException("Token contains permVersion but is missing permDigest");
+        }
         String userDomain = normalizeUserDomain(claims.get(CLAIM_USER_DOMAIN, String.class));
         String tokenId = claims.getId();
         return new AuthenticatedPrincipal(userId, userDomain, permVersion, permDigest, tokenId);
@@ -154,7 +159,16 @@ public class AuthorizationGatewayFilter implements GlobalFilter, Ordered {
         if (tokenId == null || tokenId.isBlank()) {
             return false;
         }
-        return Boolean.TRUE.equals(redisService.exists(BLACKLIST_KEY_PREFIX + tokenId));
+        try {
+            return Boolean.TRUE.equals(redisService.exists(BLACKLIST_KEY_PREFIX + tokenId));
+        } catch (Exception e) {
+            // Fail-closed: treat the token as blacklisted when the revocation store is
+            // unreachable. This is preferable to letting potentially revoked tokens
+            // through.
+            log.error("[Auth] Blacklist check failed — treating token as revoked, tokenId={}, error={}",
+                    tokenId, e.getMessage());
+            return true;
+        }
     }
 
     private boolean isPermVersionValid(String userId, String userDomain, Long tokenVersion) {

@@ -26,6 +26,29 @@ spring:
         - RemoveResponseHeader=X-Powered-By
         - RemoveResponseHeader=Server
 
+      # Explicit CORS allowlist. Only origins listed here are accepted; the
+      # wildcard ("*") is intentionally prohibited to prevent cross-origin abuse.
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOriginPatterns:
+              - ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - X-Requested-With
+              - X-Trace-Id
+            exposedHeaders:
+              - X-Trace-Id
+            allowCredentials: true
+            maxAge: 1800
+
       # Route prefixes follow the service name. Auth keeps its controller prefix,
       # while member, im, and admin strip one leading path segment.
       routes:

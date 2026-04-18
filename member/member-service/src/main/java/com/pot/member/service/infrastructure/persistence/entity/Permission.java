@@ -107,10 +107,6 @@ public class Permission implements Serializable {
         return SystemFlag.SYSTEM_BUILTIN.getCode().equals(this.isSystemPermission);
     }
 
-    public boolean isTopLevel() {
-        return this.parentId == null || this.permissionLevel == 1;
-    }
-
     public void enable() {
         this.isActive = Status.ENABLED.getCode();
     }

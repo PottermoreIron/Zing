@@ -10,24 +10,23 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Key provider that appends the client IP address.
+ * Key provider that appends the real client IP address.
+ *
+ * <p>
+ * Only {@code X-Real-IP} (injected by the reverse proxy) and the TCP remote
+ * address are trusted. User-controllable headers such as
+ * {@code X-Forwarded-For}
+ * are intentionally ignored to prevent rate-limit bypass via header spoofing.
  */
 @Slf4j
 public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
 
-    private static final String[] IP_HEADER_CANDIDATES = {
-            "X-Forwarded-For",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP",
-            "HTTP_X_FORWARDED_FOR",
-            "HTTP_X_FORWARDED",
-            "HTTP_X_CLUSTER_CLIENT_IP",
-            "HTTP_CLIENT_IP",
-            "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED",
-            "HTTP_VIA",
-            "REMOTE_ADDR"
-    };
+    /**
+     * Header name set by the reverse proxy (nginx:
+     * {@code proxy_set_header X-Real-IP $remote_addr}).
+     * This value cannot be forged by the client because the gateway overwrites it.
+     */
+    private static final String REAL_IP_HEADER = "X-Real-IP";
 
     @Override
     public String generateKey(String baseKey, ProceedingJoinPoint joinPoint, RateLimit rateLimit) {
@@ -46,7 +45,11 @@ public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
     }
 
     /**
-     * Resolves the best-effort client IP address.
+     * Returns the trusted client IP address.
+     *
+     * <p>
+     * Prefers {@code X-Real-IP} set by the reverse proxy.
+     * Falls back to the TCP remote address when the header is absent.
      */
     private String getClientIp() {
         try {
@@ -58,13 +61,9 @@ public class IpBasedRateLimitKeyProvider implements RateLimitKeyProvider {
 
             HttpServletRequest request = attributes.getRequest();
 
-            for (String header : IP_HEADER_CANDIDATES) {
-                String ip = request.getHeader(header);
-                if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-                    // X-Forwarded-For may contain multiple hops; the first value is the client IP.
-                    int index = ip.indexOf(',');
-                    return index != -1 ? ip.substring(0, index) : ip;
-                }
+            String realIp = request.getHeader(REAL_IP_HEADER);
+            if (realIp != null && !realIp.isBlank() && !"unknown".equalsIgnoreCase(realIp)) {
+                return realIp.trim();
             }
 
             return request.getRemoteAddr();

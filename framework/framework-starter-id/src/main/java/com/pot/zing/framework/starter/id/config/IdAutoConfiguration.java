@@ -41,11 +41,28 @@ public class IdAutoConfiguration {
     public IDGen potSegmentIdGen(IDAllocDao idAllocDao) {
         SegmentIDGenImpl segmentIDGen = new SegmentIDGenImpl();
         segmentIDGen.setDao(idAllocDao);
-        if (!segmentIDGen.init()) {
-            throw new IllegalStateException("Segment ID generator initialization failed");
+
+        int maxAttempts = 5;
+        int delayMs = 2000;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            if (segmentIDGen.init()) {
+                log.info("Pot Segment ID generator initialized successfully on attempt {}", attempt);
+                return segmentIDGen;
+            }
+            log.warn("Segment ID generator init failed (attempt {}/{}); retrying in {}ms", attempt, maxAttempts,
+                    delayMs);
+            if (attempt < maxAttempts) {
+                try {
+                    Thread.sleep(delayMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
         }
-        log.info("Pot Segment ID generator initialized successfully");
-        return segmentIDGen;
+        throw new IllegalStateException(
+                "Segment ID generator failed to initialize after " + maxAttempts + " attempts. "
+                        + "Verify that the database is reachable and the leaf_alloc table exists.");
     }
 
     @Bean

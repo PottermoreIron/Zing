@@ -14,8 +14,11 @@ import com.pot.member.service.application.service.MemberPermissionApplicationSer
 import com.pot.member.service.application.service.MemberQueryApplicationService;
 import com.pot.zing.framework.common.model.R;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +41,7 @@ import java.util.Set;
  * @since 2026-03-18
  */
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/internal/member")
 @RequiredArgsConstructor
@@ -56,34 +60,34 @@ public class InternalMemberController {
     }
 
     @GetMapping("/by-email")
-    public R<MemberDTO> findByEmail(@RequestParam String email) {
+    public R<MemberDTO> findByEmail(@RequestParam @NotBlank String email) {
         var internalDTO = memberQueryApplicationService.getMember(
                 GetMemberQuery.byEmail(email));
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-phone")
-    public R<MemberDTO> findByPhone(@RequestParam String phone) {
+    public R<MemberDTO> findByPhone(@RequestParam @NotBlank String phone) {
         var internalDTO = memberQueryApplicationService.getMember(
                 GetMemberQuery.byPhoneNumber(phone));
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-nickname")
-    public R<MemberDTO> findByNickname(@RequestParam String nickname) {
+    public R<MemberDTO> findByNickname(@RequestParam @NotBlank String nickname) {
         var internalDTO = memberQueryApplicationService.getMember(
                 GetMemberQuery.byNickname(nickname));
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-oauth2")
-    public R<MemberDTO> findByOAuth2(@RequestParam String provider, @RequestParam String openId) {
+    public R<MemberDTO> findByOAuth2(@RequestParam @NotBlank String provider, @RequestParam @NotBlank String openId) {
         var internalDTO = memberQueryApplicationService.findByOAuth2(provider, openId);
         return R.success(toFacadeDTO(internalDTO));
     }
 
     @GetMapping("/by-wechat")
-    public R<MemberDTO> findByWeChat(@RequestParam String weChatOpenId) {
+    public R<MemberDTO> findByWeChat(@RequestParam @NotBlank String weChatOpenId) {
         var internalDTO = memberQueryApplicationService.findByWeChat(weChatOpenId);
         return R.success(toFacadeDTO(internalDTO));
     }
@@ -116,8 +120,8 @@ public class InternalMemberController {
     }
 
     @PostMapping("/auth/verify-password")
-    public R<MemberDTO> authenticateWithPassword(@RequestParam String identifier,
-            @RequestParam String password) {
+    public R<MemberDTO> authenticateWithPassword(@RequestParam @NotBlank String identifier,
+            @RequestParam @NotBlank String password) {
         var internalDTO = memberAccountApplicationService.authenticateWithPassword(identifier, password);
         return R.success(toFacadeDTO(internalDTO));
     }
@@ -144,8 +148,8 @@ public class InternalMemberController {
     @PostMapping("/{memberId}/login-attempt")
     public R<Void> recordLoginAttempt(@PathVariable Long memberId,
             @RequestParam boolean success,
-            @RequestParam String ip,
-            @RequestParam Long timestamp) {
+            @RequestParam @NotBlank String ip,
+            @RequestParam @NotNull Long timestamp) {
         memberAccountApplicationService.recordLoginAttempt(memberId, success, ip, timestamp);
         return R.success(null);
     }
@@ -173,8 +177,8 @@ public class InternalMemberController {
     @PostMapping("/{memberId}/devices")
     public R<Void> recordDeviceLogin(@PathVariable Long memberId,
             @RequestBody DeviceDTO device,
-            @RequestParam String ip,
-            @RequestParam String refreshToken) {
+            @RequestParam @NotBlank String ip,
+            @RequestParam @NotBlank String refreshToken) {
         memberApplicationService.recordDeviceLogin(memberId, device, ip, refreshToken);
         return R.success(null);
     }

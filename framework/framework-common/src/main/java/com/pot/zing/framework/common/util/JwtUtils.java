@@ -63,15 +63,28 @@ public class JwtUtils {
     }
 
     /**
-     * Creates an access token.
+     * Creates an access token using HMAC-SHA signing.
+     *
+     * @deprecated The main auth flow uses RSA-256 via
+     *             {@code SpringSecurityJwtAdapter} in auth-service.
+     *             HMAC tokens produced here are <strong>not</strong> accepted by
+     *             the gateway's RSA
+     *             public-key verifier. Use this utility only for
+     *             non-gateway-authenticated, service-internal
+     *             purposes (e.g. one-time links, internal tool tokens).
      */
+    @Deprecated(since = "2026", forRemoval = false)
     public String createAccessToken(Object userId) {
         return createToken(Map.of("uid", userId), jwtProperties.getAccessTokenExpiration());
     }
 
     /**
-     * Creates a refresh token.
+     * Creates a refresh token using HMAC-SHA signing.
+     *
+     * @deprecated See {@link #createAccessToken(Object)} for the deprecation
+     *             rationale.
      */
+    @Deprecated(since = "2026", forRemoval = false)
     public String createRefreshToken(Object userId) {
         return createToken(Map.of("uid", userId), jwtProperties.getRefreshTokenExpiration());
     }

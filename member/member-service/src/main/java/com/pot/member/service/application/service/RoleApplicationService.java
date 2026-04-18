@@ -58,7 +58,14 @@ public class RoleApplicationService {
     }
 
     public List<RoleDTO> getAllRoles() {
+        // Roles are a system-managed, bounded set. A hard guard is added here to
+        // surface mis-configurations early and prevent accidental OOM when the role
+        // table grows unexpectedly.
         List<RoleAggregate> roles = roleRepository.findAll();
+        if (roles.size() > 1000) {
+            log.warn("[Role] getAllRoles returned {} roles which exceeds the safety threshold; "
+                    + "consider adding pagination", roles.size());
+        }
         return roleAssembler.toDTOList(roles);
     }
 }
